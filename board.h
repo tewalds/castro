@@ -53,6 +53,7 @@ public:
 		size_d = s*2-1;
 		nummoves = 0;
 		outcome = -1;
+
 		cells.resize(vecsize(), 0);
 		groups.resize(vecsize());
 
@@ -161,6 +162,15 @@ public:
 		printf("%s", to_s().c_str());
 	}
 	
+	string won_str(){
+		switch(outcome){
+			case -1: return "none";
+			case 0:  return "tie";
+			case 1:  return "white";
+			case 2:  return "black";
+		}
+	}
+
 	char won(){
 		return outcome;
 	}
@@ -178,6 +188,9 @@ public:
 		nummoves++;
 	}
 
+	int find_group(int x, int y){
+		return find_group(xy(x, y));
+	}
 	int find_group(int i){
 		if(groups[i].parent != i)
 			groups[i].parent = find_group(groups[i].parent);
@@ -187,6 +200,9 @@ public:
 
 	//join the groups of two positions, propagating group size, and edge/corner connections
 	//returns true if they're already the same group, false if they are now joined
+	bool join_groups(int x1, int y1, int x2, int y2){
+		return join_groups(xy(x1, y1), xy(x2, y2));
+	}
 	bool join_groups(int i, int j){
 		i = find_group(i);
 		j = find_group(j);
@@ -212,7 +228,7 @@ public:
 			int nx = x + neighbours[i][0];
 			int ny = y + neighbours[i][1];
 			
-			if(onboard2(nx, ny) && find_group(xy(nx, ny)) == group && followring(x, y, nx, ny, i, group))
+			if(onboard2(nx, ny) && find_group(nx, ny) == group && followring(x, y, nx, ny, i, group))
 				return true;
 		}
 		return false;
@@ -221,15 +237,15 @@ public:
 	// only take the 3 directions that are valid in a ring
 	// the backwards directions are either invalid or not part of the shortest loop
 	bool followring(const int & sx, const int & sy, const int & cx, const int & cy, const int & dir, const int & group){
-		if(sx == cx && sy == sy)
+		if(sx == cx && sy == cy)
 			return true;
 
-		for(int i = -1; i <= 1; i++){
+		for(int i = 5; i <= 7; i++){
 			int nd = (dir + i) % 6;
 			int nx = cx + neighbours[nd][0];
 			int ny = cy + neighbours[nd][1];
 			
-			if(onboard2(nx, ny) && find_group(xy(nx, ny)) == group && followring(sx, sy, nx, ny, nd, group))
+			if(onboard2(nx, ny) && find_group(nx, ny) == group && followring(sx, sy, nx, ny, nd, group))
 				return true;
 		}
 		return false;
@@ -250,10 +266,10 @@ public:
 			int Y = y + neighbours[i][1];
 		
 			if(onboard2(X, Y) && turn == get(X, Y))
-				alreadyjoined |= join_groups(xy(x,y), xy(X, Y));
+				alreadyjoined |= join_groups(x, y, X, Y);
 		}
 
-		Group * g = & groups[find_group(xy(x, y))];
+		Group * g = & groups[find_group(x, y)];
 		if(g->numcorners() >= 2 || g->numedges() >= 3 || (alreadyjoined && g->size >= 6 && detectring(x, y))){
 			outcome = turn;
 		}else if(nummoves == numcells()){
