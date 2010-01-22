@@ -74,13 +74,9 @@ public:
 	void run(){
 		char buf[1001];
 
-		FILE * fd;
 		while(fgets(buf, 1000, in)){
 			string line(buf);
 
-			fd = fopen("/home/timo/code/castro/log.txt", "a");
-			fwrite(line.c_str(), 1, line.length(), fd);
-		
 			trim(line);
 			
 			if(line.length() == 0)
@@ -113,9 +109,7 @@ public:
 			string output = (response.success ? '=' : '?') + id + ' ' + response.response + "\n\n";
 
 			fwrite(output.c_str(), 1, output.length(), out);
-
-			fwrite(output.c_str(), 1, output.length(), fd);
-			fclose(fd);
+			fflush(out);
 		}
 	}
 
