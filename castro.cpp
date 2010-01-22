@@ -5,6 +5,7 @@
 #include <cctype>
 
 Board * board;
+bool verbose = false;
 
 GTPResponse gtp_print(vecstr args){
 	return GTPResponse(true, "\n" + board->to_s());
@@ -32,7 +33,7 @@ GTPResponse gtp_clearboard(vecstr args){
 
 void parse_move(const string & str, int & x, int & y){
 	x = tolower(str[0]) - 'a';
-	y = str[1] - '1';
+	y = atoi(str.c_str() + 1) - 1;
 }
 GTPResponse play(const string & pos, int toplay){
 	int x, y;
@@ -43,7 +44,10 @@ GTPResponse play(const string & pos, int toplay){
 	if(!board->move(x, y, toplay))
 		return GTPResponse(false, "Invalid placement, already taken");
 
-	return GTPResponse(true);
+	if(verbose)
+		return GTPResponse(true, "Placement: " + to_str(x) + "," + to_str(y) + ", outcome: " + board->won_str() + "\n" + board->to_s());
+	else
+		return GTPResponse(true);
 }
 
 GTPResponse gtp_play(vecstr args){
@@ -75,14 +79,8 @@ GTPResponse gtp_playblack(vecstr args){
 	return play(args[0], 2);
 }
 
-
 GTPResponse gtp_winner(vecstr args){
-	switch(board->won()){
-		case -1: return GTPResponse(true, "none");
-		case 0:  return GTPResponse(true, "tie");
-		case 1:  return GTPResponse(true, "white");
-		case 2:  return GTPResponse(true, "black");
-	}
+	return GTPResponse(true, board->won_str());
 }
 
 GTPResponse gtp_name(vecstr args){
@@ -93,6 +91,11 @@ GTPResponse gtp_version(vecstr args){
 	return GTPResponse(true, "0.1");
 }
 
+GTPResponse gtp_verbose(vecstr args){
+	verbose = true;
+	return GTPResponse(true, "Verbose on");
+}
+
 int main(){
 
 	board = new Board(8);
@@ -100,6 +103,7 @@ int main(){
 	GTPclient gtp;
 	gtp.newcallback("name",        gtp_name);
 	gtp.newcallback("version",     gtp_version);
+	gtp.newcallback("verbose",     gtp_verbose);
 	gtp.newcallback("print",       gtp_print);
 	gtp.newcallback("clear_board", gtp_clearboard);
 	gtp.newcallback("boardsize",   gtp_boardsize);
