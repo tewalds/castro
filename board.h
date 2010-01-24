@@ -17,14 +17,15 @@ using namespace std;
 const int neighbours[6][2] = {{-1,-1}, {0,-1}, {1, 0}, {1, 1}, {0, 1}, {-1, 0}}; //x, y, clockwise
 
 class Board{
-	struct Group {
-		unsigned parent : 10;
-		unsigned size   : 10;
+	struct Cell {
+		unsigned piece  : 2;
+		unsigned parent : 9;
+		unsigned size   : 9;
 		unsigned corner : 6;
 		unsigned edge   : 6;
-		Group() : parent(0), size(0), corner(0), edge(0) { }
-		Group(unsigned int p, unsigned int s, unsigned int c, unsigned int e) :
-			parent(p), size(s), corner(c), edge(e) { }
+		Cell() : piece(0), parent(0), size(0), corner(0), edge(0) { }
+		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e) :
+			piece(p), parent(a), size(s), corner(c), edge(e) { }
 
 		int numcorners(){
 			return BITCOUNT6(corner);
@@ -40,8 +41,7 @@ class Board{
 	short nummoves;
 	char outcome; //-1 = unknown, 0 = tie, 1,2 = player win
 
-	vector<char> cells;
-	vector<Group> groups;
+	vector<Cell> cells;
 
 //	static const int neighbours[6][2]; //x, y, clockwise
 
@@ -54,17 +54,20 @@ public:
 		nummoves = 0;
 		outcome = -1;
 
-		cells.resize(vecsize(), 0);
-		groups.resize(vecsize());
+		cells.resize(vecsize());
 
 		for(int y = 0; y < size_d; y++){
 			for(int x = 0; x < size_d; x++){
 				int i = xy(x, y);
-				groups[i] = Group(i, 1, (1 << iscorner(x, y)), (1 << isedge(x, y)));
+				cells[i] = Cell(0, i, 1, (1 << iscorner(x, y)), (1 << isedge(x, y)));
 			}
 		}
 	}
-	
+
+	int memsize(){
+		return sizeof(Board) + sizeof(Cell)*vecsize();
+	}
+
 	int getsize() const{
 		return size;
 	}
@@ -82,11 +85,11 @@ public:
 		return y*size_d + x;
 	}
 	
-	char get(int i) const {
-		return cells[i];
+	int get(int i) const {
+		return cells[i].piece;
 	}
-	char get(int x, int y) const { //assumes valid x,y
-		return cells[xy(x, y)];
+	int get(int x, int y) const { //assumes valid x,y
+		return cells[xy(x, y)].piece;
 	}
 
 	//assumes x, y are in array bounds
@@ -146,7 +149,7 @@ public:
 			s += string(spaces, ' ');
 			for(int x = 0; x < size_d; x++){
 				if(onboard(x, y)){
-					char p = get(x, y);
+					int p = get(x, y);
 					if(p == 0) s += '.';
 					if(p == 1) s += 'X';
 					if(p == 2) s += 'O';
@@ -180,11 +183,11 @@ public:
 	}
 
 	bool valid_move(int x, int y){
-		return (outcome == -1 && onboard2(x, y) && !cells[xy(x, y)]);
+		return (outcome == -1 && onboard2(x, y) && !cells[xy(x, y)].piece);
 	}
 
-	void set(int x, int y, char v){
-		cells[xy(x, y)] = v;
+	void set(int x, int y, int v){
+		cells[xy(x, y)].piece = v;
 		nummoves++;
 	}
 
@@ -192,9 +195,9 @@ public:
 		return find_group(xy(x, y));
 	}
 	int find_group(int i){
-		if(groups[i].parent != i)
-			groups[i].parent = find_group(groups[i].parent);
-		return groups[i].parent;
+		if(cells[i].parent != i)
+			cells[i].parent = find_group(cells[i].parent);
+		return cells[i].parent;
 
 	}
 
@@ -210,13 +213,13 @@ public:
 		if(i == j)
 			return true;
 		
-		if(groups[i].size < groups[j].size) //force i's subtree to be bigger
+		if(cells[i].size < cells[j].size) //force i's subtree to be bigger
 			swap(i, j);
 
-		groups[j].parent = i;
-		groups[i].size   += groups[j].size;
-		groups[i].corner |= groups[j].corner;
-		groups[i].edge   |= groups[j].edge;
+		cells[j].parent = i;
+		cells[i].size   += cells[j].size;
+		cells[i].corner |= cells[j].corner;
+		cells[i].edge   |= cells[j].edge;
 		
 		return false;
 	}
@@ -269,7 +272,7 @@ public:
 				alreadyjoined |= join_groups(x, y, X, Y);
 		}
 
-		Group * g = & groups[find_group(x, y)];
+		Cell * g = & cells[find_group(x, y)];
 		if(g->numcorners() >= 2 || g->numedges() >= 3 || (alreadyjoined && g->size >= 6 && detectring(x, y))){
 			outcome = turn;
 		}else if(nummoves == numcells()){
