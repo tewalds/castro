@@ -1,8 +1,11 @@
 
-
+#ifndef _GTP_H_
+#define _GTP_H_
 
 #include "string.h"
 
+#include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include <tr1/functional>
@@ -124,4 +127,6 @@ public:
 		return GTPResponse(true, ret);
 	}
 };
+
+#endif
 
