@@ -14,8 +14,8 @@ public:
 	bool verbose;
 	bool hguicoords;
 
-	HavannahGTP(FILE * i = stdin, FILE * o = stdout){
-		GTPclient(i, o);
+	HavannahGTP(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
+		GTPclient(i, o, l);
 
 		verbose = false;
 		hguicoords = false;
@@ -55,6 +55,8 @@ public:
 		if(args.size() != 1)
 			return GTPResponse(false, "Wrong number of arguments");
 
+		log("boardsize " + args[0]);
+
 		int size = atoi(args[0].c_str());
 		if(size < 3 || size > 10)
 			return GTPResponse(false, "Size " + to_str(size) + " is out of range.");
@@ -65,11 +67,13 @@ public:
 
 	GTPResponse gtp_clearboard(vecstr args){
 		game.clear();
+		log("clear_board");
 		return GTPResponse(true);
 	}
 
 	GTPResponse gtp_undo(vecstr args){
 		game.undo();
+		log("undo");
 		if(verbose)
 			return GTPResponse(true, "\n" + game.getboard()->to_s());
 		else
@@ -79,6 +83,8 @@ public:
 	GTPResponse gtp_solve(vecstr args){
 		if(args.size() != 1)
 			return GTPResponse(false, "Wrong number of arguments");
+
+		log("havannah_solve " + args[0]);
 
 		Solver solve(*(game.getboard()), atof(args[0].c_str()));
 
@@ -98,8 +104,11 @@ public:
 			y += x + 1 - game.getsize();
 	}
 
-	string move_str(int x, int y){
-		if(!hguicoords && x >= game.getsize())
+	string move_str(int x, int y, int hguic = -1){
+		if(hguic == -1)
+			hguic = hguicoords;
+
+		if(!hguic && x >= game.getsize())
 			y -= x + 1 - game.getsize();
 
 		return string() + char(x + 'a') + to_str(y+1);
@@ -113,6 +122,8 @@ public:
 
 		if(!game.move(x, y, toplay))
 			return GTPResponse(false, "Invalid placement, already taken");
+
+		log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(x, y, false));
 
 		if(verbose)
 			return GTPResponse(true, "Placement: " + move_str(x, y) + ", outcome: " + game.getboard()->won_str() + "\n" + game.getboard()->to_s());
@@ -150,6 +161,7 @@ public:
 	}
 
 	GTPResponse gtp_winner(vecstr args){
+		log("havannah_winner");
 		return GTPResponse(true, game.getboard()->won_str());
 	}
 

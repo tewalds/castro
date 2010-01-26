@@ -45,18 +45,31 @@ struct GTPCallback {
 };
 
 class GTPclient {
-	FILE * in, * out;
+	FILE * in, * out, * logfile;
 	vector<GTPCallback> callbacks;
 
 public:
 
-	GTPclient(FILE * i = stdin, FILE * o = stdout){
+	GTPclient(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
 		in = i;
 		out = o;
+		logfile = l;
 
 		newcallback("help",             bind(&GTPclient::gtp_list_commands,    this, _1));
 		newcallback("list_commands",    bind(&GTPclient::gtp_list_commands,    this, _1));
 		newcallback("protocol_version", bind(&GTPclient::gtp_protocol_version, this, _1));
+		newcallback("logfile",          bind(&GTPclient::gtp_logfile,          this, _1));
+	}
+
+	~GTPclient(){
+		if(logfile)
+			fclose(logfile);
+	}
+
+	void setlogfile(FILE * l){
+		if(logfile)
+			fclose(logfile);
+		logfile = l;
 	}
 
 	void newcallback(const string name, const gtp_callback_fn & fn){
@@ -73,7 +86,14 @@ public:
 				return i;
 		return -1;
 	}
-	
+
+	void log(const string & str){
+		if(logfile){
+			fprintf(logfile, "%s\n", str.c_str());
+			fflush(logfile);
+		}
+	}
+
 	void run(){
 		char buf[1001];
 
@@ -114,6 +134,19 @@ public:
 			fwrite(output.c_str(), 1, output.length(), out);
 			fflush(out);
 		}
+	}
+
+	GTPResponse gtp_logfile(vecstr args){
+		if(args.size() != 1)
+			return GTPResponse(false, "Wrong number of arguments");
+
+		FILE * fd = fopen(args[0].c_str(), "w");
+		if(!fd)
+			return GTPResponse(false, "Couldn't open file " + args[0]);
+
+		setlogfile(fd);
+
+		return GTPResponse(true);
 	}
 
 	GTPResponse gtp_protocol_version(vecstr args){
