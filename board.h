@@ -12,17 +12,18 @@ using namespace std;
  * A 0 1 2    0 1       0 1
  * B 3 4 5 => 3 4 5 => 3 4 5
  * C 6 7 8      7 8     7 8
+ * This follows the H-Gui convention, not the 'standard' convention
  */
 
 const int neighbours[6][2] = {{-1,-1}, {0,-1}, {1, 0}, {1, 1}, {0, 1}, {-1, 0}}; //x, y, clockwise
 
 class Board{
 	struct Cell {
-		unsigned piece  : 2;
-		unsigned parent : 9;
-		unsigned size   : 9;
-		unsigned corner : 6;
-		unsigned edge   : 6;
+		unsigned piece  : 2; //who controls this cell, 0 for none, 1,2 for players
+		unsigned parent : 9; //parent for this group of cells
+		unsigned size   : 9; //size of this group of cells
+		unsigned corner : 6; //which corners are this group connected to
+		unsigned edge   : 6; //which edges are this group connected to
 		Cell() : piece(0), parent(0), size(0), corner(0), edge(0) { }
 		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e) :
 			piece(p), parent(a), size(s), corner(c), edge(e) { }
@@ -64,11 +65,15 @@ public:
 		}
 	}
 
-	int memsize(){
+	int memsize() const {
 		return sizeof(Board) + sizeof(Cell)*vecsize();
 	}
 
-	int getsize() const{
+	int get_size_d() const {
+		return size_d;
+	}
+
+	int get_size() const{
 		return size;
 	}
 	
@@ -142,17 +147,16 @@ public:
 		return size_d - abs((size-1) - y);
 	}
 
-	string to_s(){
+	string to_s() const {
 		string s;
 		for(int y = 0; y < size_d; y++){
-			int spaces = abs(size-1 - y);
-			s += string(spaces, ' ');
+			s += string(abs(size-1 - y) + 2, ' ');
 			for(int x = 0; x < size_d; x++){
 				if(onboard(x, y)){
 					int p = get(x, y);
 					if(p == 0) s += '.';
-					if(p == 1) s += 'X';
-					if(p == 2) s += 'O';
+					if(p == 1) s += 'W';
+					if(p == 2) s += 'B';
 					s += ' ';
 				}
 			}
@@ -161,11 +165,11 @@ public:
 		return s;
 	}
 	
-	void print(){
+	void print() const {
 		printf("%s", to_s().c_str());
 	}
 	
-	string won_str(){
+	string won_str() const {
 		switch(outcome){
 			case -1: return "none";
 			case 0:  return "tie";
@@ -174,15 +178,21 @@ public:
 		}
 	}
 
-	char won(){
+	char won() const {
 		return outcome;
 	}
 
-	char toplay(){
+	int win() const{
+		if(outcome <= 0)
+			return 0;
+		return (outcome == toplay() ? 1 : -1);
+	}
+
+	char toplay() const {
 		return nummoves%2 + 1;
 	}
 
-	bool valid_move(int x, int y){
+	bool valid_move(int x, int y) const {
 		return (outcome == -1 && onboard2(x, y) && !cells[xy(x, y)].piece);
 	}
 

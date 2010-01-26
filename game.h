@@ -9,11 +9,17 @@
 
 class HavannahGame {
 	vector<Board> hist;
+	int size;
 
 public:
 
-	HavannahGame(int size = 8){
+	HavannahGame(int s = 8){
+		size = s;
 		hist.push_back(Board(size));
+	}
+
+	int getsize(){
+		return size;
 	}
 
 	Board * getboard(){
