@@ -35,4 +35,8 @@ play w d3
 play b c3
 play w c4
 play b d5
+1 havannah_winner
+#? [none]
 play w d4
+2 havannah_winner
+#? [white]

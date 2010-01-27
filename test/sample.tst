@@ -8,10 +8,14 @@ play B b4
 play W d2
 play B d4
 10 havannah_winner
+#? [none]
 play W e2
 20 havannah_winner
+#? [none]
 play B D5
 30 havannah_winner
+#? [none]
 play W C1
 40 havannah_winner
+#? [white]
 

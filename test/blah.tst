@@ -269,7 +269,8 @@ play w i10
 play b i9
 play w j9
 play b k9
-havannah_winner
+1 havannah_winner
+#? [none]
 play w j10
-havannah_winner
-
+2 havannah_winner
+#? [white]

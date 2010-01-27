@@ -35,5 +35,8 @@ play w e1
 play b d1
 play w c1
 play b b1
+1 havannah_winner
+#? [none]
 play w a1
-havannah_winner
+2 havannah_winner
+#? [draw]

@@ -168,5 +168,8 @@ play w k12
 play b i14
 play w i13
 play b j12
+1 havannah_winner
+#? [none]
 play w k11
-havannah_winner
+2 havannah_winner
+#? [draw]

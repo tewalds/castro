@@ -31,5 +31,8 @@ play w c6
 play b f5
 play w d7
 play b f1
+1 havannah_winner
+#? [none]
 play w e2
-havannah_winner
+2 havannah_winner
+#? [white]

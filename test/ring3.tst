@@ -268,7 +268,8 @@ play b i1
 play w i2
 play b h1
 play w d1
-havannah_winner
+1 havannah_winner
+#? [none]
 play b q3
-havannah_winner
-
+2 havannah_winner
+#? [black]

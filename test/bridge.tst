@@ -5,5 +5,8 @@ play w a2
 play b b2
 play w a3
 play b b3
+1 havannah_winner
+#? [none]
 play w a4
-havannah_winner
+2 havannah_winner
+#? [white]
