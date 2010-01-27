@@ -59,6 +59,7 @@ public:
 		newcallback("list_commands",    bind(&GTPclient::gtp_list_commands,    this, _1));
 		newcallback("protocol_version", bind(&GTPclient::gtp_protocol_version, this, _1));
 		newcallback("logfile",          bind(&GTPclient::gtp_logfile,          this, _1));
+		newcallback("logend",           bind(&GTPclient::gtp_logend,           this, _1));
 	}
 
 	~GTPclient(){
@@ -146,6 +147,12 @@ public:
 
 		setlogfile(fd);
 
+		return GTPResponse(true);
+	}
+
+	GTPResponse gtp_logend(vecstr args){
+		if(logfile)
+			fclose(logfile);
 		return GTPResponse(true);
 	}
 
