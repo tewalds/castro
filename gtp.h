@@ -104,9 +104,9 @@ public:
 
 			trim(line);
 			
-			if(line.length() == 0)
+			if(line.length() == 0 || line[0] == '#')
 				continue;
-		
+
 			vecstr parts = explode(line, " ");
 			string id;
 
