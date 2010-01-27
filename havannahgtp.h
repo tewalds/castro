@@ -45,7 +45,7 @@ public:
 	string won_str(int outcome) const {
 		switch(outcome){
 			case -1: return "none";
-			case 0:  return "tie";
+			case 0:  return "draw";
 			case 1:  return "white";
 			case 2:  return "black";
 		}
@@ -89,7 +89,7 @@ public:
 		Solver solve(*(game.getboard()), atof(args[0].c_str()));
 
 		string ret = "";
-		ret += won_str(solve.outcome) + " ";
+		ret += (solve.outcome == -1 ? string("unknown") : won_str(solve.outcome)) + " ";
 		ret += move_str(solve.x, solve.y) + " ";
 		ret += to_str(solve.maxdepth) + " ";
 		ret += to_str(solve.nodes);
@@ -107,6 +107,9 @@ public:
 	string move_str(int x, int y, int hguic = -1){
 		if(hguic == -1)
 			hguic = hguicoords;
+
+		if(x == -1)
+			return "none";
 
 		if(!hguic && x >= game.getsize())
 			y -= x + 1 - game.getsize();
