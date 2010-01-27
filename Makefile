@@ -29,4 +29,6 @@ fresh: clean all
 run: all
 	./castro
 
+tar: clean
+	cd ..; tar zcf castro.tgz castro --exclude castro/.git --exclude castro/.gitignore
 
