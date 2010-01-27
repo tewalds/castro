@@ -57,6 +57,7 @@ public:
 
 		newcallback("help",             bind(&GTPclient::gtp_list_commands,    this, _1));
 		newcallback("list_commands",    bind(&GTPclient::gtp_list_commands,    this, _1));
+		newcallback("quit",             bind(&GTPclient::gtp_quit,             this, _1));
 		newcallback("protocol_version", bind(&GTPclient::gtp_protocol_version, this, _1));
 		newcallback("logfile",          bind(&GTPclient::gtp_logfile,          this, _1));
 		newcallback("logend",           bind(&GTPclient::gtp_logend,           this, _1));
@@ -134,6 +135,9 @@ public:
 
 			fwrite(output.c_str(), 1, output.length(), out);
 			fflush(out);
+
+			if(name == "quit")
+				break;
 		}
 	}
 
@@ -157,7 +161,11 @@ public:
 	}
 
 	GTPResponse gtp_protocol_version(vecstr args){
-		return GTPResponse(true, "1");
+		return GTPResponse(true, "2");
+	}
+
+	GTPResponse gtp_quit(vecstr args){
+		return GTPResponse(true);
 	}
 	
 	GTPResponse gtp_list_commands(vecstr args){
