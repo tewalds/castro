@@ -86,6 +86,10 @@ public:
 		return 3*size*(size - 1) + 1;
 	}
 	
+	int movesremain() const {
+		return numcells() - nummoves;
+	}
+
 	int xy(int x, int y) const {
 		return y*size_d + x;
 	}

@@ -5,7 +5,8 @@
 #include "gtp.h"
 #include "game.h"
 #include "string.h"
-#include "solver.h"
+//#include "solver.h"
+#include "pnssolver.h"
 
 class HavannahGTP : public GTPclient {
 	HavannahGame game;
@@ -81,12 +82,19 @@ public:
 	}
 
 	GTPResponse gtp_solve(vecstr args){
-		if(args.size() != 1)
-			return GTPResponse(false, "Wrong number of arguments");
+		double time = 1000000;
+		int mem = 2000;
 
-		log("havannah_solve " + args[0]);
+		if(args.size() >= 1)
+			time = atof(args[0].c_str());
+		
+		if(args.size() >= 2)
+			mem = atoi(args[1].c_str());
 
-		Solver solve(*(game.getboard()), atof(args[0].c_str()));
+		log("havannah_solve " + to_str(time) + " " + to_str(mem));
+
+		PNSSolver solve(*(game.getboard()), time, mem);
+//		ABSolver solve(*(game.getboard()), time, mem);
 
 		string ret = "";
 		ret += (solve.outcome == -1 ? string("unknown") : won_str(solve.outcome)) + " ";

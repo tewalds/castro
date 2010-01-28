@@ -14,9 +14,8 @@ castro: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
 
-castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h solver.h
+castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h solver.h pnssolver.h absolver.h
 string.o: string.cpp string.h
-
 
 gendeps:
 	ls *.cpp -1 | xargs -L 1 cpp -M -MM
