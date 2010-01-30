@@ -31,3 +31,6 @@ run: all
 tar: clean
 	cd ..; tar zcf castro.tgz castro --exclude castro/.git --exclude castro/.gitignore
 
+profile:
+	valgrind --tool=callgrind ./castro
+

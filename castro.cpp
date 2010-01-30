@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc, char **argv){
 	HavannahGTP gtp;
 
-	for(int i = 1; i < (unsigned int)argc; i++) {
+	for(int i = 1; i < argc; i++) {
 		string arg = argv[i];
 		if(arg == "--help"){
 			printf("Usage:\n"

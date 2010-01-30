@@ -83,7 +83,7 @@ public:
 	}
 	
 	int find_callback(const string & name){
-		for(int i = 0; i < callbacks.size(); i++)
+		for(unsigned int i = 0; i < callbacks.size(); i++)
 			if(callbacks[i].name == name)
 				return i;
 		return -1;
@@ -170,7 +170,7 @@ public:
 	
 	GTPResponse gtp_list_commands(vecstr args){
 		string ret;
-		for(int i = 0; i < callbacks.size(); i++)
+		for(unsigned int i = 0; i < callbacks.size(); i++)
 			ret += callbacks[i].name + "\n";
 		return GTPResponse(true, ret);
 	}

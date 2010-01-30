@@ -7,6 +7,7 @@
 #include "string.h"
 //#include "solver.h"
 #include "pnssolver.h"
+#include "absolver.h"
 
 class HavannahGTP : public GTPclient {
 	HavannahGame game;
@@ -50,6 +51,7 @@ public:
 			case 1:  return "white";
 			case 2:  return "black";
 		}
+		return "unknown";
 	}
 
 	GTPResponse gtp_boardsize(vecstr args){
@@ -93,8 +95,8 @@ public:
 
 		log("havannah_solve " + to_str(time) + " " + to_str(mem));
 
-		PNSSolver solve(*(game.getboard()), time, mem);
-//		ABSolver solve(*(game.getboard()), time, mem);
+//		PNSSolver solve(*(game.getboard()), time, mem);
+		ABSolver solve(*(game.getboard()), time, mem);
 
 		string ret = "";
 		ret += (solve.outcome == -1 ? string("unknown") : won_str(solve.outcome)) + " ";

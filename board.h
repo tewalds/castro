@@ -180,6 +180,7 @@ public:
 			case 1:  return "white";
 			case 2:  return "black";
 		}
+		return "unknown";
 	}
 
 	char won() const {
