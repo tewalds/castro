@@ -5,9 +5,7 @@
 #include "gtp.h"
 #include "game.h"
 #include "string.h"
-//#include "solver.h"
-#include "pnssolver.h"
-#include "absolver.h"
+#include "solver.h"
 #include "board.h"
 
 class HavannahGTP : public GTPclient {
@@ -39,6 +37,8 @@ public:
 		newcallback("undo",            bind(&HavannahGTP::gtp_undo,       this, _1));
 		newcallback("havannah_winner", bind(&HavannahGTP::gtp_winner,     this, _1));
 		newcallback("havannah_solve",  bind(&HavannahGTP::gtp_solve,      this, _1));
+		newcallback("solve_ab",        bind(&HavannahGTP::gtp_solve_ab,   this, _1));
+		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,  this, _1));
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,  this, _1));
 		newcallback("top_moves",       bind(&HavannahGTP::gtp_top_moves,  this, _1));
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,    this, _1));
@@ -88,26 +88,46 @@ public:
 	}
 
 	GTPResponse gtp_solve(vecstr args){
+		log("havannah_solve " + implode(args, " "));
+
+		return gtp_solve_pns(args);
+	}
+
+	GTPResponse gtp_solve_ab(vecstr args){
+		double time = 1000000;
+
+		if(args.size() >= 1)
+			time = from_str<double>(args[0]);
+
+		Solver solve;
+		solve.solve_ab(*(game.getboard()), time);
+
+		return GTPResponse(true, solve_str(solve));
+	}
+
+	GTPResponse gtp_solve_pns(vecstr args){
 		double time = 1000000;
 		int mem = 2000;
 
 		if(args.size() >= 1)
-			time = atof(args[0].c_str());
+			time = from_str<double>(args[0]);
 		
 		if(args.size() >= 2)
-			mem = atoi(args[1].c_str());
+			mem = from_str<int>(args[1]);
 
-		log("havannah_solve " + to_str(time) + " " + to_str(mem));
+		Solver solve;
+		solve.solve_pns(*(game.getboard()), time, mem);
 
-//		PNSSolver solve(*(game.getboard()), time, mem);
-		ABSolver solve(*(game.getboard()), time, mem);
+		return GTPResponse(true, solve_str(solve));
+	}
 
+	string solve_str(const Solver & solve){
 		string ret = "";
 		ret += (solve.outcome == -1 ? string("unknown") : won_str(solve.outcome)) + " ";
 		ret += move_str(solve.x, solve.y) + " ";
 		ret += to_str(solve.maxdepth) + " ";
 		ret += to_str(solve.nodes);
-		return GTPResponse(true, ret);
+		return ret;
 	}
 
 	void parse_move(const string & str, int & x, int & y){

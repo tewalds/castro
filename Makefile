@@ -1,6 +1,6 @@
 .PHONY: clean fresh run gendeps
 
-OBJECTS		= castro.o string.o
+OBJECTS		= castro.o string.o time.o	 solverab.o solverpns.o
 
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall
@@ -14,8 +14,12 @@ castro: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
 
-castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h solver.h pnssolver.h absolver.h
+castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h solver.h time.h
+solverab.o: solverab.cpp solver.h time.h board.h
+solverpns.o: solverpns.cpp solver.h time.h board.h
 string.o: string.cpp string.h
+time.o: time.cpp time.h
+
 
 gendeps:
 	ls *.cpp -1 | xargs -L 1 cpp -M -MM
