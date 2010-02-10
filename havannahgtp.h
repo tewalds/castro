@@ -8,6 +8,7 @@
 //#include "solver.h"
 #include "pnssolver.h"
 #include "absolver.h"
+#include "board.h"
 
 class HavannahGTP : public GTPclient {
 	HavannahGame game;
@@ -38,6 +39,9 @@ public:
 		newcallback("undo",            bind(&HavannahGTP::gtp_undo,       this, _1));
 		newcallback("havannah_winner", bind(&HavannahGTP::gtp_winner,     this, _1));
 		newcallback("havannah_solve",  bind(&HavannahGTP::gtp_solve,      this, _1));
+		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,  this, _1));
+		newcallback("top_moves",       bind(&HavannahGTP::gtp_top_moves,  this, _1));
+		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,    this, _1));
 	}
 
 	GTPResponse gtp_print(vecstr args){
@@ -127,6 +131,37 @@ public:
 		return string() + char(x + 'a') + to_str(y+1);
 	}
 
+	GTPResponse gtp_all_legal(vecstr args){
+		Move moves[game.getboard()->vecsize()];
+		int num = game.getboard()->get_moves(moves);
+
+		string ret;
+		for(int i = 0; i < num; i++)
+			ret += move_str(moves[i].x, moves[i].y) + " ";
+		return GTPResponse(true, ret);
+	}
+
+	GTPResponse gtp_top_moves(vecstr args){
+		Move moves[game.getboard()->vecsize()];
+		int num = game.getboard()->get_moves(moves, true);
+
+		string ret;
+		for(int i = 0; i < num; i++)
+			ret += move_str(moves[i].x, moves[i].y) + " " + to_str(moves[i].score) + " ";
+		return GTPResponse(true, ret);
+	}
+
+	GTPResponse gtp_genmove(vecstr args){
+		Move moves[game.getboard()->vecsize()];
+		int num = game.getboard()->get_moves(moves, true);
+		if(num){
+			game.move(moves[0].x, moves[0].y);
+			return GTPResponse(true, move_str(moves[0].x, moves[0].y));
+		}else
+			return GTPResponse(false);
+	}
+
+
 	GTPResponse play(const string & pos, int toplay){
 		int x, y;
 		parse_move(pos, x, y);
@@ -199,7 +234,6 @@ public:
 		hguicoords = false;
 		return GTPResponse(true);
 	}
-
 
 	GTPResponse gtp_debug(vecstr args){
 		string str = "\n";
