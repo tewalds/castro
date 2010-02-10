@@ -14,6 +14,14 @@ template <class T> std::string to_str(T a){
 	return out.str();
 }
 
+template <class T> T from_str(const std::string & str){
+	std::istringstream sin(str);
+	T ret;
+	sin >> ret;
+	return ret;
+}
+
+
 void trim(std::string & str);
 
 vecstr explode(const std::string & str, const std::string & sep);
