@@ -12,7 +12,7 @@ void trim(string & str){
 
 vecstr explode(const string & str, const string & sep){
 	vecstr ret;
-	unsigned int old = 0, pos = 0;
+	int old = 0, pos = 0;
 	while((pos = str.find_first_of(sep, old)) != string::npos){
 		ret.push_back(str.substr(old, pos - old));
 		old = pos + sep.length();
