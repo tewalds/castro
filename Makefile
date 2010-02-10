@@ -1,6 +1,6 @@
 .PHONY: clean fresh run gendeps
 
-OBJECTS		= castro.o string.o time.o	 solverab.o solverpns.o
+OBJECTS		= castro.o string.o time.o solverab.o solverpns.o solverpnsab.o
 
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall
@@ -17,6 +17,7 @@ castro: $(OBJECTS)
 castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h solver.h time.h
 solverab.o: solverab.cpp solver.h time.h board.h
 solverpns.o: solverpns.cpp solver.h time.h board.h
+solverpnsab.o: solverpnsab.cpp solver.h time.h board.h
 string.o: string.cpp string.h
 time.o: time.cpp time.h
 

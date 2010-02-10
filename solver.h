@@ -71,6 +71,7 @@ public:
 
 	void solve_ab(const Board & board, double time, int mdepth = 1000);
 	void solve_pns(const Board & board, double time, uint64_t memlimit);
+	void solve_pnsab(const Board & board, double time, uint64_t memlimit);
 
 protected:
 //used for alpha-beta solvers
@@ -79,6 +80,7 @@ protected:
 
 //basic proof number search building a tree
 	bool pns(const Board & board, Node * node, int depth);
+	bool pnsab(const Board & board, Node * node, int depth);
 
 };
 
