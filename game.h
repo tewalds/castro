@@ -38,7 +38,7 @@ public:
 		return true;
 	}
 
-	bool move(int x, int y, int toplay){
+	bool move(int x, int y, int toplay = -1){
 		Board b = *getboard();
 		if(b.move(x, y, toplay)){
 			hist.push_back(b);
