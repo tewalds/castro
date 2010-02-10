@@ -31,6 +31,9 @@ const int neighbourscores[18][3] = {
 	{-1,-2, 2}, {1,-1, 2}, {2, 1, 2}, {1, 2, 2}, {-1, 1, 2}, {-2,-1, 2}, //sides of ring 2, virtual connections
 	};
 
+const int score_range = 8;
+const int score_offset = 2;
+
 class Board{
 	struct Cell {
 		unsigned piece  : 2; //who controls this cell, 0 for none, 1,2 for players
@@ -337,29 +340,30 @@ public:
 		}
 	}
 	
-	int calc_score(int x, int y) const {
+	int calc_score(int x, int y, char turn) const {
 		const Cell * cell = & cells[xy(x, x)];
-		return (8 - abs(cell->color))*cell->near;
+		return (score_range - abs(score_offset*turn - cell->color))*cell->near;
 	}
 
 	static bool cmpmoves(const Move & a, const Move & b) {
 		return a.score > b.score;
 	}
 
-	int get_moves(Move * moves, bool s = true) const {
+	int get_moves(Move * moves, bool s = false, char turn = -1) const {
 		Move * mend = moves;
+		turn = (turn == 1 ? 1 : -1);
 
 		for(int y = 0; y < size_d; y++){
 			for(int x = 0; x < size_d; x++){
 				if(valid_move(x, y)){
-					*mend = Move(x, y, calc_score(x, y));
+					*mend = Move(x, y, calc_score(x, y, turn));
 					mend++;
 				}
 			}
 		}
 
-//		if(s)
-//			sort(moves, mend, cmpmoves);
+		if(s)
+			sort(moves, mend, cmpmoves);
 		return mend - moves;
 	}
 };
