@@ -205,8 +205,12 @@ public:
 		if(!game.getboard()->onboard2(x, y))
 			return GTPResponse(false, "Move out of bounds");
 
-		if(!game.move(x, y, toplay))
-			return GTPResponse(false, "Invalid placement, already taken");
+		if(!game.move(x, y, toplay)){
+			if(game.getboard()->won() >= 0)
+				return GTPResponse(false, "Game already over");
+			else
+				return GTPResponse(false, "Invalid placement, already taken");
+		}
 
 		log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(x, y, false));
 
