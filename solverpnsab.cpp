@@ -11,6 +11,7 @@ void Solver::solve_pnsab(const Board & board, double time, uint64_t memlimit){
 		return;
 	}
 
+	Timer timer = Timer(time, bind(&Solver::timedout, this));
 	int starttime = time_msec();
 
 	int turn = board.toplay();
@@ -18,7 +19,7 @@ void Solver::solve_pnsab(const Board & board, double time, uint64_t memlimit){
 	PNSNode root(-1, -1, false);
 
 	bool mem = true;
-	while(mem && root.phi != 0 && root.delta != 0 && time_msec() - starttime < time*1000)
+	while(mem && !timeout && root.phi != 0 && root.delta != 0)
 		mem = pnsab(board, & root, 0);
 
 	maxdepth += pnsab_depth+1;
@@ -43,8 +44,8 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 		nodesremain -= node->alloc(board.movesremain());
 		nodes += board.movesremain();
 
-		int min = INF16;
-		int sum = 0;
+		unsigned int min = INF16;
+		unsigned int sum = 0;
 		int i = 0;
 		for(int y = 0; y < board.get_size_d(); y++){
 			for(int x = 0; x < board.get_size_d(); x++){
@@ -82,8 +83,8 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 
 		return true;
 	}
-	
-	int min, sum;
+
+	unsigned int min, sum;
 	bool mem;
 	do{
 		int i = 0;
@@ -105,7 +106,7 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 		}
 		if(sum > INF16)
 			sum = INF16-1;
-	}while(mem && min == node->phi && sum == node->delta);
+	}while(!timeout && mem && min == node->phi && sum == node->delta);
 
 	node->phi = min;
 	node->delta = sum;

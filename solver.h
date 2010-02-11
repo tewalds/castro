@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include "time.h"
+#include "timer.h"
 
 #include "board.h"
 
@@ -65,13 +66,16 @@ public:
 	int maxdepth;
 	uint64_t nodes;
 	int x, y;
+	bool timeout;
 
 	Solver() {
 		outcome = -1;
 		maxdepth = 0;
 		nodes = 0;
 		x = y = -1;
+		timeout = false;
 	}
+	void timedout(){ timeout = true; }
 
 	void solve_ab(const Board & board, double time, int mdepth = 1000);
 	void solve_pns(const Board & board, double time, uint64_t memlimit);
@@ -83,8 +87,8 @@ protected:
 	int negamaxh(const Board & board, const int depth, int alpha, int beta); //negamax with move ordering heuristic
 
 //basic proof number search building a tree
-	bool pns(const Board & board, PNSNode * node, int depth);
-	bool pnsab(const Board & board, PNSNode * node, int depth);
+	bool pns(const Board & board, PNSNode * node, int depth);   //basic proof number search
+	bool pnsab(const Board & board, PNSNode * node, int depth); //use a tiny negamax search as a pn,dn heuristic
 
 };
 

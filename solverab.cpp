@@ -7,11 +7,12 @@ void Solver::solve_ab(const Board & board, double time, int mdepth){
 		return;
 	}
 
+	Timer timer = Timer(time, bind(&Solver::timedout, this));
 	int starttime = time_msec();
 
 	int turn = board.toplay();
 
-	for(maxdepth = 1; maxdepth < mdepth && time_msec() - starttime < time*1000; maxdepth++){
+	for(maxdepth = 1; !timeout && maxdepth < mdepth; maxdepth++){
 		fprintf(stderr, "Starting depth %d\n", maxdepth);
 
 		int ret = negamax(board, maxdepth, -2, 2);
@@ -32,10 +33,8 @@ int Solver::negamax(const Board & board, const int depth, int alpha, int beta){
 	if(board.won() >= 0)
 		return (board.won() ? -2 : -1);
 
-	if(depth <= 0)
+	if(depth <= 0 || timeout)
 		return 0;
-
-	int turn = board.toplay();
 
 	for(int y = 0; y < board.get_size_d(); y++){
 		for(int x = 0; x < board.get_size_d(); x++){
@@ -65,8 +64,6 @@ int Solver::negamaxh(const Board & board, const int depth, int alpha, int beta){
 
 	if(depth <= 0)
 		return 0;
-
-	int turn = board.toplay();
 
 	Move moves[board.vecsize()];
 	int num = board.get_moves(moves);
