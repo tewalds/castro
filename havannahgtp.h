@@ -141,7 +141,7 @@ public:
 	string solve_str(const Solver & solve){
 		string ret = "";
 		ret += (solve.outcome == -1 ? string("unknown") : won_str(solve.outcome)) + " ";
-		ret += move_str(solve.x, solve.y) + " ";
+		ret += move_str(solve.X, solve.Y) + " ";
 		ret += to_str(solve.maxdepth) + " ";
 		ret += to_str(solve.nodes);
 		return ret;

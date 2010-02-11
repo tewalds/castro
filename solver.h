@@ -65,14 +65,14 @@ public:
 	int outcome;
 	int maxdepth;
 	uint64_t nodes;
-	int x, y;
+	int X, Y;
 	bool timeout;
 
 	Solver() {
 		outcome = -1;
 		maxdepth = 0;
 		nodes = 0;
-		x = y = -1;
+		X = Y = -1;
 		timeout = false;
 	}
 	void timedout(){ timeout = true; }

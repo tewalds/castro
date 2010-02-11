@@ -15,10 +15,40 @@ void Solver::solve_ab(const Board & board, double time, int mdepth){
 	for(maxdepth = 1; !timeout && maxdepth < mdepth; maxdepth++){
 		fprintf(stderr, "Starting depth %d\n", maxdepth);
 
+/*
 		int ret = negamax(board, maxdepth, -2, 2);
+/*/
+		int alpha = -2;
+		int beta = 2;
+
+		bool done = false;
+		for(int y = 0; !done && y < board.get_size_d(); y++){
+			for(int x = 0; !done && x < board.get_size_d(); x++){
+				if(!board.valid_move(x, y))
+					continue;
+
+				nodes++;
+
+				Board next = board;
+				next.move(x, y);
+
+				int value = -negamax(next, maxdepth - 1, -beta, -alpha);
+
+				if(value > alpha){
+					alpha = value;
+					X = x;
+					Y = y;
+				}
+
+				if(alpha >= beta)
+					done = true;
+			}
+		}
+		int ret = alpha;
+//*/
 
 		if(ret){
-			if(     ret == -2) outcome = (turn == 1 ? 2 : 1);
+			if(     ret == -2){ outcome = (turn == 1 ? 2 : 1); X = -1; Y = -1; }
 			else if(ret == 2)  outcome = turn;
 			else /*-1 || 1*/   outcome = 0;
 
