@@ -25,7 +25,7 @@ class Timer {
 	static void nullcallback(){ }
 
 public:
-	Timer(double time, callback_fn fn){
+	Timer(double time, function<void()> fn){
 		timeout = time;
 		callback = fn;
 		pthread_create(&thread, NULL, (void* (*)(void*)) &Timer::waiter, this);
