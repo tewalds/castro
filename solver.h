@@ -15,15 +15,19 @@ class Solver {
 //memory management for PNS which uses a tree to store the nodes
 	int nodesremain;
 
-	struct Node {
+//depth to run the alpha-beta search at each pns node
+	int pnsab_depth;
+
+	struct PNSNode {
 		uint8_t x, y; //move
 		uint16_t phi, delta;
 		uint16_t numchildren;
-		Node * children;
+		PNSNode * children;
 
-		Node() { }
-		Node(int X, int Y, int p, int d) : x(X), y(Y), phi(p), delta(d), numchildren(0), children(NULL) { }
-		Node(int X, int Y, bool terminal) : x(X), y(Y), numchildren(0), children(NULL) {
+		PNSNode() { }
+		PNSNode(int X, int Y, int v)         : x(X), y(Y), phi(v), delta(v), numchildren(0), children(NULL) { }
+		PNSNode(int X, int Y, int p, int d)  : x(X), y(Y), phi(p), delta(d), numchildren(0), children(NULL) { }
+		PNSNode(int X, int Y, bool terminal) : x(X), y(Y), numchildren(0), children(NULL) {
 			if(terminal){
 				phi = INF16;
 				delta = 0;
@@ -33,13 +37,13 @@ class Solver {
 			}
 		}
 
-		~Node(){
+		~PNSNode(){
 			if(children)
 				delete[] children;
 		}
 		int alloc(int num){
 			numchildren = num;
-			children = new Node[num];
+			children = new PNSNode[num];
 			return num;
 		}
 		int dealloc(){
@@ -79,8 +83,8 @@ protected:
 	int negamaxh(const Board & board, const int depth, int alpha, int beta); //negamax with move ordering heuristic
 
 //basic proof number search building a tree
-	bool pns(const Board & board, Node * node, int depth);
-	bool pnsab(const Board & board, Node * node, int depth);
+	bool pns(const Board & board, PNSNode * node, int depth);
+	bool pnsab(const Board & board, PNSNode * node, int depth);
 
 };
 

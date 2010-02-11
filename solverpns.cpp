@@ -2,7 +2,7 @@
 #include "solver.h"
 
 void Solver::solve_pns(const Board & board, double time, uint64_t memlimit){
-	nodesremain = memlimit*1024*1024/sizeof(Node);
+	nodesremain = memlimit*1024*1024/sizeof(PNSNode);
 
 	if(board.won() >= 0){
 		outcome = board.won();
@@ -13,7 +13,7 @@ void Solver::solve_pns(const Board & board, double time, uint64_t memlimit){
 
 	int turn = board.toplay();
 
-	Node root(-1, -1, false);
+	PNSNode root(-1, -1, false);
 
 	bool mem = true;
 	while(mem && root.phi != 0 && root.delta != 0 && time_msec() - starttime < time*1000)
@@ -28,7 +28,7 @@ void Solver::solve_pns(const Board & board, double time, uint64_t memlimit){
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-bool Solver::pns(const Board & board, Node * node, int depth){
+bool Solver::pns(const Board & board, PNSNode * node, int depth){
 	if(depth > maxdepth)
 		maxdepth = depth;
 
@@ -47,7 +47,7 @@ bool Solver::pns(const Board & board, Node * node, int depth){
 				if(board.valid_move(x, y)){
 					Board next = board;
 					next.move(x, y);
-					node->children[i] = Node(x, y, next.won() >= 0);
+					node->children[i] = PNSNode(x, y, next.won() >= 0);
 
 					sum += node->children[i].phi;
 					if(node->children[i].delta < min)
@@ -76,7 +76,7 @@ bool Solver::pns(const Board & board, Node * node, int depth){
 		for(; i < node->numchildren; i++)
 			if(node->children[i].delta == node->phi)
 				break;
-		Node * child = &(node->children[i]);
+		PNSNode * child = &(node->children[i]);
 
 		Board next = board;
 		next.move(child->x, child->y);

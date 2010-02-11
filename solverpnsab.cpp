@@ -2,7 +2,9 @@
 #include "solver.h"
 
 void Solver::solve_pnsab(const Board & board, double time, uint64_t memlimit){
-	nodesremain = memlimit*1024*1024/sizeof(Node);
+	nodesremain = memlimit*1024*1024/sizeof(PNSNode);
+
+	pnsab_depth = 1;
 
 	if(board.won() >= 0){
 		outcome = board.won();
@@ -13,11 +15,13 @@ void Solver::solve_pnsab(const Board & board, double time, uint64_t memlimit){
 
 	int turn = board.toplay();
 
-	Node root(-1, -1, false);
+	PNSNode root(-1, -1, false);
 
 	bool mem = true;
 	while(mem && root.phi != 0 && root.delta != 0 && time_msec() - starttime < time*1000)
 		mem = pnsab(board, & root, 0);
+
+	maxdepth += pnsab_depth+1;
 
 	if(!mem)
 		fprintf(stderr, "Ran out of memory\n");
@@ -28,7 +32,7 @@ void Solver::solve_pnsab(const Board & board, double time, uint64_t memlimit){
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-bool Solver::pnsab(const Board & board, Node * node, int depth){
+bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 	if(depth > maxdepth)
 		maxdepth = depth;
 
@@ -50,14 +54,14 @@ bool Solver::pnsab(const Board & board, Node * node, int depth){
 					
 					uint64_t prevnodes = nodes;
 					
-					int abval = negamax(next, 3, -2, 2);
-					
+					int abval = negamax(next, pnsab_depth, -2, 2);
+
 					if(abval == 2)
-						node->children[i] = Node(x, y, 0, INF16);
+						node->children[i] = PNSNode(x, y, 0, INF16);
 					else if(abval == -2)
-						node->children[i] = Node(x, y, INF16, 0);
+						node->children[i] = PNSNode(x, y, INF16, 0);
 					else
-						node->children[i] = Node(x, y, nodes - prevnodes, nodes - prevnodes);
+						node->children[i] = PNSNode(x, y, 1 + int(nodes - prevnodes));
 
 					sum += node->children[i].phi;
 					if(node->children[i].delta < min)
@@ -86,11 +90,11 @@ bool Solver::pnsab(const Board & board, Node * node, int depth){
 		for(; i < node->numchildren; i++)
 			if(node->children[i].delta == node->phi)
 				break;
-		Node * child = &(node->children[i]);
+		PNSNode * child = &(node->children[i]);
 
 		Board next = board;
 		next.move(child->x, child->y);
-		mem = pns(next, child, depth + 1);
+		mem = pnsab(next, child, depth + 1);
 
 		min = INF16;
 		sum = 0;
