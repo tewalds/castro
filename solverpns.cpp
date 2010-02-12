@@ -1,6 +1,13 @@
 
 #include "solver.h"
 
+/* three possible outcomes from run_pns: Win, Loss, Unknown (ran out of time/memory)
+ * Ties are grouped with loss first, win second, forcing two runs:
+ *   W L  U
+ * W W T  WT
+ * L W L  L
+ * U W LT U
+ */
 void Solver::solve_pns(const Board & board, double time, uint64_t memlimit){
 	nodesremain = memlimit*1024*1024/sizeof(PNSNode);
 
@@ -13,6 +20,30 @@ void Solver::solve_pns(const Board & board, double time, uint64_t memlimit){
 	int starttime = time_msec();
 
 	int turn = board.toplay();
+	int otherturn = (turn == 1 ? 2 : 1);
+
+	int ret1 = run_pns(board, otherturn);
+
+	if(ret1 == 1){ //win
+		outcome = turn;
+	}else{
+		int ret2 = run_pns(board, turn);
+
+		if(ret2 == -1){
+			outcome = otherturn; //loss
+		}else{
+			if(ret1 == -1 && ret2 == 1) outcome = 0;          //tie
+			if(ret1 == -1 && ret2 == 0) outcome = -otherturn; //loss or tie
+			if(ret1 ==  0 && ret2 == 1) outcome = -turn;      //win or tie
+			if(ret1 ==  0 && ret2 == 0) outcome = -3;         //unknown
+		}
+	}
+
+	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
+}
+
+int Solver::run_pns(const Board & board, int ties){ //1 = win, 0 = unknown, -1 = loss
+	assignties = ties;
 
 	PNSNode root(-1, -1, false);
 
@@ -23,10 +54,9 @@ void Solver::solve_pns(const Board & board, double time, uint64_t memlimit){
 	if(!mem)
 		fprintf(stderr, "Ran out of memory\n");
 
-	if(root.delta == 0)    outcome = (turn == 1 ? 2 : 1);
-	else if(root.phi == 0) outcome = turn;
-
-	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
+	if(root.phi == 0)   return 1;
+	if(root.delta == 0) return -1;
+	return 0;
 }
 
 bool Solver::pns(const Board & board, PNSNode * node, int depth){
@@ -48,7 +78,8 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 				if(board.valid_move(x, y)){
 					Board next = board;
 					next.move(x, y);
-					node->children[i] = PNSNode(x, y, next.won() >= 0);
+
+					node->children[i] = PNSNode(x, y).abval((next.won() > 0) + (next.won() >= 0), (board.toplay() == assignties));
 
 					sum += node->children[i].phi;
 					if(node->children[i].delta < min)

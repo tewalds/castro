@@ -52,11 +52,22 @@ public:
 	string won_str(int outcome) const {
 		switch(outcome){
 			case -1: return "none";
-			case 0:  return "draw";
-			case 1:  return "white";
-			case 2:  return "black";
+			case  0: return "draw";
+			case  1: return "white";
+			case  2: return "black";
+			default: return "unknown";
 		}
-		return "unknown";
+	}
+
+	string solve_str(int outcome) const {
+		switch(outcome){
+			case -2: return "black_or_draw";
+			case -1: return "white_or_draw";
+			case  0: return "draw";
+			case  1: return "white";
+			case  2: return "black";
+			default: return "unknown";
+		}
 	}
 
 	GTPResponse gtp_boardsize(vecstr args){

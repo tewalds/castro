@@ -54,15 +54,10 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 					next.move(x, y);
 					
 					uint64_t prevnodes = nodes;
-					
-					int abval = negamax(next, pnsab_depth, -2, 2);
 
-					if(abval == 2)
-						node->children[i] = PNSNode(x, y, 0, INF16);
-					else if(abval == -2)
-						node->children[i] = PNSNode(x, y, INF16, 0);
-					else
-						node->children[i] = PNSNode(x, y, 1 + int(nodes - prevnodes));
+					int abval = -negamax(next, pnsab_depth, -2, 2);
+
+					node->children[i] = PNSNode(x, y).abval(abval, (board.toplay() == assignties), 1 + int(nodes - prevnodes));
 
 					sum += node->children[i].phi;
 					if(node->children[i].delta < min)
