@@ -54,8 +54,17 @@ int Solver::run_pns(const Board & board, int ties){ //1 = win, 0 = unknown, -1 =
 	if(!mem)
 		fprintf(stderr, "Ran out of memory\n");
 
-	if(root.phi == 0)   return 1;
-	if(root.delta == 0) return -1;
+	if(root.phi == 0){
+		for(int i = 0; i < root.numchildren; i++){
+			if(root.children[i].delta == 0){
+				X = root.children[i].x;
+				Y = root.children[i].y;
+			}
+		}
+		return 1;
+	}
+	if(root.delta == 0)
+		return -1;
 	return 0;
 }
 
@@ -95,9 +104,6 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 		node->phi = min;
 		node->delta = sum;
 
-		if(node->phi == 0 || node->delta == 0)
-			nodesremain += node->dealloc();
-
 		return true;
 	}
 	
@@ -114,6 +120,9 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 		next.move(child->x, child->y);
 		mem = pns(next, child, depth + 1);
 
+		if(child->phi == 0 || child->delta == 0)
+			nodesremain += child->dealloc();
+
 		min = INF16;
 		sum = 0;
 		for(int i = 0; i < node->numchildren; i++){
@@ -127,9 +136,6 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 
 	node->phi = min;
 	node->delta = sum;
-
-	if(node->phi == 0 || node->delta == 0)
-		nodesremain += node->dealloc();
 
 	return mem;
 }
