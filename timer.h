@@ -18,7 +18,7 @@ class Timer {
 	static void * waiter(void * blah){
 		Timer * timer = (Timer *)blah;
 		sleep((int)timer->timeout);
-		usleep((timer->timeout - (int)timer->timeout)*1000000);
+		usleep((int)((timer->timeout - (int)timer->timeout)*1000000));
 		timer->callback();
 	}
 
