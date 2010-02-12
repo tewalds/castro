@@ -3,9 +3,9 @@
 
 /* three possible outcomes from run_pns: Win, Loss, Unknown (ran out of time/memory)
  * Ties are grouped with loss first, win second, forcing two runs:
- *   W L  U
- * W W T  WT
- * L W L  L
+ *   W L  U   Run 1: W | TL
+ * W W T  WT  Run 2: WT | L
+ * L W L  L   from the perspective of toplay
  * U W LT U
  */
 void Solver::solve_pns(const Board & board, double time, uint64_t memlimit){
