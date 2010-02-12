@@ -42,7 +42,7 @@ class Solver {
 		}
 		PNSNode & abval(int outcome, bool ties, int value = 1){
 			if(outcome == 1 || outcome == -1)
-				outcome == (ties ? 2 : -2);
+				outcome = (ties ? 2 : -2);
 
 			if(     outcome ==  0)   { phi = value; delta = value; }
 			else if(outcome ==  2)   { phi = INF16; delta = 0;     }

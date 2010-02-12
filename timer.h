@@ -20,6 +20,7 @@ class Timer {
 		sleep((int)timer->timeout);
 		usleep((int)((timer->timeout - (int)timer->timeout)*1000000));
 		timer->callback();
+		return NULL;
 	}
 
 	static void nullcallback(){ }
