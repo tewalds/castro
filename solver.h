@@ -17,9 +17,6 @@ class Solver {
 	int nodesremain;
 	int assignties; //which player to assign a tie to
 
-//depth to run the alpha-beta search at each pns node
-	int pnsab_depth;
-
 	struct PNSNode {
 		uint8_t x, y; //move
 		uint16_t phi, delta;
@@ -102,6 +99,7 @@ protected:
 
 //basic proof number search building a tree
 	int run_pns(const Board & board, int ties); //1 = win, 0 = unknown, -1 = loss
+	int run_pnsab(const Board & board, int ties); //1 = win, 0 = unknown, -1 = loss
 
 	bool pns(const Board & board, PNSNode * node, int depth);   //basic proof number search
 	bool pnsab(const Board & board, PNSNode * node, int depth); //use a tiny negamax search as a pn,dn heuristic
