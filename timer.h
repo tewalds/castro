@@ -34,6 +34,7 @@ public:
 	~Timer(){
 		callback = &Timer::nullcallback;
 		pthread_cancel(thread);
+		pthread_join(thread, NULL);
 	}
 };
 
