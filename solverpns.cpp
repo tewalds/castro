@@ -61,8 +61,10 @@ int Solver::run_pns(const Board & board, int ties){ //1 = win, 0 = unknown, -1 =
 				Y = root.children[i].y;
 			}
 		}
+		nodesremain += root.dealloc();
 		return 1;
 	}
+	nodesremain += root.dealloc();
 	if(root.delta == 0)
 		return -1;
 	return 0;
