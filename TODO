@@ -1,0 +1,18 @@
+
+DFPN
+- transposition table
+- hashing function...
+
+if pns fails and time left, use negamax
+
+Heuristic:
+- colorness - how black/white a cell is
+  - +3 points for each direct neighbour
+  - +2 points for virtual connection
+  - +1 point for each in second ring
+- contentious
+  - (24 - abs(colorness))*(number of pieces in neighbourhood)
+- order moves by contentiousness
+- dead move analysis
+
+
