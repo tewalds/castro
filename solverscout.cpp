@@ -74,7 +74,6 @@ int Solver::negascout(const Board & board, const int depth, int alpha, int beta)
 			Board next = board;
 			next.move(x, y);
 
-
 			int value = -negascout(next, depth - 1, -b, -alpha);
 
 			if(value > alpha && value < beta && !first) // re-search

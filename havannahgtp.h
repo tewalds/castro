@@ -41,6 +41,7 @@ public:
 		newcallback("solve_scout",     bind(&HavannahGTP::gtp_solve_scout,this, _1));
 		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,  this, _1));
 		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pnsab,this, _1));
+//		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab,this, _1));
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,  this, _1));
 		newcallback("top_moves",       bind(&HavannahGTP::gtp_top_moves,  this, _1));
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,    this, _1));
@@ -158,6 +159,22 @@ public:
 
 		Solver solve;
 		solve.solve_pnsab(*(game.getboard()), time, mem);
+
+		return GTPResponse(true, solve_str(solve));
+	}
+
+	GTPResponse gtp_solve_dfpnsab(vecstr args){
+		double time = 1000000;
+		int mem = 2000;
+
+		if(args.size() >= 1)
+			time = from_str<double>(args[0]);
+
+		if(args.size() >= 2)
+			mem = from_str<int>(args[1]);
+
+		Solver solve;
+		solve.solve_dfpnsab(*(game.getboard()), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
 	}
