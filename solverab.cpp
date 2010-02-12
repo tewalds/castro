@@ -19,8 +19,8 @@ void Solver::solve_ab(const Board & board, double time, int mdepth){
 
 		if(ret){
 			if(     ret == -2){ outcome = (turn == 1 ? 2 : 1); X = -1; Y = -1; }
-			else if(ret == 2)  outcome = turn;
-			else /*-1 || 1*/   outcome = 0;
+			else if(ret ==  2){ outcome = turn; }
+			else /*-1 || 1*/  { outcome = 0; }
 
 			fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 			return;
