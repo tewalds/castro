@@ -86,6 +86,7 @@ public:
 	void timedout(){ timeout = true; }
 
 	void solve_ab(const Board & board, double time, int mdepth = 1000);
+	void solve_scout(const Board & board, double time, int mdepth = 1000);
 	void solve_pns(const Board & board, double time, uint64_t memlimit);
 	void solve_pnsab(const Board & board, double time, uint64_t memlimit);
 
@@ -94,8 +95,11 @@ protected:
 //used for alpha-beta solvers
 //return -2 for loss, -1,1 for tie, 0 for unknown, 2 for win, all from toplay's perspective
 	int run_negamax(const Board & board, const int depth, int alpha, int beta);  //plain negamax
+	int run_negascout(const Board & board, const int depth, int alpha, int beta);  //plain negascout
+
 	int negamax(const Board & board, const int depth, int alpha, int beta);  //plain negamax
 	int negamaxh(const Board & board, const int depth, int alpha, int beta); //negamax with move ordering heuristic
+	int negascout(const Board & board, const int depth, int alpha, int beta);  //plain negascout
 
 //basic proof number search building a tree
 	int run_pns(const Board & board, int ties); //1 = win, 0 = unknown, -1 = loss

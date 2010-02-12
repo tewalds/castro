@@ -38,6 +38,7 @@ public:
 		newcallback("havannah_winner", bind(&HavannahGTP::gtp_winner,     this, _1));
 		newcallback("havannah_solve",  bind(&HavannahGTP::gtp_solve,      this, _1));
 		newcallback("solve_ab",        bind(&HavannahGTP::gtp_solve_ab,   this, _1));
+		newcallback("solve_scout",     bind(&HavannahGTP::gtp_solve_scout,this, _1));
 		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,  this, _1));
 		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pnsab,this, _1));
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,  this, _1));
@@ -102,7 +103,7 @@ public:
 	GTPResponse gtp_solve(vecstr args){
 		log("havannah_solve " + implode(args, " "));
 
-		return gtp_solve_pns(args);
+		return gtp_solve_pnsab(args);
 	}
 
 	GTPResponse gtp_solve_ab(vecstr args){
@@ -113,6 +114,18 @@ public:
 
 		Solver solve;
 		solve.solve_ab(*(game.getboard()), time);
+
+		return GTPResponse(true, solve_str(solve));
+	}
+
+	GTPResponse gtp_solve_scout(vecstr args){
+		double time = 1000000;
+
+		if(args.size() >= 1)
+			time = from_str<double>(args[0]);
+
+		Solver solve;
+		solve.solve_scout(*(game.getboard()), time);
 
 		return GTPResponse(true, solve_str(solve));
 	}
