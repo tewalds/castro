@@ -74,8 +74,6 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 		nodesremain -= node->alloc(board.movesremain());
 		nodes += board.movesremain();
 
-		unsigned int min = INF16;
-		unsigned int sum = 0;
 		int i = 0;
 		for(int y = 0; y < board.get_size_d(); y++){
 			for(int x = 0; x < board.get_size_d(); x++){
@@ -89,24 +87,16 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 
 					node->children[i] = PNSNode(x, y).abval(abval, (board.toplay() == assignties), 1 + int(nodes - prevnodes));
 
-					sum += node->children[i].phi;
-					if(node->children[i].delta < min)
-						min = node->children[i].delta;
-
 					i++;
 				}
 			}
 		}
-		if(sum > INF16)
-			sum = INF16 - 1;
 
-		node->phi = min;
-		node->delta = sum;
+		updatePDnum(node);
 
 		return true;
 	}
 
-	unsigned int min, sum;
 	bool mem;
 	do{
 		int i = 0;
@@ -122,19 +112,7 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 		if(child->phi == 0 || child->delta == 0)
 			nodesremain += child->dealloc();
 
-		min = INF16;
-		sum = 0;
-		for(int i = 0; i < node->numchildren; i++){
-			sum += node->children[i].phi;
-			if(node->children[i].delta < min)
-				min = node->children[i].delta;
-		}
-		if(sum > INF16)
-			sum = INF16-1;
-	}while(!timeout && mem && min == node->phi && sum == node->delta);
-
-	node->phi = min;
-	node->delta = sum;
+	}while(!timeout && mem && !updatePDnum(node));
 
 	return mem;
 }

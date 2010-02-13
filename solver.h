@@ -111,6 +111,8 @@ protected:
 	bool pnsab(const Board & board, PNSNode * node, int depth); //use a tiny negamax search as a pn,dn heuristic
 	bool dfpnsab(const Board & board, PNSNode * node, int depth, int tp, int td);
 
+//update the phi and delta for the node
+	bool updatePDnum(PNSNode * node);
 };
 
 #endif

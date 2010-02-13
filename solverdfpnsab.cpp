@@ -72,15 +72,13 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, int tp, int
 		nodesremain -= node->alloc(board.movesremain());
 		nodes += board.movesremain();
 
-		unsigned int minp = INF16;
-		unsigned int sum = 0;
 		int i = 0;
 		for(int y = 0; y < board.get_size_d(); y++){
 			for(int x = 0; x < board.get_size_d(); x++){
 				if(board.valid_move(x, y)){
 					Board next = board;
 					next.move(x, y);
-//*
+/*
 					node->children[i] = PNSNode(x, y).abval((next.won() > 0) + (next.won() >= 0), (board.toplay() == assignties));
 /*/					
 					uint64_t prevnodes = nodes;
@@ -89,24 +87,16 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, int tp, int
 
 					node->children[i] = PNSNode(x, y).abval(abval, (board.toplay() == assignties), 1 + int(nodes - prevnodes));
 //*/
-					sum += node->children[i].phi;
-					if( minp > node->children[i].delta)
-						minp = node->children[i].delta;
-
 					i++;
 				}
 			}
 		}
-		if(sum > INF16)
-			sum = INF16 - 1;
 
-		node->phi = minp;
-		node->delta = sum;
+		updatePDnum(node);
 
 		return true;
 	}
 
-	unsigned int minp, sum;
 	bool mem;
 	do{
 		PNSNode * c1 = node->children;
@@ -121,7 +111,7 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, int tp, int
 		Board next = board;
 		next.move(c1->x, c1->y);
 		
-		int tpc = (td + c1->phi - node->delta);
+		int tpc = min((int)(INF16-1), (td + c1->phi - node->delta));
 		int tdc = min(tp, c2->delta + 1);
 		
 //		printf("depth: %i, tp: %i, td: %i, tpc: %i, tdc: %i\n", depth, tp, td, tpc, tdc);
@@ -131,18 +121,7 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, int tp, int
 		if(c1->phi == 0 || c1->delta == 0)
 			nodesremain += c1->dealloc();
 
-		minp = INF16;
-		sum = 0;
-		for(int i = 0; i < node->numchildren; i++){
-			sum += node->children[i].phi;
-			if( minp > node->children[i].delta)
-				minp = node->children[i].delta;
-		}
-		if(sum > INF16)
-			sum = INF16-1;
-
-		node->phi = minp;
-		node->delta = sum;
+		updatePDnum(node);
 	}while(!timeout && mem && node->phi < tp && node->delta < td);
 
 	return mem;
