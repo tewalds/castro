@@ -42,7 +42,7 @@ int Solver::run_dfpnsab(const Board & board, int ties){ //1 = win, 0 = unknown, 
 
 	bool mem = true;
 	while(mem && !timeout && root.phi != 0 && root.delta != 0)
-		mem = dfpnsab(board, & root, 0, INF16, INF16);
+		mem = dfpnsab(board, & root, 0, INF16/2, INF16/2);
 
 	if(!mem)
 		fprintf(stderr, "Ran out of memory\n");
