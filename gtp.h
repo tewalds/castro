@@ -68,6 +68,10 @@ public:
 			fclose(logfile);
 	}
 
+	void setinfile(FILE * i){
+		in = i;
+	}
+
 	void setlogfile(FILE * l){
 		if(logfile)
 			fclose(logfile);
