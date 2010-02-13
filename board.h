@@ -31,6 +31,14 @@ const int neighbourscores[18][3] = {
 	{-1,-2, 2}, {1,-1, 2}, {2, 1, 2}, {1, 2, 2}, {-1, 1, 2}, {-2,-1, 2}, //sides of ring 2, virtual connections
 	};
 
+const int deadpatterns[5][5] = {
+	{1,1,1,1,0},
+	{1,1,1,0,2},
+	{1,1,0,2,2},
+	{2,2,2,0,1},
+	{2,2,2,2,0},
+	};
+
 const int score_range = 8;
 const int score_offset = 2;
 
@@ -236,7 +244,6 @@ public:
 		if(cells[i].parent != i)
 			cells[i].parent = find_group(cells[i].parent);
 		return cells[i].parent;
-
 	}
 
 	//join the groups of two positions, propagating group size, and edge/corner connections
@@ -300,7 +307,8 @@ public:
 			turn = toplay();
 
 		set(x, y, turn);
-		update_scores(x, y, turn);
+//		update_scores(x, y, turn);
+//		detect_dead(x, y, turn);
 
 		bool alreadyjoined = false; //useful for finding rings
 		for(int i = 0; i < 6; i++){
@@ -320,8 +328,39 @@ public:
 		return true;	
 	}
 
-	void detect_dead(int x, int y){
-		//go through the neighbours to x,y, and check if they are now dead
+	//go through the neighbours to x,y, and check if they are now dead
+	void detect_dead(int x, int y, char turn){
+		for(int n = 0; n < 6; n++){ //go through each neighbour
+			int X = x + neighbours[n][0];
+			int Y = y + neighbours[n][1];
+
+			if(onboard2(X, Y) && !get(X, Y))
+				check_neighbour_dead(X, Y, turn);
+		}
+	}
+
+	void check_neighbour_dead(int X, int Y, char turn){
+		for(int p = 0; p < 5; p++){ //each pattern
+			for(int d = 0; d < 6; d++){ //each direction of the pattern
+				if(check_pattern(X, Y, p, d)){
+					set(X, Y, turn); //mark it dead
+					return;
+				}
+			}
+		}
+	}
+
+	bool check_pattern(int x, int y, int p, int d){
+		for(int i = 0; i < 5; i++){ //each element of the pattern
+			if(deadpatterns[p][i]){
+				int X = x + neighbours[(i+d)%6][0];
+				int Y = x + neighbours[(i+d)%6][1];
+
+				if(!onboard2(X, Y) || deadpatterns[p][i] != get(X, Y))
+					return false;
+			}
+		}
+		return true;
 	}
 
 	void update_scores(int x, int y, char turn){
