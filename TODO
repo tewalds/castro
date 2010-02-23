@@ -1,9 +1,19 @@
 
-DFPN
-- transposition table
-- hashing function...
+General:
+- if cmdline arg is a file, parse it as gtp, then drop to stdin
 
-if pns fails and time left, use negamax
+MCTS
+- use weighted random choices instead of uniform random:
+  - different weights for black vs white?
+  - values based on:
+    - empty, direct neighbour, potential virtual connection neighbours, 2nd corner
+    - virtual connection points (0,1,2)
+    - edge/corner, near edge/corner, empty space
+  - analyze games to determine these values
+- a position near the edge/corner defines virtual connections to the wall
+
+
+
 
 Heuristic:
 - colorness - how black/white a cell is

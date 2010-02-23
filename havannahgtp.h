@@ -6,6 +6,7 @@
 #include "game.h"
 #include "string.h"
 #include "solver.h"
+#include "player.h"
 #include "board.h"
 
 class HavannahGTP : public GTPclient {
@@ -230,13 +231,20 @@ public:
 	}
 
 	GTPResponse gtp_genmove(vecstr args){
-		Move moves[game.getboard()->vecsize()];
-		int num = game.getboard()->get_moves(moves, true);
-		if(num){
-			game.move(moves[0].x, moves[0].y);
-			return GTPResponse(true, move_str(moves[0].x, moves[0].y));
-		}else
-			return GTPResponse(false);
+		double time = 200;
+		int mem = 2000;
+
+		if(args.size() >= 2)
+			time = from_str<double>(args[1]);
+
+		if(args.size() >= 3)
+			mem = from_str<int>(args[2]);
+
+		Player player;
+		player.play_uct(*(game.getboard()), time, mem);
+
+		game.move(player.X, player.Y);
+		return GTPResponse(true, move_str(player.X, player.Y));
 	}
 
 
