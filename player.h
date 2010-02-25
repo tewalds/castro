@@ -57,6 +57,8 @@ public:
 	int X, Y;
 	bool timeout;
 
+	double time_used;
+
 	Player() {
 		runs = 0;
 		conflicts = 0;

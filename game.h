@@ -38,6 +38,10 @@ public:
 		return true;
 	}
 
+	int movesremain() const {
+		return hist[hist.size()-1].movesremain();
+	}
+
 	bool move(int x, int y, int toplay = -1){
 		Board b = *getboard();
 		if(b.move(x, y, toplay)){

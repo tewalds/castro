@@ -33,6 +33,7 @@ void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 
 	fprintf(stderr, "Finished %i runs in %d msec\n", runs, time_msec() - starttime);
 
+	time_used = (double)(time_msec() - starttime)/1000;
 }
 
 int Player::walk_tree(Board & board, Node * node){

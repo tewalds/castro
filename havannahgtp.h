@@ -15,12 +15,18 @@ class HavannahGTP : public GTPclient {
 public:
 	bool verbose;
 	bool hguicoords;
+	double time_remain;
+	double time_per_move;
+	int mem_allowed;
 
 	HavannahGTP(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
 		GTPclient(i, o, l);
 
 		verbose = false;
 		hguicoords = false;
+		time_remain = 120;
+		time_per_move = 0;
+		mem_allowed = 1000;
 
 		newcallback("name",            bind(&HavannahGTP::gtp_name,       this, _1));
 		newcallback("version",         bind(&HavannahGTP::gtp_version,    this, _1));
@@ -45,6 +51,7 @@ public:
 		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab,this, _1));
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,  this, _1));
 		newcallback("top_moves",       bind(&HavannahGTP::gtp_top_moves,  this, _1));
+		newcallback("time_settings",   bind(&HavannahGTP::gtp_time_settings, this, _1));
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,    this, _1));
 	}
 
@@ -71,6 +78,20 @@ public:
 			case  2: return "black";
 			default: return "unknown";
 		}
+	}
+
+	GTPResponse gtp_time_settings(vecstr args){
+		if(args.size() == 0)
+			return GTPResponse(false, "Wrong number of arguments");
+
+		log("time_settings " + implode(args, " "));
+
+		time_remain = from_str<double>(args[0]);
+
+		if(args.size() >= 2)
+			time_per_move = from_str<double>(args[1]);
+
+		return GTPResponse(true);
 	}
 
 	GTPResponse gtp_boardsize(vecstr args){
@@ -134,7 +155,7 @@ public:
 
 	GTPResponse gtp_solve_pns(vecstr args){
 		double time = 60;
-		int mem = 2000;
+		int mem = mem_allowed;
 
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
@@ -150,7 +171,7 @@ public:
 
 	GTPResponse gtp_solve_pnsab(vecstr args){
 		double time = 60;
-		int mem = 2000;
+		int mem = mem_allowed;
 
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
@@ -166,7 +187,7 @@ public:
 
 	GTPResponse gtp_solve_dfpnsab(vecstr args){
 		double time = 60;
-		int mem = 2000;
+		int mem = mem_allowed;
 
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
@@ -231,8 +252,8 @@ public:
 	}
 
 	GTPResponse gtp_genmove(vecstr args){
-		double time = 200;
-		int mem = 2000;
+		double time = time_per_move + 2*time_remain / game.movesremain();
+		int mem = mem_allowed;
 
 		if(args.size() >= 2)
 			time = from_str<double>(args[1]);
@@ -242,6 +263,8 @@ public:
 
 		Player player;
 		player.play_uct(*(game.getboard()), time, mem);
+
+		time_remain += time_per_move - player.time_used;
 
 		game.move(player.X, player.Y);
 		return GTPResponse(true, move_str(player.X, player.Y));
