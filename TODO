@@ -2,7 +2,18 @@
 General:
 - if cmdline arg is a file, parse it as gtp, then drop to stdin
 
+Detect win races
+- look for a forced win when only using virtual connections
+
+
+Faster win detection:
+- keep count of number of corners/edges, not just the flags
+- for rings
+  - make sure the two neighbours are not also next to each other, ie make sure you didn't just create a triangle
+  - minimal number of ways a ring can form, check neighbour patterns
+
 MCTS
+- use heuristic initialization of nodes
 - use weighted random choices instead of uniform random:
   - different weights for black vs white?
   - values based on:
@@ -10,10 +21,15 @@ MCTS
     - virtual connection points (0,1,2)
     - edge/corner, near edge/corner, empty space
   - analyze games to determine these values
-- a position near the edge/corner defines virtual connections to the wall
-
-
-
+  - a position near the edge/corner defines virtual connections to the wall
+- RAVE
+  - store rave value in each tree node
+  - store move list during simulation
+  - on the way back up the tree, incr rave value for each child of nodes in the tree
+    - if win, incr rave value for each move we made in the tree
+    - if loss, incr rave value for each move opponent made in the tree
+  - low accuracy, so devalue over time
+- roll-outs don't need to be good games, only increase correlation between current position and outcome
 
 Heuristic:
 - colorness - how black/white a cell is
