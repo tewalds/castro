@@ -33,6 +33,8 @@ int main(int argc, char **argv){
 		}
 	}
 
+	gtp.setinfile(stdin);
+
 	gtp.run();
 }
 
