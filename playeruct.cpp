@@ -14,10 +14,13 @@ void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 	runs = 0;
 
 	Node root;
+	vector<Move> movelist;
+	movelist.reserve(board.movesremain());
 	while(!timeout){
 		runs++;
 		Board copy = board;
-		walk_tree(copy, & root);
+		movelist.clear();
+		walk_tree(copy, & root, movelist);
 	}
 
 
@@ -36,7 +39,7 @@ void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 	time_used = (double)(time_msec() - starttime)/1000;
 }
 
-int Player::walk_tree(Board & board, Node * node){
+int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist){
 	int result, won = -1;
 
 	node->visits++;
@@ -57,7 +60,7 @@ int Player::walk_tree(Board & board, Node * node){
 				if(child->visits < minvisitspriority) // give priority to nodes that have few or no visits
 					val = 10000 - child->visits*1000 + rand()%100;
 				else
-					val = child->winrate() + explore*sqrt(logvisits/child->visits);
+					val = ravefactor*child->ravescore() + child->winrate() + explore*sqrt(logvisits/child->visits);
 
 				if(maxval < val){
 					maxval = val;
@@ -68,12 +71,49 @@ int Player::walk_tree(Board & board, Node * node){
 		
 		Node * child = & node->children[maxi];
 		board.move(child->x, child->y);
-		result = - walk_tree(board, child);
+		result = - walk_tree(board, child, movelist);
+
+		if(ravefactor > 0 && result > 0){ //if a win
+			//incr the rave score of all children that were played
+			int m = 0, c = 0;
+			while(m < movelist.size() && c < node->numchildren){
+				if(movelist[m].x == node->children[c].x && movelist[m].y == node->children[c].y){
+					node->children[c].rave++;
+					m++;
+				}
+				c++;
+			}
+		}
 	}else if((won = board.won()) >= 0){
 		//already done
 	}else if(node->visits <= minvisitschildren || nodesremain <= 0){
 	//do random game on this node
-		won = rand_game(board);
+		won = rand_game(board, movelist);
+
+		if(ravefactor > 0){
+			//remove the moves that were played by the loser
+			//sort in y,x order
+
+			if(won == 0){
+				movelist.clear();
+			}else{
+				int i = 0, j = 1;
+
+				if(won != board.toplay()){
+					i++;
+					j++;
+				}
+
+				while(j < movelist.size()){
+					movelist[i] = movelist[j];
+					i++;
+					j += 2;
+				}
+
+				movelist.resize(i);
+				sort(movelist.begin(), movelist.end());
+			}
+		}
 	}else{
 	//create children
 		nodesremain -= node->alloc(board.movesremain());
@@ -84,10 +124,7 @@ int Player::walk_tree(Board & board, Node * node){
 				if(board.valid_move(x, y))
 					node->children[i++] = Node(x, y);
 
-	//recurse on a random child
-		Node * child = & node->children[rand() % node->numchildren];
-		board.move(child->x, child->y);
-		result = - walk_tree(board, child);
+		return walk_tree(board, node, movelist);
 	}
 	if(won >= 0)
 		result = (won == 0 ? 0 : won == board.toplay() ? -1 : 1);
@@ -97,7 +134,7 @@ int Player::walk_tree(Board & board, Node * node){
 }
 
 //play a random game starting from a board state, and return the results of who won	
-int Player::rand_game(Board & board){
+int Player::rand_game(Board & board, vector<Move> & movelist){
 	int won;
 
 	while((won = board.won()) < 0){
@@ -108,6 +145,7 @@ int Player::rand_game(Board & board){
 		}while(!board.valid_move(x, y));
 		
 		board.move(x, y);
+		movelist.push_back(Move(x, y));
 	}
 	return won;
 }

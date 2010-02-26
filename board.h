@@ -8,6 +8,8 @@
 #include <string>
 using namespace std;
 
+#include "move.h"
+
 #define BITCOUNT6(a) ((a & 1) + ((a & (1<<1))>>1) + ((a & (1<<2))>>2) + ((a & (1<<3))>>3) + ((a & (1<<4))>>4) + ((a & (1<<5))>>5))
 /*
  * the board is represented as a flattened 2d array of the form:
@@ -17,12 +19,6 @@ using namespace std;
  * C 6 7 8      7 8     7 8
  * This follows the H-Gui convention, not the 'standard' convention
  */
-
-struct Move {
-	int x, y, score;
-	Move() { }
-	Move(int X, int Y, int s) : x(X), y(Y), score(s) { }
-};
 
 const int neighbours[6][2] = {{-1,-1}, {0,-1}, {1, 0}, {1, 1}, {0, 1}, {-1, 0}}; //x, y, clockwise
 const int neighbourscores[18][3] = {
@@ -384,18 +380,18 @@ public:
 		return (score_range - abs(score_offset*turn - cell->color))*cell->near;
 	}
 
-	static bool cmpmoves(const Move & a, const Move & b) {
+	static bool cmpmoves(const MoveScore & a, const MoveScore & b) {
 		return a.score > b.score;
 	}
 
-	int get_moves(Move * moves, bool s = false, char turn = -1) const {
-		Move * mend = moves;
+	int get_moves(MoveScore * moves, bool s = false, char turn = -1) const {
+		MoveScore * mend = moves;
 		turn = (turn == 1 ? 1 : -1);
 
 		for(int y = 0; y < size_d; y++){
 			for(int x = 0; x < size_d; x++){
 				if(valid_move(x, y)){
-					*mend = Move(x, y, calc_score(x, y, turn));
+					*mend = MoveScore(x, y, calc_score(x, y, turn));
 					mend++;
 				}
 			}

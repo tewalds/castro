@@ -2,6 +2,7 @@
 #ifndef __PLAYER_H_
 #define __PLAYER_H_
 
+#include "move.h"
 #include "board.h"
 #include "time.h"
 #include "timer.h"
@@ -9,12 +10,12 @@
 
 class Player {
 	struct Node {
-		uint32_t visits, score;
+		uint32_t visits, score, rave;
 		uint8_t x, y;
 		uint16_t numchildren;
 		Node * children;
 
-		Node(int X = 0, int Y = 0) : visits(0), score(0), x(X), y(Y), numchildren(0), children(NULL) { }
+		Node(int X = 0, int Y = 0) : visits(0), score(0), rave(0), x(X), y(Y), numchildren(0), children(NULL) { }
 	
 		~Node(){
 			if(numchildren)
@@ -41,9 +42,14 @@ class Player {
 		float winrate(){
 			return (float)score/visits;
 		}
+
+		float ravescore(){
+			return (float)rave/(visits+1);
+		}
 	};
 
-	float explore;  //greater than one favours exploration, smaller than one favours exploitation
+	float explore;    //greater than one favours exploration, smaller than one favours exploitation
+	float ravefactor; //big numbers favour rave scores, small ignore it
 	
 	int nodesremain;
 	
@@ -67,6 +73,7 @@ public:
 		timeout = false;
 		
 		explore = 1;
+		ravefactor = 1;
 		minvisitschildren = 1;
 		minvisitspriority = 1;
 	}
@@ -75,10 +82,8 @@ public:
 	void play_uct(const Board & board, double time, uint64_t memlimit);
 
 protected:
-	int walk_tree(Board & board, Node * node);
-	int rand_game(Board & board);
-
-
+	int walk_tree(Board & board, Node * node, vector<Move> & movelist);
+	int rand_game(Board & board, vector<Move> & movelist);
 };
 
 #endif

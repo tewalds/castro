@@ -232,7 +232,7 @@ public:
 	}
 
 	GTPResponse gtp_all_legal(vecstr args){
-		Move moves[game.getboard()->vecsize()];
+		MoveScore moves[game.getboard()->vecsize()];
 		int num = game.getboard()->get_moves(moves);
 
 		string ret;
@@ -242,7 +242,7 @@ public:
 	}
 
 	GTPResponse gtp_top_moves(vecstr args){
-		Move moves[game.getboard()->vecsize()];
+		MoveScore moves[game.getboard()->vecsize()];
 		int num = game.getboard()->get_moves(moves, true);
 
 		string ret;

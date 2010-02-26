@@ -29,7 +29,9 @@ MCTS
     - if win, incr rave value for each move we made in the tree
     - if loss, incr rave value for each move opponent made in the tree
   - low accuracy, so devalue over time
+    - test different ravefactors, and other ways of devaluing the score
 - roll-outs don't need to be good games, only increase correlation between current position and outcome
+- keep stats for average rollout length: min, max, average, standard deviation.
 
 Heuristic:
 - colorness - how black/white a cell is

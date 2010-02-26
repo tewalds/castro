@@ -91,7 +91,7 @@ int Solver::negamaxh(const Board & board, const int depth, int alpha, int beta){
 	if(depth <= 0)
 		return 0;
 
-	Move moves[board.vecsize()];
+	MoveScore moves[board.vecsize()];
 	int num = board.get_moves(moves);
 
 	for(int i = 0; i < num; i++){
