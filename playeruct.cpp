@@ -1,6 +1,8 @@
 
 #include "player.h"
 #include <cmath>
+#include <string>
+#include "string.h"
 
 void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 	nodesremain = memlimit*1024*1024/sizeof(Node);
@@ -20,26 +22,29 @@ void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 		runs++;
 		Board copy = board;
 		movelist.clear();
-		walk_tree(copy, & root, movelist);
+		walk_tree(copy, & root, movelist, 0);
 	}
 
 
 //return the best one
 	int maxi = 0;
 	for(int i = 1; i < root.numchildren; i++)
-//		if(root.children[maxi].winrate() < root.children[i].winrate())
-		if(root.children[maxi].visits < root.children[i].visits)
+		if(root.children[maxi].winrate() < root.children[i].winrate())
+//		if(root.children[maxi].visits < root.children[i].visits)
 			maxi = i;
 
 	X = root.children[maxi].x;
 	Y = root.children[maxi].y;
 
-	fprintf(stderr, "Finished %i runs in %d msec\n", runs, time_msec() - starttime);
+	string stats = "Finished " + to_str(runs) + " runs in " + to_str(time_msec() - starttime) + " msec\n";
+	stats += "Rollout depths: min " + to_str(mindepth) + ", max: " + to_str(maxdepth) + ", avg: " + to_str(sumdepth/runs);
+	stats += ", std dev: " + to_str(sqrt((double)sumdepthsq/runs - ((double)sumdepth/runs)*((double)sumdepth/runs))) + "\n";
+	fprintf(stderr, "%s", stats.c_str());
 
 	time_used = (double)(time_msec() - starttime)/1000;
 }
 
-int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist){
+int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int depth){
 	int result, won = -1;
 
 	node->visits++;
@@ -60,7 +65,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist){
 				if(child->visits < minvisitspriority) // give priority to nodes that have few or no visits
 					val = 10000 - child->visits*1000 + rand()%100;
 				else
-					val = ravefactor*child->ravescore() + child->winrate() + explore*sqrt(logvisits/child->visits);
+					val = child->ravescore(ravefactor, ravepower) + child->winrate() + explore*sqrt(logvisits/child->visits);
 
 				if(maxval < val){
 					maxval = val;
@@ -71,7 +76,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist){
 		
 		Node * child = & node->children[maxi];
 		board.move(child->x, child->y);
-		result = - walk_tree(board, child, movelist);
+		result = - walk_tree(board, child, movelist, depth+1);
 
 		if(ravefactor > 0 && result > 0){ //if a win
 			//incr the rave score of all children that were played
@@ -86,9 +91,10 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist){
 		}
 	}else if((won = board.won()) >= 0){
 		//already done
+		update_depths(depth);
 	}else if(node->visits <= minvisitschildren || nodesremain <= 0){
 	//do random game on this node
-		won = rand_game(board, movelist);
+		won = rand_game(board, movelist, depth);
 
 		if(ravefactor > 0){
 			//remove the moves that were played by the loser
@@ -124,7 +130,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist){
 				if(board.valid_move(x, y))
 					node->children[i++] = Node(x, y);
 
-		return walk_tree(board, node, movelist);
+		return walk_tree(board, node, movelist, depth);
 	}
 	if(won >= 0)
 		result = (won == 0 ? 0 : won == board.toplay() ? -1 : 1);
@@ -134,7 +140,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist){
 }
 
 //play a random game starting from a board state, and return the results of who won	
-int Player::rand_game(Board & board, vector<Move> & movelist){
+int Player::rand_game(Board & board, vector<Move> & movelist, int depth){
 	int won;
 
 	while((won = board.won()) < 0){
@@ -146,7 +152,11 @@ int Player::rand_game(Board & board, vector<Move> & movelist){
 		
 		board.move(x, y);
 		movelist.push_back(Move(x, y));
+		depth++;
 	}
+
+	update_depths(depth);
+
 	return won;
 }
 

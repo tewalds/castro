@@ -7,6 +7,7 @@
 #include "time.h"
 #include "timer.h"
 #include <stdint.h>
+#include <cmath>
 
 class Player {
 	struct Node {
@@ -43,13 +44,14 @@ class Player {
 			return (float)score/visits;
 		}
 
-		float ravescore(){
-			return (float)rave/(visits+1);
+		float ravescore(float factor, float power){
+			return factor*rave/pow(visits+1, power);
 		}
 	};
 
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
+	float ravepower;  //big numbers make rave scores fall off quickly
 	
 	int nodesremain;
 	
@@ -58,6 +60,7 @@ class Player {
 
 public:
 	int runs;
+	uint64_t mindepth, maxdepth, sumdepth, sumdepthsq;
 	int conflicts;
 	uint64_t nodes;
 	int X, Y;
@@ -67,13 +70,22 @@ public:
 
 	Player() {
 		runs = 0;
+
+		mindepth = 10000;
+		maxdepth = 0;
+		sumdepth = 0;
+		sumdepthsq = 0;
+
 		conflicts = 0;
 		nodes = 0;
 		X = Y = -1;
 		timeout = false;
 		
 		explore = 1;
-		ravefactor = 1;
+
+		ravefactor = 0;
+		ravepower = 1;
+
 		minvisitschildren = 1;
 		minvisitspriority = 1;
 	}
@@ -82,8 +94,15 @@ public:
 	void play_uct(const Board & board, double time, uint64_t memlimit);
 
 protected:
-	int walk_tree(Board & board, Node * node, vector<Move> & movelist);
-	int rand_game(Board & board, vector<Move> & movelist);
+	int walk_tree(Board & board, Node * node, vector<Move> & movelist, int depth);
+	int rand_game(Board & board, vector<Move> & movelist, int depth);
+
+	void update_depths(int depth){
+		if(mindepth > depth) mindepth = depth;
+		if(maxdepth < depth) maxdepth = depth;
+		sumdepth += depth;
+		sumdepthsq += depth*depth;
+	}
 };
 
 #endif
