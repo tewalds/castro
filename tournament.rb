@@ -43,14 +43,15 @@
 
 
 def play_game(p1, p2)
-
+#start the programs
 	fds = [];
 	IO.popen($players[p1], "w+"){|fd1|
 		fds << fd1;
 	
 	IO.popen($players[p2], "w+"){|fd2|
 		fds << fd2;
-		
+
+	#send the initial commands
 		$cmds.each{|cmd|
 			puts cmd;
 			
@@ -65,6 +66,7 @@ def play_game(p1, p2)
 
 		turn = 0;
 		loop{
+			#ask for a move
 			print "genmove #{turnstrings[turn]}: ";
 			fds[turn].write("genmove #{turnstrings[turn]}\n");
 			ret = fds[turn].gets.slice(2, 100).rstrip;
@@ -75,6 +77,7 @@ def play_game(p1, p2)
 
 			break if(ret == "resign" || ret == "none")
 
+			#pass the move to the other player
 			fds[turn].write("play #{turnstrings[turn]} #{ret}\n");
 			fds[turn].gets;
 			fds[turn].gets;
@@ -177,6 +180,7 @@ end
 
 	puts "Starting a tournament of #{$rounds} rounds and #{$num_games} games\n";
 
+#queue up the games
 	$games = [];
 	n = 1;
 	(0...$rounds).each{|r|
@@ -190,16 +194,19 @@ end
 		}
 	}
 
+#play the games
 	time = timer {
 		$outcomes = $games.map_fork($parallel){|n,i,j|
 			puts "Game #{n}/#{$num_games}: #{$players[i]} vs #{$players[j]}\n";
-			$0 = "Game #{n}: #{$players[i]} vs #{$players[j]}"
+			$0 = "Game #{n}/#{$num_games}: #{$players[i]} vs #{$players[j]}"
+
 			result = play_game(i, j);
 
 			[i,j,result]
 		}
 	}
 
+#compute the results
 	$results = []
 	$num.times{ $results << [0]*$num }
 	$outcomes.each{|i,j,result|
@@ -240,5 +247,4 @@ end
 	}
 
 	puts "Played #{$num_games} games, Total Time: #{time.to_i} s";
-
 
