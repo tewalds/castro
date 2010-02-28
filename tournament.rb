@@ -42,7 +42,7 @@
 
 
 
-def play_game(p1, p2)
+def play_game(n, p1, p2)
 #start the programs
 	fds = [];
 	IO.popen($players[p1], "w+"){|fd1|
@@ -65,7 +65,11 @@ def play_game(p1, p2)
 		turnstrings = ["white","black"];
 
 		turn = 0;
+		i = 1;
 		loop{
+			$0 = "Game #{n}/#{$num_games} move #{i}: #{$players[p1]} vs #{$players[p2]}"
+			i += 1;
+
 			#ask for a move
 			print "genmove #{turnstrings[turn]}: ";
 			fds[turn].write("genmove #{turnstrings[turn]}\n");
@@ -197,11 +201,7 @@ end
 #play the games
 	time = timer {
 		$outcomes = $games.map_fork($parallel){|n,i,j|
-			puts "Game #{n}/#{$num_games}: #{$players[i]} vs #{$players[j]}\n";
-			$0 = "Game #{n}/#{$num_games}: #{$players[i]} vs #{$players[j]}"
-
-			result = play_game(i, j);
-
+			result = play_game(n, i, j);
 			[i,j,result]
 		}
 	}
