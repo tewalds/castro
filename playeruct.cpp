@@ -5,7 +5,16 @@
 #include "string.h"
 
 void Player::play_uct(const Board & board, double time, uint64_t memlimit){
-	nodesremain = memlimit*1024*1024/sizeof(Node);
+	maxnodes = memlimit*1024*1024/sizeof(Node);
+	nodes = 0;
+	time_used = 0;
+	runs = 0;
+
+	treelen.reset();
+	gamelen.reset();
+
+	bestmove = Move(-2,-2);
+	timeout = false;
 
 	if(board.won() >= 0)
 		return;
@@ -95,7 +104,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 	}else if((won = board.won()) >= 0){
 		//already done
 		treelen.add(depth);
-	}else if(node->visits <= minvisitschildren || nodesremain <= 0){
+	}else if(node->visits <= minvisitschildren || nodes >= maxnodes){
 	//do random game on this node
 		treelen.add(depth);
 		won = rand_game(board, movelist, depth);
@@ -126,7 +135,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 		}
 	}else{
 	//create children
-		nodesremain -= node->alloc(board.movesremain());
+		nodes += node->alloc(board.movesremain());
 
 		int i = 0;
 		for(int y = 0; y < board.get_size_d(); y++)
