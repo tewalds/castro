@@ -13,6 +13,9 @@ struct DepthStats {
 	uint64_t sumdepth, sumdepthsq;
 
 	DepthStats(){
+		reset();
+	}
+	void reset(){
 		num = 0;
 		mindepth = 1000000000;
 		maxdepth = 0;
