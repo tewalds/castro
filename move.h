@@ -7,10 +7,14 @@
 struct Move {
 	int8_t x, y;
 //	Move() { }
-	Move(int X = 0, int Y = 0) : x(Y), y(Y) { }
+	Move(int X = 0, int Y = 0) : x(X), y(Y) { }
+	Move(const Move & m){ x = m.x; y = m.y; }
 
 	bool operator<(const Move & b) const {
 		return (y == b.y ? x < b.x : y < b.y);
+	}
+	bool operator==(const Move & b) const {
+		return (x == b.x && y == b.y);
 	}
 };
 
