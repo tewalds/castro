@@ -73,12 +73,12 @@ def play_game(p1, p2)
 			fds[turn].gets;
 			puts ret;
 
-			turn = (turn+1)%2;
+			turn = 1-turn;
 
 			break if(ret == "resign" || ret == "none")
 
 			#pass the move to the other player
-			fds[turn].write("play #{turnstrings[turn]} #{ret}\n");
+			fds[turn].write("play #{turnstrings[1-turn]} #{ret}\n");
 			fds[turn].gets;
 			fds[turn].gets;
 		}
