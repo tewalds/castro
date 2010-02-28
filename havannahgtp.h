@@ -20,6 +20,8 @@ public:
 	double time_per_move;
 	int mem_allowed;
 
+	Player player;
+
 	HavannahGTP(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
 		GTPclient(i, o, l);
 
@@ -54,6 +56,7 @@ public:
 		newcallback("top_moves",       bind(&HavannahGTP::gtp_top_moves,  this, _1));
 		newcallback("time_settings",   bind(&HavannahGTP::gtp_time_settings, this, _1));
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,    this, _1));
+		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1));
 	}
 
 	GTPResponse gtp_print(vecstr args){
@@ -268,7 +271,6 @@ public:
 		if(args.size() >= 3)
 			mem = from_str<int>(args[2]);
 
-		Player player;
 		player.play_uct(*(game.getboard()), time, mem);
 
 		time_remain += time_per_move - player.time_used;
@@ -276,6 +278,17 @@ public:
 		game.move(player.bestmove);
 		return GTPResponse(true, move_str(player.bestmove));
 	}
+
+	GTPResponse gtp_player_params(vecstr args){
+		if(args.size() >= 1)
+			player.explore = from_str<double>(args[0]);
+
+		if(args.size() >= 2)
+			player.ravefactor = from_str<double>(args[1]);
+
+		return GTPResponse(true);
+	}
+
 
 
 	GTPResponse play(const string & pos, int toplay){

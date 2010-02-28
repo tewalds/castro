@@ -51,13 +51,14 @@ class Player {
 		}
 	};
 
+public:
+
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
 
 	int minvisitschildren; //number of visits to a node before expanding its children nodes
 	int minvisitspriority; //give priority to this node if it has less than this many visits
 
-public:
 	int runs;
 	DepthStats treelen, gamelen;
 	uint64_t nodes, maxnodes;
@@ -69,7 +70,7 @@ public:
 	Player() {
 		time_used = 0;
 		
-		explore = 4;
+		explore = 3;
 		ravefactor = 1;
 
 		minvisitschildren = 1;
