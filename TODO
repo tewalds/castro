@@ -8,9 +8,12 @@ Detect win races
 
 Faster win detection:
 - keep count of number of corners/edges, not just the flags
-- for rings
-  - make sure the two neighbours are not also next to each other, ie make sure you didn't just create a triangle
-  - minimal number of ways a ring can form, check neighbour patterns
+- for rings:
+  - only a few ways rings can form:
+    - if two neighbours are next to each other, it is just a triangle and not a ring - done
+    - 3-5 next to each other *might* be a ring, but might not be
+    - if two distinct groupings are part of the same group, it is a ring
+  - build a lookup table 2^6 big that returns yes/no/maybe for whether it is a ring
 
 MCTS
 - use heuristic initialization of nodes

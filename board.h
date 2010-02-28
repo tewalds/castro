@@ -319,8 +319,11 @@ public:
 			int X = x + neighbours[i][0];
 			int Y = y + neighbours[i][1];
 		
-			if(onboard2(X, Y) && turn == get(X, Y))
+			if(onboard2(X, Y) && turn == get(X, Y)){
 				alreadyjoined |= join_groups(x, y, X, Y);
+				i++; //skip the next one. If it is the same group,
+				     //it is already connected and forms a corner, which we can ignore
+			}
 		}
 
 		Cell * g = & cells[find_group(x, y)];
