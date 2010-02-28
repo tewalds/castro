@@ -33,8 +33,7 @@ void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 //		if(root.children[maxi].visits < root.children[i].visits)
 			maxi = i;
 
-	X = root.children[maxi].x;
-	Y = root.children[maxi].y;
+	bestmove = root.children[maxi].move;
 
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(time_msec() - starttime) + " msec\n";
 	stats += "Rollout depths: min " + to_str(mindepth) + ", max: " + to_str(maxdepth) + ", avg: " + to_str(sumdepth/runs);
@@ -65,7 +64,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 				if(child->visits < minvisitspriority) // give priority to nodes that have few or no visits
 					val = 10000 - child->visits*1000 + rand()%100;
 				else
-					val = child->ravescore(ravefactor, ravepower) + child->winrate() + explore*sqrt(logvisits/child->visits);
+					val = ravefactor*child->ravescore(node->visits) + child->winrate() + explore*sqrt(logvisits/child->visits);
 
 				if(maxval < val){
 					maxval = val;
@@ -75,14 +74,14 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 		}
 		
 		Node * child = & node->children[maxi];
-		board.move(child->x, child->y);
+		board.move(child->move);
 		result = - walk_tree(board, child, movelist, depth+1);
 
 		if(ravefactor > 0 && result > 0){ //if a win
 			//incr the rave score of all children that were played
 			int m = 0, c = 0;
 			while(m < movelist.size() && c < node->numchildren){
-				if(movelist[m].x == node->children[c].x && movelist[m].y == node->children[c].y){
+				if(movelist[m] == node->children[c].move){
 					node->children[c].rave++;
 					m++;
 				}
@@ -105,7 +104,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 			}else{
 				int i = 0, j = 1;
 
-				if(won != board.toplay()){
+				if(won == board.toplay()){
 					i++;
 					j++;
 				}

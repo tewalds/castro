@@ -12,11 +12,12 @@
 class Player {
 	struct Node {
 		uint32_t visits, score, rave;
-		uint8_t x, y;
+		Move move;
 		uint16_t numchildren;
 		Node * children;
 
-		Node(int X = 0, int Y = 0) : visits(0), score(0), rave(0), x(X), y(Y), numchildren(0), children(NULL) { }
+		Node(const Move & m)       : visits(0), score(0), rave(0), move(m),         numchildren(0), children(NULL) { }
+		Node(int x = 0, int y = 0) : visits(0), score(0), rave(0), move(Move(x,y)), numchildren(0), children(NULL) { }
 	
 		~Node(){
 			if(numchildren)
@@ -44,14 +45,13 @@ class Player {
 			return (float)score/visits;
 		}
 
-		float ravescore(float factor, float power){
-			return factor*rave/pow(visits+1, power);
+		float ravescore(int parentvisits){
+			return (float)rave/(visits*visits + parentvisits);
 		}
 	};
 
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
-	float ravepower;  //big numbers make rave scores fall off quickly
 	
 	int nodesremain;
 	
@@ -63,7 +63,7 @@ public:
 	uint64_t mindepth, maxdepth, sumdepth, sumdepthsq;
 	int conflicts;
 	uint64_t nodes;
-	int X, Y;
+	Move bestmove;
 	bool timeout;
 
 	double time_used;
@@ -78,13 +78,12 @@ public:
 
 		conflicts = 0;
 		nodes = 0;
-		X = Y = -1;
+		bestmove = Move(-2,-2);
 		timeout = false;
 		
 		explore = 1;
 
 		ravefactor = 0;
-		ravepower = 1;
 
 		minvisitschildren = 1;
 		minvisitspriority = 1;

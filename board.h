@@ -224,6 +224,10 @@ public:
 		return nummoves%2 + 1;
 	}
 
+	bool valid_move(const Move & m) const {
+		return valid_move(m.x, m.y);
+	}
+
 	bool valid_move(int x, int y) const {
 		return (outcome == -1 && onboard2(x, y) && !cells[xy(x, y)].piece);
 	}
@@ -293,6 +297,10 @@ public:
 				return true;
 		}
 		return false;
+	}
+
+	bool move(const Move & m, char turn = -1){
+		return move(m.x, m.y, turn);
 	}
 
 	bool move(int x, int y, char turn = -1){

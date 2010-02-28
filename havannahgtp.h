@@ -8,6 +8,7 @@
 #include "solver.h"
 #include "player.h"
 #include "board.h"
+#include "move.h"
 
 class HavannahGTP : public GTPclient {
 	HavannahGame game;
@@ -218,12 +219,18 @@ public:
 			y += x + 1 - game.getsize();
 	}
 
+	string move_str(Move & m, int hguic = -1){
+		return move_str(m.x, m.y, hguic);
+	}
+
 	string move_str(int x, int y, int hguic = -1){
 		if(hguic == -1)
 			hguic = hguicoords;
 
 		if(x == -1)
 			return "none";
+		if(x == -2)
+			return "resign";
 
 		if(!hguic && x >= game.getsize())
 			y -= x + 1 - game.getsize();
@@ -266,8 +273,8 @@ public:
 
 		time_remain += time_per_move - player.time_used;
 
-		game.move(player.X, player.Y);
-		return GTPResponse(true, move_str(player.X, player.Y));
+		game.move(player.bestmove);
+		return GTPResponse(true, move_str(player.bestmove));
 	}
 
 
