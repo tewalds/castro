@@ -6,6 +6,7 @@
 #include "board.h"
 #include "time.h"
 #include "timer.h"
+#include "depthstats.h"
 #include <stdint.h>
 #include <cmath>
 
@@ -60,7 +61,7 @@ class Player {
 
 public:
 	int runs;
-	uint64_t mindepth, maxdepth, sumdepth, sumdepthsq;
+	DepthStats treelen, gamelen;
 	int conflicts;
 	uint64_t nodes;
 	Move bestmove;
@@ -70,11 +71,6 @@ public:
 
 	Player() {
 		runs = 0;
-
-		mindepth = 10000;
-		maxdepth = 0;
-		sumdepth = 0;
-		sumdepthsq = 0;
 
 		conflicts = 0;
 		nodes = 0;
@@ -95,13 +91,6 @@ public:
 protected:
 	int walk_tree(Board & board, Node * node, vector<Move> & movelist, int depth);
 	int rand_game(Board & board, vector<Move> & movelist, int depth);
-
-	void update_depths(int depth){
-		if(mindepth > depth) mindepth = depth;
-		if(maxdepth < depth) maxdepth = depth;
-		sumdepth += depth;
-		sumdepthsq += depth*depth;
-	}
 };
 
 #endif

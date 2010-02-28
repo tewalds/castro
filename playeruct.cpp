@@ -35,12 +35,15 @@ void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 
 	bestmove = root.children[maxi].move;
 
-	string stats = "Finished " + to_str(runs) + " runs in " + to_str(time_msec() - starttime) + " msec\n";
-	stats += "Rollout depths: min " + to_str(mindepth) + ", max: " + to_str(maxdepth) + ", avg: " + to_str(sumdepth/runs);
-	stats += ", std dev: " + to_str(sqrt((double)sumdepthsq/runs - ((double)sumdepth/runs)*((double)sumdepth/runs))) + "\n";
+	int runtime = time_msec() - starttime;
+
+	string stats = "Finished " + to_str(runs) + " runs in " + to_str(runtime) + " msec\n";
+	stats += "Game length: " + gamelen.to_s() + "\n";
+	stats += "Tree depth:  " + treelen.to_s() + "\n";
+	stats += "Move Score:  " + to_str(root.children[maxi].winrate()/2) + "\n";
 	fprintf(stderr, "%s", stats.c_str());
 
-	time_used = (double)(time_msec() - starttime)/1000;
+	time_used = (double)runtime/1000;
 }
 
 int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int depth){
@@ -90,9 +93,10 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 		}
 	}else if((won = board.won()) >= 0){
 		//already done
-		update_depths(depth);
+		treelen.add(depth);
 	}else if(node->visits <= minvisitschildren || nodesremain <= 0){
 	//do random game on this node
+		treelen.add(depth);
 		won = rand_game(board, movelist, depth);
 
 		if(ravefactor > 0){
@@ -154,7 +158,7 @@ int Player::rand_game(Board & board, vector<Move> & movelist, int depth){
 		depth++;
 	}
 
-	update_depths(depth);
+	gamelen.add(depth);
 
 	return won;
 }
