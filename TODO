@@ -25,15 +25,9 @@ MCTS
     - edge/corner, near edge/corner, empty space
   - analyze games to determine these values
   - a position near the edge/corner defines virtual connections to the wall
-- RAVE
-  - store rave value in each tree node
-  - store move list during simulation
-  - on the way back up the tree, incr rave value for each child of nodes in the tree
-    - if win, incr rave value for each move we made in the tree
-    - if loss, incr rave value for each move opponent made in the tree
-  - low accuracy, so devalue over time
-    - test different ravefactors, and other ways of devaluing the score
 - roll-outs don't need to be good games, only increase correlation between current position and outcome
+- save the partial tree for the next gen_move
+- do a small solve, and use that as initial weights for move ordering
 
 Heuristic:
 - colorness - how black/white a cell is

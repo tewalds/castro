@@ -79,7 +79,7 @@ public:
 		
 		explore = 1;
 
-		ravefactor = 0;
+		ravefactor = 1;
 
 		minvisitschildren = 1;
 		minvisitspriority = 1;

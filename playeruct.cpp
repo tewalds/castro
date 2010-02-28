@@ -41,6 +41,7 @@ void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 	stats += "Game length: " + gamelen.to_s() + "\n";
 	stats += "Tree depth:  " + treelen.to_s() + "\n";
 	stats += "Move Score:  " + to_str(root.children[maxi].winrate()/2) + "\n";
+	stats += "Games/s:     " + to_str(1000*runs/runtime) + "\n";
 	fprintf(stderr, "%s", stats.c_str());
 
 	time_used = (double)runtime/1000;
