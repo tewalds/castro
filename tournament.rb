@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 
+	$against = false;
 	$parallel = 1;
 	$rounds = 1;
 	$players = [];
@@ -12,6 +13,7 @@
 	while(ARGV.length > 0)
 		arg = ARGV.shift
 		case arg
+		when "-a", "--against"  then $against       = true;
 		when "-p", "--parallel" then $parallel      = ARGV.shift.to_i;
 		when "-r", "--rounds"   then $rounds        = ARGV.shift.to_i;
 		when "-g", "--timegame" then $time_per_game = ARGV.shift.to_f;
@@ -21,12 +23,13 @@
 		when "-h", "--help"     then
 			puts "Run a round robin tournament between players that all understand GTP."
 			puts "Usage: #{$0} [<options>] players..."
+			puts "  -a --against  The first player is the control and all others play it but not each other"
 			puts "  -p --parallel Number of games to run in parallel [#{$parallel}]"
 			puts "  -r --rounds   Number of rounds to play [#{$rounds}]"
 			puts "  -g --timegame Time given per game [#{$time_per_game}]"
 			puts "  -m --timemove Time given per move [#{$time_per_move}]"
 			puts "  -s --size     Board size [#{$boardsize}]"
-			puts "  -s --cmd      Send an arbitrary GTP command at the beginning of the game"
+			puts "  -c --cmd      Send an arbitrary GTP command at the beginning of the game"
 			puts "  -h --help     Print this help"
 			exit;
 		else
@@ -38,7 +41,7 @@
 	$cmds << "time_settings #{$time_per_game} #{$time_per_move} 0" if $time_per_game > 0 || $time_per_move > 0
 
 	$num = $players.length();
-	$num_games = $num*($num-1)*$rounds;
+	$num_games = 0;
 
 
 
@@ -182,23 +185,33 @@ class Array
 	end
 end
 
-	puts "Starting a tournament of #{$rounds} rounds and #{$num_games} games\n";
-
 #queue up the games
 	$games = [];
-	n = 1;
-	(0...$rounds).each{|r|
-		(0...$num).each{|i|
-			(0...$num).each{|j|
-				if(i != j)
-					$games << [n,i,j]
-					n += 1;
-				end
+	n = 0;
+	if($against)
+		(0...$rounds).each{|r|
+			(1...$num).each{|i|
+				$games << [n+1, 0, i]
+				$games << [n+2, i, 0]
+				n += 2;
 			}
 		}
-	}
+	else
+		(0...$rounds).each{|r|
+			(0...$num).each{|i|
+				(0...$num).each{|j|
+					if(i != j)
+						n += 1;
+						$games << [n,i,j]
+					end
+				}
+			}
+		}
+	end
+	$num_games = n;
 
 #play the games
+	puts "Starting a tournament of #{$rounds} rounds and #{$num_games} games\n";
 	time = timer {
 		$outcomes = $games.map_fork($parallel){|n,i,j|
 			result = play_game(n, i, j);
