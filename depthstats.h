@@ -22,7 +22,7 @@ struct DepthStats {
 		sumdepth = 0;
 		sumdepthsq = 0;
 	}
-	void add(int depth){
+	void add(unsigned int depth){
 		num++;
 		if(mindepth > depth) mindepth = depth;
 		if(maxdepth < depth) maxdepth = depth;
