@@ -1,5 +1,6 @@
 
 #include "player.h"
+#include "board.h"
 #include <cmath>
 #include <string>
 #include "string.h"
@@ -107,7 +108,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 	}else if(node->visits <= minvisitschildren || nodes >= maxnodes){
 	//do random game on this node
 		treelen.add(depth);
-		won = rand_game(board, movelist, depth);
+		won = rand_game(board, movelist, node->move, depth);
 
 		if(ravefactor > 0){
 			//remove the moves that were played by the loser
@@ -152,19 +153,88 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 	return result;
 }
 
+bool Player::check_pattern(const Board & board, Move & move){
+	Move ret;
+	int state = 0;
+	int a = rand() % 6;
+	int piece = 3 - board.get(move.x, move.y);
+	for(int i = 0; i < 8; i++){
+		int x = move.x + neighbours[(i+a)%6][0];
+		int y = move.y + neighbours[(i+a)%6][1];
+
+		bool on = board.onboard2(x,y);
+		int v;
+		if(on)
+			v = board.get(x,y);
+
+/*
+	//state machine that progresses when it see the pattern, but only taking pieces into account
+		if(state == 0){
+			if(on && v == piece)
+				state = 1;
+			//else state = 0;
+		}else if(state == 1){
+			if(on){
+				if(v == 0){
+					state = 2;
+					ret = Move(x,y);
+				}else if(v != piece)
+					state = 0;
+				//else (v==piece) => state = 1;
+			}else
+				state = 0;
+		}else{ // state == 2
+			if(on && v == piece){
+				move = ret;
+				return true;
+			}else{
+				state = 0;
+			}
+		}
+
+/*/
+	//state machine that progresses when it see the pattern, but counting borders as part of the pattern
+		if(state == 0){
+			if(!on || v == piece)
+				state = 1;
+			//else state = 0;
+		}else if(state == 1){
+			if(on){
+				if(v == 0){
+					state = 2;
+					ret = Move(x,y);
+				}else if(v != piece)
+					state = 0;
+				//else (v==piece) => state = 1;
+			}
+			//else state = 1;
+		}else{ // state == 2
+			if(!on || v == piece){
+				move = ret;
+				return true;
+			}else{
+				state = 0;
+			}
+		}
+//*/
+	}
+	return false;
+}
+
 //play a random game starting from a board state, and return the results of who won	
-int Player::rand_game(Board & board, vector<Move> & movelist, int depth){
+int Player::rand_game(Board & board, vector<Move> & movelist, Move move, int depth){
 	int won;
 
 	while((won = board.won()) < 0){
-		int x, y;
-		do{
-			x = rand() % board.get_size_d();
-			y = rand() % board.get_size_d();
-		}while(!board.valid_move(x, y));
-		
-		board.move(x, y);
-		movelist.push_back(Move(x, y));
+		if(!check_pattern(board, move)){
+			do{
+				move.x = rand() % board.get_size_d();
+				move.y = rand() % board.get_size_d();
+			}while(!board.valid_move(move));
+		}
+
+		board.move(move);
+		movelist.push_back(move);
 		depth++;
 	}
 

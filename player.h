@@ -70,8 +70,8 @@ public:
 	Player() {
 		time_used = 0;
 		
-		explore = 3;
-		ravefactor = 1;
+		explore = 4;
+		ravefactor = 3;
 
 		minvisitschildren = 1;
 		minvisitspriority = 1;
@@ -82,7 +82,8 @@ public:
 
 protected:
 	int walk_tree(Board & board, Node * node, vector<Move> & movelist, int depth);
-	int rand_game(Board & board, vector<Move> & movelist, int depth);
+	int rand_game(Board & board, vector<Move> & movelist, Move move, int depth);
+	bool check_pattern(const Board & board, Move & move);
 };
 
 #endif
