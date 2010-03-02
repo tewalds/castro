@@ -47,55 +47,59 @@
 
 def play_game(n, p1, p2)
 #start the programs
-	fds = [];
-	IO.popen($players[p1], "w+"){|fd1|
-		fds << fd1;
+	begin
+		fds = [];
+		IO.popen($players[p1], "w+"){|fd1|
+			fds << fd1;
 	
-	IO.popen($players[p2], "w+"){|fd2|
-		fds << fd2;
+		IO.popen($players[p2], "w+"){|fd2|
+			fds << fd2;
 
-	#send the initial commands
-		$cmds.each{|cmd|
-			puts cmd;
+		#send the initial commands
+			$cmds.each{|cmd|
+				puts cmd;
 			
-			fd1.write(cmd+"\n");
-			fd1.gets; fd1.gets;
+				fd1.write(cmd+"\n");
+				fd1.gets; fd1.gets;
 			
-			fd2.write(cmd+"\n");
-			fd2.gets; fd2.gets;
+				fd2.write(cmd+"\n");
+				fd2.gets; fd2.gets;
+			}
+
+			turnstrings = ["white","black"];
+
+			turn = 0;
+			i = 1;
+			loop{
+				$0 = "Game #{n}/#{$num_games} move #{i}: #{$players[p1]} vs #{$players[p2]}"
+				i += 1;
+
+				#ask for a move
+				print "genmove #{turnstrings[turn]}: ";
+				fds[turn].write("genmove #{turnstrings[turn]}\n");
+				ret = fds[turn].gets.slice(2, 100).rstrip;
+				fds[turn].gets;
+				puts ret;
+
+				turn = 1-turn;
+
+				break if(ret == "resign" || ret == "none")
+
+				#pass the move to the other player
+				fds[turn].write("play #{turnstrings[1-turn]} #{ret}\n");
+				fds[turn].gets;
+				fds[turn].gets;
+			}
+
+			fd1.write("quit\n");
+			fd2.write("quit\n");
+
+			return turn+1;
 		}
-
-		turnstrings = ["white","black"];
-
-		turn = 0;
-		i = 1;
-		loop{
-			$0 = "Game #{n}/#{$num_games} move #{i}: #{$players[p1]} vs #{$players[p2]}"
-			i += 1;
-
-			#ask for a move
-			print "genmove #{turnstrings[turn]}: ";
-			fds[turn].write("genmove #{turnstrings[turn]}\n");
-			ret = fds[turn].gets.slice(2, 100).rstrip;
-			fds[turn].gets;
-			puts ret;
-
-			turn = 1-turn;
-
-			break if(ret == "resign" || ret == "none")
-
-			#pass the move to the other player
-			fds[turn].write("play #{turnstrings[1-turn]} #{ret}\n");
-			fds[turn].gets;
-			fds[turn].gets;
 		}
-
-		fd1.write("quit\n");
-		fd2.write("quit\n");
-
-		return turn+1;
-	}
-	}
+	rescue
+		return 0;
+	end
 end
 
 def timer
