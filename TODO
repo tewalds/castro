@@ -1,10 +1,6 @@
 
-General:
-- if cmdline arg is a file, parse it as gtp, then drop to stdin
-
 Detect win races
 - look for a forced win when only using virtual connections
-
 
 Faster win detection:
 - keep count of number of corners/edges, not just the flags
@@ -27,7 +23,16 @@ MCTS
   - a position near the edge/corner defines virtual connections to the wall
 - roll-outs don't need to be good games, only increase correlation between current position and outcome
 - save the partial tree for the next gen_move
-- do a small solve, and use that as initial weights for move ordering
+
+add moves in the tree to the movelist, not just the random moves
+
+combine PNS with MCTS:
+- spend x% of the time on PNS
+- if a win is found, just make that move
+- copy the tree over for MCTS
+  - drop all nodes that are a proven loss
+  - give HUGE win percentage for proven wins
+- not sure how to deal with the proof and disproof numbers themselves
 
 Heuristic:
 - colorness - how black/white a cell is
