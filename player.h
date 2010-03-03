@@ -12,13 +12,13 @@
 
 class Player {
 	struct Node {
-		uint32_t visits, score, rave;
+		uint32_t rave, score, visits;
 		Move move;
 		uint16_t numchildren;
 		Node * children;
 
-		Node(const Move & m)       : visits(0), score(0), rave(0), move(m),         numchildren(0), children(NULL) { }
-		Node(int x = 0, int y = 0) : visits(0), score(0), rave(0), move(Move(x,y)), numchildren(0), children(NULL) { }
+		Node(const Move & m,       int s = 0, int v = 0) : rave(0), score(s), visits(v), move(m),         numchildren(0), children(NULL) { }
+		Node(int x = 0, int y = 0, int s = 0, int v = 0) : rave(0), score(s), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
 	
 		~Node(){
 			if(numchildren)

@@ -87,10 +87,12 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 			}
 		}
 		
+		//recurse on the chosen child
 		Node * child = & node->children[maxi];
 		board.move(child->move);
 		result = - walk_tree(board, child, movelist, depth+1);
 
+		//update the rave scores
 		if(ravefactor > 0 && result > 0){ //if a win
 			//incr the rave score of all children that were played
 			int m = 0, c = 0;
@@ -153,6 +155,11 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 	return result;
 }
 
+//look for good forced moves. In this case I only look for keeping a virtual connection active
+//so looking from the last played position's perspective, which is a move by the opponent
+//if you see a pattern of mine, empty, mine in the circle around the last move, their move
+//would break the virtual connection, so should be played
+//a virtual connection to a wall is also important
 bool Player::check_pattern(const Board & board, Move & move){
 	Move ret;
 	int state = 0;
@@ -226,12 +233,12 @@ int Player::rand_game(Board & board, vector<Move> & movelist, Move move, int dep
 	int won;
 
 	while((won = board.won()) < 0){
-		if(!check_pattern(board, move)){
+//		if(!check_pattern(board, move)){
 			do{
 				move.x = rand() % board.get_size_d();
 				move.y = rand() % board.get_size_d();
 			}while(!board.valid_move(move));
-		}
+//		}
 
 		board.move(move);
 		movelist.push_back(move);
