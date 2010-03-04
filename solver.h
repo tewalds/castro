@@ -17,6 +17,8 @@ class Solver {
 	int nodesremain;
 	int assignties; //which player to assign a tie to
 
+public:
+
 	struct PNSNode {
 		uint8_t x, y; //move
 		uint16_t phi, delta;
@@ -39,6 +41,8 @@ class Solver {
 		~PNSNode(){
 			if(children)
 				delete[] children;
+			children = NULL;
+			numchildren = 0;
 		}
 		PNSNode & abval(int outcome, bool ties, int value = 1){
 			if(outcome == 1 || outcome == -1)
@@ -68,8 +72,6 @@ class Solver {
 		}
 	};
 
-
-public:
 	int outcome; // 0 = tie, 1 = white, 2 = black, -1 = white or tie, -2 = black or tie, anything else unknown
 	int maxdepth;
 	uint64_t nodes;
@@ -106,7 +108,7 @@ public:
 	void solve_pnsab(const Board & board, double time, int memlimit);
 	void solve_dfpnsab(const Board & board, double time, int memlimit);
 
-protected:
+//protected:
 
 //used for alpha-beta solvers
 //return -2 for loss, -1,1 for tie, 0 for unknown, 2 for win, all from toplay's perspective
