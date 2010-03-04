@@ -76,20 +76,35 @@ public:
 	int X, Y;
 	bool timeout;
 
+	PNSNode * root;
+
 	Solver() {
+		root = NULL;
+		reset();
+	}
+	~Solver(){
+		if(root)
+			delete root;
+	}
+	void reset(){
 		outcome = -3;
 		maxdepth = 0;
 		nodes = 0;
 		X = Y = -1;
 		timeout = false;
+
+		if(root){
+			delete root;
+			root = NULL;
+		}
 	}
 	void timedout(){ timeout = true; }
 
 	void solve_ab(const Board & board, double time, int mdepth = 1000);
 	void solve_scout(const Board & board, double time, int mdepth = 1000);
-	void solve_pns(const Board & board, double time, uint64_t memlimit);
-	void solve_pnsab(const Board & board, double time, uint64_t memlimit);
-	void solve_dfpnsab(const Board & board, double time, uint64_t memlimit);
+	void solve_pns(const Board & board, double time, int memlimit);
+	void solve_pnsab(const Board & board, double time, int memlimit);
+	void solve_dfpnsab(const Board & board, double time, int memlimit);
 
 protected:
 
@@ -103,9 +118,9 @@ protected:
 	int negascout(const Board & board, const int depth, int alpha, int beta);  //plain negascout
 
 //basic proof number search building a tree
-	int run_pns(const Board & board, int ties); //1 = win, 0 = unknown, -1 = loss
-	int run_pnsab(const Board & board, int ties); //1 = win, 0 = unknown, -1 = loss
-	int run_dfpnsab(const Board & board, int ties); //1 = win, 0 = unknown, -1 = loss
+	int run_pns(const Board & board, int ties, int memlimit); //1 = win, 0 = unknown, -1 = loss
+	int run_pnsab(const Board & board, int ties, int memlimit); //1 = win, 0 = unknown, -1 = loss
+	int run_dfpnsab(const Board & board, int ties, int memlimit); //1 = win, 0 = unknown, -1 = loss
 
 	bool pns(const Board & board, PNSNode * node, int depth);   //basic proof number search
 	bool pnsab(const Board & board, PNSNode * node, int depth); //use a tiny negamax search as a pn,dn heuristic

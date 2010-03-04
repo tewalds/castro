@@ -2,6 +2,7 @@
 #include "solver.h"
 
 void Solver::solve_ab(const Board & board, double time, int mdepth){
+	reset();
 	if(board.won() >= 0){
 		outcome = board.won();
 		return;

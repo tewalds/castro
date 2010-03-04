@@ -1,8 +1,8 @@
 
 #include "solver.h"
 
-void Solver::solve_dfpnsab(const Board & board, double time, uint64_t memlimit){
-	nodesremain = memlimit*1024*1024/sizeof(PNSNode);
+void Solver::solve_dfpnsab(const Board & board, double time, int memlimit){
+	reset();
 
 	if(board.won() >= 0){
 		outcome = board.won();
@@ -15,12 +15,12 @@ void Solver::solve_dfpnsab(const Board & board, double time, uint64_t memlimit){
 	int turn = board.toplay();
 	int otherturn = (turn == 1 ? 2 : 1);
 
-	int ret1 = run_dfpnsab(board, otherturn);
+	int ret1 = run_dfpnsab(board, otherturn, memlimit);
 
 	if(ret1 == 1){ //win
 		outcome = turn;
 	}else{
-		int ret2 = run_dfpnsab(board, turn);
+		int ret2 = run_dfpnsab(board, turn, memlimit);
 
 		if(ret2 == -1){
 			outcome = otherturn; //loss
@@ -35,28 +35,30 @@ void Solver::solve_dfpnsab(const Board & board, double time, uint64_t memlimit){
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-int Solver::run_dfpnsab(const Board & board, int ties){ //1 = win, 0 = unknown, -1 = loss
+int Solver::run_dfpnsab(const Board & board, int ties, int memlimit){ //1 = win, 0 = unknown, -1 = loss
 	assignties = ties;
 
-	PNSNode root(-1, -1, false);
+	if(root) delete root;
+	root = new PNSNode(-1, -1, false);
+	nodesremain = memlimit*1024*1024/sizeof(PNSNode);
 
 	bool mem = true;
-	while(mem && !timeout && root.phi != 0 && root.delta != 0)
-		mem = dfpnsab(board, & root, 0, INF16/2, INF16/2);
+	while(mem && !timeout && root->phi != 0 && root->delta != 0)
+		mem = dfpnsab(board, root, 0, INF16/2, INF16/2);
 
 	if(!mem)
 		fprintf(stderr, "Ran out of memory\n");
 
-	if(root.phi == 0){
-		for(int i = 0; i < root.numchildren; i++){
-			if(root.children[i].delta == 0){
-				X = root.children[i].x;
-				Y = root.children[i].y;
+	if(root->phi == 0){
+		for(int i = 0; i < root->numchildren; i++){
+			if(root->children[i].delta == 0){
+				X = root->children[i].x;
+				Y = root->children[i].y;
 			}
 		}
 		return 1;
 	}
-	if(root.delta == 0)
+	if(root->delta == 0)
 		return -1;
 	return 0;
 }
