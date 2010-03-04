@@ -14,19 +14,21 @@
 
 class Player {
 	struct Node {
-		uint32_t rave, score, visits;
+		float rave, score;
+		uint32_t ravevisits, visits;
 		Move move;
 		uint16_t numchildren;
 		Node * children;
 
-		Node(const Move & m,       int s = 0, int v = 0) : rave(0), score(s), visits(v), move(m),         numchildren(0), children(NULL) { }
-		Node(int x = 0, int y = 0, int s = 0, int v = 0) : rave(0), score(s), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
+		Node(const Move & m,       float s = 0, int v = 0) : rave(0), ravevisits(0), score(s), visits(v), move(m),         numchildren(0), children(NULL) { }
+		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), ravevisits(0), score(s), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
 
 		void construct(const Solver::PNSNode * n){
 			move.x = n->x;
 			move.y = n->y;
 
 			rave = 0;
+			ravevisits = 0;
 
 			if(n->delta == 0){ //a win!
 				score  = 2000;
@@ -36,9 +38,9 @@ class Player {
 				score = 0;
 				visits = 100;
 			}else{
-				//how to use phi/delta if it isn't a win/loss?
-				score = 0;
-				visits = 0;
+				score = 2*n->phi/n->delta;
+				if(score > 4) score = 4;
+				visits = 2;
 			}
 
 			numchildren = n->numchildren;
@@ -76,11 +78,11 @@ class Player {
 		}
 
 		float winrate(){
-			return (float)score/visits;
+			return score/visits;
 		}
 
 		float ravescore(int parentvisits){
-			return (float)rave/(visits*visits + parentvisits);
+			return rave/(visits + parentvisits);
 		}
 	};
 
@@ -103,8 +105,8 @@ public:
 	Player() {
 		time_used = 0;
 
-		explore = 4;
-		ravefactor = 3;
+		explore = 1;
+		ravefactor = 10;
 
 		minvisitschildren = 1;
 		minvisitspriority = 1;
