@@ -5,7 +5,7 @@
 #include <string>
 #include "string.h"
 
-void Player::play_uct(const Board & board, double time, uint64_t memlimit){
+void Player::play_uct(const Board & board, double time, int memlimit){
 	maxnodes = memlimit*1024*1024/sizeof(Node);
 	nodes = 0;
 	time_used = 0;
@@ -25,7 +25,21 @@ void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 	int starttime = time_msec();
 	runs = 0;
 
+
+	Solver solver;
+	Timer timer2 = Timer(0.2*time, bind(&Solver::timedout, &solver));
+	int ret = solver.run_pnsab(board, (board.toplay() == 1 ? 2 : 1), memlimit/2);
+
+	//if it found a win, just play it
+	if(ret == 1){
+		bestmove = Move(solver.X, solver.Y);
+		return;
+	}
+
 	Node root;
+	root.construct(solver.root);
+	solver.reset();
+
 	vector<Move> movelist;
 	movelist.reserve(board.movesremain());
 	while(!timeout){
@@ -39,8 +53,8 @@ void Player::play_uct(const Board & board, double time, uint64_t memlimit){
 //return the best one
 	int maxi = 0;
 	for(int i = 1; i < root.numchildren; i++)
-		if(root.children[maxi].winrate() < root.children[i].winrate())
-//		if(root.children[maxi].visits < root.children[i].visits)
+//		if(root.children[maxi].winrate() < root.children[i].winrate())
+		if(root.children[maxi].visits    < root.children[i].visits)
 			maxi = i;
 
 	bestmove = root.children[maxi].move;
@@ -95,7 +109,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 		//update the rave scores
 		if(ravefactor > 0 && result > 0){ //if a win
 			//incr the rave score of all children that were played
-			int m = 0, c = 0;
+			unsigned int m = 0, c = 0;
 			while(m < movelist.size() && c < node->numchildren){
 				if(movelist[m] == node->children[c].move){
 					node->children[c].rave++;
@@ -119,7 +133,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 			if(won == 0){
 				movelist.clear();
 			}else{
-				int i = 0, j = 1;
+				unsigned int i = 0, j = 1;
 
 				if(won == board.toplay()){
 					i++;
