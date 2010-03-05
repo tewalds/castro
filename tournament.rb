@@ -42,8 +42,11 @@
 
 	$num = $players.length();
 	$num_games = 0;
+	$interrupt = false;
 
-
+trap("SIGTERM") { $interrupt = true; }
+trap("SIGINT")  { $interrupt = true; }
+trap("SIGHUP")  { $interrupt = true; }
 
 def play_game(n, p1, p2)
 #start the programs
@@ -218,7 +221,7 @@ end
 	puts "Starting a tournament of #{$rounds} rounds and #{$num_games} games\n";
 	time = timer {
 		$outcomes = $games.map_fork($parallel){|n,i,j|
-			result = play_game(n, i, j);
+			result = ($interrupt ? 0 : play_game(n, i, j));
 			[i,j,result]
 		}
 	}
