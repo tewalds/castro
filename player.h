@@ -111,16 +111,17 @@ class Player {
 			unsigned int i = 0, j = 1;
 			float base, factor;
 
-			if(!first){
-				i++;
-				j++;
-			}
 			if(scale){
 				base = 2;
-				factor = 4.0/list.size();
+				factor = 1.9/list.size(); //1.9 instead of 2.0 so it never goes below 0; 2 instead of 1 so the average stays at 1
 			}else{
 				base = 1;
 				factor = 0;
+			}
+
+			if(!first){
+				i++;
+				j++;
 			}
 
 			while(j < list.size()){
