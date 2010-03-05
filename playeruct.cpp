@@ -108,6 +108,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 		//recurse on the chosen child
 		Node * child = & node->children[maxi];
 		board.move(child->move);
+		movelist.push_back(child->move);
 		result = - walk_tree(board, child, movelist, depth+1);
 
 		//update the rave scores
@@ -140,7 +141,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 			}else{
 				unsigned int i = 0, j = 1;
 
-				if(won == board.toplay()){
+				if((won == board.toplay()) == (depth % 2 == 0)){
 					i++;
 					j++;
 				}
