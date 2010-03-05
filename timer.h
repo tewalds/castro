@@ -32,10 +32,14 @@ public:
 		pthread_create(&thread, NULL, (void* (*)(void*)) &Timer::waiter, this);
 	}
 
-	~Timer(){
+	void cancel(){
 		callback = &Timer::nullcallback;
 		pthread_cancel(thread);
 		pthread_join(thread, NULL);
+	}
+
+	~Timer(){
+		cancel();
 	}
 };
 
