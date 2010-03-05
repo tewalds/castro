@@ -46,8 +46,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 		solver.reset();
 	}
 
-	vector<Move> movelist;
-	movelist.reserve(board.movesremain());
+	RaveMoveList movelist(board.movesremain());
 	while(!timeout){
 		runs++;
 		Board copy = board;
@@ -77,7 +76,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	time_used = (double)runtime/1000;
 }
 
-int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int depth){
+int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){
 	int result, won = -1;
 
 	node->visits++;
@@ -110,7 +109,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 		//recurse on the chosen child
 		Node * child = & node->children[maxi];
 		board.move(child->move);
-		movelist.push_back(child->move);
+		movelist.add(child->move);
 		result = - walk_tree(board, child, movelist, depth+1);
 
 		//update the rave scores
@@ -119,7 +118,7 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 			unsigned int m = 0, c = 0;
 			while(m < movelist.size() && c < node->numchildren){
 				if(movelist[m] == node->children[c].move){
-					node->children[c].rave += 1;
+					node->children[c].rave += movelist[m].score;
 					m++;
 				}
 				c++;
@@ -135,28 +134,10 @@ int Player::walk_tree(Board & board, Node * node, vector<Move> & movelist, int d
 		won = rand_game(board, movelist, node->move, depth);
 
 		if(ravefactor > 0){
-			//remove the moves that were played by the loser
-			//sort in y,x order
-
-			if(won == 0){
+			if(won == 0)
 				movelist.clear();
-			}else{
-				unsigned int i = 0, j = 1;
-
-				if((won == board.toplay()) == (depth % 2 == 0)){
-					i++;
-					j++;
-				}
-
-				while(j < movelist.size()){
-					movelist[i] = movelist[j];
-					i++;
-					j += 2;
-				}
-
-				movelist.resize(i);
-				sort(movelist.begin(), movelist.end());
-			}
+			else
+				movelist.clean(((won == board.toplay()) == (depth % 2 == 0)), ravescale);
 		}
 	}else{
 	//create children
@@ -251,7 +232,7 @@ bool Player::check_pattern(const Board & board, Move & move){
 }
 
 //play a random game starting from a board state, and return the results of who won	
-int Player::rand_game(Board & board, vector<Move> & movelist, Move move, int depth){
+int Player::rand_game(Board & board, RaveMoveList & movelist, Move move, int depth){
 	int won;
 
 	while((won = board.won()) < 0){
@@ -263,7 +244,7 @@ int Player::rand_game(Board & board, vector<Move> & movelist, Move move, int dep
 		}
 
 		board.move(move);
-		movelist.push_back(move);
+		movelist.add(move);
 		depth++;
 	}
 

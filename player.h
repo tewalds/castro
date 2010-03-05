@@ -86,10 +86,60 @@ class Player {
 		}
 	};
 
+	struct RaveMoveList {
+		vector<MoveScore> list;
+
+		RaveMoveList(int s = 0){
+			list.reserve(s);
+		}
+
+		void add(const Move & move){
+			list.push_back(move);
+		}
+		void clear(){
+			list.clear();
+		}
+		int size() const {
+			return list.size();
+		}
+		const MoveScore & operator[](int i) const {
+			return list[i];
+		}
+		//remove the moves that were played by the loser
+		//sort in y,x order
+		void clean(bool first, bool scale){
+			unsigned int i = 0, j = 1;
+			float base, factor;
+
+			if(!first){
+				i++;
+				j++;
+			}
+			if(scale){
+				base = 2;
+				factor = 4.0/list.size();
+			}else{
+				base = 1;
+				factor = 0;
+			}
+
+			while(j < list.size()){
+				list[i] = list[j];
+				list[i].score = base - i*scale;
+				i++;
+				j += 2;
+			}
+
+			list.resize(i);
+			sort(list.begin(), list.end());
+		}
+	};
+
 public:
 
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
+	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1
 	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
 	int   proofscore;   //how many virtual rollouts to assign based on the proof number search values
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
@@ -110,6 +160,7 @@ public:
 
 		explore = 1;
 		ravefactor = 10;
+		ravescale = true;
 		prooftime = 0.2;
 		proofscore = 2;
 		rolloutpattern = true;
@@ -122,8 +173,8 @@ public:
 	void play_uct(const Board & board, double time, int memlimit);
 
 protected:
-	int walk_tree(Board & board, Node * node, vector<Move> & movelist, int depth);
-	int rand_game(Board & board, vector<Move> & movelist, Move move, int depth);
+	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
+	int rand_game(Board & board, RaveMoveList & movelist, Move move, int depth);
 	bool check_pattern(const Board & board, Move & move);
 };
 
