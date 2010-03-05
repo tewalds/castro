@@ -25,24 +25,26 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	int starttime = time_msec();
 	runs = 0;
 
-
-	Solver solver;
-	Timer timer2 = Timer(0.2*time, bind(&Solver::timedout, &solver));
-	int ret = solver.run_pnsab(board, (board.toplay() == 1 ? 2 : 1), memlimit/2);
-
-	//if it found a win, just play it
-	if(ret == 1){
-		bestmove = Move(solver.X, solver.Y);
-
-		int runtime = time_msec() - starttime;
-		fprintf(stderr, "Solved in %i msec\n", runtime);
-		time_used = (double)runtime/1000;
-		return;
-	}
-
 	Node root;
-	root.construct(solver.root);
-	solver.reset();
+
+	if(prooftime > 0){
+		Solver solver;
+		Timer timer2 = Timer(prooftime*time, bind(&Solver::timedout, &solver));
+		int ret = solver.run_pnsab(board, (board.toplay() == 1 ? 2 : 1), memlimit/2);
+
+		//if it found a win, just play it
+		if(ret == 1){
+			bestmove = Move(solver.X, solver.Y);
+
+			int runtime = time_msec() - starttime;
+			fprintf(stderr, "Solved in %i msec\n", runtime);
+			time_used = (double)runtime/1000;
+			return;
+		}
+
+		root.construct(solver.root, proofscore);
+		solver.reset();
+	}
 
 	vector<Move> movelist;
 	movelist.reserve(board.movesremain());
@@ -253,12 +255,12 @@ int Player::rand_game(Board & board, vector<Move> & movelist, Move move, int dep
 	int won;
 
 	while((won = board.won()) < 0){
-//		if(!check_pattern(board, move)){
+		if(!rolloutpattern || !check_pattern(board, move)){
 			do{
 				move.x = rand() % board.get_size_d();
 				move.y = rand() % board.get_size_d();
 			}while(!board.valid_move(move));
-//		}
+		}
 
 		board.move(move);
 		movelist.push_back(move);

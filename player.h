@@ -23,7 +23,7 @@ class Player {
 		Node(const Move & m,       float s = 0, int v = 0) : rave(0), ravevisits(0), score(s), visits(v), move(m),         numchildren(0), children(NULL) { }
 		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), ravevisits(0), score(s), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
 
-		void construct(const Solver::PNSNode * n){
+		void construct(const Solver::PNSNode * n, int pnsscore){
 			move.x = n->x;
 			move.y = n->y;
 
@@ -38,9 +38,9 @@ class Player {
 				score = 0;
 				visits = 100;
 			}else{
-				score = 2*n->phi/n->delta;
-				if(score > 4) score = 4;
-				visits = 2;
+				score = pnsscore*n->phi/n->delta;
+				if(score > 2*pnsscore) score = 2*pnsscore;
+				visits = pnsscore;
 			}
 
 			numchildren = n->numchildren;
@@ -49,7 +49,7 @@ class Player {
 			if(numchildren){
 				children = new Node[numchildren];
 				for(int i = 0; i < numchildren; i++)
-					children[i].construct(& n->children[i]);
+					children[i].construct(& n->children[i], pnsscore);
 			}
 		}
 
@@ -81,8 +81,8 @@ class Player {
 			return score/visits;
 		}
 
-		float ravescore(int parentvisits){
-			return rave/(visits + parentvisits);
+		float ravescore(int parentravevisits){
+			return rave/(visits + parentravevisits);
 		}
 	};
 
@@ -90,6 +90,9 @@ public:
 
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
+	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
+	int   proofscore;   //how many virtual rollouts to assign based on the proof number search values
+	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 
 	unsigned int minvisitschildren; //number of visits to a node before expanding its children nodes
 	unsigned int minvisitspriority; //give priority to this node if it has less than this many visits
@@ -107,6 +110,9 @@ public:
 
 		explore = 1;
 		ravefactor = 10;
+		prooftime = 0.2;
+		proofscore = 2;
+		rolloutpattern = true;
 
 		minvisitschildren = 1;
 		minvisitspriority = 1;
