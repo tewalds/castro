@@ -15,20 +15,20 @@
 class Player {
 	struct Node {
 		float rave, score;
-		uint32_t ravevisits, visits;
+		uint32_t childravevisits, visits;
 		Move move;
 		uint16_t numchildren;
 		Node * children;
 
-		Node(const Move & m,       float s = 0, int v = 0) : rave(0), ravevisits(0), score(s), visits(v), move(m),         numchildren(0), children(NULL) { }
-		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), ravevisits(0), score(s), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
+		Node(const Move & m,       float s = 0, int v = 0) : rave(0), childravevisits(0), score(s), visits(v), move(m),         numchildren(0), children(NULL) { }
+		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), childravevisits(0), score(s), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
 
 		void construct(const Solver::PNSNode * n, int pnsscore){
 			move.x = n->x;
 			move.y = n->y;
 
 			rave = 0;
-			ravevisits = 0;
+			childravevisits = 0;
 
 			if(n->delta == 0){ //a win!
 				score  = 2000;
