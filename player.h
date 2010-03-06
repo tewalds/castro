@@ -153,6 +153,7 @@ public:
 	DepthStats treelen, gamelen;
 	uint64_t nodes, maxnodes;
 	Move bestmove;
+	vector<Move> principle_variation;
 	bool timeout;
 
 	double time_used;

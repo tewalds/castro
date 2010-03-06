@@ -66,6 +66,8 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 
 	int runtime = time_msec() - starttime;
 
+	time_used = (double)runtime/1000;
+
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(runtime) + " msec\n";
 	stats += "Game length: " + gamelen.to_s() + "\n";
 	stats += "Tree depth:  " + treelen.to_s() + "\n";
@@ -73,7 +75,20 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	stats += "Games/s:     " + to_str((int)((double)runs*1000/runtime)) + "\n";
 	fprintf(stderr, "%s", stats.c_str());
 
-	time_used = (double)runtime/1000;
+//return the principle variation
+	principle_variation.clear();
+	Node * n = & root;
+	while(n->numchildren){
+		int maxi = 0;
+		for(int i = 1; i < n->numchildren; i++)
+//			if(n->children[maxi].winrate() < n->children[i].winrate())
+			if(n->children[maxi].visits    < n->children[i].visits)
+				maxi = i;
+
+		Node * child = & n->children[maxi];
+		principle_variation.push_back(child->move);
+		n = child;
+	}
 }
 
 int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){

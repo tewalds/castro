@@ -276,6 +276,12 @@ public:
 		time_remain += time_per_move - player.time_used;
 
 		game.move(player.bestmove);
+
+		string pv = "";
+		for(int i = 0; i < player.principle_variation.size(); i++)
+			pv += move_str(player.principle_variation[i], true) + " ";
+		fprintf(stderr, "PV:          %s\n", pv.c_str());
+
 		return GTPResponse(true, move_str(player.bestmove));
 	}
 
