@@ -161,7 +161,7 @@ public:
 	Player() {
 		time_used = 0;
 
-		explore = 1;
+		explore = 0.45;
 		ravefactor = 10;
 		ravescale = true;
 		prooftime = 0.2;

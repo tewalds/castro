@@ -99,30 +99,26 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	if(node->children){
 	//choose a child and recurse
 		int maxi = 0;
-		if(node->visits < node->numchildren/5){
-			maxi = rand() % node->numchildren;
-		}else{
-			float val, maxval = -1000000000;
-			float logvisits = log(node->visits)/5;
-			Node * child;
+		float val, maxval = -1000000000;
+		float logvisits = log(node->visits);
+		Node * child;
 
-			for(unsigned int i = 0; i < node->numchildren; i++){
-				child = & node->children[i];
+		for(unsigned int i = 0; i < node->numchildren; i++){
+			child = & node->children[i];
 
-				if(child->visits < minvisitspriority) // give priority to nodes that have few or no visits
-					val = 10000 - child->visits*1000 + rand()%100;
-				else
-					val = ravefactor*child->ravescore(node->childravevisits) + child->winrate() + explore*sqrt(logvisits/child->visits);
+			if(child->visits < minvisitspriority) // give priority to nodes that have few or no visits
+				val = 10000 - child->visits*1000 + rand()%100;
+			else
+				val = ravefactor*child->ravescore(node->childravevisits) + child->winrate() + explore*sqrt(logvisits/child->visits);
 
-				if(maxval < val){
-					maxval = val;
-					maxi = i;
-				}
+			if(maxval < val){
+				maxval = val;
+				maxi = i;
 			}
 		}
 		
 		//recurse on the chosen child
-		Node * child = & node->children[maxi];
+		child = & node->children[maxi];
 		board.move(child->move);
 		movelist.add(child->move);
 		result = - walk_tree(board, child, movelist, depth+1);
