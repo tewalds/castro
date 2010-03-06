@@ -106,10 +106,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		for(unsigned int i = 0; i < node->numchildren; i++){
 			child = & node->children[i];
 
-			if(child->visits < minvisitspriority) // give priority to nodes that have few or no visits
-				val = 10000 - child->visits*1000 + rand()%100;
-			else
-				val = ravefactor*child->ravescore(node->childravevisits) + child->winrate() + explore*sqrt(logvisits/child->visits);
+			val = child->value(node->childravevisits, ravefactor) + explore*sqrt(logvisits/(child->visits+1));
 
 			if(maxval < val){
 				maxval = val;

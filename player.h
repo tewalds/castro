@@ -81,9 +81,44 @@ class Player {
 			return score/visits;
 		}
 
-		float ravescore(int parentravevisits){
-			return rave/(visits + parentravevisits);
+/*
+		//old way, which doesn't necessarily balance the factors well
+		//explore = 0.5; ravefactor = 10
+		float value(int ravecount, float ravefactor){
+			if(visits == 0)
+				return 10000 + rand()%100;
+
+			return ravefactor*rave/(visits + ravecount) + winrate();
 		}
+//*/
+		//new way, more standard way of changing over from rave scores to real scores
+		float value(int ravecount, float ravefactor){
+			if(visits == 0 && ravecount == 0)
+				return 10000 + rand()%100;
+
+			float alpha = ravefactor/(ravefactor + visits);
+
+			return alpha*(rave/ravecount) + (1 - alpha)*winrate();
+		}
+/*
+		//my understanding of how fuego does it
+		float value(int ravecount, float ravefactor){
+			float val = 0;
+			float weight = 0;
+			if(visits) {
+				val += score;
+				weight += visits;
+			}
+			if(ravecount){
+				val += rave;
+				weight += ravecount/(1.1 + ravecount/20000);
+			}
+			if(weight > 0)
+				return val / weight;
+			else
+				return 10000 + rand()%100; //first play urgency...
+		}
+//*/
 	};
 
 	struct RaveMoveList {
@@ -161,8 +196,8 @@ public:
 	Player() {
 		time_used = 0;
 
-		explore = 0.45;
-		ravefactor = 10;
+		explore = 3;
+		ravefactor = 50;
 		ravescale = true;
 		prooftime = 0.2;
 		proofscore = 2;
