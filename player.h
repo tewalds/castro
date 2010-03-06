@@ -98,7 +98,11 @@ class Player {
 
 			float alpha = ravefactor/(ravefactor + visits);
 
-			return alpha*(rave/ravecount) + (1 - alpha)*winrate();
+			float val = 0;
+			if(ravecount) val += alpha*rave/ravecount;
+			if(visits)    val += (1-alpha)*score/visits;
+
+			return val;
 		}
 /*
 		//my understanding of how fuego does it
@@ -196,7 +200,7 @@ public:
 	Player() {
 		time_used = 0;
 
-		explore = 3;
+		explore = 5;
 		ravefactor = 50;
 		ravescale = true;
 		prooftime = 0.2;
