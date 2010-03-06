@@ -286,12 +286,35 @@ public:
 	}
 
 	GTPResponse gtp_player_params(vecstr args){
-		if(args.size() >= 1)
-			player.explore = from_str<double>(args[0]);
+		if(args.size() == 0)
+			return GTPResponse(true, string("\n") +
+				"Set player parameters, eg: player_params -e 3 -r 40 -t 0.1 -p 0\n" +
+				"  -e --explore     Exploration rate                                  [" + to_str(player.explore) + "]\n" +
+				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
+				"  -r --ravescale   Scale the rave values from 2 - 0 instead all 1    [" + to_str(player.ravescale) + "]\n" +
+				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
+				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
+				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
 
-		if(args.size() >= 2)
-			player.ravefactor = from_str<double>(args[1]);
+		for(int i = 0; i < args.size(); i++) {
+			string arg = args[i];
 
+			if((arg == "-e" || arg == "--explore") && i+1 < args.size()){
+				player.explore = from_str<double>(args[++i]);
+			}else if((arg == "-f" || arg == "--ravefactor") && i+1 < args.size()){
+				player.ravefactor = from_str<double>(args[++i]);
+			}else if((arg == "-r" || arg == "--ravescale") && i+1 < args.size()){
+				player.ravescale = from_str<bool>(args[++i]);
+			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
+				player.prooftime = from_str<double>(args[++i]);
+			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
+				player.proofscore = from_str<int>(args[++i]);
+			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
+				player.rolloutpattern = from_str<bool>(args[++i]);
+			}else{
+				return GTPResponse(false, "Missing or unknown parameter");
+			}
+		}
 		return GTPResponse(true);
 	}
 
