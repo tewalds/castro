@@ -107,7 +107,7 @@ class Player {
 		}
 		//remove the moves that were played by the loser
 		//sort in y,x order
-		void clean(bool first, bool scale){
+		void clean(bool keepfirst, bool scale){
 			unsigned int i = 0, j = 1;
 			float base, factor;
 
@@ -119,7 +119,8 @@ class Player {
 				factor = 0;
 			}
 
-			if(!first){
+			if(keepfirst){
+				list[0].score = base;
 				i++;
 				j++;
 			}
