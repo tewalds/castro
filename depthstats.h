@@ -40,7 +40,7 @@ struct DepthStats {
 	}
 	string to_s(){
 		if(num == 0) return "num=0";
-		return "avg=" + to_str(avg()) +", std-dev=" + to_str(std_dev()) + ", min=" + to_str(mindepth) + ", max=" + to_str(maxdepth) + ", num=" + to_str(num);
+		return to_str(avg()) +", dev=" + to_str(std_dev()) + ", min=" + to_str(mindepth) + ", max=" + to_str(maxdepth) + ", num=" + to_str(num);
 	}
 };
 
