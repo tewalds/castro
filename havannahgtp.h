@@ -262,7 +262,10 @@ public:
 	}
 
 	GTPResponse gtp_genmove(vecstr args){
-		double time = time_per_move + 2*time_remain / game.movesremain();
+		double time = 4*time_remain / game.movesremain();
+		if(time > time_remain)
+			time = time_remain;
+		time += time_per_move;
 		int mem = mem_allowed;
 
 		if(args.size() >= 2)
@@ -270,6 +273,8 @@ public:
 
 		if(args.size() >= 3)
 			mem = from_str<int>(args[2]);
+
+		fprintf(stderr, "time left: %.1f, max time: %.3f\n", time_remain, time);
 
 		player.play_uct(*(game.getboard()), time, mem);
 
