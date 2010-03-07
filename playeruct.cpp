@@ -137,7 +137,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	}else if((won = board.won()) >= 0){
 		//already done
 		treelen.add(depth);
-	}else if(node->visits <= minvisitschildren || nodes >= maxnodes){
+	}else if(node->visits <= 1 || nodes >= maxnodes){ //1 instead of 0 because of the virtual loss added above
 	//do random game on this node
 		treelen.add(depth);
 		won = rand_game(board, movelist, node->move, depth);

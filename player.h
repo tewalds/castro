@@ -187,9 +187,6 @@ public:
 	int   proofscore;   //how many virtual rollouts to assign based on the proof number search values
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 
-	unsigned int minvisitschildren; //number of visits to a node before expanding its children nodes
-	unsigned int minvisitspriority; //give priority to this node if it has less than this many visits
-
 	int runs;
 	DepthStats treelen, gamelen;
 	uint64_t nodes, maxnodes;
@@ -208,9 +205,6 @@ public:
 		prooftime = 0.5;
 		proofscore = 0;
 		rolloutpattern = true;
-
-		minvisitschildren = 1;
-		minvisitspriority = 1;
 	}
 	void timedout(){ timeout = true; }
 
