@@ -43,7 +43,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 			return;
 		}
 
-		root.construct(solver.root, proofscore);
+		nodes = root.construct(solver.root, proofscore);
 		solver.reset();
 	}
 

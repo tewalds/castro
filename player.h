@@ -23,7 +23,7 @@ class Player {
 		Node(const Move & m,       float s = 0, int v = 0) : rave(0), childravevisits(0), score(s), visits(v), move(m),         numchildren(0), children(NULL) { }
 		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), childravevisits(0), score(s), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
 
-		void construct(const Solver::PNSNode * n, int pnsscore){
+		int construct(const Solver::PNSNode * n, int pnsscore){
 			move.x = n->x;
 			move.y = n->y;
 
@@ -46,11 +46,13 @@ class Player {
 			numchildren = n->numchildren;
 			children = NULL;
 
+			int num = 1;
 			if(numchildren){
 				children = new Node[numchildren];
 				for(int i = 0; i < numchildren; i++)
-					children[i].construct(& n->children[i], pnsscore);
+					num += children[i].construct(& n->children[i], pnsscore);
 			}
+			return num;
 		}
 
 		~Node(){
