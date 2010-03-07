@@ -12,6 +12,7 @@ using namespace placeholders; //for bind
 
 class Timer {
 	pthread_t thread;
+	bool destruct;
 	function<void()> callback;
 	double timeout;
 
@@ -29,13 +30,22 @@ public:
 	Timer(double time, function<void()> fn){
 		timeout = time;
 		callback = fn;
-		pthread_create(&thread, NULL, (void* (*)(void*)) &Timer::waiter, this);
+		if(time < 0.001){ //too small, just call it directly
+			destruct = false;
+			fn();
+		}else{
+			destruct = true;
+			pthread_create(&thread, NULL, (void* (*)(void*)) &Timer::waiter, this);
+		}
 	}
 
 	void cancel(){
-		callback = &Timer::nullcallback;
-		pthread_cancel(thread);
-		pthread_join(thread, NULL);
+		if(destruct){
+			destruct = false;
+			callback = &Timer::nullcallback;
+			pthread_cancel(thread);
+			pthread_join(thread, NULL);
+		}
 	}
 
 	~Timer(){
