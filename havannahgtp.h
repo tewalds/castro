@@ -297,6 +297,7 @@ public:
 				"  -e --explore     Exploration rate                                  [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
 				"  -r --ravescale   Scale the rave values from 2 - 0 instead all 1    [" + to_str(player.ravescale) + "]\n" +
+				"  -a --raveall     Assign a value of 0.5 to unplayed positions       [" + to_str(player.raveall) + "]\n" +
 				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
 				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
@@ -310,6 +311,8 @@ public:
 				player.ravefactor = from_str<double>(args[++i]);
 			}else if((arg == "-r" || arg == "--ravescale") && i+1 < args.size()){
 				player.ravescale = from_str<bool>(args[++i]);
+			}else if((arg == "-a" || arg == "--raveall") && i+1 < args.size()){
+				player.raveall = from_str<bool>(args[++i]);
 			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
 				player.prooftime = from_str<double>(args[++i]);
 			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
