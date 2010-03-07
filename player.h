@@ -203,7 +203,7 @@ public:
 		explore = 5;
 		ravefactor = 50;
 		ravescale = true;
-		prooftime = 0.2;
+		prooftime = 0.5;
 		proofscore = 2;
 		rolloutpattern = true;
 

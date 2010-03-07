@@ -105,6 +105,10 @@ public:
 		return 3*size*(size - 1) + 1;
 	}
 	
+	int num_moves() const {
+		return nummoves;
+	}
+
 	int movesremain() const {
 		return numcells() - nummoves;
 	}
