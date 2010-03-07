@@ -202,9 +202,9 @@ public:
 
 		explore = 5;
 		ravefactor = 50;
-		ravescale = true;
+		ravescale = false;
 		prooftime = 0.5;
-		proofscore = 2;
+		proofscore = 0;
 		rolloutpattern = true;
 
 		minvisitschildren = 1;
