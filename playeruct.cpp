@@ -107,7 +107,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		for(unsigned int i = 0; i < node->numchildren; i++){
 			child = & node->children[i];
 
-			val = child->value(node->childravevisits, ravefactor) + explore*sqrt(logvisits/(child->visits+1));
+			val = child->value(ravefactor) + explore*sqrt(logvisits/(child->visits+1));
 
 			if(maxval < val){
 				maxval = val;
@@ -128,11 +128,14 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			while(m < movelist.size() && c < node->numchildren){
 				if(movelist[m] == node->children[c].move){
 					node->children[c].rave += movelist[m].score;
+					node->children[c].ravevisits++;
 					m++;
+				}else if(raveall){ //unused positions get a score as better than a loss
+					node->children[c].rave += 0.5;
+					node->children[c].ravevisits++;
 				}
 				c++;
 			}
-			node->childravevisits++;
 		}
 	}else if((won = board.won()) >= 0){
 		//already done
@@ -163,7 +166,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	if(won >= 0)
 		result = (won == 0 ? 0 : won == board.toplay() ? -1 : 1);
 
-	node->score += result + 1;
+	node->score += (result + 1)/2.0;
 	return result;
 }
 
