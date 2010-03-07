@@ -29,7 +29,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 
 	if(prooftime > 0){
 		Solver solver;
-		double ptime = prooftime * board.num_moves() / board.num_cells(); //ie scale up from 0 to prooftime
+		double ptime = prooftime * board.num_moves() / board.numcells(); //ie scale up from 0 to prooftime
 		Timer timer2 = Timer(ptime*time, bind(&Solver::timedout, &solver));
 		int ret = solver.run_pnsab(board, (board.toplay() == 1 ? 2 : 1), memlimit/2);
 
