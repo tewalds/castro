@@ -31,12 +31,15 @@ struct DepthStats {
 	}
 
 	int avg(){
+		if(num == 0) return 0;
 		return sumdepth/num;
 	}
 	double std_dev(){
+		if(num == 0) return 0;
 		return sqrt((double)sumdepthsq/num - ((double)sumdepth/num)*((double)sumdepth/num));
 	}
 	string to_s(){
+		if(num == 0) return "num=0";
 		return "avg=" + to_str(avg()) +", std-dev=" + to_str(std_dev()) + ", min=" + to_str(mindepth) + ", max=" + to_str(maxdepth) + ", num=" + to_str(num);
 	}
 };
