@@ -48,12 +48,12 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	}
 
 	RaveMoveList movelist(board.movesremain());
-	while(!timeout){
+	do{
 		runs++;
 		Board copy = board;
 		movelist.clear();
 		walk_tree(copy, & root, movelist, 0);
-	}
+	}while(!timeout);
 
 
 //return the best one
@@ -130,11 +130,16 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 					node->children[c].rave += movelist[m].score;
 					node->children[c].ravevisits++;
 					m++;
-				}else if(raveall){ //unused positions get a score as better than a loss
-					node->children[c].rave += 0.5;
-					node->children[c].ravevisits++;
+					c++;
+				}else if(movelist[m] > node->children[c].move){
+					if(raveall){ //unused positions get a score as better than a loss
+						node->children[c].rave += 0.5;
+						node->children[c].ravevisits++;
+					}
+					c++;
+				}else if(movelist[m] < node->children[c].move){
+					m++;
 				}
-				c++;
 			}
 		}
 	}else if((won = board.won()) >= 0){
