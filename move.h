@@ -28,6 +28,15 @@ struct MoveScore {
 	bool operator<(const MoveScore & b) const {
 		return (y == b.y ? x < b.x : y < b.y);
 	}
+	bool operator<(const Move & b) const {
+		return (y == b.y ? x < b.x : y < b.y);
+	}
+	bool operator>(const MoveScore & b) const {
+		return (y == b.y ? x > b.x : y > b.y);
+	}
+	bool operator>(const Move & b) const {
+		return (y == b.y ? x > b.x : y > b.y);
+	}
 	bool operator==(const MoveScore & b) const {
 		return (x == b.x && y == b.y);
 	}
