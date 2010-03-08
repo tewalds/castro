@@ -6,7 +6,9 @@
 #include "game.h"
 #include "string.h"
 #include "solver.h"
+#include "player.h"
 #include "board.h"
+#include "move.h"
 
 class HavannahGTP : public GTPclient {
 	HavannahGame game;
@@ -14,12 +16,20 @@ class HavannahGTP : public GTPclient {
 public:
 	bool verbose;
 	bool hguicoords;
+	double time_remain;
+	double time_per_move;
+	int mem_allowed;
+
+	Player player;
 
 	HavannahGTP(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
 		GTPclient(i, o, l);
 
 		verbose = false;
 		hguicoords = false;
+		time_remain = 120;
+		time_per_move = 0;
+		mem_allowed = 1000;
 
 		newcallback("name",            bind(&HavannahGTP::gtp_name,       this, _1));
 		newcallback("version",         bind(&HavannahGTP::gtp_version,    this, _1));
@@ -41,10 +51,12 @@ public:
 		newcallback("solve_scout",     bind(&HavannahGTP::gtp_solve_scout,this, _1));
 		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,  this, _1));
 		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pnsab,this, _1));
-//		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab,this, _1));
+		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab,this, _1));
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,  this, _1));
 		newcallback("top_moves",       bind(&HavannahGTP::gtp_top_moves,  this, _1));
+		newcallback("time_settings",   bind(&HavannahGTP::gtp_time_settings, this, _1));
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,    this, _1));
+		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1));
 	}
 
 	GTPResponse gtp_print(vecstr args){
@@ -70,6 +82,20 @@ public:
 			case  2: return "black";
 			default: return "unknown";
 		}
+	}
+
+	GTPResponse gtp_time_settings(vecstr args){
+		if(args.size() == 0)
+			return GTPResponse(false, "Wrong number of arguments");
+
+		log("time_settings " + implode(args, " "));
+
+		time_remain = from_str<double>(args[0]);
+
+		if(args.size() >= 2)
+			time_per_move = from_str<double>(args[1]);
+
+		return GTPResponse(true);
 	}
 
 	GTPResponse gtp_boardsize(vecstr args){
@@ -108,7 +134,7 @@ public:
 	}
 
 	GTPResponse gtp_solve_ab(vecstr args){
-		double time = 1000000;
+		double time = 60;
 
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
@@ -120,7 +146,7 @@ public:
 	}
 
 	GTPResponse gtp_solve_scout(vecstr args){
-		double time = 1000000;
+		double time = 60;
 
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
@@ -132,8 +158,8 @@ public:
 	}
 
 	GTPResponse gtp_solve_pns(vecstr args){
-		double time = 1000000;
-		int mem = 2000;
+		double time = 60;
+		int mem = mem_allowed;
 
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
@@ -148,8 +174,8 @@ public:
 	}
 
 	GTPResponse gtp_solve_pnsab(vecstr args){
-		double time = 1000000;
-		int mem = 2000;
+		double time = 60;
+		int mem = mem_allowed;
 
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
@@ -164,8 +190,8 @@ public:
 	}
 
 	GTPResponse gtp_solve_dfpnsab(vecstr args){
-		double time = 1000000;
-		int mem = 2000;
+		double time = 60;
+		int mem = mem_allowed;
 
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
@@ -196,12 +222,18 @@ public:
 			y += x + 1 - game.getsize();
 	}
 
+	string move_str(Move & m, int hguic = -1){
+		return move_str(m.x, m.y, hguic);
+	}
+
 	string move_str(int x, int y, int hguic = -1){
 		if(hguic == -1)
 			hguic = hguicoords;
 
 		if(x == -1)
 			return "none";
+		if(x == -2)
+			return "resign";
 
 		if(!hguic && x >= game.getsize())
 			y -= x + 1 - game.getsize();
@@ -210,7 +242,7 @@ public:
 	}
 
 	GTPResponse gtp_all_legal(vecstr args){
-		Move moves[game.getboard()->vecsize()];
+		MoveScore moves[game.getboard()->vecsize()];
 		int num = game.getboard()->get_moves(moves);
 
 		string ret;
@@ -220,7 +252,7 @@ public:
 	}
 
 	GTPResponse gtp_top_moves(vecstr args){
-		Move moves[game.getboard()->vecsize()];
+		MoveScore moves[game.getboard()->vecsize()];
 		int num = game.getboard()->get_moves(moves, true);
 
 		string ret;
@@ -230,14 +262,70 @@ public:
 	}
 
 	GTPResponse gtp_genmove(vecstr args){
-		Move moves[game.getboard()->vecsize()];
-		int num = game.getboard()->get_moves(moves, true);
-		if(num){
-			game.move(moves[0].x, moves[0].y);
-			return GTPResponse(true, move_str(moves[0].x, moves[0].y));
-		}else
-			return GTPResponse(false);
+		double time = 4*time_remain / game.movesremain();
+		if(time > time_remain)
+			time = time_remain;
+		time += time_per_move;
+		int mem = mem_allowed;
+
+		if(args.size() >= 2)
+			time = from_str<double>(args[1]);
+
+		if(args.size() >= 3)
+			mem = from_str<int>(args[2]);
+
+		fprintf(stderr, "time left: %.1f, max time: %.3f\n", time_remain, time);
+
+		player.play_uct(*(game.getboard()), time, mem);
+
+		time_remain += time_per_move - player.time_used;
+
+		game.move(player.bestmove);
+
+		string pv = "";
+		for(int i = 0; i < player.principle_variation.size(); i++)
+			pv += move_str(player.principle_variation[i], true) + " ";
+		fprintf(stderr, "PV:          %s\n", pv.c_str());
+
+		return GTPResponse(true, move_str(player.bestmove));
 	}
+
+	GTPResponse gtp_player_params(vecstr args){
+		if(args.size() == 0)
+			return GTPResponse(true, string("\n") +
+				"Set player parameters, eg: player_params -e 3 -r 40 -t 0.1 -p 0\n" +
+				"  -e --explore     Exploration rate                                  [" + to_str(player.explore) + "]\n" +
+				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
+				"  -r --ravescale   Scale the rave values from 2 - 0 instead all 1    [" + to_str(player.ravescale) + "]\n" +
+				"  -a --raveall     Assign a value of 0.5 to unplayed positions       [" + to_str(player.raveall) + "]\n" +
+				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
+				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
+				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
+
+		for(int i = 0; i < args.size(); i++) {
+			string arg = args[i];
+
+			if((arg == "-e" || arg == "--explore") && i+1 < args.size()){
+				player.explore = from_str<double>(args[++i]);
+			}else if((arg == "-f" || arg == "--ravefactor") && i+1 < args.size()){
+				player.ravefactor = from_str<double>(args[++i]);
+			}else if((arg == "-r" || arg == "--ravescale") && i+1 < args.size()){
+				player.ravescale = from_str<bool>(args[++i]);
+			}else if((arg == "-a" || arg == "--raveall") && i+1 < args.size()){
+				player.raveall = from_str<bool>(args[++i]);
+			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
+				player.prooftime = from_str<double>(args[++i]);
+			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
+				player.proofscore = from_str<int>(args[++i]);
+			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
+				player.rolloutpattern = from_str<bool>(args[++i]);
+			}else{
+				return GTPResponse(false, "Missing or unknown parameter");
+			}
+		}
+		return GTPResponse(true);
+	}
+
 
 
 	GTPResponse play(const string & pos, int toplay){

@@ -1,7 +1,7 @@
 .PHONY: clean fresh run gendeps
 
 LDFLAGS   += -lpthread
-OBJECTS		= castro.o string.o time.o solverab.o solverscout.o solverpns.o solverpnsab.o solverdfpnsab.o
+OBJECTS		= castro.o string.o time.o solverab.o solverscout.o solverpns.o solverpnsab.o solverdfpnsab.o playeruct.o
 
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall
@@ -15,12 +15,15 @@ castro: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
 
-castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h solver.h time.h timer.h
-solverab.o: solverab.cpp solver.h time.h timer.h board.h
-solverscout.o: solverscout.cpp solver.h time.h timer.h board.h
-solverdfpnsab.o: solverdfpnsab.cpp solver.h time.h timer.h board.h
-solverpnsab.o: solverpnsab.cpp solver.h time.h timer.h board.h
-solverpns.o: solverpns.cpp solver.h time.h timer.h board.h
+castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h move.h \
+ solver.h time.h timer.h player.h depthstats.h
+playeruct.o: playeruct.cpp player.h move.h board.h time.h timer.h \
+ depthstats.h string.h solver.h
+solverab.o: solverab.cpp solver.h time.h timer.h board.h move.h
+solverdfpnsab.o: solverdfpnsab.cpp solver.h time.h timer.h board.h move.h
+solverpnsab.o: solverpnsab.cpp solver.h time.h timer.h board.h move.h
+solverpns.o: solverpns.cpp solver.h time.h timer.h board.h move.h
+solverscout.o: solverscout.cpp solver.h time.h timer.h board.h move.h
 string.o: string.cpp string.h
 time.o: time.cpp time.h
 

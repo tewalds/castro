@@ -16,6 +16,7 @@ using namespace placeholders; //for bind
 
 struct GTPResponse {
 	bool success;
+	string id;
 	string response;
 
 	GTPResponse() { }
@@ -28,6 +29,10 @@ struct GTPResponse {
 	GTPResponse(string r){
 		success = true;
 		response = r;
+	}
+
+	string to_s(){
+		return (success ? '=' : '?') + id + ' ' + response + "\n\n";
 	}
 };
 
@@ -68,6 +73,10 @@ public:
 			fclose(logfile);
 	}
 
+	void setinfile(FILE * i){
+		in = i;
+	}
+
 	void setlogfile(FILE * l){
 		if(logfile)
 			fclose(logfile);
@@ -96,6 +105,32 @@ public:
 		}
 	}
 
+	GTPResponse cmd(string line){
+		vecstr parts = explode(line, " ");
+		string id;
+
+		if(parts.size() > 1 && atoi(parts[0].c_str())){
+			id = parts[0];
+			parts.erase(parts.begin());
+		}
+
+		string name = parts[0];
+		parts.erase(parts.begin());
+
+		int cb = find_callback(name);
+		GTPResponse response;
+
+		if(cb < 0){
+			response = GTPResponse(false, "Unknown command");
+		}else{
+			response = callbacks[cb].func(parts);
+		}
+
+		response.id = id;
+
+		return response;
+	}
+
 	void run(){
 		char buf[1001];
 
@@ -107,37 +142,12 @@ public:
 			if(line.length() == 0 || line[0] == '#')
 				continue;
 
-			vecstr parts = explode(line, " ");
-			string id;
+			GTPResponse response = cmd(line);
 
-			if(atoi(parts[0].c_str())){
-				id = parts[0];
-				parts.erase(parts.begin());
-			}
-
-			if(parts.size() == 0)
-				continue;
-
-			string name = parts[0];
-			parts.erase(parts.begin());
-
-			int cb = find_callback(name);
-			GTPResponse response;
-		
-			
-			if(cb < 0){
-				response = GTPResponse(false, "Unknown command");
-			}else{
-				response = callbacks[cb].func(parts);
-			}
-
-			string output = (response.success ? '=' : '?') + id + ' ' + response.response + "\n\n";
+			string output = response.to_s();
 
 			fwrite(output.c_str(), 1, output.length(), out);
 			fflush(out);
-
-			if(name == "quit")
-				break;
 		}
 	}
 
@@ -165,7 +175,7 @@ public:
 	}
 
 	GTPResponse gtp_quit(vecstr args){
-		return GTPResponse(true);
+		exit(0);
 	}
 	
 	GTPResponse gtp_list_commands(vecstr args){

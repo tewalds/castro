@@ -1,9 +1,22 @@
 
-DFPN
-- transposition table
-- hashing function...
+For both solver and player, keep the tree around so it can prune off parts that aren't taken, but use the remainder
 
-if pns fails and time left, use negamax
+MCTS
+- use heuristic initialization of nodes
+- use weighted random choices instead of uniform random:
+  - different weights for black vs white?
+  - values based on:
+    - empty, direct neighbour, potential virtual connection neighbours, 2nd corner
+    - virtual connection points (0,1,2)
+    - edge/corner, near edge/corner, empty space
+  - analyze games to determine these values
+  - a position near the edge/corner defines virtual connections to the wall
+- roll-outs don't need to be good games, only increase correlation between current position and outcome
+- keep running the roll out past the end of the game to set rave values for those positions?
+
+Opening Book
+- learn an opening book from many games, and from example games
+- how to deal with symmetry?
 
 Heuristic:
 - colorness - how black/white a cell is
