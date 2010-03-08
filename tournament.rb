@@ -263,7 +263,8 @@ end
 				losses += $results[j][i];
 			end
 		}
-		puts " : #{wins} wins, #{losses} losses, #{(($num-1)*2*$rounds-wins-losses)} ties";
+		ties = ($against && i > 0 ? 1 : $num-1)*2*$rounds - wins - losses;
+		puts " : #{wins} wins, #{losses} losses, #{ties} ties";
 	}
 
 	puts "Played #{$num_games} games, Total Time: #{time.to_i} s";
