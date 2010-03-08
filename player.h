@@ -178,8 +178,8 @@ public:
 	Player() {
 		time_used = 0;
 
-		explore = 5;
-		ravefactor = 50;
+		explore = 10;
+		ravefactor = 10;
 		ravescale = false;
 		raveall = false;
 		prooftime = 0.5;
