@@ -20,8 +20,8 @@ class Player {
 		uint16_t numchildren;
 		Node * children;
 
-		Node(const Move & m,       float s = 0, int v = 0) : rave(0), ravevisits(0), score(s), visits(v), move(m),         numchildren(0), children(NULL) { }
-		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), ravevisits(0), score(s), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
+		Node(const Move & m,       float s = 0, int v = 0) : rave(0), score(s), ravevisits(0), visits(v), move(m),         numchildren(0), children(NULL) { }
+		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), score(s), ravevisits(0), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
 
 		int construct(const Solver::PNSNode * n, int pnsscore){
 			move.x = n->x;
