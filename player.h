@@ -124,7 +124,22 @@ class Player {
 	};
 
 	struct RaveMoveList {
-		vector<MoveScore> list;
+		struct RaveMove {
+			Move move;
+			char player;
+			float score;
+
+			RaveMove(const Move & m) : move(m), player(0), score(0) { }
+
+			bool operator< (const RaveMove & b) const { return (move <  b.move); }
+			bool operator<=(const RaveMove & b) const { return (move <= b.move); }
+			bool operator> (const RaveMove & b) const { return (move >  b.move); }
+			bool operator>=(const RaveMove & b) const { return (move >= b.move); }
+			bool operator==(const RaveMove & b) const { return (move == b.move); }
+			bool operator!=(const RaveMove & b) const { return (move != b.move); }
+		};
+
+		vector<RaveMove> list;
 
 		RaveMoveList(int s = 0){
 			list.reserve(s);
@@ -139,25 +154,28 @@ class Player {
 		int size() const {
 			return list.size();
 		}
-		const MoveScore & operator[](int i) const {
+		const RaveMove & operator[](int i) const {
 			return list[i];
 		}
 		//remove the moves that were played by the loser
 		//sort in y,x order
-		void clean(bool keepfirst, bool scale){
+		void clean(int player, bool scale){
 			float base, factor;
 
 			if(scale){
 				base = 2; //2 instead of 1 so the average of wins stays at 1
-				factor = 4.0/(list.size()+1); //+1 to keep it from going negative, 4 = base*2 since half the values are skipped
+				factor = 2*2.0/(list.size()+1); //+1 to keep it from going negative, 4 = base*2 since half the values are skipped
 			}else{
 				base = 1;
 				factor = 0;
 			}
 
 			//the wins get values, the losses stay at default=0
-			for(unsigned int i = !keepfirst; i < list.size(); i += 2)
+			for(unsigned int i = 0; i < list.size(); i++){
+				list[i].player = player;
 				list[i].score = base - i/2*factor;
+				player = 3 - player;
+			}
 
 			sort(list.begin(), list.end()); //sort in y,x order
 		}

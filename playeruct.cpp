@@ -128,19 +128,19 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			unsigned int m = 0, c = 0;
 			while(m < movelist.size() && c < node->numchildren){
 				child = & node->children[c];
-				if(movelist[m] == child->move){
-					child->rave += movelist[m].score;
+				if(movelist[m].player != board.toplay() || movelist[m] < child->move){
+					m++;
+				}else if(movelist[m] == child->move){
+					child->rave += (result > 0 ? movelist[m].score : 0);
 					child->ravevisits++;
 					m++;
 					c++;
-				}else if(movelist[m] > child->move){
+				}else{ //(movelist[m] > child->move)
 					if(raveall){ //unused positions get a score as better than a loss
 						child->rave += 0.5;
 						child->ravevisits++;
 					}
 					c++;
-				}else if(movelist[m] < child->move){
-					m++;
 				}
 			}
 		}
@@ -152,7 +152,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			if(won == 0)
 				movelist.clear();
 			else
-				movelist.clean((won == cur_player), ravescale);
+				movelist.clean(cur_player, ravescale);
 		}
 	}else if(node->visits == 0 || nodes >= maxnodes){
 	//do random game on this node
@@ -163,7 +163,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			if(won == 0)
 				movelist.clear();
 			else
-				movelist.clean((won == cur_player), ravescale);
+				movelist.clean(cur_player, ravescale);
 		}
 
 	}else{
