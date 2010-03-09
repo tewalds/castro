@@ -95,6 +95,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 
 int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){
 	int result, won = -1;
+	int toplay = board.toplay();
 
 	if(node->children){
 	//choose a child and recurse
@@ -128,7 +129,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			unsigned int m = 0, c = 0;
 			while(m < movelist.size() && c < node->numchildren){
 				child = & node->children[c];
-				if(movelist[m].player != board.toplay() || movelist[m] < child->move){
+				if(movelist[m].player != toplay || movelist[m] < child->move){
 					m++;
 				}else if(movelist[m] == child->move){
 					child->rave += (result > 0 ? movelist[m].score : 0);
@@ -165,7 +166,6 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			else
 				movelist.clean(cur_player, ravescale);
 		}
-
 	}else{
 	//create children
 		nodes += node->alloc(board.movesremain());
@@ -179,7 +179,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		return walk_tree(board, node, movelist, depth);
 	}
 	if(won >= 0)
-		result = (won == 0 ? 0 : won == board.toplay() ? -1 : 1);
+		result = (won == 0 ? 0 : won == toplay ? -1 : 1);
 
 	node->visits++;
 	node->score += (result + 1)/2.0;
