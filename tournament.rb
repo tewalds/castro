@@ -9,6 +9,7 @@
 	$boardsize = 4;
 	$players = [];
 	$cmds = [];
+	$msg = nil;
 
 	while(ARGV.length > 0)
 		arg = ARGV.shift
@@ -20,6 +21,7 @@
 		when "-m", "--timemove" then $time_per_move = ARGV.shift.to_f;
 		when "-s", "--size"     then $boardsize     = ARGV.shift.to_i;
 		when "-c", "--cmd"      then $cmds << ARGV.shift;
+		when "-z", "--msg"      then $msg = ARGV.shift;
 		when "-h", "--help"     then
 			puts "Run a round robin tournament between players that all understand GTP."
 			puts "Usage: #{$0} [<options>] players..."
@@ -30,6 +32,7 @@
 			puts "  -m --timemove Time given per move [#{$time_per_move}]"
 			puts "  -s --size     Board size [#{$boardsize}]"
 			puts "  -c --cmd      Send an arbitrary GTP command at the beginning of the game"
+			puts "  -z --msg      Output a message of what this is testing with the results"
 			puts "  -h --help     Print this help"
 			exit;
 		else
@@ -239,6 +242,7 @@ end
 	
 #start output
 	puts "\n\n";
+	puts "#{$msg}\n" if $msg;
 	(0...$num).each{|i|
 		puts "Player #{i+1}: #{$players[i]}";
 	}
