@@ -11,6 +11,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	time_used = 0;
 	runs = 0;
 
+	principle_variation.clear();
 	treelen.reset();
 	gamelen.reset();
 
@@ -78,7 +79,6 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	fprintf(stderr, "%s", stats.c_str());
 
 //return the principle variation
-	principle_variation.clear();
 	Node * n = & root;
 	while(n->numchildren){
 		int maxi = 0;
