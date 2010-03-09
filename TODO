@@ -1,4 +1,7 @@
 
+
+SWAP!!!
+
 For both solver and player, keep the tree around so it can prune off parts that aren't taken, but use the remainder
 
 MCTS
@@ -15,6 +18,19 @@ MCTS
 - try using moving averages instead of simple averages to deal with drift:
   - current: v += 1/k*(nv - v); k++;
   - new:     v += 1/a*(nv - v); k++; where a = (k < 100 ? k : 100); or some other value
+
+RAVE:
+- test if "a good move for him is a good move for me" is good... make it optional?
+- if not above, then add wins for winning side, losses to losing side, as opposed to wins and losses to only winner or both
+- try alpha = sqrt(k/(3*n+k))
+
+prior knowledge
+- virtual connect pattern
+- local reply is good
+
+Time control
+- if one move has many more simulations than the other, we can stop early since it won't change
+- quiecense search - if the highest winrate != most played, keep simulating
 
 Opening Book
 - learn an opening book from many games, and from example games
