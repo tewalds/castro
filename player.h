@@ -90,11 +90,11 @@ class Player {
 		}
 //*
 		//new way, more standard way of changing over from rave scores to real scores
-		float value(float ravefactor){
+		float value(int ravefactor){
 			if(visits == 0 && ravevisits == 0)
 				return 10000 + rand()%100;
 
-			float alpha = ravefactor/(ravefactor + visits);
+			float alpha = (ravefactor == 0 ? 0 : (float)ravefactor/(ravefactor + visits));
 
 			float val = 0;
 			if(ravevisits) val += alpha*rave/ravevisits;
@@ -104,7 +104,7 @@ class Player {
 		}
 /*/
 		//my understanding of how fuego does it
-		float value(float ravefactor){
+		float value(int ravefactor){
 			float val = 0;
 			float weight = 0;
 			if(visits) {
@@ -165,9 +165,10 @@ class Player {
 
 public:
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
-	float ravefactor; //big numbers favour rave scores, small ignore it
+	int   ravefactor; //big numbers favour rave scores, small ignore it
 	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1
 	bool  raveall;    //add rave value for win, 0 for loss, 0.5 for not used
+	int   skiprave;   //how often to skip rave
 	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
 	int   proofscore;   //how many virtual rollouts to assign based on the proof number search values
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
@@ -189,6 +190,7 @@ public:
 		ravefactor = 10;
 		ravescale = false;
 		raveall = false;
+		skiprave = 20;
 		prooftime = 0.8;
 		proofscore = 2;
 		rolloutpattern = true;
