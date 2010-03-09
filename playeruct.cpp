@@ -145,20 +145,12 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 				}
 			}
 		}
-	}else if((won = board.won()) >= 0){
-		//already done
-		treelen.add(depth);
+	}else if((won = board.won()) >= 0 || node->visits == 0 || nodes >= maxnodes){
+	//do random game on this node, unless it's already the end
+		if(won == -1)
+			won = rand_game(board, movelist, node->move, depth);
 
-		if(ravefactor > 0){
-			if(won == 0)
-				movelist.clear();
-			else
-				movelist.clean(cur_player, ravescale);
-		}
-	}else if(node->visits == 0 || nodes >= maxnodes){
-	//do random game on this node
 		treelen.add(depth);
-		won = rand_game(board, movelist, node->move, depth);
 
 		if(ravefactor > 0){
 			if(won == 0)
