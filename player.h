@@ -37,10 +37,16 @@ class Player {
 				//set high but not insurmountable visits just in case it is a tie
 				score = 0;
 				visits = 100;
-			}else{
-				score = pnsscore*n->phi/n->delta;
-				if(score > 2*pnsscore) score = 2*pnsscore;
+			}else if(pnsscore > 0){
+				if(n->phi >= n->delta)
+					score = pnsscore*(1 - n->delta/(2*n->phi));
+				else
+					score = pnsscore*(n->phi/(2*n->delta));
+
 				visits = pnsscore;
+			}else{
+				score = 0;
+				visits = 0;
 			}
 
 			numchildren = n->numchildren;
