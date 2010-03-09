@@ -166,6 +166,7 @@ public:
 	int   proofscore;   //how many virtual rollouts to assign based on the proof number search values
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 
+	int cur_player;
 	int runs;
 	DepthStats treelen, gamelen;
 	uint64_t nodes, maxnodes;

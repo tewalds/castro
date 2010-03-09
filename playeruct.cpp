@@ -47,6 +47,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 		solver.reset();
 	}
 
+	cur_player = board.toplay();
 	RaveMoveList movelist(board.movesremain());
 	do{
 		runs++;
@@ -72,7 +73,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(runtime) + " msec\n";
 	stats += "Game length: " + gamelen.to_s() + "\n";
 	stats += "Tree depth:  " + treelen.to_s() + "\n";
-	stats += "Move Score:  " + to_str(root.children[maxi].winrate()/2) + "\n";
+	stats += "Move Score:  " + to_str(root.children[maxi].winrate()) + "\n";
 	stats += "Games/s:     " + to_str((int)((double)runs*1000/runtime)) + "\n";
 	fprintf(stderr, "%s", stats.c_str());
 
@@ -94,8 +95,6 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 
 int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){
 	int result, won = -1;
-
-	node->visits++;
 
 	if(node->children){
 	//choose a child and recurse
@@ -122,22 +121,23 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		result = - walk_tree(board, child, movelist, depth+1);
 
 		//update the rave scores
-		if(ravefactor > 0 && result > 0){ //if a win
-			//incr the rave score of all children that were played
+		if(ravefactor > 0){
+			//update the rave score of all children that were played
 			unsigned int m = 0, c = 0;
 			while(m < movelist.size() && c < node->numchildren){
-				if(movelist[m] == node->children[c].move){
-					node->children[c].rave += movelist[m].score;
-					node->children[c].ravevisits++;
+				child = & node->children[c];
+				if(movelist[m] == child->move){
+					child->rave += movelist[m].score;
+					child->ravevisits++;
 					m++;
 					c++;
-				}else if(movelist[m] > node->children[c].move){
+				}else if(movelist[m] > child->move){
 					if(raveall){ //unused positions get a score as better than a loss
-						node->children[c].rave += 0.5;
-						node->children[c].ravevisits++;
+						child->rave += 0.5;
+						child->ravevisits++;
 					}
 					c++;
-				}else if(movelist[m] < node->children[c].move){
+				}else if(movelist[m] < child->move){
 					m++;
 				}
 			}
@@ -145,7 +145,14 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	}else if((won = board.won()) >= 0){
 		//already done
 		treelen.add(depth);
-	}else if(node->visits <= 1 || nodes >= maxnodes){ //1 instead of 0 because of the virtual loss added above
+
+		if(ravefactor > 0){
+			if(won == 0)
+				movelist.clear();
+			else
+				movelist.clean((won == cur_player), ravescale);
+		}
+	}else if(node->visits == 0 || nodes >= maxnodes){
 	//do random game on this node
 		treelen.add(depth);
 		won = rand_game(board, movelist, node->move, depth);
@@ -154,8 +161,9 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			if(won == 0)
 				movelist.clear();
 			else
-				movelist.clean(((won == board.toplay()) == (depth % 2 == 0)), ravescale);
+				movelist.clean((won == cur_player), ravescale);
 		}
+
 	}else{
 	//create children
 		nodes += node->alloc(board.movesremain());
@@ -171,6 +179,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	if(won >= 0)
 		result = (won == 0 ? 0 : won == board.toplay() ? -1 : 1);
 
+	node->visits++;
 	node->score += (result + 1)/2.0;
 	return result;
 }
