@@ -186,6 +186,7 @@ public:
 	int   ravefactor; //big numbers favour rave scores, small ignore it
 	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1
 	bool  raveall;    //add rave value for win, 0 for loss, 0.5 for not used
+	bool  opmoves;    //take the opponents rave updates too, a good move for my opponent is a good move for me.
 	int   skiprave;   //how often to skip rave
 	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
 	int   proofscore;   //how many virtual rollouts to assign based on the proof number search values
@@ -208,6 +209,7 @@ public:
 		ravefactor = 10;
 		ravescale = false;
 		raveall = false;
+		opmoves = false;
 		skiprave = 20;
 		prooftime = 0.8;
 		proofscore = 2;

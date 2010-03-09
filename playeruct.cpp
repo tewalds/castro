@@ -129,19 +129,19 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			unsigned int m = 0, c = 0;
 			while(m < movelist.size() && c < node->numchildren){
 				child = & node->children[c];
-				if(movelist[m].player != toplay || movelist[m] < child->move){
-					m++;
-				}else if(movelist[m] == child->move){
+				if(movelist[m] == child->move && (opmoves || movelist[m].player == toplay)){
 					child->rave += (result > 0 ? movelist[m].score : 0);
 					child->ravevisits++;
 					m++;
 					c++;
-				}else{ //(movelist[m] > child->move)
+				}else if(movelist[m] > child->move){
 					if(raveall){ //unused positions get a score as better than a loss
 						child->rave += 0.5;
 						child->ravevisits++;
 					}
 					c++;
+				}else{ //(movelist[m] < child->move || opponents move){
+					m++;
 				}
 			}
 		}

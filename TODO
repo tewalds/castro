@@ -30,7 +30,7 @@ prior knowledge
 
 Time control
 - if one move has many more simulations than the other, we can stop early since it won't change
-- quiecense search - if the highest winrate != most played, keep simulating
+- quiecense search - if the highest winrate != most played, keep simulating until it is
 
 Opening Book
 - learn an opening book from many games, and from example games
