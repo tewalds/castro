@@ -182,8 +182,8 @@ public:
 		ravefactor = 10;
 		ravescale = false;
 		raveall = false;
-		prooftime = 0.5;
-		proofscore = 0;
+		prooftime = 0.8;
+		proofscore = 2;
 		rolloutpattern = true;
 	}
 	void timedout(){ timeout = true; }
