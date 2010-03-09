@@ -199,7 +199,7 @@ public:
 	string won_str() const {
 		switch(outcome){
 			case -1: return "none";
-			case 0:  return "tie";
+			case 0:  return "draw";
 			case 1:  return "white";
 			case 2:  return "black";
 		}
