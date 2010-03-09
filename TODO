@@ -12,7 +12,9 @@ MCTS
   - analyze games to determine these values
   - a position near the edge/corner defines virtual connections to the wall
 - roll-outs don't need to be good games, only increase correlation between current position and outcome
-- keep running the roll out past the end of the game to set rave values for those positions?
+- try using moving averages instead of simple averages to deal with drift:
+  - current: v += 1/k*(nv - v); k++;
+  - new:     v += 1/a*(nv - v); k++; where a = (k < 100 ? k : 100); or some other value
 
 Opening Book
 - learn an opening book from many games, and from example games
