@@ -283,7 +283,7 @@ public:
 		game.move(player.bestmove);
 
 		string pv = "";
-		for(int i = 0; i < player.principle_variation.size(); i++)
+		for(unsigned int i = 0; i < player.principle_variation.size(); i++)
 			pv += move_str(player.principle_variation[i], true) + " ";
 		fprintf(stderr, "PV:          %s\n", pv.c_str());
 
@@ -304,7 +304,7 @@ public:
 				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
 				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
 
-		for(int i = 0; i < args.size(); i++) {
+		for(unsigned int i = 0; i < args.size(); i++) {
 			string arg = args[i];
 
 			if((arg == "-e" || arg == "--explore") && i+1 < args.size()){
