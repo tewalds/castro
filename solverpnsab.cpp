@@ -72,21 +72,17 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 		nodes += board.movesremain();
 
 		int i = 0;
-		for(int y = 0; y < board.get_size_d(); y++){
-			for(int x = 0; x < board.get_size_d(); x++){
-				if(board.valid_move(x, y)){
-					Board next = board;
-					next.move(x, y);
-					
-					uint64_t prevnodes = nodes;
+		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+			Board next = board;
+			next.move(*move);
+			
+			uint64_t prevnodes = nodes;
 
-					int abval = -negamax(next, 1, -2, 2); //higher depth goes farther but takes longer, depth 1 seems to be best
+			int abval = -negamax(next, 1, -2, 2); //higher depth goes farther but takes longer, depth 1 seems to be best
 
-					node->children[i] = PNSNode(x, y).abval(abval, (board.toplay() == assignties), 1 + int(nodes - prevnodes));
+			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), 1 + int(nodes - prevnodes));
 
-					i++;
-				}
-			}
+			i++;
 		}
 
 		updatePDnum(node);

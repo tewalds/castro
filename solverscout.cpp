@@ -31,26 +31,21 @@ void Solver::solve_scout(const Board & board, double time, int mdepth){
 }
 
 int Solver::run_negascout(const Board & board, const int depth, int alpha, int beta){
-	for(int y = 0; y < board.get_size_d(); y++){
-		for(int x = 0; x < board.get_size_d(); x++){
-			if(!board.valid_move(x, y))
-				continue;
+	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+		nodes++;
 
-			nodes++;
+		Board next = board;
+		next.move(*move);
 
-			Board next = board;
-			next.move(x, y);
+		int value = -negascout(next, maxdepth - 1, -beta, -alpha);
 
-			int value = -negascout(next, maxdepth - 1, -beta, -alpha);
-
-			if(value > alpha){
-				alpha = value;
-				bestmove = Move(x, y);
-			}
-
-			if(alpha >= beta)
-				return beta;
+		if(value > alpha){
+			alpha = value;
+			bestmove = *move;
 		}
+
+		if(alpha >= beta)
+			return beta;
 	}
 	return alpha;
 }
@@ -64,30 +59,25 @@ int Solver::negascout(const Board & board, const int depth, int alpha, int beta)
 
 	int b = beta;
 	int first = true;
-	for(int y = 0; y < board.get_size_d(); y++){
-		for(int x = 0; x < board.get_size_d(); x++){
-			if(!board.valid_move(x, y))
-				continue;
+	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+		nodes++;
 
-			nodes++;
+		Board next = board;
+		next.move(*move);
 
-			Board next = board;
-			next.move(x, y);
+		int value = -negascout(next, depth - 1, -b, -alpha);
 
-			int value = -negascout(next, depth - 1, -b, -alpha);
+		if(value > alpha && value < beta && !first) // re-search
+			value = -negascout(next, depth - 1, -beta, -alpha);
 
-			if(value > alpha && value < beta && !first) // re-search
-				value = -negascout(next, depth - 1, -beta, -alpha);
+		if(value > alpha)
+			alpha = value;
 
-			if(value > alpha)
-				alpha = value;
+		if(alpha >= beta)
+			return beta;
 
-			if(alpha >= beta)
-				return beta;
-
-			b = alpha + 1; // set up null window
-			first = false;
-		}
+		b = alpha + 1; // set up null window
+		first = false;
 	}
 	return alpha;
 }

@@ -163,10 +163,8 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		nodes += node->alloc(board.movesremain());
 
 		int i = 0;
-		for(int y = 0; y < board.get_size_d(); y++)
-			for(int x = 0; x < board.get_size_d(); x++)
-				if(board.valid_move(x, y))
-					node->children[i++] = Node(x, y);
+		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+			node->children[i++] = Node(*move);
 
 		return walk_tree(board, node, movelist, depth);
 	}

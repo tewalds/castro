@@ -79,17 +79,13 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 		nodes += board.movesremain();
 
 		int i = 0;
-		for(int y = 0; y < board.get_size_d(); y++){
-			for(int x = 0; x < board.get_size_d(); x++){
-				if(board.valid_move(x, y)){
-					Board next = board;
-					next.move(x, y);
+		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+			Board next = board;
+			next.move(*move);
 
-					node->children[i] = PNSNode(x, y).abval((next.won() > 0) + (next.won() >= 0), (board.toplay() == assignties));
+			node->children[i] = PNSNode(*move).abval((next.won() > 0) + (next.won() >= 0), (board.toplay() == assignties));
 
-					i++;
-				}
-			}
+			i++;
 		}
 
 		updatePDnum(node);
