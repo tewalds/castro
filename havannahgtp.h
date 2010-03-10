@@ -223,18 +223,20 @@ public:
 
 		if(!hguicoords && m.x >= game.getsize())
 			m.y += m.x + 1 - game.getsize();
-	}
 
-	string move_str(const Move & m, int hguic = -1){
-		return move_str(m.x, m.y, hguic);
+		return m;
 	}
 
 	string move_str(int x, int y, int hguic = -1){
+		return move_str(Move(x, y), hguic);
+	}
+
+	string move_str(Move m, int hguic = -1){
 		if(hguic == -1)
 			hguic = hguicoords;
 
-		if(x < 0){
-			switch(x){
+		if(m.y < 0){
+			switch(m.y){
 				case M_UNKNOWN: return "unknown";
 				case M_NONE:    return "none";
 				case M_SWAP:    return "swap";
@@ -243,10 +245,10 @@ public:
 			}
 		}
 
-		if(!hguic && x >= game.getsize())
-			y -= x + 1 - game.getsize();
+		if(!hguic && m.x >= game.getsize())
+			m.y -= m.x + 1 - game.getsize();
 
-		return string() + char(x + 'a') + to_str(y+1);
+		return string() + char(m.x + 'a') + to_str(m.y + 1);
 	}
 
 	GTPResponse gtp_all_legal(vecstr args){
@@ -331,14 +333,12 @@ public:
 
 	GTPResponse play(const string & pos, int toplay){
 		Move move = parse_move(pos);
-		if(!game.getboard()->onboard2(move))
-			return GTPResponse(false, "Move out of bounds");
 
 		if(!game.move(move, toplay)){
 			if(game.getboard()->won() >= 0)
 				return GTPResponse(false, "Game already over");
 			else
-				return GTPResponse(false, "Invalid placement, already taken");
+				return GTPResponse(false, "Invalid move");
 		}
 
 		log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(move, false));

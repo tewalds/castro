@@ -15,7 +15,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	treelen.reset();
 	gamelen.reset();
 
-	bestmove = Move(-2,-2);
+	bestmove = Move(M_RESIGN);
 	timeout = false;
 
 	if(board.won() >= 0)

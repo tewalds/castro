@@ -43,7 +43,7 @@ public:
 		const Board & board;
 		Move move;
 	public:
-		MoveIterator(const Board & b) : board(b) {
+		MoveIterator(const Board & b) : board(b), move(Move(M_SWAP)) {
 			if(!board.valid_move(move))
 				++(*this);
 		}
@@ -124,10 +124,10 @@ public:
 	int numcells() const { return vecsize() - size*(size - 1); }
 
 	int num_moves() const { return nummoves; }
-	int movesremain() const { return numcells() - nummoves; }
+	int movesremain() const { return numcells() - nummoves + canswap(); }
 
-	int xy(int x, int y)   const { return y*size_d + x; }
-	int xy(const Move & m) const { return xy(m.x, m.y); }
+	int xy(int x, int y)   const { return   y*size_d +   x; }
+	int xy(const Move & m) const { return m.y*size_d + m.x; }
 	
 	//assumes valid x,y
 	int get(int i)          const { return cells[i].piece; }
@@ -135,11 +135,16 @@ public:
 	int get(const Move & m) const { return get(xy(m)); }
 
 	//assumes x, y are in array bounds
-	bool onboard(int x, int y)   const { return (y - x < size) && (x - y < size); }
-	bool onboard(const Move & m) const { return onboard(m.x, m.y); }
+	bool onboard(int x, int y)   const { return (  y -   x < size) && (  x -   y < size); }
+	bool onboard(const Move & m) const { return (m.y - m.x < size) && (m.x - m.y < size); }
 	//checks array bounds too
-	bool onboard2(int x, int y)  const { return (x >= 0 && y >= 0 && x < size_d && y < size_d && onboard(x, y) ); }
-	bool onboard2(const Move & m)const { return onboard2(m.x, m.y); }
+	bool onboard2(int x, int y)  const { return (  x >= 0 &&   y >= 0 &&   x < size_d &&   y < size_d && onboard(x, y) ); }
+	bool onboard2(const Move & m)const { return (m.x >= 0 && m.y >= 0 && m.x < size_d && m.y < size_d && onboard(m) ); }
+
+	bool canswap() const { return (nummoves == 1 && toPlay == 2); }
+
+	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard2(x, y) && !get(x,y)); } //ignores swap rule!
+	bool valid_move(const Move & m) const { return (outcome == -1 && ((onboard2(m) && !get(m)) || (m.isswap() && canswap()))); }
 
 	int iscorner(int x, int y) const {
 		if(!onboard(x,y))
@@ -227,13 +232,21 @@ public:
 		return MoveIterator(*this);
 	}
 
-	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard2(x, y) && !cells[xy(x, y)].piece); }
-	bool valid_move(const Move & m) const { return valid_move(m.x, m.y); }
-
 	void set(const Move & m, int v){
 		cells[xy(m)].piece = v;
 		nummoves++;
 		toPlay = 3 - toPlay;
+	}
+	void doswap(){
+		for(int y = 0; y < size_d; y++){
+			for(int x = 0; x < size_d; x++){
+				if(get(x,y) != 0){
+					cells[xy(x,y)].piece = 2;
+					toPlay = 1;
+					return;
+				}
+			}
+		}
 	}
 
 	int find_group(const Move & m) { return find_group(xy(m)); }
@@ -296,6 +309,11 @@ public:
 	bool move(const Move & pos, char turn = -1){
 		if(!valid_move(pos))
 			return false;
+
+		if(pos.isswap()){
+			doswap();
+			return true;
+		}
 
 		if(turn == -1)
 			turn = toplay();
