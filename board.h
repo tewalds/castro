@@ -55,12 +55,15 @@ class Board{
 		}
 	};
 
+public:
 	class MoveIterator { //only returns valid moves...
 		const Board & board;
 		Move move;
 	public:
-		MoveIterator(const Board & b) : board(b) { }
-		MoveIterator(const Board & b, Move & m) : board(b), move(m) { }
+		MoveIterator(const Board & b) : board(b) {
+			if(!board.valid_move(move))
+				++(*this);
+		}
 
 		const Move & operator * () const {
 			return move;
@@ -81,11 +84,13 @@ class Board{
 			do{
 				move.x++;
 
-				if(move.x == board.get_size_d()){
+				if(move.x >= board.get_size_d()){
 					move.x = 0;
 					move.y++;
+					if(move.y >= board.get_size_d())
+						break;
 				}
-			}while(move.y < board.get_size_d() && !board.valid_move(move));
+			}while(!board.valid_move(move));
 
 			return *this;
 		}
@@ -96,6 +101,7 @@ class Board{
 		}
 	};
 
+private:
 	short size; //the length of one side of the hexagon
 	short size_d; //diameter of the board = size*2-1
 
