@@ -185,15 +185,14 @@ bool Player::check_pattern(const Board & board, Move & move){
 	Move ret;
 	int state = 0;
 	int a = rand() % 6;
-	int piece = 3 - board.get(move.x, move.y);
+	int piece = 3 - board.get(move);
 	for(int i = 0; i < 8; i++){
-		int x = move.x + neighbours[(i+a)%6][0];
-		int y = move.y + neighbours[(i+a)%6][1];
+		Move cur = move + neighbours[(i+a)%6];
 
-		bool on = board.onboard2(x,y);
+		bool on = board.onboard2(cur);
 		int v;
 		if(on)
-			v = board.get(x,y);
+			v = board.get(cur);
 
 /*
 	//state machine that progresses when it see the pattern, but only taking pieces into account
@@ -205,7 +204,7 @@ bool Player::check_pattern(const Board & board, Move & move){
 			if(on){
 				if(v == 0){
 					state = 2;
-					ret = Move(x,y);
+					ret = cur;
 				}else if(v != piece)
 					state = 0;
 				//else (v==piece) => state = 1;
@@ -230,7 +229,7 @@ bool Player::check_pattern(const Board & board, Move & move){
 			if(on){
 				if(v == 0){
 					state = 2;
-					ret = Move(x,y);
+					ret = cur;
 				}else if(v != piece)
 					state = 0;
 				//else (v==piece) => state = 1;

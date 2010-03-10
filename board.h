@@ -20,7 +20,7 @@ using namespace std;
  * This follows the H-Gui convention, not the 'standard' convention
  */
 
-const int neighbours[6][2] = {{-1,-1}, {0,-1}, {1, 0}, {1, 1}, {0, 1}, {-1, 0}}; //x, y, clockwise
+const Move neighbours[6] = { Move(-1,-1), Move(0,-1), Move(1,0), Move(1,1), Move(0,1), Move(-1,0) };//x, y, clockwise
 
 class Board{
 	struct Cell {
@@ -230,8 +230,8 @@ public:
 	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard2(x, y) && !cells[xy(x, y)].piece); }
 	bool valid_move(const Move & m) const { return valid_move(m.x, m.y); }
 
-	void set(int x, int y, int v){
-		cells[xy(x, y)].piece = v;
+	void set(const Move & m, int v){
+		cells[xy(m)].piece = v;
 		nummoves++;
 		toPlay = 3 - toPlay;
 	}
@@ -267,61 +267,54 @@ public:
 	}
 
 	// recursively follow a ring
-	bool detectring(int x, int y){
-		int group = find_group(xy(x, y));
+	bool detectring(const Move & pos){
+		int group = find_group(pos);
 		for(int i = 0; i < 6; i++){
-			int nx = x + neighbours[i][0];
-			int ny = y + neighbours[i][1];
+			Move loc = pos + neighbours[i];
 			
-			if(onboard2(nx, ny) && find_group(nx, ny) == group && followring(x, y, nx, ny, i, group))
+			if(onboard2(loc) && find_group(loc) == group && followring(pos, loc, i, group))
 				return true;
 		}
 		return false;
 	}
 	// only take the 3 directions that are valid in a ring
 	// the backwards directions are either invalid or not part of the shortest loop
-	bool followring(const int & sx, const int & sy, const int & cx, const int & cy, const int & dir, const int & group){
-		if(sx == cx && sy == cy)
+	bool followring(const Move & start, const Move & cur, const int & dir, const int & group){
+		if(start == cur)
 			return true;
 
 		for(int i = 5; i <= 7; i++){
 			int nd = (dir + i) % 6;
-			int nx = cx + neighbours[nd][0];
-			int ny = cy + neighbours[nd][1];
+			Move next = cur + neighbours[nd];
 			
-			if(onboard2(nx, ny) && find_group(nx, ny) == group && followring(sx, sy, nx, ny, nd, group))
+			if(onboard2(next) && find_group(next) == group && followring(start, next, nd, group))
 				return true;
 		}
 		return false;
 	}
 
-	bool move(const Move & m, char turn = -1){
-		return move(m.x, m.y, turn);
-	}
-
-	bool move(int x, int y, char turn = -1){
-		if(!valid_move(x, y))
+	bool move(const Move & pos, char turn = -1){
+		if(!valid_move(pos))
 			return false;
 
 		if(turn == -1)
 			turn = toplay();
 
-		set(x, y, turn);
+		set(pos, turn);
 
 		bool alreadyjoined = false; //useful for finding rings
 		for(int i = 0; i < 6; i++){
-			int X = x + neighbours[i][0];
-			int Y = y + neighbours[i][1];
+			Move loc = pos + neighbours[i];
 		
-			if(onboard2(X, Y) && turn == get(X, Y)){
-				alreadyjoined |= join_groups(x, y, X, Y);
+			if(onboard2(loc) && turn == get(loc)){
+				alreadyjoined |= join_groups(pos, loc);
 				i++; //skip the next one. If it is the same group,
 				     //it is already connected and forms a corner, which we can ignore
 			}
 		}
 
-		Cell * g = & cells[find_group(x, y)];
-		if(g->numcorners() >= 2 || g->numedges() >= 3 || (alreadyjoined && g->size >= 6 && detectring(x, y))){
+		Cell * g = & cells[find_group(pos)];
+		if(g->numcorners() >= 2 || g->numedges() >= 3 || (alreadyjoined && g->size >= 6 && detectring(pos))){
 			outcome = turn;
 		}else if(nummoves == numcells()){
 			outcome = 0;

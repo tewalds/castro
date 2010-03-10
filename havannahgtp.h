@@ -213,12 +213,16 @@ public:
 		return ret;
 	}
 
-	void parse_move(const string & str, int & x, int & y){
-		x = tolower(str[0]) - 'a';
-		y = atoi(str.c_str() + 1) - 1;
+	Move parse_move(const string & str){
+		if(str == "swap")
+			return Move(M_SWAP);
 
-		if(!hguicoords && x >= game.getsize())
-			y += x + 1 - game.getsize();
+		Move m;
+		m.x = tolower(str[0]) - 'a';
+		m.y = atoi(str.c_str() + 1) - 1;
+
+		if(!hguicoords && m.x >= game.getsize())
+			m.y += m.x + 1 - game.getsize();
 	}
 
 	string move_str(const Move & m, int hguic = -1){
@@ -326,22 +330,21 @@ public:
 
 
 	GTPResponse play(const string & pos, int toplay){
-		int x, y;
-		parse_move(pos, x, y);
-		if(!game.getboard()->onboard2(x, y))
+		Move move = parse_move(pos);
+		if(!game.getboard()->onboard2(move))
 			return GTPResponse(false, "Move out of bounds");
 
-		if(!game.move(x, y, toplay)){
+		if(!game.move(move, toplay)){
 			if(game.getboard()->won() >= 0)
 				return GTPResponse(false, "Game already over");
 			else
 				return GTPResponse(false, "Invalid placement, already taken");
 		}
 
-		log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(x, y, false));
+		log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(move, false));
 
 		if(verbose)
-			return GTPResponse(true, "Placement: " + move_str(x, y) + ", outcome: " + game.getboard()->won_str() + "\n" + game.getboard()->to_s());
+			return GTPResponse(true, "Placement: " + move_str(move) + ", outcome: " + game.getboard()->won_str() + "\n" + game.getboard()->to_s());
 		else
 			return GTPResponse(true);
 	}
