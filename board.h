@@ -55,6 +55,47 @@ class Board{
 		}
 	};
 
+	class MoveIterator { //only returns valid moves...
+		const Board & board;
+		Move move;
+	public:
+		MoveIterator(const Board & b) : board(b) { }
+		MoveIterator(const Board & b, Move & m) : board(b), move(m) { }
+
+		const Move & operator * () const {
+			return move;
+		}
+		const Move * operator -> () const {
+			return & move;
+		}
+		bool done() const {
+			return (move.y >= board.get_size_d());
+		}
+		bool operator == (const Board::MoveIterator & rhs) const {
+			return (move == rhs.move);
+		}
+		bool operator != (const Board::MoveIterator & rhs) const {
+			return (move != rhs.move);
+		}
+		MoveIterator & operator ++ (){ //prefix form
+			do{
+				move.x++;
+
+				if(move.x == board.get_size_d()){
+					move.x = 0;
+					move.y++;
+				}
+			}while(move.y < board.get_size_d() && !board.valid_move(move));
+
+			return *this;
+		}
+		MoveIterator operator ++ (int){ //postfix form, discouraged from being used
+			MoveIterator newit(*this);
+			++(*this);
+			return newit;
+		}
+	};
+
 	short size; //the length of one side of the hexagon
 	short size_d; //diameter of the board = size*2-1
 
@@ -222,6 +263,10 @@ public:
 		return toPlay;
 	}
 
+	MoveIterator moveit() const {
+		return MoveIterator(*this);
+	}
+
 	bool valid_move(const Move & m) const {
 		return valid_move(m.x, m.y);
 	}
@@ -362,13 +407,9 @@ public:
 		MoveScore * mend = moves;
 		turn = (turn == 1 ? 1 : -1);
 
-		for(int y = 0; y < size_d; y++){
-			for(int x = 0; x < size_d; x++){
-				if(valid_move(x, y)){
-					*mend = MoveScore(x, y, calc_score(x, y, turn));
-					mend++;
-				}
-			}
+		for(MoveIterator move = moveit(); !move.done(); ++move){
+			*mend = MoveScore(*move, calc_score(move->x, move->y, turn));
+			mend++;
 		}
 
 		if(s)
