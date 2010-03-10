@@ -21,38 +21,21 @@ using namespace std;
  */
 
 const int neighbours[6][2] = {{-1,-1}, {0,-1}, {1, 0}, {1, 1}, {0, 1}, {-1, 0}}; //x, y, clockwise
-const int neighbourscores[18][3] = {
-	{-1,-1, 3}, {0,-1, 3}, {1, 0, 3}, {1, 1, 3}, { 0, 1, 3}, {-1, 0, 3}, //direct neighbours
-	{-2,-2, 1}, {0,-2, 1}, {2, 0, 1}, {2, 2, 1}, { 0, 2, 1}, {-2, 0, 1}, //corners of ring 2, easy to block
-	{-1,-2, 2}, {1,-1, 2}, {2, 1, 2}, {1, 2, 2}, {-1, 1, 2}, {-2,-1, 2}, //sides of ring 2, virtual connections
-	};
-
-const int score_range = 8;
-const int score_offset = 2;
 
 class Board{
 	struct Cell {
 		unsigned piece  : 2; //who controls this cell, 0 for none, 1,2 for players
 		unsigned parent : 9; //parent for this group of cells
-		unsigned size   : 7; //size of this group of cells, technically could be >= 128, but in practice won't happen
+		unsigned size   : 9; //size of this group of cells
 		unsigned corner : 6; //which corners are this group connected to
 		unsigned edge   : 6; //which edges are this group connected to
-		signed   color  : 6; //how black/white a cell is, < 0 is white, > 0 is black
-		unsigned near   : 4; //how many cells are taken within the neighbourhood
 
-		Cell() : piece(0), parent(0), size(0), corner(0), edge(0), color(0), near(0) { }
+		Cell() : piece(0), parent(0), size(0), corner(0), edge(0) { }
 		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e) :
-			piece(p), parent(a), size(s), corner(c), edge(e), color(0), near(0) {
-			if(corner) near += 3;
-			if(edge)   near += 2;
-		}
+			piece(p), parent(a), size(s), corner(c), edge(e) { }
 
-		int numcorners(){
-			return BITCOUNT6(corner);
-		}
-		int numedges(){
-			return BITCOUNT6(edge);
-		}
+		int numcorners(){ return BITCOUNT6(corner); }
+		int numedges(){   return BITCOUNT6(edge); }
 	};
 
 public:
@@ -110,8 +93,6 @@ private:
 	char outcome; //-1 = unknown, 0 = tie, 1,2 = player win
 
 	vector<Cell> cells;
-
-//	static const int neighbours[6][2]; //x, y, clockwise
 
 public:
 	Board(){ }
@@ -361,7 +342,6 @@ public:
 			turn = toplay();
 
 		set(x, y, turn);
-//		update_scores(x, y, turn);
 
 		bool alreadyjoined = false; //useful for finding rings
 		for(int i = 0; i < 6; i++){
@@ -382,45 +362,6 @@ public:
 			outcome = 0;
 		}
 		return true;	
-	}
-
-	void update_scores(int x, int y, char turn){
-		turn = (turn == 1 ? -1 : 1);
-		for(int i = 0; i < 18; i++){
-			int X = x + neighbourscores[i][0];
-			int Y = y + neighbourscores[i][1];
-			if(onboard2(X, Y)){
-				Cell * cell = & cells[xy(X, Y)];
-				if(!cell->piece){
-					if(cell->near < 15) //max value near can hold in 4 bits
-						cell->near++;
-					cell->color += turn * neighbourscores[i][2];
-				}
-			}
-		}
-	}
-	
-	int calc_score(int x, int y, char turn) const {
-		const Cell * cell = & cells[xy(x, x)];
-		return (score_range - abs(score_offset*turn - cell->color))*cell->near;
-	}
-
-	static bool cmpmoves(const MoveScore & a, const MoveScore & b) {
-		return a.score > b.score;
-	}
-
-	int get_moves(MoveScore * moves, bool s = false, char turn = -1) const {
-		MoveScore * mend = moves;
-		turn = (turn == 1 ? 1 : -1);
-
-		for(MoveIterator move = moveit(); !move.done(); ++move){
-			*mend = MoveScore(*move, calc_score(move->x, move->y, turn));
-			mend++;
-		}
-
-		if(s)
-			sort(moves, mend, cmpmoves);
-		return mend - moves;
 	}
 };
 

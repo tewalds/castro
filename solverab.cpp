@@ -74,30 +74,3 @@ int Solver::negamax(const Board & board, const int depth, int alpha, int beta){
 	return alpha;
 }
 
-int Solver::negamaxh(const Board & board, const int depth, int alpha, int beta){
-	if(board.won() >= 0)
-		return (board.won() ? -2 : -1);
-
-	if(depth <= 0)
-		return 0;
-
-	MoveScore moves[board.vecsize()];
-	int num = board.get_moves(moves);
-
-	for(int i = 0; i < num; i++){
-		nodes++;
-
-		Board next = board;
-		next.move(moves[i].x, moves[i].y);
-
-		int value = -negamaxh(next, depth - 1, -beta, -alpha);
-
-		if(value > alpha)
-			alpha = value;
-
-		if(alpha >= beta)
-			return beta;
-	}
-	return alpha;
-}
-

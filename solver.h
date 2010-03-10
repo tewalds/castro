@@ -109,7 +109,6 @@ public:
 	int run_negascout(const Board & board, const int depth, int alpha, int beta);  //plain negascout
 
 	int negamax(const Board & board, const int depth, int alpha, int beta);  //plain negamax
-	int negamaxh(const Board & board, const int depth, int alpha, int beta); //negamax with move ordering heuristic
 	int negascout(const Board & board, const int depth, int alpha, int beta);  //plain negascout
 
 //basic proof number search building a tree

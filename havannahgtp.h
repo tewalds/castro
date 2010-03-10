@@ -53,7 +53,6 @@ public:
 		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pnsab,this, _1));
 		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab,this, _1));
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,  this, _1));
-		newcallback("top_moves",       bind(&HavannahGTP::gtp_top_moves,  this, _1));
 		newcallback("time_settings",   bind(&HavannahGTP::gtp_time_settings, this, _1));
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,    this, _1));
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1));
@@ -247,22 +246,9 @@ public:
 	}
 
 	GTPResponse gtp_all_legal(vecstr args){
-		MoveScore moves[game.getboard()->vecsize()];
-		int num = game.getboard()->get_moves(moves);
-
 		string ret;
-		for(int i = 0; i < num; i++)
-			ret += move_str(moves[i].x, moves[i].y) + " ";
-		return GTPResponse(true, ret);
-	}
-
-	GTPResponse gtp_top_moves(vecstr args){
-		MoveScore moves[game.getboard()->vecsize()];
-		int num = game.getboard()->get_moves(moves, true);
-
-		string ret;
-		for(int i = 0; i < num; i++)
-			ret += move_str(moves[i].x, moves[i].y) + " " + to_str(moves[i].score) + " ";
+		for(Board::MoveIterator move = game.getboard()->moveit(); !move.done(); ++move)
+			ret += move_str(*move) + " ";
 		return GTPResponse(true, ret);
 	}
 
