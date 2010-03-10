@@ -212,7 +212,7 @@ public:
 		opmoves = false;
 		skiprave = 20;
 		prooftime = 0.8;
-		proofscore = 2;
+		proofscore = 3;
 		rolloutpattern = true;
 	}
 	void timedout(){ timeout = true; }
