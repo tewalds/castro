@@ -95,6 +95,7 @@ class Player {
 				return 10000 + rand()%100;
 
 			float alpha = (ravefactor == 0 ? 0 : (float)ravefactor/(ravefactor + visits));
+//			float alpha = (ravefactor == 0 ? 0 : sqrt((float)ravefactor/(ravefactor + 3*visits)));
 
 			float val = 0;
 			if(ravevisits) val += alpha*rave/ravevisits;
@@ -205,8 +206,8 @@ public:
 	Player() {
 		time_used = 0;
 
-		explore = 10;
-		ravefactor = 10;
+		explore = 1;
+		ravefactor = 50;
 		ravescale = false;
 		raveall = false;
 		opmoves = false;
