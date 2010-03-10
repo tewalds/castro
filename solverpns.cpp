@@ -46,7 +46,7 @@ int Solver::run_pns(const Board & board, int ties, int memlimit){ //1 = win, 0 =
 	assignties = ties;
 
 	if(root) delete root;
-	root = new PNSNode(-1, -1, false);
+	root = new PNSNode(0, 0, 1);
 	nodesremain = memlimit*1024*1024/sizeof(PNSNode);
 
 	bool mem = true;
@@ -57,12 +57,9 @@ int Solver::run_pns(const Board & board, int ties, int memlimit){ //1 = win, 0 =
 		fprintf(stderr, "Ran out of memory\n");
 
 	if(root->phi == 0){
-		for(int i = 0; i < root->numchildren; i++){
-			if(root->children[i].delta == 0){
-				X = root->children[i].x;
-				Y = root->children[i].y;
-			}
-		}
+		for(int i = 0; i < root->numchildren; i++)
+			if(root->children[i].delta == 0)
+				bestmove = root->children[i].move;
 		return 1;
 	}
 	if(root->delta == 0)
@@ -109,7 +106,7 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 		PNSNode * child = &(node->children[i]);
 
 		Board next = board;
-		next.move(child->x, child->y);
+		next.move(child->move);
 		mem = pns(next, child, depth + 1);
 
 		if(child->phi == 0 || child->delta == 0)

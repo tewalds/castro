@@ -36,7 +36,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 
 		//if it found a win, just play it
 		if(ret == 1){
-			bestmove = Move(solver.X, solver.Y);
+			bestmove = solver.bestmove;
 
 			int runtime = time_msec() - starttime;
 			fprintf(stderr, "Solved in %i msec\n", runtime);

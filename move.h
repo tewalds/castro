@@ -4,6 +4,11 @@
 
 #include <stdint.h>
 
+#define M_UNKNOWN -1
+#define M_NONE    -2
+#define M_SWAP    -3
+#define M_RESIGN  -4
+
 struct Move {
 	int8_t x, y;
 

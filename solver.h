@@ -20,23 +20,16 @@ class Solver {
 public:
 
 	struct PNSNode {
-		uint8_t x, y; //move
+		Move move;
 		uint16_t phi, delta;
 		uint16_t numchildren;
 		PNSNode * children;
 
 		PNSNode() { }
-		PNSNode(int X, int Y, int v = 0)     : x(X), y(Y), phi(v), delta(v), numchildren(0), children(NULL) { }
-		PNSNode(int X, int Y, int p, int d)  : x(X), y(Y), phi(p), delta(d), numchildren(0), children(NULL) { }
-		PNSNode(int X, int Y, bool terminal) : x(X), y(Y), numchildren(0), children(NULL) {
-			if(terminal){
-				phi = INF16;
-				delta = 0;
-			}else{
-				phi = 1;
-				delta = 1;
-			}
-		}
+		PNSNode(int x, int y,   int v = 1)     : move(Move(x,y)), phi(v), delta(v), numchildren(0), children(NULL) { }
+		PNSNode(const Move & m, int v = 1)     : move(m),         phi(v), delta(v), numchildren(0), children(NULL) { }
+		PNSNode(int x, int y,   int p, int d)  : move(Move(x,y)), phi(p), delta(d), numchildren(0), children(NULL) { }
+		PNSNode(const Move & m, int p, int d)  : move(m),         phi(p), delta(d), numchildren(0), children(NULL) { }
 
 		~PNSNode(){
 			if(children)
@@ -75,7 +68,7 @@ public:
 	int outcome; // 0 = tie, 1 = white, 2 = black, -1 = white or tie, -2 = black or tie, anything else unknown
 	int maxdepth;
 	uint64_t nodes;
-	int X, Y;
+	Move bestmove;
 	bool timeout;
 
 	PNSNode * root;
@@ -92,7 +85,7 @@ public:
 		outcome = -3;
 		maxdepth = 0;
 		nodes = 0;
-		X = Y = -1;
+		bestmove = Move(M_UNKNOWN);
 		timeout = false;
 
 		if(root){

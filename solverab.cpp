@@ -19,7 +19,7 @@ void Solver::solve_ab(const Board & board, double time, int mdepth){
 		int ret = run_negamax(board, maxdepth, -2, 2);
 
 		if(ret){
-			if(     ret == -2){ outcome = (turn == 1 ? 2 : 1); X = -1; Y = -1; }
+			if(     ret == -2){ outcome = (turn == 1 ? 2 : 1); bestmove = Move(M_NONE); }
 			else if(ret ==  2){ outcome = turn; }
 			else /*-1 || 1*/  { outcome = 0; }
 
@@ -45,8 +45,7 @@ int Solver::run_negamax(const Board & board, const int depth, int alpha, int bet
 
 			if(value > alpha){
 				alpha = value;
-				X = x;
-				Y = y;
+				bestmove = Move(x, y);
 			}
 
 			if(alpha >= beta)

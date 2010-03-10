@@ -24,8 +24,7 @@ class Player {
 		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), score(s), ravevisits(0), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
 
 		int construct(const Solver::PNSNode * n, int pnsscore){
-			move.x = n->x;
-			move.y = n->y;
+			move = n->move;
 
 			rave = 0;
 			ravevisits = 0;

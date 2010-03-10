@@ -208,7 +208,7 @@ public:
 	string solve_str(const Solver & solve){
 		string ret = "";
 		ret += solve_str(solve.outcome) + " ";
-		ret += move_str(solve.X, solve.Y) + " ";
+		ret += move_str(solve.bestmove) + " ";
 		ret += to_str(solve.maxdepth) + " ";
 		ret += to_str(solve.nodes);
 		return ret;
@@ -222,7 +222,7 @@ public:
 			y += x + 1 - game.getsize();
 	}
 
-	string move_str(Move & m, int hguic = -1){
+	string move_str(const Move & m, int hguic = -1){
 		return move_str(m.x, m.y, hguic);
 	}
 
@@ -230,10 +230,15 @@ public:
 		if(hguic == -1)
 			hguic = hguicoords;
 
-		if(x == -1)
-			return "none";
-		if(x == -2)
-			return "resign";
+		if(x < 0){
+			switch(x){
+				case M_UNKNOWN: return "unknown";
+				case M_NONE:    return "none";
+				case M_SWAP:    return "swap";
+				case M_RESIGN:  return "resign";
+				default:        return "bad_move";
+			}
+		}
 
 		if(!hguic && x >= game.getsize())
 			y -= x + 1 - game.getsize();
