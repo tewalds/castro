@@ -252,11 +252,19 @@ bool Player::check_pattern(const Board & board, Move & move){
 int Player::rand_game(Board & board, RaveMoveList & movelist, Move move, int depth){
 	int won;
 
+	Move order[board.movesremain()];
+
+	int i = 0;
+	for(Board::MoveIterator m = board.moveit(); !m.done(); ++m)
+		order[i++] = *m;
+
+	random_shuffle(order, order + i);
+
+	i = 0;
 	while((won = board.won()) < 0){
 		if(!rolloutpattern || !check_pattern(board, move)){
 			do{
-				move.x = rand() % board.get_size_d();
-				move.y = rand() % board.get_size_d();
+				move = order[i++];
 			}while(!board.valid_move(move));
 		}
 
