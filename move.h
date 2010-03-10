@@ -21,6 +21,8 @@ struct Move {
 	bool operator>=(const Move & b) const { return (y == b.y ? x >= b.x : y >= b.y); }
 	bool operator==(const Move & b) const { return (x == b.x && y == b.y); }
 	bool operator!=(const Move & b) const { return (x != b.x || y != b.y); }
+	Move operator+ (const Move & b) const { return Move(x + b.x, y + b.y); }
+	Move & operator+=(const Move & b)     { x += b.x; y += b.y; return *this; }
 };
 
 struct MoveScore {
