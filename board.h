@@ -68,10 +68,11 @@ public:
 				move.x++;
 
 				if(move.x >= board.get_size_d()){
-					move.x = 0;
 					move.y++;
 					if(move.y >= board.get_size_d())
 						break;
+
+					move.x = board.linestart(move.y);
 				}
 			}while(!board.valid_move(move));
 
@@ -127,7 +128,7 @@ public:
 	}
 	
 	int vecsize() const {
-		return (2*size-1)*(2*size-1);
+		return size_d*size_d;
 	}
 	
 	int numcells() const {
