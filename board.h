@@ -115,54 +115,31 @@ public:
 		}
 	}
 
-	int memsize() const {
-		return sizeof(Board) + sizeof(Cell)*vecsize();
-	}
+	int memsize() const { return sizeof(Board) + sizeof(Cell)*vecsize(); }
 
-	int get_size_d() const {
-		return size_d;
-	}
+	int get_size_d() const { return size_d; }
+	int get_size() const{ return size; }
 
-	int get_size() const{
-		return size;
-	}
-	
-	int vecsize() const {
-		return size_d*size_d;
-	}
-	
-	int numcells() const {
-		//derived from (2n-1)^2 - n(n-1)
-		return 3*size*(size - 1) + 1;
-	}
-	
-	int num_moves() const {
-		return nummoves;
-	}
+	int vecsize() const { return size_d*size_d; }
+	int numcells() const { return vecsize() - size*(size - 1); }
 
-	int movesremain() const {
-		return numcells() - nummoves;
-	}
+	int num_moves() const { return nummoves; }
+	int movesremain() const { return numcells() - nummoves; }
 
-	int xy(int x, int y) const {
-		return y*size_d + x;
-	}
+	int xy(int x, int y)   const { return y*size_d + x; }
+	int xy(const Move & m) const { return xy(m.x, m.y); }
 	
-	int get(int i) const {
-		return cells[i].piece;
-	}
-	int get(int x, int y) const { //assumes valid x,y
-		return cells[xy(x, y)].piece;
-	}
+	//assumes valid x,y
+	int get(int i)          const { return cells[i].piece; }
+	int get(int x, int y)   const { return get(xy(x,y)); }
+	int get(const Move & m) const { return get(xy(m)); }
 
 	//assumes x, y are in array bounds
-	bool onboard(int x, int y) const{
-		return (y - x < size) && (x - y < size);
-	}
+	bool onboard(int x, int y)   const { return (y - x < size) && (x - y < size); }
+	bool onboard(const Move & m) const { return onboard(m.x, m.y); }
 	//checks array bounds too
-	bool onboard2(int x, int y) const {
-        return (x >= 0 && y >= 0 && x < size_d && y < size_d && onboard(x, y) );
-	}
+	bool onboard2(int x, int y)  const { return (x >= 0 && y >= 0 && x < size_d && y < size_d && onboard(x, y) ); }
+	bool onboard2(const Move & m)const { return onboard2(m.x, m.y); }
 
 	int iscorner(int x, int y) const {
 		if(!onboard(x,y))
@@ -197,13 +174,8 @@ public:
 	}
 
 
-	int linestart(int y) const {
-		return (y < size ? 0 : y - (size-1));
-	}
-
-	int linelen(int y) const {
-		return size_d - abs((size-1) - y);
-	}
+	int linestart(int y) const { return (y < size ? 0 : y - (size-1)); }
+	int linelen(int y)   const { return size_d - abs((size-1) - y); }
 
 	string to_s() const {
 		string s;
@@ -255,13 +227,8 @@ public:
 		return MoveIterator(*this);
 	}
 
-	bool valid_move(const Move & m) const {
-		return valid_move(m.x, m.y);
-	}
-
-	bool valid_move(int x, int y) const {
-		return (outcome == -1 && onboard2(x, y) && !cells[xy(x, y)].piece);
-	}
+	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard2(x, y) && !cells[xy(x, y)].piece); }
+	bool valid_move(const Move & m) const { return valid_move(m.x, m.y); }
 
 	void set(int x, int y, int v){
 		cells[xy(x, y)].piece = v;
@@ -269,9 +236,8 @@ public:
 		toPlay = 3 - toPlay;
 	}
 
-	int find_group(int x, int y){
-		return find_group(xy(x, y));
-	}
+	int find_group(const Move & m) { return find_group(xy(m)); }
+	int find_group(int x, int y)   { return find_group(xy(x, y)); }
 	int find_group(int i){
 		if(cells[i].parent != i)
 			cells[i].parent = find_group(cells[i].parent);
@@ -280,9 +246,8 @@ public:
 
 	//join the groups of two positions, propagating group size, and edge/corner connections
 	//returns true if they're already the same group, false if they are now joined
-	bool join_groups(int x1, int y1, int x2, int y2){
-		return join_groups(xy(x1, y1), xy(x2, y2));
-	}
+	bool join_groups(const Move & a, const Move & b) { return join_groups(xy(a), xy(b)); }
+	bool join_groups(int x1, int y1, int x2, int y2) { return join_groups(xy(x1, y1), xy(x2, y2)); }
 	bool join_groups(int i, int j){
 		i = find_group(i);
 		j = find_group(j);
@@ -312,7 +277,6 @@ public:
 				return true;
 		}
 		return false;
-		
 	}
 	// only take the 3 directions that are valid in a ring
 	// the backwards directions are either invalid or not part of the shortest loop
