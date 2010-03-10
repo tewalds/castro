@@ -59,6 +59,7 @@ class Board{
 	short size_d; //diameter of the board = size*2-1
 
 	short nummoves;
+	char toPlay;
 	char outcome; //-1 = unknown, 0 = tie, 1,2 = player win
 
 	vector<Cell> cells;
@@ -72,6 +73,7 @@ public:
 		size = s;
 		size_d = s*2-1;
 		nummoves = 0;
+		toPlay = 1;
 		outcome = -1;
 
 		cells.resize(vecsize());
@@ -217,7 +219,7 @@ public:
 	}
 
 	char toplay() const {
-		return nummoves%2 + 1;
+		return toPlay;
 	}
 
 	bool valid_move(const Move & m) const {
@@ -231,6 +233,7 @@ public:
 	void set(int x, int y, int v){
 		cells[xy(x, y)].piece = v;
 		nummoves++;
+		toPlay = 3 - toPlay;
 	}
 
 	int find_group(int x, int y){
