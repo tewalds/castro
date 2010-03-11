@@ -109,7 +109,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		for(unsigned int i = 0; i < node->numchildren; i++){
 			child = & node->children[i];
 
-			val = child->value(raveval) + explore*sqrt(logvisits/(child->visits+1));
+			val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->visits+1));
 
 			if(maxval < val){
 				maxval = val;

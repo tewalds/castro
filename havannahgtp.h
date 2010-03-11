@@ -297,6 +297,7 @@ public:
 				"  -a --raveall     Assign a value of 0.5 to unplayed positions       [" + to_str(player.raveall) + "]\n" +
 				"  -o --opmoves     Treat good opponent moves as good moves for you   [" + to_str(player.opmoves) + "]\n" +
 				"  -k --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
+				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
 				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
 				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
@@ -316,6 +317,8 @@ public:
 				player.opmoves = from_str<bool>(args[++i]);
 			}else if((arg == "-k" || arg == "--skiprave") && i+1 < args.size()){
 				player.skiprave = from_str<int>(args[++i]);
+			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
+				player.fpurgency = from_str<float>(args[++i]);
 			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
 				player.prooftime = from_str<double>(args[++i]);
 			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){

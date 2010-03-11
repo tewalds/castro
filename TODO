@@ -1,7 +1,5 @@
 
 
-SWAP!!!
-
 For both solver and player, keep the tree around so it can prune off parts that aren't taken, but use the remainder
 
 MCTS
@@ -18,6 +16,7 @@ MCTS
 - try using moving averages instead of simple averages to deal with drift:
   - current: v += 1/k*(nv - v); k++;
   - new:     v += 1/a*(nv - v); k++; where a = (k < 100 ? k : 100); or some other value
+- explore the first play urgency space
 
 RAVE:
 - try alpha = sqrt(k/(3*n+k))
