@@ -32,6 +32,7 @@ struct GTPResponse {
 	}
 
 	string to_s(){
+		rtrim(response);
 		return (success ? '=' : '?') + id + ' ' + response + "\n\n";
 	}
 };
