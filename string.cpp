@@ -10,6 +10,16 @@ void trim(string & str){
     str.erase(1 + str.find_last_not_of(space));
 }
 
+void ltrim(string & str){
+	const char * space = " \t\r\n";
+    str.erase(0,  str.find_first_not_of(space));
+}
+
+void rtrim(string & str){
+	const char * space = " \t\r\n";
+    str.erase(1 + str.find_last_not_of(space));
+}
+
 vecstr explode(const string & str, const string & sep){
 	vecstr ret;
 	int old = 0, pos = 0;

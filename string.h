@@ -23,6 +23,8 @@ template <class T> T from_str(const std::string & str){
 
 
 void trim(std::string & str);
+void ltrim(std::string & str);
+void rtrim(std::string & str);
 
 vecstr explode(const std::string & str, const std::string & sep);
 std::string implode(const vecstr & vec, const std::string & sep);
