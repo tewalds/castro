@@ -1,0 +1,1247 @@
+Player 1: ../havannah
+Player 2: ./castro -c 'player_params 4 1'
+Player 3: ./castro -c 'player_params 4 4'
+Player 4: ./castro -c 'player_params 6 4'
+
+Win vs Loss Matrix:
+     1  2  3  4
+ 1:    34 35 37 : 106 wins, 14 losses, 0 ties
+ 2:  6    19 19 : 44 wins, 76 losses, 0 ties
+ 3:  5 21    24 : 50 wins, 70 losses, 0 ties
+ 4:  3 21 16    : 40 wins, 80 losses, 0 ties
+Played 240 games, Total Time: 4492 s
+
+
+
+
+
+Player 1: ./castro -c 'player_params 4 1'
+Player 2: ./castro -c 'player_params 4 2'
+Player 3: ./castro -c 'player_params 4 3'
+Player 4: ./castro -c 'player_params 4 4'
+Player 5: ./castro -c 'player_params 5 1'
+Player 6: ./castro -c 'player_params 6 1'
+Player 7: ./castro -c 'player_params 7 1'
+Player 8: ./castro -c 'player_params 8 1'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8
+ 1:    11  7 11 13 14 13 14 : 83 wins, 57 losses, 0 ties
+ 2:  9     9 10 12 14 13 14 : 81 wins, 59 losses, 0 ties
+ 3: 13 11    11 14 11 14 15 : 89 wins, 51 losses, 0 ties
+ 4:  9 10  9    12 12 18 14 : 84 wins, 56 losses, 0 ties
+ 5:  7  8  6  8     9  9 12 : 59 wins, 81 losses, 0 ties
+ 6:  6  6  9  8 11    11 12 : 63 wins, 77 losses, 0 ties
+ 7:  7  7  6  2 11  9    13 : 55 wins, 85 losses, 0 ties
+ 8:  6  6  5  6  8  8  7    : 46 wins, 94 losses, 0 ties
+Played 560 games, Total Time: 14147 s
+
+
+
+
+Player 1: ./castro-basic
+Player 2: ./castro-piece -c 'player_params 4 3'
+Player 3: ./castro-piece -c 'player_params 4 1'
+Player 4: ./castro-piece -c 'player_params 4 2'
+Player 5: ./castro-piece -c 'player_params 2 3'
+Player 6: ./castro-piece -c 'player_params 6 3'
+Player 7: ./castro-wall -c 'player_params 4 3'
+Player 8: ./castro-wall -c 'player_params 4 1'
+Player 9: ./castro-wall -c 'player_params 4 2'
+Player 10: ./castro-wall -c 'player_params 2 3'
+Player 11: ./castro-wall -c 'player_params 6 3'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11
+ 1:    12  9  9 18 15  7 11 12 17  9 : 119 wins, 81 losses, 0 ties
+ 2:  8     0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 180 ties
+ 3: 11  0     0  0  0  0  0  0  0  0 : 11 wins, 9 losses, 180 ties
+ 4: 11  0  0     0  0  0  0  0  0  0 : 11 wins, 9 losses, 180 ties
+ 5:  2  0  0  0     0  0  0  0  0  0 : 2 wins, 18 losses, 180 ties
+ 6:  5  0  0  0  0     0  0  0  0  0 : 5 wins, 15 losses, 180 ties
+ 7: 13  0  0  0  0  0     0  0  0  0 : 13 wins, 7 losses, 180 ties
+ 8:  9  0  0  0  0  0  0     0  0  0 : 9 wins, 11 losses, 180 ties
+ 9:  8  0  0  0  0  0  0  0     0  0 : 8 wins, 12 losses, 180 ties
+10:  3  0  0  0  0  0  0  0  0     0 : 3 wins, 17 losses, 180 ties
+11: 11  0  0  0  0  0  0  0  0  0    : 11 wins, 9 losses, 180 ties
+Played 200 games, Total Time: 4156 s
+
+
+
+
+
+Player 1: ./castro -c 'player_params 4 3'
+Player 2: ./castro -c 'player_params 0 8'
+Player 3: ./castro -c 'player_params 0 9'
+Player 4: ./castro -c 'player_params 0 10'
+Player 5: ./castro -c 'player_params 0 11'
+Player 6: ./castro -c 'player_params 0 12'
+Player 7: ./castro -c 'player_params 0 13'
+Player 8: ./castro -c 'player_params 0 114'
+Player 9: ./castro -c 'player_params 0 15'
+Player 10: ./castro -c 'player_params 0 16'
+Player 11: ./castro -c 'player_params 0 17'
+Player 12: ./castro -c 'player_params 0 18'
+Player 13: ./castro -c 'player_params 0 19'
+Player 14: ./castro -c 'player_params 1 6'
+Player 15: ./castro -c 'player_params 1 7'
+Player 16: ./castro -c 'player_params 1 8'
+Player 17: ./castro -c 'player_params 1 9'
+Player 18: ./castro -c 'player_params 1 10'
+Player 19: ./castro -c 'player_params 1 11'
+Player 20: ./castro -c 'player_params 1 12'
+Player 21: ./castro -c 'player_params 1 13'
+Player 22: ./castro -c 'player_params 1 14'
+Player 23: ./castro -c 'player_params 1 16'
+Player 24: ./castro -c 'player_params 1 17'
+Player 25: ./castro -c 'player_params 1 18'
+Player 26: ./castro -c 'player_params 1 19'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
+ 1:    12 11 12  5  9 11 18 10  7 10  9  9 13  9  9  8  4  5  6  7 11 11 10 10  9 : 235 wins, 265 losses, 0 ties
+ 2:  8     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 480 ties
+ 3:  9  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 9 wins, 11 losses, 480 ties
+ 4:  8  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 480 ties
+ 5: 15  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 15 wins, 5 losses, 480 ties
+ 6: 11  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 11 wins, 9 losses, 480 ties
+ 7:  9  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 9 wins, 11 losses, 480 ties
+ 8:  2  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 2 wins, 18 losses, 480 ties
+ 9: 10  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 10 wins, 10 losses, 480 ties
+10: 13  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 13 wins, 7 losses, 480 ties
+11: 10  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 10 wins, 10 losses, 480 ties
+12: 11  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 11 wins, 9 losses, 480 ties
+13: 11  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 11 wins, 9 losses, 480 ties
+14:  7  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 7 wins, 13 losses, 480 ties
+15: 11  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 11 wins, 9 losses, 480 ties
+16: 11  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 11 wins, 9 losses, 480 ties
+17: 12  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 12 wins, 8 losses, 480 ties
+18: 16  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 16 wins, 4 losses, 480 ties
+19: 15  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 15 wins, 5 losses, 480 ties
+20: 14  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 14 wins, 6 losses, 480 ties
+21: 13  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 13 wins, 7 losses, 480 ties
+22:  9  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 9 wins, 11 losses, 480 ties
+23:  9  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 9 wins, 11 losses, 480 ties
+24: 10  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 10 wins, 10 losses, 480 ties
+25: 10  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 10 wins, 10 losses, 480 ties
+26: 11  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 11 wins, 9 losses, 480 ties
+Played 500 games, Total Time: 12428 s
+
+
+
+
+
+
+
+Player 1: ./castro-baseline
+Player 2: ./castro-wall -c 'player_params 4 3'
+Player 3: ./castro-wall -c 'player_params 0 8'
+Player 4: ./castro-wall -c 'player_params 0 9'
+Player 5: ./castro-wall -c 'player_params 0 10'
+Player 6: ./castro-wall -c 'player_params 0 11'
+Player 7: ./castro-wall -c 'player_params 0 12'
+Player 8: ./castro-wall -c 'player_params 0 13'
+Player 9: ./castro-wall -c 'player_params 0 14'
+Player 10: ./castro-wall -c 'player_params 0 15'
+Player 11: ./castro-wall -c 'player_params 0 16'
+Player 12: ./castro-wall -c 'player_params 0 17'
+Player 13: ./castro-wall -c 'player_params 0 18'
+Player 14: ./castro-wall -c 'player_params 0 19'
+Player 15: ./castro-wall -c 'player_params 1 6'
+Player 16: ./castro-wall -c 'player_params 1 7'
+Player 17: ./castro-wall -c 'player_params 1 8'
+Player 18: ./castro-wall -c 'player_params 1 9'
+Player 19: ./castro-wall -c 'player_params 1 10'
+Player 20: ./castro-wall -c 'player_params 1 11'
+Player 21: ./castro-wall -c 'player_params 1 12'
+Player 22: ./castro-wall -c 'player_params 1 13'
+Player 23: ./castro-wall -c 'player_params 1 14'
+Player 24: ./castro-wall -c 'player_params 1 16'
+Player 25: ./castro-wall -c 'player_params 1 17'
+Player 26: ./castro-wall -c 'player_params 1 18'
+Player 27: ./castro-wall -c 'player_params 1 19'
+
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27
+ 1:     7 15 12 11  9  8  7  7  7  5 11  5  8 12 11  9 10  6  7  9  6 10  5  7  8 10 : 222 wins, 298 losses, 0 ties
+ 2: 13     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 13 wins, 7 losses, 500 ties
+ 3:  5  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 5 wins, 15 losses, 500 ties
+ 4:  8  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 500 ties
+ 5:  9  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 9 wins, 11 losses, 500 ties
+ 6: 11  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 11 wins, 9 losses, 500 ties
+ 7: 12  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 12 wins, 8 losses, 500 ties
+ 8: 13  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 13 wins, 7 losses, 500 ties
+ 9: 13  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 13 wins, 7 losses, 500 ties
+10: 13  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 13 wins, 7 losses, 500 ties
+11: 15  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 15 wins, 5 losses, 500 ties
+12:  9  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 9 wins, 11 losses, 500 ties
+13: 15  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 15 wins, 5 losses, 500 ties
+14: 12  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 12 wins, 8 losses, 500 ties
+15:  8  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 500 ties
+16:  9  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 9 wins, 11 losses, 500 ties
+17: 11  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 11 wins, 9 losses, 500 ties
+18: 10  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 10 wins, 10 losses, 500 ties
+19: 14  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 14 wins, 6 losses, 500 ties
+20: 13  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 13 wins, 7 losses, 500 ties
+21: 11  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 11 wins, 9 losses, 500 ties
+22: 14  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 14 wins, 6 losses, 500 ties
+23: 10  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 10 wins, 10 losses, 500 ties
+24: 15  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 15 wins, 5 losses, 500 ties
+25: 13  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 13 wins, 7 losses, 500 ties
+26: 12  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 12 wins, 8 losses, 500 ties
+27: 10  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 10 wins, 10 losses, 500 ties
+Played 520 games, Total Time: 9583 s
+
+
+Player 1: ./castro
+Player 2: ./castro-baseline
+Player 3: ./havannah
+
+Win vs Loss Matrix:
+     1  2  3
+ 1:    73  4 : 77 wins, 123 losses, 0 ties
+ 2: 27    11 : 38 wins, 162 losses, 0 ties
+ 3: 96 89    : 185 wins, 15 losses, 0 ties
+Played 300 games, Total Time: 5018 s
+
+
+
+
+Player 1: ./castro-pns0
+Player 2: ./castro-pns10
+Player 3: ./castro-pns2
+Player 4: ./castro-pns3
+Player 5: ./castro-pns5
+Player 6: ./havannah
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6
+ 1:    69 38 41 62 13 : 223 wins, 277 losses, 0 ties
+ 2: 31    39 30 48  0 : 148 wins, 352 losses, 0 ties
+ 3: 62 61    46 62  2 : 233 wins, 267 losses, 0 ties
+ 4: 59 70 54    51  3 : 237 wins, 263 losses, 0 ties
+ 5: 38 52 38 49     1 : 178 wins, 322 losses, 0 ties
+ 6: 87100 98 97 99    : 481 wins, 19 losses, 0 ties
+Played 1500 games, Total Time: 20307 s
+
+
+
+
+Played on Groove:
+
+Player 1: ./castro -c 'player_params 1 10'
+Player 2: ./castro -c 'player_params 0 8'
+Player 3: ./castro -c 'player_params 0 9'
+Player 4: ./castro -c 'player_params 0 10'
+Player 5: ./castro -c 'player_params 0 11'
+Player 6: ./castro -c 'player_params 0 12'
+Player 7: ./castro -c 'player_params 0 13'
+Player 8: ./castro -c 'player_params 0 14'
+Player 9: ./castro -c 'player_params 0 15'
+Player 10: ./castro -c 'player_params 0 16'
+Player 11: ./castro -c 'player_params 0 17'
+Player 12: ./castro -c 'player_params 1 6'
+Player 13: ./castro -c 'player_params 1 7'
+Player 14: ./castro -c 'player_params 1 8'
+Player 15: ./castro -c 'player_params 1 9'
+Player 16: ./castro -c 'player_params 1 10'
+Player 17: ./castro -c 'player_params 1 11'
+Player 18: ./castro -c 'player_params 1 12'
+Player 19: ./castro -c 'player_params 1 13'
+Player 20: ./castro -c 'player_params 1 14'
+Player 21: ./castro -c 'player_params 1 16'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+ 1:    42 35 36 39 54 45 47 45 39 44 45 39 50 39 34 37 33 50 38 41 : 832 wins, 768 losses, 0 ties
+ 2: 38     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 38 wins, 42 losses, 1520 ties
+ 3: 45  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 45 wins, 35 losses, 1520 ties
+ 4: 44  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 44 wins, 36 losses, 1520 ties
+ 5: 41  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 41 wins, 39 losses, 1520 ties
+ 6: 26  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 26 wins, 54 losses, 1520 ties
+ 7: 35  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 35 wins, 45 losses, 1520 ties
+ 8: 33  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 33 wins, 47 losses, 1520 ties
+ 9: 35  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 35 wins, 45 losses, 1520 ties
+10: 41  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 41 wins, 39 losses, 1520 ties
+11: 36  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 36 wins, 44 losses, 1520 ties
+12: 35  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 35 wins, 45 losses, 1520 ties
+13: 41  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 41 wins, 39 losses, 1520 ties
+14: 30  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 30 wins, 50 losses, 1520 ties
+15: 41  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 41 wins, 39 losses, 1520 ties
+16: 46  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 46 wins, 34 losses, 1520 ties
+17: 43  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 43 wins, 37 losses, 1520 ties
+18: 47  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 47 wins, 33 losses, 1520 ties
+19: 30  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 30 wins, 50 losses, 1520 ties
+20: 42  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 42 wins, 38 losses, 1520 ties
+21: 39  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 39 wins, 41 losses, 1520 ties
+Played 1600 games, Total Time: 27878 s
+
+
+
+
+
+Played on starscream:
+
+Player 1: ./castro -c 'player_params 1 10'
+Player 2: ./castro -c 'player_params 0 8'
+Player 3: ./castro -c 'player_params 0 9'
+Player 4: ./castro -c 'player_params 0 10'
+Player 5: ./castro -c 'player_params 0 11'
+Player 6: ./castro -c 'player_params 0 12'
+Player 7: ./castro -c 'player_params 0 13'
+Player 8: ./castro -c 'player_params 0 14'
+Player 9: ./castro -c 'player_params 0 15'
+Player 10: ./castro -c 'player_params 0 16'
+Player 11: ./castro -c 'player_params 0 17'
+Player 12: ./castro -c 'player_params 1 6'
+Player 13: ./castro -c 'player_params 1 7'
+Player 14: ./castro -c 'player_params 1 8'
+Player 15: ./castro -c 'player_params 1 9'
+Player 16: ./castro -c 'player_params 1 10'
+Player 17: ./castro -c 'player_params 1 11'
+Player 18: ./castro -c 'player_params 1 12'
+Player 19: ./castro -c 'player_params 1 13'
+Player 20: ./castro -c 'player_params 1 14'
+Player 21: ./castro -c 'player_params 1 16'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+ 1:    11 16 13 10 10 13 14 16 12 16 14 17 20 15 20 20 18 21 24 21 : 321 wins, 479 losses, 0 ties
+ 2: 29     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 29 wins, 11 losses, 760 ties
+ 3: 24  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 24 wins, 16 losses, 760 ties
+ 4: 27  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 27 wins, 13 losses, 760 ties
+ 5: 30  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 30 wins, 10 losses, 760 ties
+ 6: 30  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 30 wins, 10 losses, 760 ties
+ 7: 27  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 27 wins, 13 losses, 760 ties
+ 8: 26  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 26 wins, 14 losses, 760 ties
+ 9: 24  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 24 wins, 16 losses, 760 ties
+10: 28  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 28 wins, 12 losses, 760 ties
+11: 24  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 24 wins, 16 losses, 760 ties
+12: 26  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 26 wins, 14 losses, 760 ties
+13: 23  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 23 wins, 17 losses, 760 ties
+14: 20  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 20 wins, 20 losses, 760 ties
+15: 25  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 25 wins, 15 losses, 760 ties
+16: 20  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 20 wins, 20 losses, 760 ties
+17: 20  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 20 wins, 20 losses, 760 ties
+18: 22  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 22 wins, 18 losses, 760 ties
+19: 19  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 19 wins, 21 losses, 760 ties
+20: 16  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 16 wins, 24 losses, 760 ties
+21: 19  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 19 wins, 21 losses, 760 ties
+Played 800 games, Total Time: 25029 s
+
+
+
+Player 1: ./castro
+Player 2: ./castro-baseline
+Player 3: ./havannah
+
+Win vs Loss Matrix:
+     1  2  3
+ 1:    73  4 : 77 wins, 123 losses, 0 ties
+ 2: 27    11 : 38 wins, 162 losses, 0 ties
+ 3: 96 89    : 185 wins, 15 losses, 0 ties
+Played 300 games, Total Time: 5018 s
+
+
+
+
+
+
+Player 1: ./castro-7692c7
+Player 2: ./castro-214afe -c 'player_params 1 10'
+Player 3: ./castro-214afe -c 'player_params 1 20'
+Player 4: ./castro-214afe -c 'player_params 1 50'
+Player 5: ./castro-214afe -c 'player_params 1 100'
+Player 6: ./castro-214afe -c 'player_params 1 200'
+Player 7: ./castro-214afe -c 'player_params 2 10'
+Player 8: ./castro-214afe -c 'player_params 2 20'
+Player 9: ./castro-214afe -c 'player_params 2 50'
+Player 10: ./castro-214afe -c 'player_params 2 100'
+Player 11: ./castro-214afe -c 'player_params 2 200'
+Player 12: ./castro-214afe -c 'player_params 3 10'
+Player 13: ./castro-214afe -c 'player_params 3 20'
+Player 14: ./castro-214afe -c 'player_params 3 50'
+Player 15: ./castro-214afe -c 'player_params 3 100'
+Player 16: ./castro-214afe -c 'player_params 3 200'
+Player 17: ./castro-214afe -c 'player_params 5 10'
+Player 18: ./castro-214afe -c 'player_params 5 20'
+Player 19: ./castro-214afe -c 'player_params 5 50'
+Player 20: ./castro-214afe -c 'player_params 5 100'
+Player 21: ./castro-214afe -c 'player_params 5 200'
+Player 22: ./castro-214afe -c 'player_params 10 10'
+Player 23: ./castro-214afe -c 'player_params 10 20'
+Player 24: ./castro-214afe -c 'player_params 10 50'
+Player 25: ./castro-214afe -c 'player_params 10 100'
+Player 26: ./castro-214afe -c 'player_params 10 200'
+
+On Starscream:
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
+ 1:    35 33 29 35 47 29 28 17 24 20 22 23 15 20 24 18 10 12 29 25 11 18 21 22 30 : 597 wins, 1403 losses, 0 ties
+ 2: 45     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 45 wins, 35 losses, 1920 ties
+ 3: 47  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 47 wins, 33 losses, 1920 ties
+ 4: 51  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 51 wins, 29 losses, 1920 ties
+ 5: 45  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 45 wins, 35 losses, 1920 ties
+ 6: 33  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 33 wins, 47 losses, 1920 ties
+ 7: 51  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 51 wins, 29 losses, 1920 ties
+ 8: 52  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 52 wins, 28 losses, 1920 ties
+ 9: 63  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 63 wins, 17 losses, 1920 ties
+10: 56  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 56 wins, 24 losses, 1920 ties
+11: 60  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 60 wins, 20 losses, 1920 ties
+12: 58  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 58 wins, 22 losses, 1920 ties
+13: 57  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 57 wins, 23 losses, 1920 ties
+14: 65  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 65 wins, 15 losses, 1920 ties
+15: 60  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 60 wins, 20 losses, 1920 ties
+16: 56  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 56 wins, 24 losses, 1920 ties
+17: 62  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 62 wins, 18 losses, 1920 ties
+18: 70  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 70 wins, 10 losses, 1920 ties
+19: 68  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 68 wins, 12 losses, 1920 ties
+20: 51  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 51 wins, 29 losses, 1920 ties
+21: 55  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 55 wins, 25 losses, 1920 ties
+22: 69  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 69 wins, 11 losses, 1920 ties
+23: 62  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 62 wins, 18 losses, 1920 ties
+24: 59  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 59 wins, 21 losses, 1920 ties
+25: 58  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 58 wins, 22 losses, 1920 ties
+26: 50  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 50 wins, 30 losses, 1920 ties
+Played 2000 games, Total Time: 31856 s
+
+On Groove:
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
+ 1:    20 18 18 24 31 31 34 24 30 21 26 26 24 29 34 28 16 14 14 29 22 19 23 22 22 : 599 wins, 1401 losses, 0 ties
+ 2: 60     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 60 wins, 20 losses, 1920 ties
+ 3: 62  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 62 wins, 18 losses, 1920 ties
+ 4: 62  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 62 wins, 18 losses, 1920 ties
+ 5: 56  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 56 wins, 24 losses, 1920 ties
+ 6: 49  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 49 wins, 31 losses, 1920 ties
+ 7: 49  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 49 wins, 31 losses, 1920 ties
+ 8: 46  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 46 wins, 34 losses, 1920 ties
+ 9: 56  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 56 wins, 24 losses, 1920 ties
+10: 50  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 50 wins, 30 losses, 1920 ties
+11: 59  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 59 wins, 21 losses, 1920 ties
+12: 54  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 54 wins, 26 losses, 1920 ties
+13: 54  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 54 wins, 26 losses, 1920 ties
+14: 56  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 56 wins, 24 losses, 1920 ties
+15: 51  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 51 wins, 29 losses, 1920 ties
+16: 46  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 46 wins, 34 losses, 1920 ties
+17: 52  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 52 wins, 28 losses, 1920 ties
+18: 64  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 64 wins, 16 losses, 1920 ties
+19: 66  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 66 wins, 14 losses, 1920 ties
+20: 66  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 66 wins, 14 losses, 1920 ties
+21: 51  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 51 wins, 29 losses, 1920 ties
+22: 58  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 58 wins, 22 losses, 1920 ties
+23: 61  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 61 wins, 19 losses, 1920 ties
+24: 57  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 57 wins, 23 losses, 1920 ties
+25: 58  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 58 wins, 22 losses, 1920 ties
+26: 58  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 58 wins, 22 losses, 1920 ties
+Played 2000 games, Total Time: 30783 s
+
+
+
+Player 1: ./castro-baseline
+Player 2: ./castro (new value function)
+Player 3: ./havannah
+
+Win vs Loss Matrix:
+     1  2  3
+ 1:    46 14 : 60 wins, 140 losses, 0 ties
+ 2: 54     2 : 56 wins, 144 losses, 0 ties
+ 3: 86 98    : 184 wins, 16 losses, 0 ties
+Played 300 games, Total Time: 4692 s
+
+
+Player 1: "./havannah"
+Player 2: ./castro -c 'player_params -r 0 -t 0 -p 0'
+Player 3: ./castro -c 'player_params -r 1 -t 0 -p 0'
+Player 4: ./castro -c 'player_params -r 0 -t 0.2 -p 0'
+Player 5: ./castro -c 'player_params -r 1 -t 0.2 -p 0'
+Player 6: ./castro -c 'player_params -r 0 -t 0 -p 1'
+Player 7: ./castro -c 'player_params -r 1 -t 0 -p 1'
+Player 8: ./castro -c 'player_params -r 0 -t 0.2 -p 1'
+Player 9: ./castro -c 'player_params -r 0 -t 0.2 -p 1'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9
+ 1:    50 46 50 47 50 47 50 50 : 390 wins, 10 losses, 0 ties
+ 2:  0     0  0  0  0  0  0  0 : 0 wins, 50 losses, 350 ties
+ 3:  4  0     0  0  0  0  0  0 : 4 wins, 46 losses, 350 ties
+ 4:  0  0  0     0  0  0  0  0 : 0 wins, 50 losses, 350 ties
+ 5:  3  0  0  0     0  0  0  0 : 3 wins, 47 losses, 350 ties
+ 6:  0  0  0  0  0     0  0  0 : 0 wins, 50 losses, 350 ties
+ 7:  3  0  0  0  0  0     0  0 : 3 wins, 47 losses, 350 ties
+ 8:  0  0  0  0  0  0  0     0 : 0 wins, 50 losses, 350 ties
+ 9:  0  0  0  0  0  0  0  0    : 0 wins, 50 losses, 350 ties
+Played 400 games, Total Time: 4316 s
+
+
+Player 1: "./havannah"
+Player 2: ./castro -c 'player_params -r 0 -p 0 -t 0'
+Player 3: ./castro -c 'player_params -r 1 -p 0 -t 0'
+Player 4: ./castro -c 'player_params -r 0 -p 1 -t 0'
+Player 5: ./castro -c 'player_params -r 1 -p 1 -t 0'
+Player 6: ./castro -c 'player_params -r 0 -p 0 -t 0.2 -s 0'
+Player 7: ./castro -c 'player_params -r 1 -p 0 -t 0.2 -s 0'
+Player 8: ./castro -c 'player_params -r 0 -p 1 -t 0.2 -s 0'
+Player 9: ./castro -c 'player_params -r 1 -p 1 -t 0.2 -s 0'
+Player 10: ./castro -c 'player_params -r 0 -p 0 -t 0.2 -s 2'
+Player 11: ./castro -c 'player_params -r 1 -p 0 -t 0.2 -s 2'
+Player 12: ./castro -c 'player_params -r 0 -p 1 -t 0.2 -s 2'
+Player 13: ./castro -c 'player_params -r 1 -p 1 -t 0.2 -s 2'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13
+ 1:    47 50 46 49 28 50 15 47 47 42 46 45 : 512 wins, 86 losses, 2 ties
+ 2:  3     0  0  0  0  0  0  0  0  0  0  0 : 3 wins, 47 losses, 550 ties
+ 3:  0  0     0  0  0  0  0  0  0  0  0  0 : 0 wins, 50 losses, 550 ties
+ 4:  3  0  0     0  0  0  0  0  0  0  0  0 : 3 wins, 46 losses, 551 ties
+ 5:  0  0  0  0     0  0  0  0  0  0  0  0 : 0 wins, 49 losses, 551 ties
+ 6: 22  0  0  0  0     0  0  0  0  0  0  0 : 22 wins, 28 losses, 550 ties
+ 7:  0  0  0  0  0  0     0  0  0  0  0  0 : 0 wins, 50 losses, 550 ties
+ 8: 35  0  0  0  0  0  0     0  0  0  0  0 : 35 wins, 15 losses, 550 ties
+ 9:  3  0  0  0  0  0  0  0     0  0  0  0 : 3 wins, 47 losses, 550 ties
+10:  3  0  0  0  0  0  0  0  0     0  0  0 : 3 wins, 47 losses, 550 ties
+11:  8  0  0  0  0  0  0  0  0  0     0  0 : 8 wins, 42 losses, 550 ties
+12:  4  0  0  0  0  0  0  0  0  0  0     0 : 4 wins, 46 losses, 550 ties
+13:  5  0  0  0  0  0  0  0  0  0  0  0    : 5 wins, 45 losses, 550 ties
+Played 600 games, Total Time: 19096 s
+
+
+Groove:
+
+Player 1: "./castro-214afe"
+Player 2: ./castro-2adc3f -c 'player_params -r 0 -p 0 -t 0'
+Player 3: ./castro-2adc3f -c 'player_params -r 1 -p 0 -t 0'
+Player 4: ./castro-2adc3f -c 'player_params -r 0 -p 1 -t 0'
+Player 5: ./castro-2adc3f -c 'player_params -r 1 -p 1 -t 0'
+Player 6: ./castro-2adc3f -c 'player_params -r 0 -p 0 -t 0.5 -s 0'
+Player 7: ./castro-2adc3f -c 'player_params -r 1 -p 0 -t 0.5 -s 0'
+Player 8: ./castro-2adc3f -c 'player_params -r 0 -p 1 -t 0.5 -s 0'
+Player 9: ./castro-2adc3f -c 'player_params -r 1 -p 1 -t 0.5 -s 0'
+Player 10: ./castro-2adc3f -c 'player_params -r 0 -p 0 -t 0.5 -s 2'
+Player 11: ./castro-2adc3f -c 'player_params -r 1 -p 0 -t 0.5 -s 2'
+Player 12: ./castro-2adc3f -c 'player_params -r 0 -p 1 -t 0.5 -s 2'
+Player 13: ./castro-2adc3f -c 'player_params -r 1 -p 1 -t 0.5 -s 2'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13
+ 1:    96 84 89 78 46 67 47 59 39 53 41 53 : 752 wins, 439 losses, 9 ties
+ 2:  3     0  0  0  0  0  0  0  0  0  0  0 : 3 wins, 96 losses, 1101 ties
+ 3: 13  0     0  0  0  0  0  0  0  0  0  0 : 13 wins, 84 losses, 1103 ties
+ 4: 10  0  0     0  0  0  0  0  0  0  0  0 : 10 wins, 89 losses, 1101 ties
+ 5: 18  0  0  0     0  0  0  0  0  0  0  0 : 18 wins, 78 losses, 1104 ties
+ 6: 54  0  0  0  0     0  0  0  0  0  0  0 : 54 wins, 46 losses, 1100 ties
+ 7: 33  0  0  0  0  0     0  0  0  0  0  0 : 33 wins, 67 losses, 1100 ties
+ 8: 53  0  0  0  0  0  0     0  0  0  0  0 : 53 wins, 47 losses, 1100 ties
+ 9: 41  0  0  0  0  0  0  0     0  0  0  0 : 41 wins, 59 losses, 1100 ties
+10: 61  0  0  0  0  0  0  0  0     0  0  0 : 61 wins, 39 losses, 1100 ties
+11: 47  0  0  0  0  0  0  0  0  0     0  0 : 47 wins, 53 losses, 1100 ties
+12: 59  0  0  0  0  0  0  0  0  0  0     0 : 59 wins, 41 losses, 1100 ties
+13: 47  0  0  0  0  0  0  0  0  0  0  0    : 47 wins, 53 losses, 1100 ties
+Played 1200 games, Total Time: 33710 s
+
+
+Starscream:
+
+Player 1: "./castro-214afe"
+Player 2: ./castro-2adc3f -c 'player_params -r 0 -p 0 -t 0'
+Player 3: ./castro-2adc3f -c 'player_params -r 1 -p 0 -t 0'
+Player 4: ./castro-2adc3f -c 'player_params -r 0 -p 1 -t 0'
+Player 5: ./castro-2adc3f -c 'player_params -r 1 -p 1 -t 0'
+Player 6: ./castro-2adc3f -c 'player_params -r 0 -p 0 -t 0.5 -s 0'
+Player 7: ./castro-2adc3f -c 'player_params -r 1 -p 0 -t 0.5 -s 0'
+Player 8: ./castro-2adc3f -c 'player_params -r 0 -p 1 -t 0.5 -s 0'
+Player 9: ./castro-2adc3f -c 'player_params -r 1 -p 1 -t 0.5 -s 0'
+Player 10: ./castro-2adc3f -c 'player_params -r 0 -p 0 -t 0.5 -s 2'
+Player 11: ./castro-2adc3f -c 'player_params -r 1 -p 0 -t 0.5 -s 2'
+Player 12: ./castro-2adc3f -c 'player_params -r 0 -p 1 -t 0.5 -s 2'
+Player 13: ./castro-2adc3f -c 'player_params -r 1 -p 1 -t 0.5 -s 2'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13
+ 1:    84 77 58 88 38 70 40 68 44 54 57 54 : 732 wins, 465 losses, 3 ties
+ 2: 16     0  0  0  0  0  0  0  0  0  0  0 : 16 wins, 84 losses, 1100 ties
+ 3: 22  0     0  0  0  0  0  0  0  0  0  0 : 22 wins, 77 losses, 1101 ties
+ 4: 42  0  0     0  0  0  0  0  0  0  0  0 : 42 wins, 58 losses, 1100 ties
+ 5: 10  0  0  0     0  0  0  0  0  0  0  0 : 10 wins, 88 losses, 1102 ties
+ 6: 62  0  0  0  0     0  0  0  0  0  0  0 : 62 wins, 38 losses, 1100 ties
+ 7: 30  0  0  0  0  0     0  0  0  0  0  0 : 30 wins, 70 losses, 1100 ties
+ 8: 60  0  0  0  0  0  0     0  0  0  0  0 : 60 wins, 40 losses, 1100 ties
+ 9: 32  0  0  0  0  0  0  0     0  0  0  0 : 32 wins, 68 losses, 1100 ties
+10: 56  0  0  0  0  0  0  0  0     0  0  0 : 56 wins, 44 losses, 1100 ties
+11: 46  0  0  0  0  0  0  0  0  0     0  0 : 46 wins, 54 losses, 1100 ties
+12: 43  0  0  0  0  0  0  0  0  0  0     0 : 43 wins, 57 losses, 1100 ties
+13: 46  0  0  0  0  0  0  0  0  0  0  0    : 46 wins, 54 losses, 1100 ties
+Played 1200 games, Total Time: 34788 s
+
+
+Player 1: "./havannah"
+Player 2: ./castro -c 'player_params -r 0 -p 0 -t 0'
+Player 3: ./castro -c 'player_params -r 1 -p 0 -t 0'
+Player 4: ./castro -c 'player_params -r 0 -p 1 -t 0'
+Player 5: ./castro -c 'player_params -r 1 -p 1 -t 0'
+Player 6: ./castro -c 'player_params -r 0 -p 0 -t 0.2 -s 0'
+Player 7: ./castro -c 'player_params -r 1 -p 0 -t 0.2 -s 0'
+Player 8: ./castro -c 'player_params -r 0 -p 1 -t 0.2 -s 0'
+Player 9: ./castro -c 'player_params -r 1 -p 1 -t 0.2 -s 0'
+Player 10: ./castro -c 'player_params -r 0 -p 0 -t 0.2 -s 2'
+Player 11: ./castro -c 'player_params -r 1 -p 0 -t 0.2 -s 2'
+Player 12: ./castro -c 'player_params -r 0 -p 1 -t 0.2 -s 2'
+Player 13: ./castro -c 'player_params -r 1 -p 1 -t 0.2 -s 2'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13
+ 1:    95100 89100 57 97 36 96 92 94 94 83 : 1033 wins, 167 losses, 0 ties
+ 2:  5     0  0  0  0  0  0  0  0  0  0  0 : 5 wins, 95 losses, 1100 ties
+ 3:  0  0     0  0  0  0  0  0  0  0  0  0 : 0 wins, 100 losses, 1100 ties
+ 4: 11  0  0     0  0  0  0  0  0  0  0  0 : 11 wins, 89 losses, 1100 ties
+ 5:  0  0  0  0     0  0  0  0  0  0  0  0 : 0 wins, 100 losses, 1100 ties
+ 6: 43  0  0  0  0     0  0  0  0  0  0  0 : 43 wins, 57 losses, 1100 ties
+ 7:  3  0  0  0  0  0     0  0  0  0  0  0 : 3 wins, 97 losses, 1100 ties
+ 8: 64  0  0  0  0  0  0     0  0  0  0  0 : 64 wins, 36 losses, 1100 ties
+ 9:  4  0  0  0  0  0  0  0     0  0  0  0 : 4 wins, 96 losses, 1100 ties
+10:  8  0  0  0  0  0  0  0  0     0  0  0 : 8 wins, 92 losses, 1100 ties
+11:  6  0  0  0  0  0  0  0  0  0     0  0 : 6 wins, 94 losses, 1100 ties
+12:  6  0  0  0  0  0  0  0  0  0  0     0 : 6 wins, 94 losses, 1100 ties
+13: 17  0  0  0  0  0  0  0  0  0  0  0    : 17 wins, 83 losses, 1100 ties
+Played 1200 games, Total Time: 40168 s
+
+
+
+Player 1: "./castro-214afe"
+Player 2: ./castro-be99899 -c 'player_params -e 1 -f 10'
+Player 3: ./castro-be99899 -c 'player_params -e 1 -f 20'
+Player 4: ./castro-be99899 -c 'player_params -e 1 -f 50'
+Player 5: ./castro-be99899 -c 'player_params -e 1 -f 100'
+Player 6: ./castro-be99899 -c 'player_params -e 2 -f 10'
+Player 7: ./castro-be99899 -c 'player_params -e 2 -f 20'
+Player 8: ./castro-be99899 -c 'player_params -e 2 -f 50'
+Player 9: ./castro-be99899 -c 'player_params -e 2 -f 100'
+Player 10: ./castro-be99899 -c 'player_params -e 3 -f 10'
+Player 11: ./castro-be99899 -c 'player_params -e 3 -f 20'
+Player 12: ./castro-be99899 -c 'player_params -e 3 -f 50'
+Player 13: ./castro-be99899 -c 'player_params -e 3 -f 100'
+Player 14: ./castro-be99899 -c 'player_params -e 5 -f 10'
+Player 15: ./castro-be99899 -c 'player_params -e 5 -f 20'
+Player 16: ./castro-be99899 -c 'player_params -e 5 -f 50'
+Player 17: ./castro-be99899 -c 'player_params -e 5 -f 100'
+Player 18: ./castro-be99899 -c 'player_params -e 10 -f 10'
+Player 19: ./castro-be99899 -c 'player_params -e 10 -f 20'
+Player 20: ./castro-be99899 -c 'player_params -e 10 -f 50'
+Player 21: ./castro-be99899 -c 'player_params -e 10 -f 100'
+
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+ 1:    15 10 11 12 17 12 16 15  6 12 16 18 11 10 14 13  7 11  8 13 : 247 wins, 153 losses, 0 ties
+ 2:  5     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 5 wins, 15 losses, 380 ties
+ 3: 10  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 10 wins, 10 losses, 380 ties
+ 4:  9  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 9 wins, 11 losses, 380 ties
+ 5:  8  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 380 ties
+ 6:  3  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 3 wins, 17 losses, 380 ties
+ 7:  8  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 380 ties
+ 8:  4  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 4 wins, 16 losses, 380 ties
+ 9:  5  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 5 wins, 15 losses, 380 ties
+10: 14  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 14 wins, 6 losses, 380 ties
+11:  8  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 380 ties
+12:  4  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 4 wins, 16 losses, 380 ties
+13:  2  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 2 wins, 18 losses, 380 ties
+14:  9  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 9 wins, 11 losses, 380 ties
+15: 10  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 10 wins, 10 losses, 380 ties
+16:  6  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 6 wins, 14 losses, 380 ties
+17:  7  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 7 wins, 13 losses, 380 ties
+18: 13  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 13 wins, 7 losses, 380 ties
+19:  9  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 9 wins, 11 losses, 380 ties
+20: 12  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 12 wins, 8 losses, 380 ties
+21:  7  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 7 wins, 13 losses, 380 ties
+Played 400 games, Total Time: 10374 s
+
+
+Player 1: "./castro-214afe"
+Player 2: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 0 -t 0'
+Player 3: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 0 -t 0'
+Player 4: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 0 -t 0'
+Player 5: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 0 -t 0'
+Player 6: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 1 -t 0'
+Player 7: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 1 -t 0'
+Player 8: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 1 -t 0'
+Player 9: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 1 -t 0'
+Player 10: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 0 -t 0.5'
+Player 11: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 0 -t 0.5'
+Player 12: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 0 -t 0.5'
+Player 13: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 0 -t 0.5'
+Player 14: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 1 -t 0.5'
+Player 15: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 1 -t 0.5'
+Player 16: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 1 -t 0.5'
+Player 17: ./castro-be99899 -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 1 -t 0.5'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+ 1:    39 37 39 43 43 37 32 40 23 22 16 24 22 29 26 22 : 494 wins, 305 losses, 1 ties
+ 2: 10     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 10 wins, 39 losses, 751 ties
+ 3: 13  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 13 wins, 37 losses, 750 ties
+ 4: 11  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 11 wins, 39 losses, 750 ties
+ 5:  7  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 7 wins, 43 losses, 750 ties
+ 6:  7  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 7 wins, 43 losses, 750 ties
+ 7: 13  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 13 wins, 37 losses, 750 ties
+ 8: 18  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 18 wins, 32 losses, 750 ties
+ 9: 10  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 10 wins, 40 losses, 750 ties
+10: 27  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 27 wins, 23 losses, 750 ties
+11: 28  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 28 wins, 22 losses, 750 ties
+12: 34  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 34 wins, 16 losses, 750 ties
+13: 26  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 26 wins, 24 losses, 750 ties
+14: 28  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 28 wins, 22 losses, 750 ties
+15: 21  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 21 wins, 29 losses, 750 ties
+16: 24  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 24 wins, 26 losses, 750 ties
+17: 28  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 28 wins, 22 losses, 750 ties
+Played 800 games, Total Time: 22519 s
+
+
+
+
+Player 1: "./castro-214afe"
+Player 2: ./castro-be99899 -c 'player_params -e 6 -f 10'
+Player 3: ./castro-be99899 -c 'player_params -e 6 -f 20'
+Player 4: ./castro-be99899 -c 'player_params -e 6 -f 50'
+Player 5: ./castro-be99899 -c 'player_params -e 6 -f 100'
+Player 6: ./castro-be99899 -c 'player_params -e 8 -f 10'
+Player 7: ./castro-be99899 -c 'player_params -e 8 -f 20'
+Player 8: ./castro-be99899 -c 'player_params -e 8 -f 50'
+Player 9: ./castro-be99899 -c 'player_params -e 8 -f 100'
+Player 10: ./castro-be99899 -c 'player_params -e 10 -f 10'
+Player 11: ./castro-be99899 -c 'player_params -e 10 -f 20'
+Player 12: ./castro-be99899 -c 'player_params -e 10 -f 50'
+Player 13: ./castro-be99899 -c 'player_params -e 10 -f 100'
+Player 14: ./castro-be99899 -c 'player_params -e 12 -f 10'
+Player 15: ./castro-be99899 -c 'player_params -e 12 -f 20'
+Player 16: ./castro-be99899 -c 'player_params -e 12 -f 50'
+Player 17: ./castro-be99899 -c 'player_params -e 12 -f 100'
+Player 18: ./castro-be99899 -c 'player_params -e 15 -f 10'
+Player 19: ./castro-be99899 -c 'player_params -e 15 -f 20'
+Player 20: ./castro-be99899 -c 'player_params -e 15 -f 50'
+Player 21: ./castro-be99899 -c 'player_params -e 15 -f 100'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+ 1:    22 22 20 26 27 22 13 29 17 16 21 18 16 36 14 31 19 18 19 28 : 434 wins, 566 losses, 0 ties
+ 2: 28     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 28 wins, 22 losses, 950 ties
+ 3: 28  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 28 wins, 22 losses, 950 ties
+ 4: 30  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 30 wins, 20 losses, 950 ties
+ 5: 24  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 24 wins, 26 losses, 950 ties
+ 6: 23  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 23 wins, 27 losses, 950 ties
+ 7: 28  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 28 wins, 22 losses, 950 ties
+ 8: 37  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 37 wins, 13 losses, 950 ties
+ 9: 21  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 21 wins, 29 losses, 950 ties
+10: 33  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 33 wins, 17 losses, 950 ties
+11: 34  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 34 wins, 16 losses, 950 ties
+12: 29  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 29 wins, 21 losses, 950 ties
+13: 32  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 32 wins, 18 losses, 950 ties
+14: 34  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 34 wins, 16 losses, 950 ties
+15: 14  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 14 wins, 36 losses, 950 ties
+16: 36  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 36 wins, 14 losses, 950 ties
+17: 19  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 19 wins, 31 losses, 950 ties
+18: 31  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 31 wins, 19 losses, 950 ties
+19: 32  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 32 wins, 18 losses, 950 ties
+20: 31  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 31 wins, 19 losses, 950 ties
+21: 22  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 22 wins, 28 losses, 950 ties
+Played 1000 games, Total Time: 27290 s
+
+
+
+Player 1: "./havannah"
+Player 2: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 0 -t 0'
+Player 3: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 0 -t 0'
+Player 4: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 0 -t 0'
+Player 5: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 0 -t 0'
+Player 6: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 1 -t 0'
+Player 7: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 1 -t 0'
+Player 8: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 1 -t 0'
+Player 9: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 1 -t 0'
+Player 10: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 0 -t 0.5'
+Player 11: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 0 -t 0.5'
+Player 12: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 0 -t 0.5'
+Player 13: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 0 -t 0.5'
+Player 14: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 1 -t 0.5'
+Player 15: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 1 -t 0.5'
+Player 16: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 1 -t 0.5'
+Player 17: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 1 -t 0.5'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+ 1:    50 49 49 48 46 46 40 40 23 17 25 18 16 18 19 23 : 527 wins, 259 losses, 14 ties
+ 2:  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 0 wins, 50 losses, 750 ties
+ 3:  1  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 1 wins, 49 losses, 750 ties
+ 4:  1  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 1 wins, 49 losses, 750 ties
+ 5:  2  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 2 wins, 48 losses, 750 ties
+ 6:  4  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 4 wins, 46 losses, 750 ties
+ 7:  3  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 3 wins, 46 losses, 751 ties
+ 8:  5  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 5 wins, 40 losses, 755 ties
+ 9:  4  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 4 wins, 40 losses, 756 ties
+10: 27  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 27 wins, 23 losses, 750 ties
+11: 33  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 33 wins, 17 losses, 750 ties
+12: 24  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 24 wins, 25 losses, 751 ties
+13: 32  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 32 wins, 18 losses, 750 ties
+14: 34  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 34 wins, 16 losses, 750 ties
+15: 32  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 32 wins, 18 losses, 750 ties
+16: 30  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 30 wins, 19 losses, 751 ties
+17: 27  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 27 wins, 23 losses, 750 ties
+Played 800 games, Total Time: 20093 s
+
+
+Player 1: "./havannah"
+Player 2: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 0 -t 0.5'
+Player 3: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 0 -t 0.5'
+Player 4: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 0 -t 0.5'
+Player 5: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 0 -t 0.5'
+Player 6: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 0 -p 1 -t 0.5'
+Player 7: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 0 -p 1 -t 0.5'
+Player 8: ./castro -c 'player_params -e 10 -f 10 -r 0 -a 1 -p 1 -t 0.5'
+Player 9: ./castro -c 'player_params -e 10 -f 10 -r 1 -a 1 -p 1 -t 0.5'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9
+ 1:    22 18 28 15 17 18 13 24 : 155 wins, 244 losses, 1 ties
+ 2: 28     0  0  0  0  0  0  0 : 28 wins, 22 losses, 350 ties
+ 3: 32  0     0  0  0  0  0  0 : 32 wins, 18 losses, 350 ties
+ 4: 22  0  0     0  0  0  0  0 : 22 wins, 28 losses, 350 ties
+ 5: 35  0  0  0     0  0  0  0 : 35 wins, 15 losses, 350 ties
+ 6: 33  0  0  0  0     0  0  0 : 33 wins, 17 losses, 350 ties
+ 7: 32  0  0  0  0  0     0  0 : 32 wins, 18 losses, 350 ties
+ 8: 36  0  0  0  0  0  0     0 : 36 wins, 13 losses, 351 ties
+ 9: 26  0  0  0  0  0  0  0    : 26 wins, 24 losses, 350 ties
+Played 400 games, Total Time: 10686 s
+
+
+
+Player 1: ./castro - add rave values to both players, not just the winner, ravescale off
+Player 2: ./castro-728811e
+
+Win vs Loss Matrix:
+     1  2
+ 1:    54 : 54 wins, 46 losses, 0 ties
+ 2: 46    : 46 wins, 54 losses, 0 ties
+Played 100 games, Total Time: 6618 s
+
+
+finally fixed the bug!!!
+Player 1: ./castro
+Player 2: ./havannah
+Player 3: ../../tewalds-public/castro
+
+Win vs Loss Matrix:
+     1  2  3
+ 1:    18 16 : 34 wins, 6 losses, 0 ties
+ 2:  2     7 : 9 wins, 31 losses, 0 ties
+ 3:  4 13    : 17 wins, 23 losses, 0 ties
+Played 60 games, Total Time: 1572 s
+
+
+
+
+Player 1: "./castro"
+Player 2: ./castro -c 'player_params -e 0 -f 10'
+Player 3: ./castro -c 'player_params -e 0 -f 20'
+Player 4: ./castro -c 'player_params -e 0 -f 50'
+Player 5: ./castro -c 'player_params -e 0 -f 100'
+Player 6: ./castro -c 'player_params -e 1 -f 10'
+Player 7: ./castro -c 'player_params -e 1 -f 20'
+Player 8: ./castro -c 'player_params -e 1 -f 50'
+Player 9: ./castro -c 'player_params -e 1 -f 100'
+Player 10: ./castro -c 'player_params -e 2 -f 10'
+Player 11: ./castro -c 'player_params -e 2 -f 20'
+Player 12: ./castro -c 'player_params -e 2 -f 50'
+Player 13: ./castro -c 'player_params -e 2 -f 100'
+Player 14: ./castro -c 'player_params -e 5 -f 10'
+Player 15: ./castro -c 'player_params -e 5 -f 20'
+Player 16: ./castro -c 'player_params -e 5 -f 50'
+Player 17: ./castro -c 'player_params -e 5 -f 100'
+Player 18: ./castro -c 'player_params -e 10 -f 10'
+Player 19: ./castro -c 'player_params -e 10 -f 20'
+Player 20: ./castro -c 'player_params -e 10 -f 50'
+Player 21: ./castro -c 'player_params -e 10 -f 100'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+ 1:    19 18 20 19 12 11  9 10 16 10 12 12 20 19 19 19 19 20 20 19 : 323 wins, 77 losses, 0 ties
+ 2:  1     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 1 wins, 19 losses, 0 ties
+ 3:  2  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 2 wins, 18 losses, 0 ties
+ 4:  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 0 wins, 20 losses, 0 ties
+ 5:  1  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 1 wins, 19 losses, 0 ties
+ 6:  8  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 0 ties
+ 7:  9  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 9 wins, 11 losses, 0 ties
+ 8: 11  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 11 wins, 9 losses, 0 ties
+ 9: 10  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 10 wins, 10 losses, 0 ties
+10:  4  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 4 wins, 16 losses, 0 ties
+11: 10  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 10 wins, 10 losses, 0 ties
+12:  8  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 0 ties
+13:  8  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 8 wins, 12 losses, 0 ties
+14:  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 0 wins, 20 losses, 0 ties
+15:  1  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 1 wins, 19 losses, 0 ties
+16:  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 1 wins, 19 losses, 0 ties
+17:  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 1 wins, 19 losses, 0 ties
+18:  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 1 wins, 19 losses, 0 ties
+19:  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 0 wins, 20 losses, 0 ties
+20:  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 0 wins, 20 losses, 0 ties
+21:  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 1 wins, 19 losses, 0 ties
+Played 400 games, Total Time: 13086 s
+
+
+
+
+Player 1: "./castro"
+Player 2: ./castro -c 'player_params -s 0'
+Player 3: ./castro -c 'player_params -s 1'
+Player 4: ./castro -c 'player_params -s 2'
+Player 5: ./castro -c 'player_params -s 3'
+Player 6: ./castro -c 'player_params -s 4'
+Player 7: ./castro -c 'player_params -s 6'
+Player 8: ./castro -c 'player_params -s 8'
+Player 9: ./castro -c 'player_params -s 10'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9
+ 1:    23 29 25 17 23 22 26 28 : 193 wins, 207 losses, 0 ties
+ 2: 27     0  0  0  0  0  0  0 : 27 wins, 23 losses, 0 ties
+ 3: 21  0     0  0  0  0  0  0 : 21 wins, 29 losses, 0 ties
+ 4: 25  0  0     0  0  0  0  0 : 25 wins, 25 losses, 0 ties
+ 5: 33  0  0  0     0  0  0  0 : 33 wins, 17 losses, 0 ties
+ 6: 27  0  0  0  0     0  0  0 : 27 wins, 23 losses, 0 ties
+ 7: 28  0  0  0  0  0     0  0 : 28 wins, 22 losses, 0 ties
+ 8: 24  0  0  0  0  0  0     0 : 24 wins, 26 losses, 0 ties
+ 9: 22  0  0  0  0  0  0  0    : 22 wins, 28 losses, 0 ties
+Played 400 games, Total Time: 27576 s
+
+
+Player 1: "./castro"
+Player 2: ./castro -c 'player_params -e 0.7'
+Player 3: ./castro -c 'player_params -e 0.8'
+Player 4: ./castro -c 'player_params -e 0.9'
+Player 5: ./castro -c 'player_params -e 1.0'
+Player 6: ./castro -c 'player_params -e 1.1'
+Player 7: ./castro -c 'player_params -e 1.2'
+Player 8: ./castro -c 'player_params -e 1.3'
+Player 9: ./castro -c 'player_params -e 1.4'
+Player 10: ./castro -c 'player_params -e 1.5'
+Player 11: ./castro -c 'player_params -e 1.6'
+Player 12: ./castro -c 'player_params -e 1.7'
+Player 13: ./castro -c 'player_params -e 1.8'
+Player 14: ./castro -c 'player_params -e 1.9'
+Player 15: ./castro -c 'player_params -e 2.0'
+Player 16: ./castro -c 'player_params -e 2.1'
+Player 17: ./castro -c 'player_params -e 2.2'
+Player 18: ./castro -c 'player_params -e 2.3'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18
+ 1:    21 18 19 28 20 19 26 26 30 31 29 26 31 36 34 34 39 : 467 wins, 383 losses, 0 ties
+ 2: 29     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 29 wins, 21 losses, 0 ties
+ 3: 32  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 32 wins, 18 losses, 0 ties
+ 4: 31  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 31 wins, 19 losses, 0 ties
+ 5: 22  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 22 wins, 28 losses, 0 ties
+ 6: 30  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 30 wins, 20 losses, 0 ties
+ 7: 31  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 31 wins, 19 losses, 0 ties
+ 8: 24  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 24 wins, 26 losses, 0 ties
+ 9: 24  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 24 wins, 26 losses, 0 ties
+10: 20  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 20 wins, 30 losses, 0 ties
+11: 19  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 19 wins, 31 losses, 0 ties
+12: 21  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 21 wins, 29 losses, 0 ties
+13: 24  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 24 wins, 26 losses, 0 ties
+14: 19  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 19 wins, 31 losses, 0 ties
+15: 14  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 14 wins, 36 losses, 0 ties
+16: 16  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 16 wins, 34 losses, 0 ties
+17: 16  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 16 wins, 34 losses, 0 ties
+18: 11  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 11 wins, 39 losses, 0 ties
+Played 850 games, Total Time: 29582 s
+
+
+Player 1: "./castro"
+Player 2: ./castro -c 'player_params -k 0'
+Player 3: ./castro -c 'player_params -k 5'
+Player 4: ./castro -c 'player_params -k 10'
+Player 5: ./castro -c 'player_params -k 20'
+Player 6: ./castro -c 'player_params -k 50'
+Player 7: ./castro -c 'player_params -k 100'
+Player 8: ./castro -c 'player_params -k 200'
+Player 9: ./castro -c 'player_params -k 500'
+Player 10: ./castro -c 'player_params -k 1000'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10
+ 1:    26 34 26 19 29 23 27 24 22 : 230 wins, 220 losses, 0 ties
+ 2: 24     0  0  0  0  0  0  0  0 : 24 wins, 26 losses, 0 ties
+ 3: 16  0     0  0  0  0  0  0  0 : 16 wins, 34 losses, 0 ties
+ 4: 24  0  0     0  0  0  0  0  0 : 24 wins, 26 losses, 0 ties
+ 5: 31  0  0  0     0  0  0  0  0 : 31 wins, 19 losses, 0 ties
+ 6: 21  0  0  0  0     0  0  0  0 : 21 wins, 29 losses, 0 ties
+ 7: 27  0  0  0  0  0     0  0  0 : 27 wins, 23 losses, 0 ties
+ 8: 23  0  0  0  0  0  0     0  0 : 23 wins, 27 losses, 0 ties
+ 9: 26  0  0  0  0  0  0  0     0 : 26 wins, 24 losses, 0 ties
+10: 28  0  0  0  0  0  0  0  0    : 28 wins, 22 losses, 0 ties
+Played 450 games, Total Time: 31503 s
+
+
+Player 1: "./castro"
+Player 2: ./castro -c 'player_params -r 0 -a 0 -o 0 -p 0'
+Player 3: ./castro -c 'player_params -r 1 -a 0 -o 0 -p 0'
+Player 4: ./castro -c 'player_params -r 0 -a 1 -o 0 -p 0'
+Player 5: ./castro -c 'player_params -r 1 -a 1 -o 0 -p 0'
+Player 6: ./castro -c 'player_params -r 0 -a 0 -o 1 -p 0'
+Player 7: ./castro -c 'player_params -r 1 -a 0 -o 1 -p 0'
+Player 8: ./castro -c 'player_params -r 0 -a 1 -o 1 -p 0'
+Player 9: ./castro -c 'player_params -r 1 -a 1 -o 1 -p 0'
+Player 10: ./castro -c 'player_params -r 0 -a 0 -o 0 -p 1'
+Player 11: ./castro -c 'player_params -r 1 -a 0 -o 0 -p 1'
+Player 12: ./castro -c 'player_params -r 0 -a 1 -o 0 -p 1'
+Player 13: ./castro -c 'player_params -r 1 -a 1 -o 0 -p 1'
+Player 14: ./castro -c 'player_params -r 0 -a 0 -o 1 -p 1'
+Player 15: ./castro -c 'player_params -r 1 -a 0 -o 1 -p 1'
+Player 16: ./castro -c 'player_params -r 0 -a 1 -o 1 -p 1'
+Player 17: ./castro -c 'player_params -r 1 -a 1 -o 1 -p 1'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+ 1:    16 27 30 28 19 30 15 32  6  1 10  9  7  8 12 21 : 271 wins, 462 losses, 67 ties
+ 2: 21     0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 21 wins, 16 losses, 13 ties
+ 3: 12  0     0  0  0  0  0  0  0  0  0  0  0  0  0  0 : 12 wins, 27 losses, 11 ties
+ 4: 15  0  0     0  0  0  0  0  0  0  0  0  0  0  0  0 : 15 wins, 30 losses, 5 ties
+ 5: 14  0  0  0     0  0  0  0  0  0  0  0  0  0  0  0 : 14 wins, 28 losses, 8 ties
+ 6: 21  0  0  0  0     0  0  0  0  0  0  0  0  0  0  0 : 21 wins, 19 losses, 10 ties
+ 7: 13  0  0  0  0  0     0  0  0  0  0  0  0  0  0  0 : 13 wins, 30 losses, 7 ties
+ 8: 27  0  0  0  0  0  0     0  0  0  0  0  0  0  0  0 : 27 wins, 15 losses, 8 ties
+ 9: 13  0  0  0  0  0  0  0     0  0  0  0  0  0  0  0 : 13 wins, 32 losses, 5 ties
+10: 44  0  0  0  0  0  0  0  0     0  0  0  0  0  0  0 : 44 wins, 6 losses, 0 ties
+11: 49  0  0  0  0  0  0  0  0  0     0  0  0  0  0  0 : 49 wins, 1 losses, 0 ties
+12: 40  0  0  0  0  0  0  0  0  0  0     0  0  0  0  0 : 40 wins, 10 losses, 0 ties
+13: 41  0  0  0  0  0  0  0  0  0  0  0     0  0  0  0 : 41 wins, 9 losses, 0 ties
+14: 43  0  0  0  0  0  0  0  0  0  0  0  0     0  0  0 : 43 wins, 7 losses, 0 ties
+15: 42  0  0  0  0  0  0  0  0  0  0  0  0  0     0  0 : 42 wins, 8 losses, 0 ties
+16: 38  0  0  0  0  0  0  0  0  0  0  0  0  0  0     0 : 38 wins, 12 losses, 0 ties
+17: 29  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0    : 29 wins, 21 losses, 0 ties
+Played 800 games, Total Time: 46764 s
+
+
+Player 1: "./castro"
+Player 2: ./castro -c 'player_params -e 0.5'
+Player 3: ./castro -c 'player_params -e 0.6'
+Player 4: ./castro -c 'player_params -e 0.7'
+Player 5: ./castro -c 'player_params -e 0.8'
+Player 6: ./castro -c 'player_params -e 0.9'
+Player 7: ./castro -c 'player_params -e 1.0'
+Player 8: ./castro -c 'player_params -e 1.1'
+Player 9: ./castro -c 'player_params -e 1.2'
+Player 10: ./castro -c 'player_params -e 1.3'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10
+ 1:    42 47 50 38 44 58 41 52 47 : 419 wins, 481 losses, 0 ties
+ 2: 58     0  0  0  0  0  0  0  0 : 58 wins, 42 losses, 0 ties
+ 3: 53  0     0  0  0  0  0  0  0 : 53 wins, 47 losses, 0 ties
+ 4: 50  0  0     0  0  0  0  0  0 : 50 wins, 50 losses, 0 ties
+ 5: 62  0  0  0     0  0  0  0  0 : 62 wins, 38 losses, 0 ties
+ 6: 56  0  0  0  0     0  0  0  0 : 56 wins, 44 losses, 0 ties
+ 7: 42  0  0  0  0  0     0  0  0 : 42 wins, 58 losses, 0 ties
+ 8: 59  0  0  0  0  0  0     0  0 : 59 wins, 41 losses, 0 ties
+ 9: 48  0  0  0  0  0  0  0     0 : 48 wins, 52 losses, 0 ties
+10: 53  0  0  0  0  0  0  0  0    : 53 wins, 47 losses, 0 ties
+Played 900 games, Total Time: 32019 s
+
+
+Player 1: ./castro-fuego
+Player 2: ./castro-normal
+Player 3: ./castro-sqrt
+Player 4: ./havannah
+
+Win vs Loss Matrix:
+     1  2  3  4
+ 1:     5  4  0 : 9 wins, 141 losses, 0 ties
+ 2: 45    26 50 : 121 wins, 29 losses, 0 ties
+ 3: 46 24    50 : 120 wins, 30 losses, 0 ties
+ 4: 50  0  0    : 50 wins, 100 losses, 0 ties
+Played 300 games, Total Time: 6330 s
+
+
+Player 1: ./castro-fuego
+Player 2: ./castro-normal
+Player 3: ./castro-sqrt
+
+Win vs Loss Matrix:
+     1  2  3
+ 1:     0  0 : 0 wins, 40 losses, 0 ties
+ 2: 20    10 : 30 wins, 10 losses, 0 ties
+ 3: 20 10    : 30 wins, 10 losses, 0 ties
+Played 60 games, Total Time: 3386 s
+
+
+Player 1: "./castro"
+Player 2: ./castro -c 'player_params -s 0'
+Player 3: ./castro -c 'player_params -s 1'
+Player 4: ./castro -c 'player_params -s 2'
+Player 5: ./castro -c 'player_params -s 3'
+Player 6: ./castro -c 'player_params -s 4'
+Player 7: ./castro -c 'player_params -s 5'
+Player 8: ./castro -c 'player_params -s 6'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8
+ 1:    59 56 51 43 52 45 53 : 359 wins, 341 losses, 0 ties
+ 2: 41     0  0  0  0  0  0 : 41 wins, 59 losses, 0 ties
+ 3: 44  0     0  0  0  0  0 : 44 wins, 56 losses, 0 ties
+ 4: 49  0  0     0  0  0  0 : 49 wins, 51 losses, 0 ties
+ 5: 57  0  0  0     0  0  0 : 57 wins, 43 losses, 0 ties
+ 6: 48  0  0  0  0     0  0 : 48 wins, 52 losses, 0 ties
+ 7: 55  0  0  0  0  0     0 : 55 wins, 45 losses, 0 ties
+ 8: 47  0  0  0  0  0  0    : 47 wins, 53 losses, 0 ties
+Played 700 games, Total Time: 48094 s
+
+
+
+Player 1: "./castro"
+Player 2: ./castro -c 'player_params -e 0.4'
+Player 3: ./castro -c 'player_params -e 0.6'
+Player 4: ./castro -c 'player_params -e 0.8'
+Player 5: ./castro -c 'player_params -e 1.0'
+
+Win vs Loss Matrix:
+     1  2  3  4  5
+ 1:     4  5  2  5 : 16 wins, 24 losses, 0 ties
+ 2:  6     5  3  5 : 19 wins, 21 losses, 0 ties
+ 3:  5  5     4  5 : 19 wins, 21 losses, 0 ties
+ 4:  8  7  6     6 : 27 wins, 13 losses, 0 ties
+ 5:  5  5  5  4    : 19 wins, 21 losses, 0 ties
+Played 100 games, Total Time: 34692 s
+
+
+
+Player 1: ./castro -c 'player_params -r 0 -a 0 -o 0 -p 0 -t 0 -k 0'
+Player 2: ./castro -c 'player_params -r 0 -a 0 -o 0 -p 1'
+Player 3: ./castro -c 'player_params -r 1 -a 0 -o 0 -p 1'
+Player 4: ./castro -c 'player_params -r 0 -a 1 -o 0 -p 1'
+Player 5: ./castro -c 'player_params -r 1 -a 1 -o 0 -p 1'
+Player 6: ./castro -c 'player_params -r 0 -a 0 -o 1 -p 1'
+Player 7: ./castro -c 'player_params -r 1 -a 0 -o 1 -p 1'
+Player 8: ./castro -c 'player_params -r 0 -a 1 -o 1 -p 1'
+Player 9: ./castro -c 'player_params -r 1 -a 1 -o 1 -p 1'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9
+ 1:     1  1  4  1  1  0  5  2 : 15 wins, 145 losses, 0 ties
+ 2: 19     4  7 14 14  7 10 15 : 90 wins, 70 losses, 0 ties
+ 3: 19 16    11 15  9 11 13 13 : 107 wins, 53 losses, 0 ties
+ 4: 16 13  9     8 12 14  9 11 : 92 wins, 68 losses, 0 ties
+ 5: 19  6  5 12    11  9  8  9 : 79 wins, 81 losses, 0 ties
+ 6: 19  6 11  8  9     9  8  8 : 78 wins, 82 losses, 0 ties
+ 7: 20 13  9  6 11 11    11  9 : 90 wins, 70 losses, 0 ties
+ 8: 15 10  7 11 12 12  9     8 : 84 wins, 76 losses, 0 ties
+ 9: 18  5  7  9 11 12 11 12    : 85 wins, 75 losses, 0 ties
+Played 720 games, Total Time: 37045 s
+
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0'
+Player 3: ./castro -c 'player_params -u 0.5'
+Player 4: ./castro -c 'player_params -u 1'
+Player 5: ./castro -c 'player_params -u 1.5'
+Player 6: ./castro -c 'player_params -u 2'
+Player 7: ./castro -c 'player_params -u 5'
+Player 8: ./castro -c 'player_params -u 10'
+Player 9: ./castro -c 'player_params -u 100'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9
+ 1:    12 15 15 15 17 13 16 19 : 122 wins, 118 losses, 0 ties
+ 2: 18     0  0  0  0  0  0  0 : 18 wins, 12 losses, 0 ties
+ 3: 15  0     0  0  0  0  0  0 : 15 wins, 15 losses, 0 ties
+ 4: 15  0  0     0  0  0  0  0 : 15 wins, 15 losses, 0 ties
+ 5: 15  0  0  0     0  0  0  0 : 15 wins, 15 losses, 0 ties
+ 6: 13  0  0  0  0     0  0  0 : 13 wins, 17 losses, 0 ties
+ 7: 17  0  0  0  0  0     0  0 : 17 wins, 13 losses, 0 ties
+ 8: 14  0  0  0  0  0  0     0 : 14 wins, 16 losses, 0 ties
+ 9: 11  0  0  0  0  0  0  0    : 11 wins, 19 losses, 0 ties
+Played 240 games, Total Time: 17078 s
+
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0'
+Player 3: ./castro -c 'player_params -u 0.5'
+Player 4: ./castro -c 'player_params -u 0.75'
+Player 5: ./castro -c 'player_params -u 1'
+Player 6: ./castro -c 'player_params -u 1.25'
+Player 7: ./castro -c 'player_params -u 1.5'
+Player 8: ./castro -c 'player_params -u 2'
+Player 9: ./castro -c 'player_params -u 5'
+Player 10: ./castro -c 'player_params -u 10'
+Player 11: ./castro -c 'player_params -u 100'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9 10 11
+ 1:    22 17 16 18 26 20 19 19 20 18 : 195 wins, 205 losses, 0 ties
+ 2: 18     0  0  0  0  0  0  0  0  0 : 18 wins, 22 losses, 0 ties
+ 3: 23  0     0  0  0  0  0  0  0  0 : 23 wins, 17 losses, 0 ties
+ 4: 24  0  0     0  0  0  0  0  0  0 : 24 wins, 16 losses, 0 ties
+ 5: 22  0  0  0     0  0  0  0  0  0 : 22 wins, 18 losses, 0 ties
+ 6: 14  0  0  0  0     0  0  0  0  0 : 14 wins, 26 losses, 0 ties
+ 7: 20  0  0  0  0  0     0  0  0  0 : 20 wins, 20 losses, 0 ties
+ 8: 21  0  0  0  0  0  0     0  0  0 : 21 wins, 19 losses, 0 ties
+ 9: 21  0  0  0  0  0  0  0     0  0 : 21 wins, 19 losses, 0 ties
+10: 20  0  0  0  0  0  0  0  0     0 : 20 wins, 20 losses, 0 ties
+11: 22  0  0  0  0  0  0  0  0  0    : 22 wins, 18 losses, 0 ties
+Played 400 games, Total Time: 29014 s
+
+
+
+Player 1: ./castro -c 'player_params -r 0 -a 0 -o 0 -p 0 -t 0 -k 0'
+Player 2: ./castro -c 'player_params -r 0 -a 0 -o 0 -p 1'
+Player 3: ./castro -c 'player_params -r 1 -a 0 -o 0 -p 1'
+Player 4: ./castro -c 'player_params -r 0 -a 1 -o 0 -p 1'
+Player 5: ./castro -c 'player_params -r 1 -a 1 -o 0 -p 1'
+Player 6: ./castro -c 'player_params -r 0 -a 0 -o 1 -p 1'
+Player 7: ./castro -c 'player_params -r 1 -a 0 -o 1 -p 1'
+Player 8: ./castro -c 'player_params -r 0 -a 1 -o 1 -p 1'
+Player 9: ./castro -c 'player_params -r 1 -a 1 -o 1 -p 1'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9
+ 1:     4  3  3  4  1  1  3  5 : 24 wins, 136 losses, 0 ties
+ 2: 16     9 13 14  8 13  8 11 : 92 wins, 68 losses, 0 ties
+ 3: 17 11    16 14 11 11 15 11 : 106 wins, 54 losses, 0 ties
+ 4: 17  7  4    12  8  8  6  9 : 71 wins, 89 losses, 0 ties
+ 5: 16  6  6  8     9  8  6  6 : 65 wins, 95 losses, 0 ties
+ 6: 19 12  9 12 11    12  8  7 : 90 wins, 70 losses, 0 ties
+ 7: 19  7  9 12 12  8    11  7 : 85 wins, 75 losses, 0 ties
+ 8: 17 12  5 14 14 12  9    10 : 93 wins, 67 losses, 0 ties
+ 9: 15  9  9 11 14 13 13 10    : 94 wins, 66 losses, 0 ties
+Played 720 games, Total Time: 53815 s
+
+
+Player 1: ./castro -c 'player_params -e 0.6'
+Player 2: ./castro -c 'player_params -e 0.7'
+Player 3: ./castro -c 'player_params -e 0.8'
+Player 4: ./castro -c 'player_params -e 0.9'
+Player 5: ./castro -c 'player_params -e 1.0'
+
+Win vs Loss Matrix:
+     1  2  3  4  5
+ 1:     5  4  5  7 : 21 wins, 11 losses, 0 ties
+ 2:  3     2  2  3 : 10 wins, 22 losses, 0 ties
+ 3:  4  6     3  5 : 18 wins, 14 losses, 0 ties
+ 4:  3  6  5     4 : 18 wins, 14 losses, 0 ties
+ 5:  1  5  3  4    : 13 wins, 19 losses, 0 ties
+Played 80 games, Total Time: 29023 s
+
+
+
+Player 1: ./castro
+Player 2: ./havannah
+Player 3: ../../tewalds-public/castro
+
+Win vs Loss Matrix:
+     1  2  3
+ 1:    10  7 : 17 wins, 3 losses, 0 ties
+ 2:  0     0 : 0 wins, 20 losses, 0 ties
+ 3:  3 10    : 13 wins, 7 losses, 0 ties
+Played 30 games, Total Time: 1820 s
+
+
+
