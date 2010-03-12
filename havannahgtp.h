@@ -284,6 +284,9 @@ public:
 			pv += move_str(player.principle_variation[i], true) + " ";
 		fprintf(stderr, "PV:          %s\n", pv.c_str());
 
+		log("#genmove " + implode(args, " "));
+		log(string("play ") + (game.getboard()->toplay() == 2 ? 'w' : 'b') + ' ' + move_str(player.bestmove, false));
+
 		return GTPResponse(true, move_str(player.bestmove));
 	}
 
