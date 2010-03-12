@@ -166,8 +166,7 @@ public:
 	}
 
 	GTPResponse gtp_logend(vecstr args){
-		if(logfile)
-			fclose(logfile);
+		setlogfile(NULL);
 		return GTPResponse(true);
 	}
 
