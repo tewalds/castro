@@ -291,7 +291,7 @@ public:
 		if(args.size() == 0)
 			return GTPResponse(true, string("\n") +
 				"Set player parameters, eg: player_params -e 3 -r 40 -t 0.1 -p 0\n" +
-				"  -e --explore     Exploration rate                                  [" + to_str(player.explore) + "]\n" +
+				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
 				"  -r --ravescale   Scale the rave values from 2 - 0 instead all 1    [" + to_str(player.ravescale) + "]\n" +
 				"  -a --raveall     Assign a value of 0.5 to unplayed positions       [" + to_str(player.raveall) + "]\n" +

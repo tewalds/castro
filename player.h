@@ -206,13 +206,13 @@ public:
 	Player() {
 		time_used = 0;
 
-		explore = 1;
+		explore = 0.85;
 		ravefactor = 50;
 		ravescale = true;
 		raveall = false;
 		opmoves = false;
 		skiprave = 20;
-		fpurgency = 1000;
+		fpurgency = 1;
 		prooftime = 0.8;
 		proofscore = 3;
 		rolloutpattern = true;
