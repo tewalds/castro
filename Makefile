@@ -40,7 +40,12 @@ run: all
 	./castro
 
 tar: clean
-	cd ..; tar zcf castro.tgz castro --exclude castro/.git --exclude castro/.gitignore --exclude castro/papers --exclude castro/games
+	cd ..; tar zcf castro.tgz castro \
+		--exclude castro/.git \
+		--exclude castro/.gitignore \
+		--exclude castro/papers \
+		--exclude castro/games \
+		--exclude castro/littlegolem*
 
 profile:
 	valgrind --tool=callgrind ./castro
