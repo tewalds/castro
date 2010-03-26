@@ -144,7 +144,7 @@ public:
 	bool canswap() const { return (nummoves == 1 && toPlay == 2); }
 
 	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard2(x, y) && !get(x,y)); } //ignores swap rule!
-	bool valid_move(const Move & m) const { return (outcome == -1 && ((onboard2(m) && !get(m)) || (m.isswap() && canswap()))); }
+	bool valid_move(const Move & m) const { return (outcome == -1 && ((onboard2(m) && !get(m)) || (m == M_SWAP && canswap()))); }
 
 	int iscorner(int x, int y) const {
 		if(!onboard(x,y))
@@ -310,7 +310,7 @@ public:
 		if(!valid_move(pos))
 			return false;
 
-		if(pos.isswap()){
+		if(pos == M_SWAP){
 			doswap();
 			return true;
 		}

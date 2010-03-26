@@ -16,12 +16,11 @@ struct Move {
 	Move(int a) : y(a), x(120) { } //big x so it will always wrap to y=0 with swap
 	Move(int X, int Y) : y(Y), x(X) { }
 
-	bool isswap() const { return (y == M_SWAP); }
-
 	bool operator< (const Move & b) const { return (y == b.y ? x <  b.x : y <  b.y); }
 	bool operator<=(const Move & b) const { return (y == b.y ? x <= b.x : y <= b.y); }
 	bool operator> (const Move & b) const { return (y == b.y ? x >  b.x : y >  b.y); }
 	bool operator>=(const Move & b) const { return (y == b.y ? x >= b.x : y >= b.y); }
+	bool operator==(const int  & b) const { return (y == b); }
 	bool operator==(const Move & b) const { return (y == b.y && x == b.x); }
 	bool operator!=(const Move & b) const { return (y != b.y || x != b.x); }
 	Move operator+ (const Move & b) const { return Move(x + b.x, y + b.y); }

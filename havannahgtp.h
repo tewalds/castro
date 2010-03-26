@@ -235,15 +235,10 @@ public:
 		if(hguic == -1)
 			hguic = hguicoords;
 
-		if(m.y < 0){
-			switch(m.y){
-				case M_UNKNOWN: return "unknown";
-				case M_NONE:    return "none";
-				case M_SWAP:    return "swap";
-				case M_RESIGN:  return "resign";
-				default:        return "bad_move";
-			}
-		}
+		if(m == M_UNKNOWN) return "unknown";
+		if(m == M_NONE)    return "none";
+		if(m == M_SWAP)    return "swap";
+		if(m == M_RESIGN)  return "resign";
 
 		if(!hguic && m.x >= game.getsize())
 			m.y -= m.x + 1 - game.getsize();
