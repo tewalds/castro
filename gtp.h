@@ -66,6 +66,7 @@ public:
 		newcallback("quit",             bind(&GTPclient::gtp_quit,             this, _1));
 		newcallback("protocol_version", bind(&GTPclient::gtp_protocol_version, this, _1));
 		newcallback("logfile",          bind(&GTPclient::gtp_logfile,          this, _1));
+		newcallback("lognote",          bind(&GTPclient::gtp_lognote,          this, _1));
 		newcallback("logend",           bind(&GTPclient::gtp_logend,           this, _1));
 	}
 
@@ -162,6 +163,11 @@ public:
 
 		setlogfile(fd);
 
+		return GTPResponse(true);
+	}
+
+	GTPResponse gtp_lognote(vecstr args){
+		log(implode(args, " "));
 		return GTPResponse(true);
 	}
 
