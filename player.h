@@ -104,7 +104,7 @@ class Player {
 		}
 /*/
 		//my understanding of how fuego does it
-		float value(int ravefactor){
+		float value(int ravefactor, float fpurgency){
 			float val = 0;
 			float weight = 0;
 			if(visits) {
@@ -112,14 +112,38 @@ class Player {
 				weight += visits;
 			}
 			if(ravevisits){
-				val += rave;
-				weight += ravevisits/(1.1 + ravevisits/20000);
+				float bias = 1.0/(1.1 + ravevisits/20000.0);
+				val += rave*bias;
+				weight += ravevisits*bias;
 			}
 			if(weight > 0)
 				return val / weight;
 			else
-				return 10000 + rand()%100; //first play urgency...
+				return fpurgency;
 		}
+
+		//based directly on fuego
+		float value(int ravefactor, float fpurgency){
+			float val = 0.f;
+			float weightSum = 0.f;
+			bool hasValue = false;
+			if(visits){
+				val += score;
+				weightSum += visits;
+				hasValue = true;
+			}
+			if(ravevisits){
+				float weight = ravevisits / (  1.1 + ravevisits/20000.);
+				val += weight * rave / ravevisits;
+				weightSum += weight;
+				hasValue = true;
+			}
+			if(hasValue)
+				return val / weightSum;
+			else
+				return fpurgency;
+		}
+
 //*/
 	};
 
