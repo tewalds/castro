@@ -27,6 +27,12 @@ class Timer {
 	static void nullcallback(){ }
 
 public:
+	Timer() {
+		timeout = 0;
+		destruct = false;
+		callback = &Timer::nullcallback;
+	}
+
 	Timer(double time, function<void()> fn){
 		timeout = time;
 		callback = fn;
