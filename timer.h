@@ -34,6 +34,13 @@ public:
 	}
 
 	Timer(double time, function<void()> fn){
+		destruct = false;
+		set(time, fn);
+	}
+
+	void set(double time, function<void()> fn){
+		cancel();
+
 		timeout = time;
 		callback = fn;
 		if(time < 0.001){ //too small, just call it directly
