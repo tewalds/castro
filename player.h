@@ -89,12 +89,15 @@ class Player {
 		}
 //*
 		//new way, more standard way of changing over from rave scores to real scores
-		float value(int ravefactor, float fpurgency){
+		float value(float ravefactor, float fpurgency){
+			if(ravefactor <= 0.1)
+				return (visits == 0 ? fpurgency : score/visits);
+
 			if(visits == 0 && ravevisits == 0)
 				return fpurgency;
 
-			float alpha = (ravefactor == 0 ? 0 : (float)ravefactor/(ravefactor + visits));
-//			float alpha = (ravefactor == 0 ? 0 : sqrt((float)ravefactor/(ravefactor + 3*visits)));
+			float alpha = ravefactor/(ravefactor + visits);
+//			float alpha = sqrt(ravefactor/(ravefactor + 3*visits));
 
 			float val = 0;
 			if(ravevisits) val += alpha*rave/ravevisits;
@@ -104,7 +107,7 @@ class Player {
 		}
 /*/
 		//my understanding of how fuego does it
-		float value(int ravefactor, float fpurgency){
+		float value(float ravefactor, float fpurgency){
 			float val = 0;
 			float weight = 0;
 			if(visits) {
@@ -123,7 +126,7 @@ class Player {
 		}
 
 		//based directly on fuego
-		float value(int ravefactor, float fpurgency){
+		float value(float ravefactor, float fpurgency){
 			float val = 0.f;
 			float weightSum = 0.f;
 			bool hasValue = false;
@@ -175,7 +178,7 @@ class Player {
 		void clear(){
 			list.clear();
 		}
-		int size() const {
+		unsigned int size() const {
 			return list.size();
 		}
 		const RaveMove & operator[](int i) const {
@@ -207,9 +210,8 @@ class Player {
 
 public:
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
-	int   ravefactor; //big numbers favour rave scores, small ignore it
+	float ravefactor; //big numbers favour rave scores, small ignore it
 	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1
-	bool  raveall;    //add rave value for win, 0 for loss, 0.5 for not used
 	bool  opmoves;    //take the opponents rave updates too, a good move for my opponent is a good move for me.
 	int   skiprave;   //how often to skip rave, skip once in this many checks
 	float fpurgency;  //what value to return for a move that hasn't been played yet
@@ -232,14 +234,13 @@ public:
 
 		explore = 0.85;
 		ravefactor = 50;
-		ravescale = true;
-		raveall = false;
+		ravescale = false;
 		opmoves = false;
-		skiprave = 20;
+		skiprave = 0;
 		fpurgency = 1;
-		prooftime = 0.8;
-		proofscore = 3;
-		rolloutpattern = true;
+		prooftime = 0;
+		proofscore = 0;
+		rolloutpattern = false;
 	}
 	void timedout(){ timeout = true; }
 
@@ -247,6 +248,7 @@ public:
 
 protected:
 	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
+	void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
 	int rand_game(Board & board, RaveMoveList & movelist, Move move, int depth);
 	bool check_pattern(const Board & board, Move & move);
 };

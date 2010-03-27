@@ -1243,5 +1243,80 @@ Win vs Loss Matrix:
  3:  3 10    : 13 wins, 7 losses, 0 ties
 Played 30 games, Total Time: 1820 s
 
+-----------------------------------------------------------------------------
+
+Player 1: ./castro - new rave implementation
+Player 2: ./castro-assign2       - uct + rave + solver, etc
+Player 3: ./castro-assign2-basic - uct + rave
+Player 4: ./castro-assign2-uct   - just uct, no rave
+
+Win vs Loss Matrix:
+     1  2  3  4
+ 1:    15 11  8 : 34 wins, 26 losses, 0 ties
+ 2:  5    12  3 : 20 wins, 40 losses, 0 ties
+ 3:  9  8     9 : 26 wins, 34 losses, 0 ties
+ 4: 12 17 11    : 40 wins, 20 losses, 0 ties
+Played 120 games, Total Time: 3366 s
+
+
+
+Player 1: ./castro - new rave + uct
+Player 2: ./castro-assign2-basic - old rave + uct
+Player 3: ./castro-assign2-uct   - old uct, no rave
+
+Win vs Loss Matrix:
+     1  2  3
+ 1:    23 23 : 46 wins, 34 losses, 0 ties
+ 2: 17    13 : 30 wins, 49 losses, 1 ties
+ 3: 17 26    : 43 wins, 36 losses, 1 ties
+Played 120 games, Total Time: 6099 s
+
+
+
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -f 0'
+Player 3: ./castro-basic
+Player 4: ./castro-basic -c 'player_params -f 0'
+
+Win vs Loss Matrix:
+     1  2  3  4
+ 1:    13 20  9 : 42 wins, 78 losses, 0 ties
+ 2: 27    25 17 : 69 wins, 51 losses, 0 ties
+ 3: 20 15    12 : 47 wins, 73 losses, 0 ties
+ 4: 31 23 28    : 82 wins, 38 losses, 0 ties
+Played 240 games, Total Time: 11971 s
+
+
+on Groove:
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -f 0'
+Player 3: ./castro-basic
+Player 4: ./castro-basic -c 'player_params -f 0'
+
+Win vs Loss Matrix:
+     1  2  3  4
+ 1:    40 45 18 : 103 wins, 197 losses, 0 ties
+ 2: 60    74  5 : 139 wins, 156 losses, 5 ties
+ 3: 55 22     1 : 78 wins, 218 losses, 4 ties
+ 4: 82 94 99    : 275 wins, 24 losses, 1 ties
+Played 600 games, Total Time: 34220 s
+
+
+
+On Sim:
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -f 0'
+Player 3: ./castro-basic
+Player 4: ./castro-basic -c 'player_params -f 0'
+
+Win vs Loss Matrix:
+     1  2  3  4
+ 1:    41 64 40 : 145 wins, 155 losses, 0 ties
+ 2: 59    69 54 : 182 wins, 118 losses, 0 ties
+ 3: 36 31    27 : 94 wins, 206 losses, 0 ties
+ 4: 60 46 73    : 179 wins, 121 losses, 0 ties
+Played 600 games, Total Time: 29323 s
+
 
 

@@ -292,7 +292,6 @@ public:
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
 				"  -r --ravescale   Scale the rave values from 2 - 0 instead all 1    [" + to_str(player.ravescale) + "]\n" +
-				"  -a --raveall     Assign a value of 0.5 to unplayed positions       [" + to_str(player.raveall) + "]\n" +
 				"  -o --opmoves     Treat good opponent moves as good moves for you   [" + to_str(player.opmoves) + "]\n" +
 				"  -k --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
@@ -304,13 +303,11 @@ public:
 			string arg = args[i];
 
 			if((arg == "-e" || arg == "--explore") && i+1 < args.size()){
-				player.explore = from_str<double>(args[++i]);
+				player.explore = from_str<float>(args[++i]);
 			}else if((arg == "-f" || arg == "--ravefactor") && i+1 < args.size()){
-				player.ravefactor = from_str<int>(args[++i]);
+				player.ravefactor = from_str<float>(args[++i]);
 			}else if((arg == "-r" || arg == "--ravescale") && i+1 < args.size()){
 				player.ravescale = from_str<bool>(args[++i]);
-			}else if((arg == "-a" || arg == "--raveall") && i+1 < args.size()){
-				player.raveall = from_str<bool>(args[++i]);
 			}else if((arg == "-o" || arg == "--opmoves") && i+1 < args.size()){
 				player.opmoves = from_str<bool>(args[++i]);
 			}else if((arg == "-k" || arg == "--skiprave") && i+1 < args.size()){
@@ -318,7 +315,7 @@ public:
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
 			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
-				player.prooftime = from_str<double>(args[++i]);
+				player.prooftime = from_str<float>(args[++i]);
 			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
 				player.proofscore = from_str<int>(args[++i]);
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){

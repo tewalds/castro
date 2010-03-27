@@ -51,6 +51,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	cur_player = board.toplay();
 	RaveMoveList movelist(board.movesremain());
 	do{
+		root.visits++;
 		runs++;
 		Board copy = board;
 		movelist.clear();
@@ -93,8 +94,8 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 	}
 }
 
+//return the winner of the simulation
 int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){
-	int result, won = -1;
 	int toplay = board.toplay();
 
 	if(node->children){
@@ -104,7 +105,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		float logvisits = log(node->visits);
 		Node * child;
 
-		int raveval = ravefactor*(skiprave == 0 || rand() % skiprave > 0); // = 0 or ravefactor
+		float raveval = ravefactor*(skiprave == 0 || rand() % skiprave > 0); // = 0 or ravefactor
 
 		for(unsigned int i = 0; i < node->numchildren; i++){
 			child = & node->children[i];
@@ -121,59 +122,67 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		child = & node->children[maxi];
 		board.move(child->move);
 		movelist.add(child->move);
-		result = - walk_tree(board, child, movelist, depth+1);
+
+		int won = walk_tree(board, child, movelist, depth+1);
+
+		child->visits++;
+		child->score += (won == 0 ? 0.5 : won == toplay);
 
 		//update the rave scores
-		if(ravefactor > 0){
-			//update the rave score of all children that were played
-			unsigned int m = 0, c = 0;
-			while(m < movelist.size() && c < node->numchildren){
-				child = & node->children[c];
-				if(movelist[m] == child->move && (opmoves || movelist[m].player == toplay)){
-					child->rave += (result > 0 ? movelist[m].score : 0);
-					child->ravevisits++;
-					m++;
-					c++;
-				}else if(movelist[m] > child->move){
-					if(raveall){ //unused positions get a score as better than a loss
-						child->rave += 0.5;
-						child->ravevisits++;
-					}
-					c++;
-				}else{ //(movelist[m] < child->move || opponents move){
-					m++;
-				}
-			}
-		}
-	}else if((won = board.won()) >= 0 || node->visits == 0 || nodes >= maxnodes){
+		if(ravefactor > 0.1)
+			update_rave(node, movelist, won, toplay);
+
+		return won;
+	}
+
+	int won = board.won();
+	if(won >= 0 || node->visits == 0 || nodes >= maxnodes){
 	//do random game on this node, unless it's already the end
 		if(won == -1)
 			won = rand_game(board, movelist, node->move, depth);
 
 		treelen.add(depth);
 
-		if(ravefactor > 0){
+		if(ravefactor > 0.1){
 			if(won == 0)
 				movelist.clear();
 			else
 				movelist.clean(cur_player, ravescale);
 		}
-	}else{
-	//create children
-		nodes += node->alloc(board.movesremain());
 
-		int i = 0;
-		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move)
-			node->children[i++] = Node(*move);
-
-		return walk_tree(board, node, movelist, depth);
+		return won;
 	}
-	if(won >= 0)
-		result = (won == 0 ? 0 : won == toplay ? -1 : 1);
 
-	node->visits++;
-	node->score += (result + 1)/2.0;
-	return result;
+//create children
+	nodes += node->alloc(board.movesremain());
+
+	int i = 0;
+	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move)
+		node->children[i++] = Node(*move);
+
+	return walk_tree(board, node, movelist, depth);
+}
+
+void Player::update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay){
+	//update the rave score of all children that were played
+	unsigned int m = 0, c = 0;
+	while(m < movelist.size() && c < node->numchildren){
+		Node * child = & node->children[c];
+
+		if(movelist[m].move == child->move){
+			if(movelist[m].player == toplay || opmoves){
+				if(movelist[m].player == won)
+					child->rave += movelist[m].score;
+				child->ravevisits++;
+			}
+			m++;
+			c++;
+		}else if(movelist[m].move > child->move){
+			c++;
+		}else{//(movelist[m].move < child->move){
+			m++;
+		}
+	}
 }
 
 //look for good forced moves. In this case I only look for keeping a virtual connection active
