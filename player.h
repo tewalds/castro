@@ -90,7 +90,7 @@ class Player {
 //*
 		//new way, more standard way of changing over from rave scores to real scores
 		float value(float ravefactor, float fpurgency){
-			if(ravefactor <= 0.1)
+			if(ravefactor <= min_rave)
 				return (visits == 0 ? fpurgency : score/visits);
 
 			if(visits == 0 && ravevisits == 0)
@@ -210,6 +210,9 @@ class Player {
 	};
 
 public:
+
+	static const float min_rave = 0.1;
+
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
 	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1

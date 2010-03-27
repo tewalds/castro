@@ -129,7 +129,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		child->score += (won == 0 ? 0.5 : won == toplay);
 
 		//update the rave scores
-		if(ravefactor > 0.1)
+		if(ravefactor > min_rave)
 			update_rave(node, movelist, won, toplay);
 
 		return won;
@@ -143,7 +143,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 
 		treelen.add(depth);
 
-		if(ravefactor > 0.1){
+		if(ravefactor > min_rave){
 			if(won == 0)
 				movelist.clear();
 			else
