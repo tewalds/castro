@@ -5,7 +5,7 @@
 #include <string>
 #include "string.h"
 
-void Player::play_uct(const Board & board, double time, int memlimit){
+void Player::play_uct(const Board & board, double time, int maxruns, int memlimit){
 	maxnodes = memlimit*1024*1024/sizeof(Node);
 	nodes = 0;
 	time_used = 0;
@@ -56,7 +56,7 @@ void Player::play_uct(const Board & board, double time, int memlimit){
 		Board copy = board;
 		movelist.clear();
 		walk_tree(copy, & root, movelist, 0);
-	}while(!timeout);
+	}while(!timeout && (maxruns == 0 || runs < maxruns));
 
 
 //return the best one

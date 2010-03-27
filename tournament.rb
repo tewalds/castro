@@ -6,6 +6,7 @@
 	$players = [];
 	$time_per_game = 100;
 	$time_per_move = 0;
+	$max_runs = 0;
 	$boardsize = 4;
 	$players = [];
 	$cmds = [];
@@ -18,7 +19,8 @@
 		when "-p", "--parallel" then $parallel      = ARGV.shift.to_i;
 		when "-r", "--rounds"   then $rounds        = ARGV.shift.to_i;
 		when "-g", "--timegame" then $time_per_game = ARGV.shift.to_f;
-		when "-m", "--timemove" then $time_per_move = ARGV.shift.to_f;
+		when "-t", "--timemove" then $time_per_move = ARGV.shift.to_f;
+		when "-m", "--maxruns"  then $max_runs      = ARGV.shift.to_i;
 		when "-s", "--size"     then $boardsize     = ARGV.shift.to_i;
 		when "-c", "--cmd"      then $cmds << ARGV.shift;
 		when "-z", "--msg"      then $msg = ARGV.shift;
@@ -29,7 +31,8 @@
 			puts "  -p --parallel Number of games to run in parallel [#{$parallel}]"
 			puts "  -r --rounds   Number of rounds to play [#{$rounds}]"
 			puts "  -g --timegame Time given per game [#{$time_per_game}]"
-			puts "  -m --timemove Time given per move [#{$time_per_move}]"
+			puts "  -t --timemove Time given per move [#{$time_per_move}]"
+			puts "  -m --maxruns  Simulations per move [#{$max_moves}]"
 			puts "  -s --size     Board size [#{$boardsize}]"
 			puts "  -c --cmd      Send an arbitrary GTP command at the beginning of the game"
 			puts "  -z --msg      Output a message of what this is testing with the results"
@@ -41,7 +44,7 @@
 	end
 
 	$cmds << "boardsize #{$boardsize}" if $boardsize > 0
-	$cmds << "time_settings #{$time_per_game} #{$time_per_move} 0" if $time_per_game > 0 || $time_per_move > 0
+	$cmds << "time_settings #{$time_per_game} #{$time_per_move} #{$max_runs}" if $time_per_game > 0 || $time_per_move > 0 || $max_runs > 0
 
 	$num = $players.length();
 	$num_games = 0;

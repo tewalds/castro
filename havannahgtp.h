@@ -18,6 +18,7 @@ public:
 	bool hguicoords;
 	double time_remain;
 	double time_per_move;
+	int max_runs;
 	int mem_allowed;
 
 	Player player;
@@ -30,6 +31,7 @@ public:
 		time_remain = 120;
 		time_per_move = 0;
 		mem_allowed = 1000;
+		max_runs = 0;
 
 		newcallback("name",            bind(&HavannahGTP::gtp_name,       this, _1));
 		newcallback("version",         bind(&HavannahGTP::gtp_version,    this, _1));
@@ -89,10 +91,9 @@ public:
 
 		log("time_settings " + implode(args, " "));
 
-		time_remain = from_str<double>(args[0]);
-
-		if(args.size() >= 2)
-			time_per_move = from_str<double>(args[1]);
+		if(args.size() >= 1) time_remain   = from_str<double>(args[0]);
+		if(args.size() >= 2) time_per_move = from_str<double>(args[1]);
+		if(args.size() >= 3) max_runs      = from_str<int>(args[2]);
 
 		return GTPResponse(true);
 	}
@@ -266,9 +267,9 @@ public:
 		if(args.size() >= 3)
 			mem = from_str<int>(args[2]);
 
-		fprintf(stderr, "time left: %.1f, max time: %.3f\n", time_remain, time);
+		fprintf(stderr, "time left: %.1f, max time: %.3f, max runs: %i\n", time_remain, time, max_runs);
 
-		player.play_uct(*(game.getboard()), time, mem);
+		player.play_uct(*(game.getboard()), time, max_runs, mem);
 
 		time_remain += time_per_move - player.time_used;
 

@@ -244,7 +244,7 @@ public:
 	}
 	void timedout(){ timeout = true; }
 
-	void play_uct(const Board & board, double time, int memlimit);
+	void play_uct(const Board & board, double time, int maxruns, int memlimit);
 
 protected:
 	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
