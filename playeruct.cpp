@@ -18,11 +18,13 @@ void Player::play_uct(const Board & board, double time, int maxruns, int memlimi
 	bestmove = Move(M_RESIGN);
 	timeout = false;
 
-	if(board.won() >= 0)
+	if(board.won() >= 0 || (time <= 0 && maxruns == 0))
 		return;
 
-	timeout = false;
-	Timer timer = Timer(time, bind(&Player::timedout, this));
+	Timer timer;
+	if(time > 0)
+		timer = Timer(time, bind(&Player::timedout, this));
+
 	int starttime = time_msec();
 	runs = 0;
 
