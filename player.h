@@ -98,6 +98,7 @@ class Player {
 
 			float alpha = ravefactor/(ravefactor + visits);
 //			float alpha = sqrt(ravefactor/(ravefactor + 3*visits));
+//			float alpha = (float)ravevisits/((float)visits + (float)ravevisits + 4.0*visits*ravevisits*ravefactor);
 
 			float val = 0;
 			if(ravevisits) val += alpha*rave/ravevisits;
