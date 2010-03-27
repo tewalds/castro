@@ -17,9 +17,9 @@ class Time {
 	}
 	Time(double a) : t(a) { }
 
-	int to_i()   { return t; }
-	int in_msec(){ return t*1000; }
-	int in_usec(){ return t*1000000; }
+	int to_i()   { return (int)t; }
+	int in_msec(){ return (int)(t*1000); }
+	int in_usec(){ return (int)(t*1000000); }
 	double to_f(){ return t; }
 
 	Time   operator +  (double a)       const { return Time(t+a); }
