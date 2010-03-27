@@ -272,6 +272,8 @@ public:
 		player.play_uct(*(game.getboard()), time, max_runs, mem);
 
 		time_remain += time_per_move - player.time_used;
+		if(time_remain < 0)
+			time_remain = 0;
 
 		game.move(player.bestmove);
 
