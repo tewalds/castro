@@ -23,7 +23,7 @@ void Player::play_uct(const Board & board, double time, int maxruns, int memlimi
 
 	Timer timer;
 	if(time > 0)
-		timer = Timer(time, bind(&Player::timedout, this));
+		timer.set(time, bind(&Player::timedout, this));
 
 	int starttime = time_msec();
 	runs = 0;
