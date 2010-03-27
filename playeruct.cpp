@@ -102,26 +102,8 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 
 	if(node->children){
 	//choose a child and recurse
-		int maxi = 0;
-		float val, maxval = -1000000000;
-		float logvisits = log(node->visits);
-		Node * child;
+		Node * child = choose_move(node);
 
-		float raveval = ravefactor*(skiprave == 0 || rand() % skiprave > 0); // = 0 or ravefactor
-
-		for(unsigned int i = 0; i < node->numchildren; i++){
-			child = & node->children[i];
-
-			val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->visits+1));
-
-			if(maxval < val){
-				maxval = val;
-				maxi = i;
-			}
-		}
-		
-		//recurse on the chosen child
-		child = & node->children[maxi];
 		board.move(child->move);
 		movelist.add(child->move);
 
@@ -163,6 +145,28 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		node->children[i++] = Node(*move);
 
 	return walk_tree(board, node, movelist, depth);
+}
+
+Player::Node * Player::choose_move(const Node * node) const {
+	int maxi = 0;
+	float val, maxval = -1000000000;
+	float logvisits = log(node->visits);
+	Node * child;
+
+	float raveval = ravefactor*(skiprave == 0 || rand() % skiprave > 0); // = 0 or ravefactor
+
+	for(unsigned int i = 0; i < node->numchildren; i++){
+		child = & node->children[i];
+
+		val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->visits+1));
+
+		if(maxval < val){
+			maxval = val;
+			maxi = i;
+		}
+	}
+
+	return & node->children[maxi];
 }
 
 void Player::update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay){

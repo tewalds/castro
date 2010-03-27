@@ -252,6 +252,7 @@ public:
 
 protected:
 	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
+	Node * choose_move(const Node * node) const;
 	void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
 	int rand_game(Board & board, RaveMoveList & movelist, Move move, int depth);
 	bool check_pattern(const Board & board, Move & move);
