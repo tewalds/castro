@@ -34,7 +34,9 @@ public:
 
 	Board getboard(int offset = 0) const {
 		Board board(size);
-		for(unsigned int i = 0; i < (offset > 0 ? offset : hist.size() - offset); i++)
+		if(offset <= 0)
+			offset += hist.size();
+		for(int i = 0; i < offset; i++)
 			board.move(hist[i]);
 		return board;
 	}
