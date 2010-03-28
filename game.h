@@ -3,7 +3,7 @@
 #define _GAME_H_
 
 #include "board.h"
-#include "gtp.h"
+#include "move.h"
 #include "string.h"
 #include <cctype>
 
@@ -15,10 +15,15 @@ public:
 
 	HavannahGame(int s = 8){
 		size = s;
+		hist.push_back(Move(M_NONE));
 	}
 
 	int getsize() const {
 		return size;
+	}
+
+	const vector<Move> & get_hist() const {
+		return hist;
 	}
 
 	Board getboard() const {
@@ -28,8 +33,13 @@ public:
 		return board;
 	}
 	
+	int len() const {
+		return hist.size();
+	}
+
 	void clear(){
 		hist.clear();
+		hist.push_back(Move(M_NONE));
 	}
 	
 	bool undo(){
