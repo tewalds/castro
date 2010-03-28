@@ -13,6 +13,7 @@
 #include "solver.h"
 
 class Player {
+public:
 	struct Node {
 		float rave, score;
 		uint32_t ravevisits, visits;
@@ -270,6 +271,7 @@ public:
 
 	void set_board(const Board & board){
 		rootboard = board;
+		nodes -= root.dealloc();
 		root = Node();
 	}
 	void move(const Move & m){
