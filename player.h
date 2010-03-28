@@ -93,7 +93,7 @@ class Player {
 			if(ravefactor <= min_rave)
 				return (visits == 0 ? fpurgency : score/visits);
 
-			if(visits == 0 && ravevisits == 0)
+			if(ravevisits == 0 && visits == 0)
 				return fpurgency;
 
 			float alpha = ravefactor/(ravefactor + visits);

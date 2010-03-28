@@ -171,21 +171,22 @@ Player::Node * Player::choose_move(const Node * node) const {
 
 void Player::update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay){
 	//update the rave score of all children that were played
-	unsigned int m = 0, c = 0;
-	while(m < movelist.size() && c < node->numchildren){
+	unsigned int m = 0, c = 0, mls = movelist.size();
+	while(m < mls && c < node->numchildren){
 		Node * child = & node->children[c];
+		const RaveMoveList::RaveMove & rave = movelist[m];
 
-		if(movelist[m].move == child->move){
-			if(movelist[m].player == toplay || opmoves){
-				if(movelist[m].player == won)
-					child->rave += movelist[m].score;
+		if(rave.move == child->move){
+			if(rave.player == toplay || opmoves){
+				if(rave.player == won)
+					child->rave += rave.score;
 				child->ravevisits++;
 			}
 			m++;
 			c++;
-		}else if(movelist[m].move > child->move){
+		}else if(rave.move > child->move){
 			c++;
-		}else{//(movelist[m].move < child->move){
+		}else{//(rave.move < child->move){
 			m++;
 		}
 	}
