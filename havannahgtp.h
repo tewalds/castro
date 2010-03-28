@@ -58,8 +58,10 @@ public:
 		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab,this, _1));
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,  this, _1));
 		newcallback("time_settings",   bind(&HavannahGTP::gtp_time_settings, this, _1));
+		newcallback("history",         bind(&HavannahGTP::gtp_history,    this, _1));
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,    this, _1));
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1));
+		newcallback("player_stats",    bind(&HavannahGTP::gtp_player_stats, this, _1));
 	}
 
 	GTPResponse gtp_print(vecstr args){
@@ -261,6 +263,14 @@ public:
 		return GTPResponse(true, ret);
 	}
 
+	GTPResponse gtp_history(vecstr args){
+		string ret;
+		vector<Move> hist = game.get_hist();
+		for(unsigned int i = 0; i < hist.size(); i++)
+			ret += move_str(hist[i]) + " ";
+		return GTPResponse(true, ret);
+	}
+
 	GTPResponse gtp_genmove(vecstr args){
 		double time = 4*time_remain / game.movesremain();
 		if(time > time_remain)
@@ -277,6 +287,7 @@ public:
 		fprintf(stderr, "time left: %.1f, max time: %.3f, max runs: %i\n", time_remain, time, max_runs);
 
 		player.move(game.get_last());
+
 		Move best = player.mcts(time, max_runs, mem);
 
 		time_remain += time_per_move - player.time_used;
@@ -339,7 +350,22 @@ public:
 		return GTPResponse(true);
 	}
 
+	GTPResponse gtp_player_stats(vecstr args){
+		string s;
+		s += "Nodes: " + to_str(player.nodes) + "\n";
+		s += player.rootboard.to_s();
 
+		s += "Exp-Rave: ";
+		for(int i = 0; i < player.root.numchildren; i++){
+			Player::Node & child = player.root.children[i];
+			s += move_str(child.move, true) + "-";
+			s += to_str(child.score/child.visits, 2) + "/" + to_str(child.visits) + "-";
+			s += to_str(child.rave/child.ravevisits, 2) + "/" + to_str(child.ravevisits) + " ";
+		}
+		s += "\n";
+
+		return GTPResponse(true, s);
+	}
 
 	GTPResponse play(const string & pos, int toplay){
 		if(toplay != game.toplay())
