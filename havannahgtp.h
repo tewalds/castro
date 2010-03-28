@@ -104,7 +104,7 @@ public:
 
 		log("boardsize " + args[0]);
 
-		int size = atoi(args[0].c_str());
+		int size = from_str<int>(args[0]);
 		if(size < 3 || size > 10)
 			return GTPResponse(false, "Size " + to_str(size) + " is out of range.");
 
