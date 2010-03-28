@@ -5,30 +5,26 @@
 #include <string>
 #include "string.h"
 
-void Player::play_uct(const Board & board, double time, int maxruns, int memlimit){
+Move Player::mcts(double time, int maxruns, int memlimit){
 	maxnodes = memlimit*1024*1024/sizeof(Node);
-	nodes = 0;
 	time_used = 0;
 	runs = 0;
 
-	principle_variation.clear();
 	treelen.reset();
 	gamelen.reset();
 
-	bestmove = Move(M_RESIGN);
+	if(rootboard.won() >= 0 || (time <= 0 && maxruns == 0))
+		return Move(M_RESIGN);
+
 	timeout = false;
-
-	if(board.won() >= 0 || (time <= 0 && maxruns == 0))
-		return;
-
 	Timer timer;
 	if(time > 0)
 		timer.set(time, bind(&Player::timedout, this));
 
 	int starttime = time_msec();
-	runs = 0;
 
-	Node root;
+/*
+	//not sure how to handle the solver in combination with keeping the tree around between moves
 
 	double ptime = time * prooftime * board.num_moves() / board.numcells(); //ie scale up from 0 to prooftime
 	if(ptime > 0.01){ //minimum of 10ms worth of solve time
@@ -38,28 +34,26 @@ void Player::play_uct(const Board & board, double time, int maxruns, int memlimi
 
 		//if it found a win, just play it
 		if(ret == 1){
-			bestmove = solver.bestmove;
-
 			int runtime = time_msec() - starttime;
 			fprintf(stderr, "Solved in %i msec\n", runtime);
 			time_used = (double)runtime/1000;
-			return;
+			return solver.bestmove;
 		}
 
 		nodes = root.construct(solver.root, proofscore);
 		solver.reset();
 	}
+*/
 
-	cur_player = board.toplay();
-	RaveMoveList movelist(board.movesremain());
+	runs = 0;
+	RaveMoveList movelist(rootboard.movesremain());
 	do{
 		root.visits++;
 		runs++;
-		Board copy = board;
+		Board copy = rootboard;
 		movelist.clear();
 		walk_tree(copy, & root, movelist, 0);
 	}while(!timeout && (maxruns == 0 || runs < maxruns));
-
 
 //return the best one
 	int maxi = 0;
@@ -68,10 +62,7 @@ void Player::play_uct(const Board & board, double time, int maxruns, int memlimi
 		if(root.children[maxi].visits    < root.children[i].visits)
 			maxi = i;
 
-	bestmove = root.children[maxi].move;
-
 	int runtime = time_msec() - starttime;
-
 	time_used = (double)runtime/1000;
 
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(runtime) + " msec\n";
@@ -81,7 +72,12 @@ void Player::play_uct(const Board & board, double time, int maxruns, int memlimi
 	stats += "Games/s:     " + to_str((int)((double)runs*1000/runtime)) + "\n";
 	fprintf(stderr, "%s", stats.c_str());
 
-//return the principle variation
+	return root.children[maxi].move;
+}
+
+vector<Move> Player::get_pv(){
+	vector<Move> pv;
+
 	Node * n = & root;
 	while(n->numchildren){
 		int maxi = 0;
@@ -91,9 +87,14 @@ void Player::play_uct(const Board & board, double time, int maxruns, int memlimi
 				maxi = i;
 
 		Node * child = & n->children[maxi];
-		principle_variation.push_back(child->move);
+		pv.push_back(child->move);
 		n = child;
 	}
+
+	if(pv.size() == 0)
+		pv.push_back(Move(M_RESIGN));
+
+	return pv;
 }
 
 //return the winner of the simulation
@@ -131,7 +132,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			if(won == 0)
 				movelist.clear();
 			else
-				movelist.clean(cur_player, ravescale);
+				movelist.clean(rootboard.toplay(), ravescale);
 		}
 
 		return won;

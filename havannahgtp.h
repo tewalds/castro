@@ -26,6 +26,8 @@ public:
 	HavannahGTP(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
 		GTPclient(i, o, l);
 
+		player.set_board(game.getboard());
+
 		verbose = false;
 		hguicoords = false;
 		time_remain = 120;
@@ -109,17 +111,22 @@ public:
 			return GTPResponse(false, "Size " + to_str(size) + " is out of range.");
 
 		game = HavannahGame(size);
+		player.set_board(game.getboard());
+
 		return GTPResponse(true);
 	}
 
 	GTPResponse gtp_clearboard(vecstr args){
 		game.clear();
+		player.set_board(game.getboard());
+
 		log("clear_board");
 		return GTPResponse(true);
 	}
 
 	GTPResponse gtp_undo(vecstr args){
 		game.undo();
+		player.set_board(game.getboard(-1));
 		log("undo");
 		if(verbose)
 			return GTPResponse(true, "\n" + game.getboard().to_s());
@@ -269,23 +276,25 @@ public:
 
 		fprintf(stderr, "time left: %.1f, max time: %.3f, max runs: %i\n", time_remain, time, max_runs);
 
-		player.play_uct(game.getboard(), time, max_runs, mem);
+		player.move(game.get_last());
+		Move best = player.mcts(time, max_runs, mem);
 
 		time_remain += time_per_move - player.time_used;
 		if(time_remain < 0)
 			time_remain = 0;
 
-		game.move(player.bestmove);
+		game.move(best);
 
-		string pv = "";
-		for(unsigned int i = 0; i < player.principle_variation.size(); i++)
-			pv += move_str(player.principle_variation[i], true) + " ";
-		fprintf(stderr, "PV:          %s\n", pv.c_str());
+		string pvstr = "";
+		vector<Move> pv = player.get_pv();
+		for(unsigned int i = 0; i < pv.size(); i++)
+			pvstr += move_str(pv[i], true) + " ";
+		fprintf(stderr, "PV:          %s\n", pvstr.c_str());
 
 		log("#genmove " + implode(args, " "));
-		log(string("play ") + (game.toplay() == 2 ? 'w' : 'b') + ' ' + move_str(player.bestmove, false));
+		log(string("play ") + (game.toplay() == 2 ? 'w' : 'b') + ' ' + move_str(best, false));
 
-		return GTPResponse(true, move_str(player.bestmove));
+		return GTPResponse(true, move_str(best));
 	}
 
 	GTPResponse gtp_player_params(vecstr args){
@@ -336,14 +345,17 @@ public:
 		if(toplay != game.toplay())
 			return GTPResponse(false, "It is the other player's turn!");
 
+		if(game.getboard().won() >= 0)
+			return GTPResponse(false, "The game is already over.");
+
 		Move move = parse_move(pos);
 
-		if(!game.move(move)){
-			if(game.getboard().won() >= 0)
-				return GTPResponse(false, "Game already over");
-			else
-				return GTPResponse(false, "Invalid move");
-		}
+		if(!game.valid(move))
+			return GTPResponse(false, "Invalid move");
+
+		player.move(game.get_last());
+
+		game.move(move);
 
 		log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(move, false));
 

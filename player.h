@@ -23,6 +23,15 @@ class Player {
 		Node(const Move & m,       float s = 0, int v = 0) : rave(0), score(s), ravevisits(0), visits(v), move(m),         numchildren(0), children(NULL) { }
 		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), score(s), ravevisits(0), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
 
+		void neuter(){
+			numchildren = 0;
+			children = NULL;
+		}
+
+		void print() const {
+			printf("Node: exp %.2f/%i, rave %.2f/%i, move %i,%i, %i children\n", score/visits, visits, rave/ravevisits, ravevisits, move.x, move.y, numchildren);
+		}
+
 		int construct(const Solver::PNSNode * n, int pnsscore){
 			move = n->move;
 
@@ -63,8 +72,7 @@ class Player {
 		~Node(){
 			if(children)
 				delete[] children;
-			numchildren = 0;
-			children = NULL;
+			neuter();
 		}
 
 		int alloc(int num){
@@ -77,11 +85,22 @@ class Player {
 			if(numchildren){
 				for(int i = 0; i < numchildren; i++)
 					s += children[i].dealloc();
-				numchildren = 0;
 				delete[] children;
-				children = NULL;
+				neuter();
 			}
 			return s;
+		}
+
+		//need to return a pointer to a new object due to extra copies and destructor calls made during function return... need a move constructor...
+		Node * make_move(Move m){
+			for(int i = 0; i < numchildren; i++){
+				if(children[i].move == m){
+					Node * ret = new Node(children[i]); //move the child
+					children[i].neuter();
+					return ret;
+				}
+			}
+			return new Node();
 		}
 
 		float winrate(){
@@ -223,17 +242,18 @@ public:
 	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 
-	int cur_player;
+	Node root;
+	Board rootboard;
+
 	int runs;
 	DepthStats treelen, gamelen;
 	uint64_t nodes, maxnodes;
-	Move bestmove;
-	vector<Move> principle_variation;
 	bool timeout;
 
 	double time_used;
 
 	Player() {
+		nodes = 0;
 		time_used = 0;
 
 		explore = 0.85;
@@ -248,7 +268,21 @@ public:
 	}
 	void timedout(){ timeout = true; }
 
-	void play_uct(const Board & board, double time, int maxruns, int memlimit);
+	void set_board(const Board & board){
+		rootboard = board;
+		root = Node();
+	}
+	void move(const Move & m){
+		rootboard.move(m);
+		Node * child = root.make_move(m);
+		nodes -= root.dealloc();
+		root = *child;
+		child->neuter();
+		delete child;
+	}
+
+	Move mcts(double time, int maxruns, int memlimit);
+	vector<Move> get_pv();
 
 protected:
 	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
