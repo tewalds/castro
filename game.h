@@ -15,7 +15,6 @@ public:
 
 	HavannahGame(int s = 8){
 		size = s;
-		hist.push_back(Move(M_NONE));
 	}
 
 	int getsize() const {
@@ -26,24 +25,30 @@ public:
 		return hist;
 	}
 
-	Board getboard() const {
+	Move get_last() const {
+		if(hist.size() == 0)
+			return M_NONE;
+
+		return hist[hist.size()-1];
+	}
+
+	Board getboard(int offset = 0) const {
 		Board board(size);
-		for(int i = 0; i < hist.size(); i++)
+		for(unsigned int i = 0; i < (offset > 0 ? offset : hist.size() - offset); i++)
 			board.move(hist[i]);
 		return board;
 	}
-	
+
 	int len() const {
 		return hist.size();
 	}
 
 	void clear(){
 		hist.clear();
-		hist.push_back(Move(M_NONE));
 	}
-	
+
 	bool undo(){
-		if(hist.size() <= 1)
+		if(hist.size() <= 0)
 			return false;
 
 		hist.pop_back();
@@ -56,6 +61,10 @@ public:
 
 	int toplay() const {
 		return getboard().toplay();
+	}
+
+	bool valid(const Move & m) const {
+		return getboard().valid_move(m);
 	}
 
 	bool move(const Move & m){
