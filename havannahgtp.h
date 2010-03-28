@@ -61,7 +61,7 @@ public:
 	}
 
 	GTPResponse gtp_print(vecstr args){
-		return GTPResponse(true, "\n" + game.getboard()->to_s());
+		return GTPResponse(true, "\n" + game.getboard().to_s());
 	}
 
 	string won_str(int outcome) const {
@@ -122,7 +122,7 @@ public:
 		game.undo();
 		log("undo");
 		if(verbose)
-			return GTPResponse(true, "\n" + game.getboard()->to_s());
+			return GTPResponse(true, "\n" + game.getboard().to_s());
 		else
 			return GTPResponse(true);
 	}
@@ -140,7 +140,7 @@ public:
 			time = from_str<double>(args[0]);
 
 		Solver solve;
-		solve.solve_ab(*(game.getboard()), time);
+		solve.solve_ab(game.getboard(), time);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -152,7 +152,7 @@ public:
 			time = from_str<double>(args[0]);
 
 		Solver solve;
-		solve.solve_scout(*(game.getboard()), time);
+		solve.solve_scout(game.getboard(), time);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -168,7 +168,7 @@ public:
 			mem = from_str<int>(args[1]);
 
 		Solver solve;
-		solve.solve_pns(*(game.getboard()), time, mem);
+		solve.solve_pns(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -184,7 +184,7 @@ public:
 			mem = from_str<int>(args[1]);
 
 		Solver solve;
-		solve.solve_pnsab(*(game.getboard()), time, mem);
+		solve.solve_pnsab(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -200,7 +200,7 @@ public:
 			mem = from_str<int>(args[1]);
 
 		Solver solve;
-		solve.solve_dfpnsab(*(game.getboard()), time, mem);
+		solve.solve_dfpnsab(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -249,7 +249,7 @@ public:
 
 	GTPResponse gtp_all_legal(vecstr args){
 		string ret;
-		for(Board::MoveIterator move = game.getboard()->moveit(); !move.done(); ++move)
+		for(Board::MoveIterator move = game.getboard().moveit(); !move.done(); ++move)
 			ret += move_str(*move) + " ";
 		return GTPResponse(true, ret);
 	}
@@ -269,7 +269,7 @@ public:
 
 		fprintf(stderr, "time left: %.1f, max time: %.3f, max runs: %i\n", time_remain, time, max_runs);
 
-		player.play_uct(*(game.getboard()), time, max_runs, mem);
+		player.play_uct(game.getboard(), time, max_runs, mem);
 
 		time_remain += time_per_move - player.time_used;
 		if(time_remain < 0)
@@ -283,7 +283,7 @@ public:
 		fprintf(stderr, "PV:          %s\n", pv.c_str());
 
 		log("#genmove " + implode(args, " "));
-		log(string("play ") + (game.getboard()->toplay() == 2 ? 'w' : 'b') + ' ' + move_str(player.bestmove, false));
+		log(string("play ") + (game.toplay() == 2 ? 'w' : 'b') + ' ' + move_str(player.bestmove, false));
 
 		return GTPResponse(true, move_str(player.bestmove));
 	}
@@ -333,10 +333,13 @@ public:
 
 
 	GTPResponse play(const string & pos, int toplay){
+		if(toplay != game.toplay())
+			return GTPResponse(false, "It is the other player's turn!");
+
 		Move move = parse_move(pos);
 
-		if(!game.move(move, toplay)){
-			if(game.getboard()->won() >= 0)
+		if(!game.move(move)){
+			if(game.getboard().won() >= 0)
 				return GTPResponse(false, "Game already over");
 			else
 				return GTPResponse(false, "Invalid move");
@@ -345,7 +348,7 @@ public:
 		log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(move, false));
 
 		if(verbose)
-			return GTPResponse(true, "Placement: " + move_str(move) + ", outcome: " + game.getboard()->won_str() + "\n" + game.getboard()->to_s());
+			return GTPResponse(true, "Placement: " + move_str(move) + ", outcome: " + won_str(game.getboard().won()) + "\n" + game.getboard().to_s());
 		else
 			return GTPResponse(true);
 	}
@@ -381,7 +384,7 @@ public:
 
 	GTPResponse gtp_winner(vecstr args){
 		log("havannah_winner");
-		return GTPResponse(true, game.getboard()->won_str());
+		return GTPResponse(true, won_str(game.getboard().won()));
 	}
 
 	GTPResponse gtp_name(vecstr args){
@@ -408,10 +411,10 @@ public:
 
 	GTPResponse gtp_debug(vecstr args){
 		string str = "\n";
-		str += "Board size:  " + to_str(game.getboard()->get_size()) + "\n";
-		str += "Board cells: " + to_str(game.getboard()->numcells()) + "\n";
-		str += "Board vec:   " + to_str(game.getboard()->vecsize()) + "\n";
-		str += "Board mem:   " + to_str(game.getboard()->memsize()) + "\n";
+		str += "Board size:  " + to_str(game.getboard().get_size()) + "\n";
+		str += "Board cells: " + to_str(game.getboard().numcells()) + "\n";
+		str += "Board vec:   " + to_str(game.getboard().vecsize()) + "\n";
+		str += "Board mem:   " + to_str(game.getboard().memsize()) + "\n";
 
 		return GTPResponse(true, str);
 	}

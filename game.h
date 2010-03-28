@@ -8,26 +8,28 @@
 #include <cctype>
 
 class HavannahGame {
-	vector<Board> hist;
+	vector<Move> hist;
 	int size;
 
 public:
 
 	HavannahGame(int s = 8){
 		size = s;
-		hist.push_back(Board(size));
 	}
 
-	int getsize(){
+	int getsize() const {
 		return size;
 	}
 
-	Board * getboard(){
-		return & hist[hist.size()-1];
+	Board getboard() const {
+		Board board(size);
+		for(int i = 0; i < hist.size(); i++)
+			board.move(hist[i]);
+		return board;
 	}
 	
 	void clear(){
-		while(undo()) ;
+		hist.clear();
 	}
 	
 	bool undo(){
@@ -39,13 +41,16 @@ public:
 	}
 
 	int movesremain() const {
-		return hist[hist.size()-1].movesremain();
+		return getboard().movesremain();
 	}
 
-	bool move(Move & m, int toplay = -1){
-		Board b = *getboard();
-		if(b.move(m, toplay)){
-			hist.push_back(b);
+	int toplay() const {
+		return getboard().toplay();
+	}
+
+	bool move(const Move & m){
+		if(getboard().move(m)){
+			hist.push_back(m);
 			return true;
 		}
 		return false;
