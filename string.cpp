@@ -3,6 +3,12 @@
 
 using namespace std;
 
+std::string to_str(double a, int prec){
+	std::stringstream out;
+	out.precision(prec);
+	out << a;
+	return out.str();
+}
 
 void trim(string & str){
 	const char * space = " \t\r\n";

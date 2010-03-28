@@ -14,6 +14,8 @@ template <class T> std::string to_str(T a){
 	return out.str();
 }
 
+std::string to_str(double a, int prec);
+
 template <class T> T from_str(const std::string & str){
 	std::istringstream sin(str);
 	T ret;
