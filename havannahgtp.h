@@ -316,7 +316,8 @@ public:
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
 				"  -r --ravescale   Scale the rave values from 2 - 0 instead all 1    [" + to_str(player.ravescale) + "]\n" +
 				"  -o --opmoves     Treat good opponent moves as good moves for you   [" + to_str(player.opmoves) + "]\n" +
-				"  -k --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
+				"  -i --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
+				"  -k --keeptree    Keep the tree from the previous move              [" + to_str(player.keeptree) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
 				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
@@ -333,8 +334,10 @@ public:
 				player.ravescale = from_str<bool>(args[++i]);
 			}else if((arg == "-o" || arg == "--opmoves") && i+1 < args.size()){
 				player.opmoves = from_str<bool>(args[++i]);
-			}else if((arg == "-k" || arg == "--skiprave") && i+1 < args.size()){
+			}else if((arg == "-i" || arg == "--skiprave") && i+1 < args.size()){
 				player.skiprave = from_str<int>(args[++i]);
+			}else if((arg == "-k" || arg == "--keeptree") && i+1 < args.size()){
+				player.keeptree = from_str<bool>(args[++i]);
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
 			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){

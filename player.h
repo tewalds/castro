@@ -238,6 +238,7 @@ public:
 	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1
 	bool  opmoves;    //take the opponents rave updates too, a good move for my opponent is a good move for me.
 	int   skiprave;   //how often to skip rave, skip once in this many checks
+	bool  keeptree;   //reuse the tree from the previous move
 	float fpurgency;  //what value to return for a move that hasn't been played yet
 	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
 	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
@@ -262,6 +263,7 @@ public:
 		ravescale = false;
 		opmoves = false;
 		skiprave = 0;
+		keeptree = true;
 		fpurgency = 1;
 		prooftime = 0;
 		proofscore = 0;
@@ -276,11 +278,16 @@ public:
 	}
 	void move(const Move & m){
 		rootboard.move(m);
-		Node * child = root.make_move(m);
-		nodes -= root.dealloc();
-		root = *child;
-		child->neuter();
-		delete child;
+		if(keeptree){
+			Node * child = root.make_move(m);
+			nodes -= root.dealloc();
+			root = *child;
+			child->neuter();
+			delete child;
+		}else{
+			nodes -= root.dealloc();
+			root = Node();
+		}
 	}
 
 	Move mcts(double time, int maxruns, int memlimit);
