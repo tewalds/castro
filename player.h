@@ -14,15 +14,33 @@
 
 class Player {
 public:
+	struct ExpPair {
+		float sum;
+		uint32_t num;
+		ExpPair() : sum(0), num(0) { }
+		ExpPair(float s, uint32_t n) : sum(s), num(n) { }
+		float avg() const { return sum/num; }
+		ExpPair & operator+=(float a){
+			sum += a;
+			num++;
+			return *this;
+		}
+		ExpPair & operator*=(int a){
+			sum *= a;
+			num *= a;
+			return *this;
+		}
+	};
+
 	struct Node {
-		float rave, score;
-		uint32_t ravevisits, visits;
+		ExpPair rave;
+		ExpPair exp;
 		Move move;
 		uint16_t numchildren;
 		Node * children;
 
-		Node(const Move & m,       float s = 0, int v = 0) : rave(0), score(s), ravevisits(0), visits(v), move(m),         numchildren(0), children(NULL) { }
-		Node(int x = 0, int y = 0, float s = 0, int v = 0) : rave(0), score(s), ravevisits(0), visits(v), move(Move(x,y)), numchildren(0), children(NULL) { }
+		Node()               :          numchildren(0), children(NULL) { }
+		Node(const Move & m) : move(m), numchildren(0), children(NULL) { }
 
 		void neuter(){
 			numchildren = 0;
@@ -30,32 +48,22 @@ public:
 		}
 
 		void print() const {
-			printf("Node: exp %.2f/%i, rave %.2f/%i, move %i,%i, %i children\n", score/visits, visits, rave/ravevisits, ravevisits, move.x, move.y, numchildren);
+			printf("Node: exp %.2f/%i, rave %.2f/%i, move %i,%i, %i children\n", exp.avg(), exp.num, rave.avg(), rave.num, move.x, move.y, numchildren);
 		}
 
 		int construct(const Solver::PNSNode * n, int pnsscore){
 			move = n->move;
 
-			rave = 0;
-			ravevisits = 0;
-
 			if(n->delta == 0){ //a win!
-				score  = 2000;
-				visits = 1000;
+				exp = ExpPair(1000, 1000);
 			}else if(n->phi == 0){ //a loss or tie
 				//set high but not insurmountable visits just in case it is a tie
-				score = 0;
-				visits = 100;
+				exp = ExpPair(0, 100);
 			}else if(pnsscore > 0){
 				if(n->phi >= n->delta)
-					score = pnsscore*(1 - n->delta/(2*n->phi));
+					exp = (ExpPair((1 - n->delta/(2*n->phi)), 1) *= pnsscore);
 				else
-					score = pnsscore*(n->phi/(2*n->delta));
-
-				visits = pnsscore;
-			}else{
-				score = 0;
-				visits = 0;
+					exp = (ExpPair((n->phi/(2*n->delta)), 1) *= pnsscore);
 			}
 
 			numchildren = n->numchildren;
@@ -104,25 +112,22 @@ public:
 			return new Node();
 		}
 
-		float winrate(){
-			return score/visits;
-		}
 //*
 		//new way, more standard way of changing over from rave scores to real scores
 		float value(float ravefactor, float fpurgency){
 			if(ravefactor <= min_rave)
-				return (visits == 0 ? fpurgency : score/visits);
+				return (exp.num == 0 ? fpurgency : exp.avg());
 
-			if(ravevisits == 0 && visits == 0)
+			if(rave.num == 0 && exp.num == 0)
 				return fpurgency;
 
-			float alpha = ravefactor/(ravefactor + visits);
-//			float alpha = sqrt(ravefactor/(ravefactor + 3*visits));
-//			float alpha = (float)ravevisits/((float)visits + (float)ravevisits + 4.0*visits*ravevisits*ravefactor);
+			float alpha = ravefactor/(ravefactor + exp.num);
+//			float alpha = sqrt(ravefactor/(ravefactor + 3*exp.num));
+//			float alpha = (float)rave.num/((float)exp.num + (float)rave.num + 4.0*exp.num*rave.num*ravefactor);
 
 			float val = 0;
-			if(ravevisits) val += alpha*rave/ravevisits;
-			if(visits)     val += (1-alpha)*score/visits;
+			if(rave.num) val += alpha*rave.avg();
+			if(exp.num)  val += (1-alpha)*exp.avg();
 
 			return val;
 		}

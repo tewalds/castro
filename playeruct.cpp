@@ -48,7 +48,7 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 	runs = 0;
 	RaveMoveList movelist(rootboard.movesremain());
 	do{
-		root.visits++;
+		root.exp += 0;
 		runs++;
 		Board copy = rootboard;
 		movelist.clear();
@@ -58,8 +58,8 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 //return the best one
 	int maxi = 0;
 	for(int i = 1; i < root.numchildren; i++)
-//		if(root.children[maxi].winrate() < root.children[i].winrate())
-		if(root.children[maxi].visits    < root.children[i].visits)
+//		if(root.children[maxi].exp.avg() < root.children[i].exp.avg())
+		if(root.children[maxi].exp.num   < root.children[i].exp.num)
 			maxi = i;
 
 	int runtime = time_msec() - starttime;
@@ -68,7 +68,7 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(runtime) + " msec\n";
 	stats += "Game length: " + gamelen.to_s() + "\n";
 	stats += "Tree depth:  " + treelen.to_s() + "\n";
-	stats += "Move Score:  " + to_str(root.children[maxi].winrate()) + "\n";
+	stats += "Move Score:  " + to_str(root.children[maxi].exp.avg()) + "\n";
 	stats += "Games/s:     " + to_str((int)((double)runs*1000/runtime)) + "\n";
 	fprintf(stderr, "%s", stats.c_str());
 
@@ -82,8 +82,8 @@ vector<Move> Player::get_pv(){
 	while(n->numchildren){
 		int maxi = 0;
 		for(int i = 1; i < n->numchildren; i++)
-//			if(n->children[maxi].winrate() < n->children[i].winrate())
-			if(n->children[maxi].visits    < n->children[i].visits)
+//			if(n->children[maxi].exp.avg() < n->children[i].exp.avg())
+			if(n->children[maxi].exp.num   < n->children[i].exp.num)
 				maxi = i;
 
 		Node * child = & n->children[maxi];
@@ -110,8 +110,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 
 		int won = walk_tree(board, child, movelist, depth+1);
 
-		child->visits++;
-		child->score += (won == 0 ? 0.5 : won == toplay);
+		child->exp += (won == 0 ? 0.5 : won == toplay);
 
 		//update the rave scores
 		if(ravefactor > min_rave)
@@ -121,7 +120,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	}
 
 	int won = board.won();
-	if(won >= 0 || node->visits == 0 || nodes >= maxnodes){
+	if(won >= 0 || node->exp.num == 0 || nodes >= maxnodes){
 	//do random game on this node, unless it's already the end
 		if(won == -1)
 			won = rand_game(board, movelist, node->move, depth);
@@ -151,7 +150,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 Player::Node * Player::choose_move(const Node * node) const {
 	int maxi = 0;
 	float val, maxval = -1000000000;
-	float logvisits = log(node->visits);
+	float logvisits = log(node->exp.num);
 	Node * child;
 
 	float raveval = ravefactor*(skiprave == 0 || rand() % skiprave > 0); // = 0 or ravefactor
@@ -159,7 +158,7 @@ Player::Node * Player::choose_move(const Node * node) const {
 	for(unsigned int i = 0; i < node->numchildren; i++){
 		child = & node->children[i];
 
-		val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->visits+1));
+		val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->exp.num + 1));
 
 		if(maxval < val){
 			maxval = val;
@@ -178,11 +177,8 @@ void Player::update_rave(const Node * node, const RaveMoveList & movelist, int w
 		const RaveMoveList::RaveMove & rave = movelist[m];
 
 		if(rave.move == child->move){
-			if(rave.player == toplay || opmoves){
-				if(rave.player == won)
-					child->rave += rave.score;
-				child->ravevisits++;
-			}
+			if(rave.player == toplay || opmoves)
+				child->rave += (rave.player == won ? rave.score : 0);
 			m++;
 			c++;
 		}else if(rave.move > child->move){
