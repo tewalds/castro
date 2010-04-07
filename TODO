@@ -1,46 +1,28 @@
 
 
-For both solver and player, keep the tree around so it can prune off parts that aren't taken, but use the remainder
-
-MCTS
-- use heuristic initialization of nodes
-- use weighted random choices instead of uniform random:
-  - different weights for black vs white?
-  - values based on:
-    - empty, direct neighbour, potential virtual connection neighbours, 2nd corner
-    - virtual connection points (0,1,2)
-    - edge/corner, near edge/corner, empty space
-  - analyze games to determine these values
-  - a position near the edge/corner defines virtual connections to the wall
-- roll-outs don't need to be good games, only increase correlation between current position and outcome
-- try using moving averages instead of simple averages to deal with drift:
-  - current: v += 1/k*(nv - v); k++;
-  - new:     v += 1/a*(nv - v); k++; where a = (k < 100 ? k : 100); or some other value
-- explore the first play urgency space
-
-RAVE:
-- try alpha = sqrt(k/(3*n+k))
-
 prior knowledge
+- split knowledge factor from experience
+- criticality
 - virtual connect pattern
 - local reply is good
+  - use weighted random choices instead of uniform random:
+    - different weights for black vs white?
+    - values based on:
+      - empty, direct neighbour, potential virtual connection neighbours, 2nd corner
+      - virtual connection points (0,1,2)
+      - edge/corner, near edge/corner, empty space
+    - analyze games to determine these values
+    - a position near the edge/corner defines virtual connections to the wall
+
+Minimax values in the UCT tree
+
+Recency weighted experience:
+- use moving averages instead of simple averages to deal with drift:
+  - current: v += 1/k*(nv - v); k++;
+  - new:     v += 1/a*(nv - v); k++; where a = (k < 100 ? k : 100); or some other value
 
 Time control
-- if one move has many more simulations than the other, we can stop early since it won't change
 - quiecense search - if the highest winrate != most played, keep simulating until it is
-
-Opening Book
-- learn an opening book from many games, and from example games
-- how to deal with symmetry?
-
-Heuristic:
-- colorness - how black/white a cell is
-  - +3 points for each direct neighbour
-  - +2 points for virtual connection
-  - +1 point for each in second ring
-- contentious
-  - (24 - abs(colorness))*(number of pieces in neighbourhood)
-- order moves by contentiousness
-- dead move analysis
+- assign time based on expected remaining moves based on roll-out stats
 
 
