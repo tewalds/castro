@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <cmath>
+#include <cassert>
 
 #include "move.h"
 #include "board.h"
@@ -41,6 +42,29 @@ public:
 
 		Node()               :          numchildren(0), children(NULL) { }
 		Node(const Move & m) : move(m), numchildren(0), children(NULL) { }
+		Node(const Node & n) : rave(n.rave), exp(n.exp), move(n.move), numchildren(0), children(NULL) { }
+		Node & operator = (const Node & n){
+			if(this != & n){
+				//don't copy to a node that already has children
+				assert(numchildren == 0 && children == NULL);
+
+				rave = n.rave;
+				exp  = n.exp;
+				move = n.move;
+			}
+			return *this;
+		}
+
+		void swap_tree(Node & n){
+			Node * temp = children;
+			uint16_t tempnum = numchildren;
+
+			children = n.children;
+			numchildren = n.numchildren;
+
+			n.children = temp;
+			n.numchildren = tempnum;
+		}
 
 		void neuter(){
 			numchildren = 0;
@@ -81,7 +105,7 @@ public:
 			numchildren = n->numchildren;
 			children = NULL;
 
-			int num = 1;
+			int num = numchildren;
 			if(numchildren){
 				children = new Node[numchildren];
 				for(int i = 0; i < numchildren; i++)
@@ -110,18 +134,6 @@ public:
 				neuter();
 			}
 			return s;
-		}
-
-		//need to return a pointer to a new object due to extra copies and destructor calls made during function return... need a move constructor...
-		Node * make_move(Move m){
-			for(int i = 0; i < numchildren; i++){
-				if(children[i].move == m){
-					Node * ret = new Node(children[i]); //move the child
-					children[i].neuter();
-					return ret;
-				}
-			}
-			return new Node();
 		}
 
 //*
@@ -295,12 +307,21 @@ public:
 	}
 	void move(const Move & m){
 		rootboard.move(m);
+
 		if(keeptree){
-			Node * child = root.make_move(m);
+			Node child;
+
+			for(int i = 0; i < root.numchildren; i++){
+				if(root.children[i].move == m){
+					child = root.children[i];          //copy the child experience to temp
+					child.swap_tree(root.children[i]); //move the child tree to temp
+					break;
+				}
+			}
+
 			nodes -= root.dealloc();
-			root = *child;
-			child->neuter();
-			delete child;
+			root = child;
+			root.swap_tree(child);
 		}else{
 			nodes -= root.dealloc();
 			root = Node();
