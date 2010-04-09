@@ -48,11 +48,16 @@ public:
 		}
 
 		void print() const {
-			printf("Node: exp %.2f/%i, rave %.2f/%i, move %i,%i, %i children\n", exp.avg(), exp.num, rave.avg(), rave.num, move.x, move.y, numchildren);
+			printf("%s\n", to_s().c_str());
+		}
+		string to_s() const {
+			return "Node: exp " + to_str(exp.avg(), 2) + "/" + to_str(exp.num) +
+					", rave " + to_str(rave.avg(), 2) + "/" + to_str(rave.num) +
+					", move " + to_str(move.x) + "," + to_str(move.y) + ", " + to_str(numchildren);
 		}
 
 		int size() const {
-			int s = 1;
+			int s = numchildren;
 			for(int i = 0; i < numchildren; i++)
 				s += children[i].size();
 			return s;
