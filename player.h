@@ -115,17 +115,24 @@ public:
 		}
 
 		~Node(){
-			if(children)
-				delete[] children;
-			neuter();
+			assert(children == NULL && numchildren == 0);
 		}
 
 		int alloc(int num){
+			assert(numchildren == 0);
+			assert(children == NULL);
+			assert(num > 0);
+
 			numchildren = num;
 			children = new Node[num];
+
+			assert(numchildren == num);
+
 			return num;
 		}
 		int dealloc(){
+			assert((children == NULL) == (numchildren == 0));
+
 			int s = numchildren;
 			if(numchildren){
 				for(int i = 0; i < numchildren; i++)
@@ -133,6 +140,9 @@ public:
 				delete[] children;
 				neuter();
 			}
+
+			assert(children == NULL && numchildren == 0);
+
 			return s;
 		}
 
@@ -298,6 +308,7 @@ public:
 		proofscore = 0;
 		rolloutpattern = false;
 	}
+	~Player(){ root.dealloc(); }
 	void timedout(){ timeout = true; }
 
 	void set_board(const Board & board){
