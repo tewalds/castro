@@ -56,11 +56,11 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 	}while(!timeout && (maxruns == 0 || runs < maxruns));
 
 //return the best one
-	int maxi = 0;
+	Node ret = root.children[0];
 	for(int i = 1; i < root.numchildren; i++)
-//		if(root.children[maxi].exp.avg() < root.children[i].exp.avg())
-		if(root.children[maxi].exp.num   < root.children[i].exp.num)
-			maxi = i;
+//		if(ret.exp.avg() < root.children[i].exp.avg())
+		if(ret.exp.num   < root.children[i].exp.num)
+			ret = root.children[i];
 
 	int runtime = time_msec() - starttime;
 	time_used = (double)runtime/1000;
@@ -68,11 +68,11 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(runtime) + " msec\n";
 	stats += "Game length: " + gamelen.to_s() + "\n";
 	stats += "Tree depth:  " + treelen.to_s() + "\n";
-	stats += "Move Score:  " + to_str(root.children[maxi].exp.avg()) + "\n";
+	stats += "Move Score:  " + to_str(ret.exp.avg()) + "\n";
 	stats += "Games/s:     " + to_str((int)((double)runs*1000/runtime)) + "\n";
 	fprintf(stderr, "%s", stats.c_str());
 
-	return root.children[maxi].move;
+	return ret.move;
 }
 
 vector<Move> Player::get_pv(){
