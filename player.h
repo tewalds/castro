@@ -51,6 +51,13 @@ public:
 			printf("Node: exp %.2f/%i, rave %.2f/%i, move %i,%i, %i children\n", exp.avg(), exp.num, rave.avg(), rave.num, move.x, move.y, numchildren);
 		}
 
+		int size() const {
+			int s = 1;
+			for(int i = 0; i < numchildren; i++)
+				s += children[i].size();
+			return s;
+		}
+
 		int construct(const Solver::PNSNode * n, int pnsscore){
 			move = n->move;
 
