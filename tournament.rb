@@ -225,6 +225,12 @@ end
 
 #play the games
 	puts "Starting a tournament of #{$rounds} rounds and #{$num_games} games\n";
+	if($time_per_game > 0 && $time_per_move == 0 && $max_runs == 0)
+		expected_time = $num_games*2*$time_per_game/$parallel
+		puts "Max expected time: #{expected_time} seconds, Ends before: " + (Time.now + expected_time).to_s;
+	end
+	puts "\n"
+
 	time = timer {
 		$outcomes = $games.map_fork($parallel){|n,i,j|
 			result = ($interrupt ? 0 : play_game(n, i, j));
