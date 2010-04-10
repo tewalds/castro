@@ -15,6 +15,7 @@
 
 class Player {
 public:
+//*
 	class ExpPair {
 		float s;
 		uint32_t n;
@@ -35,6 +36,28 @@ public:
 			return *this;
 		}
 	};
+/*/
+	class ExpPair {
+		float v;
+		uint32_t n;
+	public:
+		ExpPair() : v(0), n(0) { }
+		ExpPair(float S, uint32_t N) : v(S/N), n(N) { }
+		float avg() const { return v; }
+		float sum() const { return v*n; }
+		uint32_t num() const { return n; }
+		ExpPair & operator+=(float nv){
+			n++;
+			v += (nv - v)/n;
+//			v += (nv - v)/(n < 1000 ? n : 1000);
+			return *this;
+		}
+		ExpPair & operator*=(int m){
+			n *= m;
+			return *this;
+		}
+	};
+//*/
 
 	struct Node {
 		ExpPair rave;
