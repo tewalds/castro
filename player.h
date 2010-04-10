@@ -37,12 +37,15 @@ public:
 		ExpPair rave;
 		ExpPair exp;
 		Move move;
+		Move bestmove; //if outcome is set, then bestmove is the way to get there
+		int16_t outcome;
 		uint16_t numchildren;
 		Node * children;
+		//don't forget to update the copy constructor/operator
 
-		Node()               :          numchildren(0), children(NULL) { }
-		Node(const Move & m) : move(m), numchildren(0), children(NULL) { }
-		Node(const Node & n) : rave(n.rave), exp(n.exp), move(n.move), numchildren(0), children(NULL) { }
+		Node()                            :          outcome(-1), numchildren(0), children(NULL) { }
+		Node(const Move & m, char o = -1) : move(m), outcome(o),  numchildren(0), children(NULL) { }
+		Node(const Node & n) { *this = n; }
 		Node & operator = (const Node & n){
 			if(this != & n){
 				//don't copy to a node that already has children
@@ -51,6 +54,8 @@ public:
 				rave = n.rave;
 				exp  = n.exp;
 				move = n.move;
+				outcome = n.outcome;
+				bestmove = n.bestmove;
 			}
 			return *this;
 		}
@@ -278,6 +283,7 @@ public:
 	bool  opmoves;    //take the opponents rave updates too, a good move for my opponent is a good move for me.
 	int   skiprave;   //how often to skip rave, skip once in this many checks
 	bool  keeptree;   //reuse the tree from the previous move
+	bool  minimax;    //solve the minimax tree within the uct tree
 	float fpurgency;  //what value to return for a move that hasn't been played yet
 	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
 	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
@@ -303,6 +309,7 @@ public:
 		opmoves = false;
 		skiprave = 0;
 		keeptree = true;
+		minimax = true;
 		fpurgency = 1;
 		prooftime = 0;
 		proofscore = 0;
@@ -344,7 +351,7 @@ public:
 
 protected:
 	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
-	Node * choose_move(const Node * node) const;
+	Node * choose_move(const Node * node, int toplay) const;
 	void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
 	int rand_game(Board & board, RaveMoveList & movelist, Move move, int depth);
 	bool check_pattern(const Board & board, Move & move);

@@ -53,14 +53,21 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 		Board copy = rootboard;
 		movelist.clear();
 		walk_tree(copy, & root, movelist, 0);
-	}while(!timeout && (maxruns == 0 || runs < maxruns));
+	}while(!timeout && root.outcome == -1 && (maxruns == 0 || runs < maxruns));
 
 //return the best one
-	Node ret = root.children[0];
-	for(int i = 1; i < root.numchildren; i++)
-//		if(ret.exp.avg() < root.children[i].exp.avg())
-		if(ret.exp.num   < root.children[i].exp.num)
-			ret = root.children[i];
+	Node ret;
+	if(root.outcome >= 0){
+		ret.move = root.bestmove;
+		ret.outcome = root.outcome;
+		ret.exp += (root.outcome == 0 ? 0.5 : (root.outcome == rootboard.toplay()));
+	}else{
+		ret.exp += 0;
+		for(int i = 0; i < root.numchildren; i++)
+//			if(ret.exp.avg() < root.children[i].exp.avg())
+			if(ret.exp.num   < root.children[i].exp.num)
+				ret = root.children[i];
+	}
 
 	int runtime = time_msec() - starttime;
 	time_used = (double)runtime/1000;
@@ -70,6 +77,13 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 	stats += "Tree depth:  " + treelen.to_s() + "\n";
 	stats += "Move Score:  " + to_str(ret.exp.avg()) + "\n";
 	stats += "Games/s:     " + to_str((int)((double)runs*1000/runtime)) + "\n";
+	if(ret.outcome >= 0){
+		stats += "Solved as a ";
+		if(ret.outcome == 0)                       stats += "draw";
+		else if(ret.outcome == rootboard.toplay()) stats += "win";
+		else                                       stats += "loss";
+		stats += "\n";
+	}
 	fprintf(stderr, "%s", stats.c_str());
 
 	return ret.move;
@@ -103,23 +117,29 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 
 	if(node->children){
 	//choose a child and recurse
-		Node * child = choose_move(node);
+		Node * child = choose_move(node, toplay);
 
-		board.move(child->move);
-		movelist.add(child->move);
+		if(child->outcome == -1){
+			board.move(child->move);
+			movelist.add(child->move);
 
-		int won = walk_tree(board, child, movelist, depth+1);
+			int won = walk_tree(board, child, movelist, depth+1);
 
-		child->exp += (won == 0 ? 0.5 : won == toplay);
+			child->exp += (won == 0 ? 0.5 : won == toplay);
 
-		//update the rave scores
-		if(ravefactor > min_rave)
-			update_rave(node, movelist, won, toplay);
+			//update the rave scores
+			if(ravefactor > min_rave)
+				update_rave(node, movelist, won, toplay);
 
-		return won;
+			return won;
+		}else{
+			node->outcome = child->outcome;
+			node->bestmove = child->move;
+			nodes -= node->dealloc();
+		}
 	}
 
-	int won = board.won();
+	int won = (minimax ? node->outcome : board->won());
 	if(won >= 0 || node->exp.num == 0 || nodes >= maxnodes){
 	//do random game on this node, unless it's already the end
 		if(won == -1)
@@ -140,25 +160,48 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 //create children
 	nodes += node->alloc(board.movesremain());
 
-	int i = 0;
-	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move)
-		node->children[i++] = Node(*move);
+	if(minimax){
+		int i = 0;
+		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+			Board copy = board;
+			copy.move(*move);
+
+			if(copy.won() == toplay){ //proven win from here, don't need children
+				node->outcome = copy.won();
+				node->bestmove = *move;
+				nodes -= node->dealloc();
+				break;
+			}
+
+			node->children[i++] = Node(*move, copy.won());
+		}
+	}else{
+		int i = 0;
+		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move)
+			node->children[i++] = Node(*move);
+	}
 
 	return walk_tree(board, node, movelist, depth);
 }
 
-Player::Node * Player::choose_move(const Node * node) const {
+Player::Node * Player::choose_move(const Node * node, int toplay) const {
 	int maxi = 0;
 	float val, maxval = -1000000000;
 	float logvisits = log(node->exp.num);
-	Node * child;
 
 	float raveval = ravefactor*(skiprave == 0 || rand() % skiprave > 0); // = 0 or ravefactor
 
 	for(unsigned int i = 0; i < node->numchildren; i++){
-		child = & node->children[i];
+		Node * child = & node->children[i];
 
-		val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->exp.num + 1));
+		if(child->outcome >= 0){
+			if(child->outcome == toplay)
+				return child;
+
+			val = (child->outcome == 0 ? -1 : -2); //-1 for tie so any unknown is better, -2 for loss so it's even worse
+		}else{
+			val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->exp.num + 1));
+		}
 
 		if(maxval < val){
 			maxval = val;

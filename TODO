@@ -14,8 +14,6 @@ prior knowledge
     - analyze games to determine these values
     - a position near the edge/corner defines virtual connections to the wall
 
-Minimax values in the UCT tree
-
 Recency weighted experience:
 - use moving averages instead of simple averages to deal with drift:
   - current: v += 1/k*(nv - v); k++;

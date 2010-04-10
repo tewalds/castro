@@ -318,6 +318,7 @@ public:
 				"  -o --opmoves     Treat good opponent moves as good moves for you   [" + to_str(player.opmoves) + "]\n" +
 				"  -i --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
 				"  -k --keeptree    Keep the tree from the previous move              [" + to_str(player.keeptree) + "]\n" +
+				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
 				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
@@ -338,6 +339,8 @@ public:
 				player.skiprave = from_str<int>(args[++i]);
 			}else if((arg == "-k" || arg == "--keeptree") && i+1 < args.size()){
 				player.keeptree = from_str<bool>(args[++i]);
+			}else if((arg == "-m" || arg == "--minimax") && i+1 < args.size()){
+				player.minimax = from_str<bool>(args[++i]);
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
 			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
