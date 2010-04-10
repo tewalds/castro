@@ -139,7 +139,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		}
 	}
 
-	int won = (minimax ? node->outcome : board->won());
+	int won = (minimax ? node->outcome : board.won());
 	if(won >= 0 || node->exp.num == 0 || nodes >= maxnodes){
 	//do random game on this node, unless it's already the end
 		if(won == -1)
