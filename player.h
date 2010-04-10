@@ -326,6 +326,8 @@ public:
 	void move(const Move & m){
 		rootboard.move(m);
 
+		uint64_t nodesbefore = nodes;
+
 		if(keeptree){
 			Node child;
 
@@ -340,10 +342,14 @@ public:
 			nodes -= root.dealloc();
 			root = child;
 			root.swap_tree(child);
+
+			if(nodesbefore > 0)
+				fprintf(stderr, "Nodes before: %llu, after: %llu, saved %.1f%% of the tree\n", nodesbefore, nodes, 100.0*nodes/nodesbefore);
 		}else{
 			nodes -= root.dealloc();
 			root = Node();
 		}
+		assert(nodes == root.size());
 	}
 
 	Move mcts(double time, int maxruns, int memlimit);
