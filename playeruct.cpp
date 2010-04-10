@@ -65,7 +65,7 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 		ret.exp += 0;
 		for(int i = 0; i < root.numchildren; i++)
 //			if(ret.exp.avg() < root.children[i].exp.avg())
-			if(ret.exp.num   < root.children[i].exp.num)
+			if(ret.exp.num() < root.children[i].exp.num())
 				ret = root.children[i];
 	}
 
@@ -97,7 +97,7 @@ vector<Move> Player::get_pv(){
 		int maxi = 0;
 		for(int i = 1; i < n->numchildren; i++)
 //			if(n->children[maxi].exp.avg() < n->children[i].exp.avg())
-			if(n->children[maxi].exp.num   < n->children[i].exp.num)
+			if(n->children[maxi].exp.num() < n->children[i].exp.num())
 				maxi = i;
 
 		Node * child = & n->children[maxi];
@@ -140,7 +140,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	}
 
 	int won = (minimax ? node->outcome : board.won());
-	if(won >= 0 || node->exp.num == 0 || nodes >= maxnodes){
+	if(won >= 0 || node->exp.num() == 0 || nodes >= maxnodes){
 	//do random game on this node, unless it's already the end
 		if(won == -1)
 			won = rand_game(board, movelist, node->move, depth);
@@ -187,7 +187,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 Player::Node * Player::choose_move(const Node * node, int toplay) const {
 	int maxi = 0;
 	float val, maxval = -1000000000;
-	float logvisits = log(node->exp.num);
+	float logvisits = log(node->exp.num());
 
 	float raveval = ravefactor*(skiprave == 0 || rand() % skiprave > 0); // = 0 or ravefactor
 
@@ -200,7 +200,7 @@ Player::Node * Player::choose_move(const Node * node, int toplay) const {
 
 			val = (child->outcome == 0 ? -1 : -2); //-1 for tie so any unknown is better, -2 for loss so it's even worse
 		}else{
-			val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->exp.num + 1));
+			val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->exp.num() + 1));
 		}
 
 		if(maxval < val){

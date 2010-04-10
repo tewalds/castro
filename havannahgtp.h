@@ -365,8 +365,8 @@ public:
 		for(int i = 0; i < player.root.numchildren; i++){
 			Player::Node & child = player.root.children[i];
 			s += move_str(child.move, true) + "-";
-			s += to_str(child.exp.avg(), 2) + "/" + to_str(child.exp.num) + "-";
-			s += to_str(child.rave.avg(), 2) + "/" + to_str(child.rave.num) + " ";
+			s += to_str(child.exp.avg(), 2) + "/" + to_str(child.exp.num()) + "-";
+			s += to_str(child.rave.avg(), 2) + "/" + to_str(child.rave.num()) + " ";
 		}
 		s += "\n";
 

@@ -15,20 +15,23 @@
 
 class Player {
 public:
-	struct ExpPair {
-		float sum;
-		uint32_t num;
-		ExpPair() : sum(0), num(0) { }
-		ExpPair(float s, uint32_t n) : sum(s), num(n) { }
-		float avg() const { return sum/num; }
-		ExpPair & operator+=(float a){
-			sum += a;
-			num++;
+	class ExpPair {
+		float s;
+		uint32_t n;
+	public:
+		ExpPair() : s(0), n(0) { }
+		ExpPair(float S, uint32_t N) : s(S), n(N) { }
+		float avg() const { return s/n; }
+		float sum() const { return s; }
+		uint32_t num() const { return n; }
+		ExpPair & operator+=(float nv){
+			s += nv;
+			n++;
 			return *this;
 		}
-		ExpPair & operator*=(int a){
-			sum *= a;
-			num *= a;
+		ExpPair & operator*=(int m){
+			s *= m;
+			n *= m;
 			return *this;
 		}
 	};
@@ -80,8 +83,8 @@ public:
 			printf("%s\n", to_s().c_str());
 		}
 		string to_s() const {
-			return "Node: exp " + to_str(exp.avg(), 2) + "/" + to_str(exp.num) +
-					", rave " + to_str(rave.avg(), 2) + "/" + to_str(rave.num) +
+			return "Node: exp " + to_str(exp.avg(), 2) + "/" + to_str(exp.num()) +
+					", rave " + to_str(rave.avg(), 2) + "/" + to_str(rave.num()) +
 					", move " + to_str(move.x) + "," + to_str(move.y) + ", " + to_str(numchildren);
 		}
 
@@ -155,18 +158,18 @@ public:
 		//new way, more standard way of changing over from rave scores to real scores
 		float value(float ravefactor, float fpurgency){
 			if(ravefactor <= min_rave)
-				return (exp.num == 0 ? fpurgency : exp.avg());
+				return (exp.num() == 0 ? fpurgency : exp.avg());
 
-			if(rave.num == 0 && exp.num == 0)
+			if(rave.num() == 0 && exp.num() == 0)
 				return fpurgency;
 
-			float alpha = ravefactor/(ravefactor + exp.num);
-//			float alpha = sqrt(ravefactor/(ravefactor + 3*exp.num));
-//			float alpha = (float)rave.num/((float)exp.num + (float)rave.num + 4.0*exp.num*rave.num*ravefactor);
+			float alpha = ravefactor/(ravefactor + exp.num());
+//			float alpha = sqrt(ravefactor/(ravefactor + 3*exp.num()));
+//			float alpha = (float)rave.num()/((float)exp.num() + (float)rave.num() + 4.0*exp.num()*rave.num()*ravefactor);
 
 			float val = 0;
-			if(rave.num) val += alpha*rave.avg();
-			if(exp.num)  val += (1-alpha)*exp.avg();
+			if(rave.num()) val += alpha*rave.avg();
+			if(exp.num())  val += (1-alpha)*exp.avg();
 
 			return val;
 		}
