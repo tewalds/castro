@@ -16,6 +16,9 @@ class HavannahGTP : public GTPclient {
 public:
 	bool verbose;
 	bool hguicoords;
+	enum time_control_t { TIME_PERCENT, TIME_EVEN, TIME_STATS };
+	time_control_t time_control;
+	double time_param;
 	double time_remain;
 	double time_per_move;
 	int max_runs;
@@ -30,6 +33,8 @@ public:
 
 		verbose = false;
 		hguicoords = false;
+		time_control = TIME_STATS;
+		time_param  = 2;
 		time_remain = 120;
 		time_per_move = 0;
 		mem_allowed = 1000;
@@ -58,6 +63,7 @@ public:
 		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab,this, _1));
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,  this, _1));
 		newcallback("time_settings",   bind(&HavannahGTP::gtp_time_settings, this, _1));
+		newcallback("time_control",    bind(&HavannahGTP::gtp_time_control, this, _1));
 		newcallback("history",         bind(&HavannahGTP::gtp_history,    this, _1));
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,    this, _1));
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1));
@@ -271,11 +277,61 @@ public:
 		return GTPResponse(true, ret);
 	}
 
-	GTPResponse gtp_genmove(vecstr args){
-		double time = 4*time_remain / game.movesremain();
+	GTPResponse gtp_time_control(vecstr args){
+		bool matched = false;
+		if(args.size() >= 1){
+			if(     args[0] == "-p" || args[0] == "--percent"){ time_control = TIME_PERCENT; time_param = 10; matched = true; }
+			else if(args[0] == "-e" || args[0] == "--even"   ){ time_control = TIME_EVEN;    time_param = 2;  matched = true; }
+			else if(args[0] == "-s" || args[0] == "--stats"  ){ time_control = TIME_STATS;   time_param = 2;  matched = true; }
+		}
+
+		string current;
+		if(time_control == TIME_PERCENT) current = "percent";
+		if(time_control == TIME_EVEN)    current = "even";
+		if(time_control == TIME_STATS)   current = "stats";
+
+		if(matched){
+			if(args.size() >= 2)
+				time_param = from_str<double>(args[1]);
+			return GTPResponse(true, current + " " + to_str(time_param));
+		}
+
+		return GTPResponse(true, string("\n") +
+			"Choose the time control to use for the player, eg: time_control -e 2.5\n" +
+			"Current time control: " + current + " " + to_str(time_param) + "\n" +
+			"  -p --percent  Percentage of the remaining time every move                          [10.0]\n" +
+			"  -e --even     Multiple of even split of the maximum  remaining moves (1.0 is even) [2.0]\n" +
+			"  -s --stats    Multiple of even split of the expected remaining moves (1.0 is even) [2.0]\n" 
+			);
+	}
+
+	double get_time(){
+		double time = 0;
+
+		switch(time_control){
+			case TIME_PERCENT:
+				time += time_param*time_remain/100;
+				break;
+			case TIME_STATS:
+				if(player.gamelen.avg() > 0){
+					time += 2.0*time_param*time_remain / player.gamelen.avg();
+					break;
+				}//fall back to even
+			case TIME_EVEN:
+				time += 2.0*time_param*time_remain / game.movesremain();
+				break;
+		}
+
 		if(time > time_remain)
 			time = time_remain;
+
 		time += time_per_move;
+
+		return time;
+	}
+
+	GTPResponse gtp_genmove(vecstr args){
+		double time = get_time();
 		int mem = mem_allowed;
 
 		if(args.size() >= 2)
