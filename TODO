@@ -14,13 +14,7 @@ prior knowledge
     - analyze games to determine these values
     - a position near the edge/corner defines virtual connections to the wall
 
-Recency weighted experience:
-- use moving averages instead of simple averages to deal with drift:
-  - current: v += 1/k*(nv - v); k++;
-  - new:     v += 1/a*(nv - v); k++; where a = (k < 100 ? k : 100); or some other value
-
 Time control
 - quiecense search - if the highest winrate != most played, keep simulating until it is
-- assign time based on expected remaining moves based on roll-out stats
 
 
