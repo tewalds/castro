@@ -1569,6 +1569,79 @@ Win vs Loss Matrix:
 Played 840 games, Total Time: 28437 s
 
 
+starscream: size 5
+Player 1: ./castro-assign2
+Player 2: ./castro -c 'time_control -p 10'
+Player 3: ./castro -c 'time_control -e 2'
+Player 4: ./castro -c 'time_control -e 3'
+Player 5: ./castro -c 'time_control -e 4'
+Player 6: ./castro -c 'time_control -s 1'
+Player 7: ./castro -c 'time_control -s 2'
+Player 8: ./castro -c 'time_control -s 3'
+Player 9: ./castro -c 'time_control -s 4'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9
+ 1:     7  8  2  8 10  4  5  9 : 53 wins, 187 losses, 0 ties
+ 2: 23     0  0  0  0  0  0  0 : 23 wins, 7 losses, 0 ties
+ 3: 22  0     0  0  0  0  0  0 : 22 wins, 8 losses, 0 ties
+ 4: 28  0  0     0  0  0  0  0 : 28 wins, 2 losses, 0 ties
+ 5: 22  0  0  0     0  0  0  0 : 22 wins, 8 losses, 0 ties
+ 6: 20  0  0  0  0     0  0  0 : 20 wins, 10 losses, 0 ties
+ 7: 26  0  0  0  0  0     0  0 : 26 wins, 4 losses, 0 ties
+ 8: 25  0  0  0  0  0  0     0 : 25 wins, 5 losses, 0 ties
+ 9: 21  0  0  0  0  0  0  0    : 21 wins, 9 losses, 0 ties
+Played 240 games, Total Time: 8185 s
+
+
+groove size 5
+Player 1: ./castro-assign2
+Player 2: ./castro -c 'time_control -p 10'
+Player 3: ./castro -c 'time_control -e 2'
+Player 4: ./castro -c 'time_control -e 3'
+Player 5: ./castro -c 'time_control -e 4'
+Player 6: ./castro -c 'time_control -s 1'
+Player 7: ./castro -c 'time_control -s 2'
+Player 8: ./castro -c 'time_control -s 3'
+Player 9: ./castro -c 'time_control -s 4'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9
+ 1:     5 11  8 10 11 10  5  4 : 64 wins, 176 losses, 0 ties
+ 2: 25     0  0  0  0  0  0  0 : 25 wins, 5 losses, 0 ties
+ 3: 19  0     0  0  0  0  0  0 : 19 wins, 11 losses, 0 ties
+ 4: 22  0  0     0  0  0  0  0 : 22 wins, 8 losses, 0 ties
+ 5: 20  0  0  0     0  0  0  0 : 20 wins, 10 losses, 0 ties
+ 6: 19  0  0  0  0     0  0  0 : 19 wins, 11 losses, 0 ties
+ 7: 20  0  0  0  0  0     0  0 : 20 wins, 10 losses, 0 ties
+ 8: 25  0  0  0  0  0  0     0 : 25 wins, 5 losses, 0 ties
+ 9: 26  0  0  0  0  0  0  0    : 26 wins, 4 losses, 0 ties
+Played 240 games, Total Time: 8309 s
+
+
+muriel size 5
+Player 1: ./castro-assign2
+Player 2: ./castro -c 'time_control -p 10'
+Player 3: ./castro -c 'time_control -e 2'
+Player 4: ./castro -c 'time_control -e 3'
+Player 5: ./castro -c 'time_control -e 4'
+Player 6: ./castro -c 'time_control -s 1'
+Player 7: ./castro -c 'time_control -s 2'
+Player 8: ./castro -c 'time_control -s 3'
+Player 9: ./castro -c 'time_control -s 4'
+
+Win vs Loss Matrix:
+     1  2  3  4  5  6  7  8  9
+ 1:    14 15 16 13 13 14 15 12 : 112 wins, 288 losses, 0 ties
+ 2: 36     0  0  0  0  0  0  0 : 36 wins, 14 losses, 0 ties
+ 3: 35  0     0  0  0  0  0  0 : 35 wins, 15 losses, 0 ties
+ 4: 34  0  0     0  0  0  0  0 : 34 wins, 16 losses, 0 ties
+ 5: 37  0  0  0     0  0  0  0 : 37 wins, 13 losses, 0 ties
+ 6: 37  0  0  0  0     0  0  0 : 37 wins, 13 losses, 0 ties
+ 7: 36  0  0  0  0  0     0  0 : 36 wins, 14 losses, 0 ties
+ 8: 35  0  0  0  0  0  0     0 : 35 wins, 15 losses, 0 ties
+ 9: 38  0  0  0  0  0  0  0    : 38 wins, 12 losses, 0 ties
+Played 400 games, Total Time: 7716 s
 
 
 
