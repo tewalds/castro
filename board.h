@@ -35,7 +35,7 @@ class Board{
 		unsigned edge   : 6; //which edges are this group connected to
 		unsigned local  : 2; //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
 
-		Cell() : piece(0), parent(0), size(0), corner(0), edge(0) { }
+		Cell() : piece(0), parent(0), size(0), corner(0), edge(0), local(0) { }
 		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e) :
 			piece(p), parent(a), size(s), corner(c), edge(e) { }
 
