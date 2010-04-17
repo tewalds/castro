@@ -381,6 +381,7 @@ public:
 				"Node initialization knowledge:\n" +
 				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
+				"  -c --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
 				"Rollout policy:\n" +
 				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
 
@@ -409,6 +410,8 @@ public:
 				player.proofscore = from_str<int>(args[++i]);
 			}else if((arg == "-l" || arg == "--localreply") && i+1 < args.size()){
 				player.localreply = from_str<bool>(args[++i]);
+			}else if((arg == "-c" || arg == "--locality") && i+1 < args.size()){
+				player.locality = from_str<bool>(args[++i]);
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);
 			}else{

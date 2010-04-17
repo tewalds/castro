@@ -30,9 +30,10 @@ class Board{
 	struct Cell {
 		unsigned piece  : 2; //who controls this cell, 0 for none, 1,2 for players
 		unsigned parent : 9; //parent for this group of cells
-		unsigned size   : 9; //size of this group of cells
+		unsigned size   : 7; //size of this group of cells
 		unsigned corner : 6; //which corners are this group connected to
 		unsigned edge   : 6; //which edges are this group connected to
+		unsigned local  : 2; //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
 
 		Cell() : piece(0), parent(0), size(0), corner(0), edge(0) { }
 		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e) :
@@ -137,6 +138,8 @@ public:
 	int get(int i)          const { return cells[i].piece; }
 	int get(int x, int y)   const { return get(xy(x,y)); }
 	int get(const Move & m) const { return get(xy(m)); }
+
+	int local(const Move & m) const { return cells[xy(m)].local; }
 
 	//assumes x, y are in array bounds
 	bool onboard(int x, int y)   const { return (  y -   x < size) && (  x -   y < size); }
@@ -310,7 +313,7 @@ public:
 		return false;
 	}
 
-	bool move(const Move & pos, char turn = -1){
+	bool move(const Move & pos, bool local = false){
 		if(!valid_move(pos))
 			return false;
 
@@ -319,10 +322,18 @@ public:
 			return true;
 		}
 
-		if(turn == -1)
-			turn = toplay();
+		char turn = toplay();
 
 		set(pos, turn);
+
+		if(local){
+			for(int i = 0; i < 18; i++){
+				MoveScore loc = neighbours[i] + pos;
+
+				if(onboard2(loc))
+					cells[xy(loc)].local |= loc.score;
+			}
+		}
 
 		bool alreadyjoined = false; //useful for finding rings
 		for(int i = 0; i < 6; i++){

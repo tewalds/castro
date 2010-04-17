@@ -183,6 +183,11 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 				child->exp.add(3 - dist, 3 - dist);
 		}
 
+		if(locality){ //give exp boost for moves near previous stones
+			int val = board.local(*move);
+			child->exp.add(val, val);
+		}
+
 		child++;
 	}
 	return walk_tree(board, node, movelist, depth);
