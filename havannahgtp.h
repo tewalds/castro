@@ -368,6 +368,7 @@ public:
 		if(args.size() == 0)
 			return GTPResponse(true, string("\n") +
 				"Set player parameters, eg: player_params -e 3 -r 40 -t 0.1 -p 0\n" +
+				"Tree traversal:\n" +
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
 				"  -r --ravescale   Scale the rave values from 2 - 0 instead all 1    [" + to_str(player.ravescale) + "]\n" +
@@ -377,7 +378,9 @@ public:
 				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
 				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
+				"Node initialization knowledge:\n" +
 				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
+				"Rollout policy:\n" +
 				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
 
 		for(unsigned int i = 0; i < args.size(); i++) {
