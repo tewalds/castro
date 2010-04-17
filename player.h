@@ -25,6 +25,15 @@ public:
 		float avg() const { return s/n; }
 		float sum() const { return s; }
 		uint32_t num() const { return n; }
+		void add(float val, int num){
+			s += val;
+			n += num;
+		}
+		ExpPair & operator+=(const ExpPair & a){
+			s += a.s;
+			n += a.n;
+			return *this;
+		}
 		ExpPair & operator+=(float nv){
 			s += nv;
 			n++;
