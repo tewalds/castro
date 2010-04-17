@@ -21,6 +21,11 @@ using namespace std;
  */
 
 const Move neighbours[6] = { Move(-1,-1), Move(0,-1), Move(1,0), Move(1,1), Move(0,1), Move(-1,0) };//x, y, clockwise
+const MoveScore neighbourscores[18] = {
+	MoveScore(-1,-1, 3), MoveScore(0,-1, 3), MoveScore(1, 0, 3), MoveScore(1, 1, 3), MoveScore( 0, 1, 3), MoveScore(-1, 0, 3), //direct neighbours
+	MoveScore(-2,-2, 1), MoveScore(0,-2, 1), MoveScore(2, 0, 1), MoveScore(2, 2, 1), MoveScore( 0, 2, 1), MoveScore(-2, 0, 1), //corners of ring 2, easy to block
+	MoveScore(-1,-2, 2), MoveScore(1,-1, 2), MoveScore(2, 1, 2), MoveScore(1, 2, 2), MoveScore(-1, 1, 2), MoveScore(-2,-1, 2), //sides of ring 2, virtual connections
+	};
 
 class Board{
 	struct Cell {
