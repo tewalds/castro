@@ -389,6 +389,7 @@ public:
 		}else{
 			nodes -= root.dealloc();
 			root = Node();
+			root.move = m;
 		}
 		assert(nodes == root.size());
 	}
