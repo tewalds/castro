@@ -324,6 +324,7 @@ public:
 	float fpurgency;  //what value to return for a move that hasn't been played yet
 //knowledge
 	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
+	bool  localreply; //give knowlegde boost for a local reply, ie a move near the previous move
 //rollout
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 
@@ -352,6 +353,7 @@ public:
 		fpurgency = 1;
 		prooftime = 0;
 		proofscore = 0;
+		localreply = 1;
 		rolloutpattern = false;
 	}
 	~Player(){ root.dealloc(); }

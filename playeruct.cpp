@@ -176,6 +176,13 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		}else{
 			*child = Node(*move);
 		}
+
+		if(localreply){ //give exp boost for moves near the previous move
+			int dist = node->move.dist(*move);
+			if(dist <= 2)
+				child->exp.add(3 - dist, 3 - dist);
+		}
+
 		child++;
 	}
 	return walk_tree(board, node, movelist, depth);

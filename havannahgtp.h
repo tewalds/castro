@@ -380,6 +380,7 @@ public:
 				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"Node initialization knowledge:\n" +
 				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
+				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
 				"Rollout policy:\n" +
 				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
 
@@ -406,6 +407,8 @@ public:
 				player.prooftime = from_str<float>(args[++i]);
 			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
 				player.proofscore = from_str<int>(args[++i]);
+			}else if((arg == "-l" || arg == "--localreply") && i+1 < args.size()){
+				player.localreply = from_str<bool>(args[++i]);
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);
 			}else{
