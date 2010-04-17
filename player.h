@@ -369,7 +369,7 @@ public:
 		root = Node();
 	}
 	void move(const Move & m){
-		rootboard.move(m);
+		rootboard.move(m, true);
 
 		uint64_t nodesbefore = nodes;
 
