@@ -1644,6 +1644,32 @@ Win vs Loss Matrix:
 Played 400 games, Total Time: 7716 s
 
 
+starscream size 5
+Player 1: ./castro-assign2
+Player 2: ./castro -c 'player_params -l 1'
+Player 3: ./castro -c 'player_params -l 0'
+
+Win vs Loss Matrix:
+     1  2  3
+ 1:    11 11 : 22 wins, 78 losses, 0 ties
+ 2: 39    27 : 66 wins, 34 losses, 0 ties
+ 3: 39 23    : 62 wins, 38 losses, 0 ties
+Played 150 games, Total Time: 5128 s
+
+
+groove size 5
+Player 1: ./castro-assign2
+Player 2: ./castro -c 'player_params -l 1'
+Player 3: ./castro -c 'player_params -l 0'
+
+Win vs Loss Matrix:
+     1  2  3
+ 1:     9 17 : 26 wins, 74 losses, 0 ties
+ 2: 41    28 : 69 wins, 31 losses, 0 ties
+ 3: 33 22    : 55 wins, 45 losses, 0 ties
+Played 150 games, Total Time: 5223 s
+
+
 
 
 
