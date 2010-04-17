@@ -287,15 +287,17 @@ public:
 	}
 
 	int test_connectivity(const Move & pos){
+		char turn = toplay();
+
 		Cell testcell;
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 
-			if(onboard2(loc) && toplay() == get(loc)){
-				int i = xy(loc);
-				testcell.corner |= cells[i].corner;
-				testcell.edge   |= cells[i].edge;
-				i++;
+			if(onboard2(loc) && turn == get(loc)){
+				Cell * g = & cells[find_group(loc)];
+				testcell.corner |= g->corner;
+				testcell.edge   |= g->edge;
+				i++; //skip the next one
 			}
 		}
 		return testcell.numcorners() + testcell.numedges();
