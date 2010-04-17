@@ -162,19 +162,17 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 
 	Node * child = node->children;
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
-		if(minimax){
-			Board copy = board;
-			copy.move(*move);
-			*child = Node(*move, copy.won());
+		*child = Node(*move);
 
-			if(minimax && copy.won() == toplay){ //proven win from here, don't need children
-				node->outcome = copy.won();
+		if(minimax){
+			child->outcome = board.test_win(*move);
+
+			if(child->outcome == toplay){ //proven win from here, don't need children
+				node->outcome = child->outcome;
 				node->bestmove = *move;
 				nodes -= node->dealloc();
 				break;
 			}
-		}else{
-			*child = Node(*move);
 		}
 
 		if(localreply){ //give exp boost for moves near the previous move

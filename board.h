@@ -367,6 +367,36 @@ public:
 		}
 		return true;	
 	}
+
+	//test if making this move would win, but don't actually make the move
+	int test_win(const Move & pos){
+		char turn = toplay();
+
+		Cell testcell;
+		int numgroups = 0;
+		for(int i = 0; i < 6; i++){
+			Move loc = pos + neighbours[i];
+
+			if(onboard2(loc) && turn == get(loc)){
+				Cell * g = & cells[find_group(loc)];
+				testcell.corner |= g->corner;
+				testcell.edge   |= g->edge;
+				i++; //skip the next one
+				numgroups++;
+			}
+		}
+
+		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3)
+			return turn;
+
+		if(numgroups >= 2 && detectring(pos, turn))
+			return turn;
+
+		if(nummoves+1 == numcells())
+			return 0;
+
+		return -1;
+	}
 };
 
 #endif
