@@ -70,7 +70,7 @@ public:
 	}
 
 	bool move(const Move & m){
-		if(getboard().move(m, move)){
+		if(getboard().move(m)){
 			hist.push_back(m);
 			return true;
 		}
