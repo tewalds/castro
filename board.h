@@ -302,27 +302,23 @@ public:
 	}
 
 	// recursively follow a ring
-	bool detectring(const Move & pos){
-		int group = find_group(pos);
+	bool detectring(const Move & pos, char turn){
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 			
-			if(onboard2(loc) && find_group(loc) == group && followring(pos, loc, i, group))
+			if(onboard2(loc) && turn == get(loc) && followring(pos, loc, i, turn))
 				return true;
 		}
 		return false;
 	}
 	// only take the 3 directions that are valid in a ring
 	// the backwards directions are either invalid or not part of the shortest loop
-	bool followring(const Move & start, const Move & cur, const int & dir, const int & group){
-		if(start == cur)
-			return true;
-
+	bool followring(const Move & start, const Move & cur, const int & dir, const int & turn){
 		for(int i = 5; i <= 7; i++){
 			int nd = (dir + i) % 6;
 			Move next = cur + neighbours[nd];
-			
-			if(onboard2(next) && find_group(next) == group && followring(start, next, nd, group))
+
+			if(start == next || (onboard2(next) && turn == get(next) && followring(start, next, nd, turn)))
 				return true;
 		}
 		return false;
@@ -362,7 +358,7 @@ public:
 		}
 
 		Cell * g = & cells[find_group(pos)];
-		if(g->numcorners() >= 2 || g->numedges() >= 3 || (alreadyjoined && g->size >= 6 && detectring(pos))){
+		if(g->numcorners() >= 2 || g->numedges() >= 3 || (alreadyjoined && g->size >= 6 && detectring(pos, turn))){
 			outcome = turn;
 		}else if(nummoves == numcells()){
 			outcome = 0;
