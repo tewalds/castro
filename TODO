@@ -4,6 +4,7 @@ prior knowledge
 - split knowledge factor from experience
 - criticality
 - virtual connect pattern
+- connections, so being connected to edges and corners is good
 - local reply is good
   - use weighted random choices instead of uniform random:
     - different weights for black vs white?
