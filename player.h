@@ -326,6 +326,7 @@ public:
 	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
 	bool  localreply; //boost for a local reply, ie a move near the previous move
 	bool  locality;   //boost for playing near previous stones
+	bool  connect;    //boost for having connections to edges and corners
 //rollout
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 
@@ -356,6 +357,7 @@ public:
 		proofscore = 0;
 		localreply = 1;
 		locality = 1;
+		connect = 1;
 		rolloutpattern = false;
 	}
 	~Player(){ root.dealloc(); }

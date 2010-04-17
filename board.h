@@ -286,6 +286,21 @@ public:
 		return false;
 	}
 
+	int test_connectivity(const Move & pos){
+		Cell testcell;
+		for(int i = 0; i < 6; i++){
+			Move loc = pos + neighbours[i];
+
+			if(onboard2(loc) && toplay() == get(loc)){
+				int i = xy(loc);
+				testcell.corner |= cells[i].corner;
+				testcell.edge   |= cells[i].edge;
+				i++;
+			}
+		}
+		return testcell.numcorners() + testcell.numedges();
+	}
+
 	// recursively follow a ring
 	bool detectring(const Move & pos){
 		int group = find_group(pos);

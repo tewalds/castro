@@ -188,6 +188,11 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			child->exp.add(val, val);
 		}
 
+		if(connect){ //boost for moves that connect to edges/corners
+			int val = board.test_connectivity(*move);
+			child->exp.add(val, val);
+		}
+
 		child++;
 	}
 	return walk_tree(board, node, movelist, depth);
