@@ -178,18 +178,14 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		if(localreply){ //give exp boost for moves near the previous move
 			int dist = node->move.dist(*move);
 			if(dist <= 2)
-				child->exp.add(3 - dist, 3 - dist);
+				child->exp.add(3 - dist);
 		}
 
-		if(locality){ //give exp boost for moves near previous stones
-			int val = board.local(*move);
-			child->exp.add(val, val);
-		}
+		if(locality) //give exp boost for moves near previous stones
+			child->exp.add(board.local(*move));
 
-		if(connect){ //boost for moves that connect to edges/corners
-			int val = board.test_connectivity(*move);
-			child->exp.add(val, val);
-		}
+		if(connect) //boost for moves that connect to edges/corners
+			child->exp.add(board.test_connectivity(*move));
 
 		child++;
 	}
