@@ -9,18 +9,21 @@ int time_msec();
 
 class Time {
 	double t;
-
+public:
 	Time(){
 		struct timeval time;
 		gettimeofday(&time, NULL);
 		t = time.tv_sec + (double)time.tv_usec/1000000;
 	}
 	Time(double a) : t(a) { }
+	Time(const struct timeval & time){
+		t = time.tv_sec + (double)time.tv_usec/1000000;
+	}
 
-	int to_i()   { return (int)t; }
-	int in_msec(){ return (int)(t*1000); }
-	int in_usec(){ return (int)(t*1000000); }
-	double to_f(){ return t; }
+	int to_i()    const { return (int)t; }
+	int in_msec() const { return (int)(t*1000); }
+	int in_usec() const { return (int)(t*1000000); }
+	double to_f() const { return t; }
 
 	Time   operator +  (double a)       const { return Time(t+a); }
 	Time & operator += (double a)             { t += a; return *this; }
