@@ -4,16 +4,13 @@ prior knowledge
 - split knowledge factor from experience
 - criticality
 - virtual connect pattern
-- connections, so being connected to edges and corners is good
-- local reply is good
-  - use weighted random choices instead of uniform random:
-    - different weights for black vs white?
-    - values based on:
-      - empty, direct neighbour, potential virtual connection neighbours, 2nd corner
-      - virtual connection points (0,1,2)
-      - edge/corner, near edge/corner, empty space
-    - analyze games to determine these values
-    - a position near the edge/corner defines virtual connections to the wall
+
+rollout policy
+- use weighted random choices instead of uniform random:
+- different weights for black vs white?
+- local reply?
+- locality?
+- connections?
 
 Time control
 - quiecense search - if the highest winrate != most played, keep simulating until it is
