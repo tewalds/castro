@@ -37,11 +37,12 @@ struct Move {
 };
 
 struct MoveScore : public Move {
-	int8_t score;
+	int16_t score;
 
 	MoveScore() : score(0) { }
 	MoveScore(MoveSpecial a) : Move(a), score(0) { }
 	MoveScore(int X, int Y, int s) : Move(X, Y), score(s) { }
+	MoveScore operator+ (const Move & b) const { return MoveScore(x + b.x, y + b.y, score); }
 };
 
 #endif
