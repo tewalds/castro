@@ -160,27 +160,24 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 //create children
 	nodes += node->alloc(board.movesremain());
 
-	if(minimax){
-		int i = 0;
-		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+	Node * child = node->children;
+	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+		if(minimax){
 			Board copy = board;
 			copy.move(*move);
+			*child = Node(*move, copy.won());
 
-			if(copy.won() == toplay){ //proven win from here, don't need children
+			if(minimax && copy.won() == toplay){ //proven win from here, don't need children
 				node->outcome = copy.won();
 				node->bestmove = *move;
 				nodes -= node->dealloc();
 				break;
 			}
-
-			node->children[i++] = Node(*move, copy.won());
+		}else{
+			*child = Node(*move);
 		}
-	}else{
-		int i = 0;
-		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move)
-			node->children[i++] = Node(*move);
+		child++;
 	}
-
 	return walk_tree(board, node, movelist, depth);
 }
 

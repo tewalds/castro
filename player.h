@@ -312,6 +312,8 @@ public:
 
 	static const float min_rave = 0.1;
 
+	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
+//tree traversal
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
 	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1
@@ -320,9 +322,11 @@ public:
 	bool  keeptree;   //reuse the tree from the previous move
 	bool  minimax;    //solve the minimax tree within the uct tree
 	float fpurgency;  //what value to return for a move that hasn't been played yet
-	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
+//knowledge
 	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
+//rollout
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
+
 
 	Node root;
 	Board rootboard;
