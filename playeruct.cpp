@@ -120,8 +120,8 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		Node * child = choose_move(node, toplay);
 
 		if(child->outcome == -1){
+			movelist.add(child->move, toplay);
 			board.move(child->move, locality);
-			movelist.add(child->move);
 
 			int won = walk_tree(board, child, movelist, depth+1);
 
@@ -152,7 +152,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			if(won == 0)
 				movelist.clear();
 			else
-				movelist.clean(rootboard.toplay(), ravescale);
+				movelist.clean(ravescale);
 		}
 
 		return won;
@@ -241,14 +241,14 @@ void Player::update_rave(const Node * node, const RaveMoveList & movelist, int w
 		Node * child = & node->children[c];
 		const RaveMoveList::RaveMove & rave = movelist[m];
 
-		if(rave.move == child->move){
+		if(rave == child->move){
 			if(rave.player == toplay || opmoves)
 				child->rave += (rave.player == won ? rave.score : 0);
 			m++;
 			c++;
-		}else if(rave.move > child->move){
+		}else if(rave > child->move){
 			c++;
-		}else{//(rave.move < child->move){
+		}else{//(rave < child->move){
 			m++;
 		}
 	}
@@ -398,8 +398,8 @@ int Player::rand_game(Board & board, RaveMoveList & movelist, Move move, int dep
 		}
 
 makemove:
+		movelist.add(move, board.toplay());
 		board.move(move);
-		movelist.add(move);
 		depth++;
 	}
 

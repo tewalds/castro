@@ -252,19 +252,11 @@ public:
 	};
 
 	struct RaveMoveList {
-		struct RaveMove {
-			Move move;
+		struct RaveMove : public Move {
 			char player;
 			float score;
 
-			RaveMove(const Move & m) : move(m), player(0), score(0) { }
-
-			bool operator< (const RaveMove & b) const { return (move <  b.move); }
-			bool operator<=(const RaveMove & b) const { return (move <= b.move); }
-			bool operator> (const RaveMove & b) const { return (move >  b.move); }
-			bool operator>=(const RaveMove & b) const { return (move >= b.move); }
-			bool operator==(const RaveMove & b) const { return (move == b.move); }
-			bool operator!=(const RaveMove & b) const { return (move != b.move); }
+			RaveMove(const Move & m, char p = 0, float s = 1) : Move(m), player(p), score(s) { }
 		};
 
 		vector<RaveMove> list;
@@ -273,8 +265,8 @@ public:
 			list.reserve(s);
 		}
 
-		void add(const Move & move){
-			list.push_back(move);
+		void add(const Move & move, char player){
+			list.push_back(RaveMove(move, player, 1));
 		}
 		void clear(){
 			list.clear();
@@ -287,22 +279,13 @@ public:
 		}
 		//remove the moves that were played by the loser
 		//sort in y,x order
-		void clean(int player, bool scale){
-			float base, factor;
-
+		void clean(bool scale){
 			if(scale){
-				base = 2; //2 instead of 1 so the average of wins stays at 1
-				factor = 2*2.0/(list.size()+1); //+1 to keep it from going negative, 4 = base*2 since half the values are skipped
-			}else{
-				base = 1;
-				factor = 0;
-			}
+				float base = 2; //2 instead of 1 so the average of wins stays at 1
+				float factor = 2*base/(list.size()+1); //+1 to keep it from going negative, 4 = base*2 since half the values are skipped
 
-			//the wins get values, the losses stay at default=0
-			for(unsigned int i = 0; i < list.size(); i++){
-				list[i].player = player;
-				list[i].score = base - i/2*factor;
-				player = 3 - player;
+				for(unsigned int i = 0; i < list.size(); i++)
+					list[i].score = base - i/2*factor;
 			}
 
 			sort(list.begin(), list.end()); //sort in y,x order
