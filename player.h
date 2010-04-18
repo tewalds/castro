@@ -349,23 +349,23 @@ public:
 		nodes = 0;
 		time_used = 0;
 
-		explore = 0.85;
-		ravefactor = 50;
-		ravescale = false;
-		opmoves = false;
-		skiprave = 0;
-		keeptree = true;
+		explore     = 0.85;
+		ravefactor  = 50;
+		ravescale   = false;
+		opmoves     = false;
+		skiprave    = 0;
+		keeptree    = true;
 		minimaxtree = false;
-		minimax = true;
-		fpurgency = 1;
-		prooftime = 0;
-		proofscore = 0;
-		localreply = 1;
-		locality = 1;
-		connect = 1;
-		bridge = 1;
+		minimax     = true;
+		fpurgency   = 1;
+		prooftime   = 0;
+		proofscore  = 0;
+		localreply  = true;
+		locality    = false;
+		connect     = true;
+		bridge      = true;
 		rolloutpattern = false;
-		instantwin = false;
+		instantwin  = false;
 	}
 	~Player(){ root.dealloc(); }
 	void timedout(){ timeout = true; }
