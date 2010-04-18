@@ -341,20 +341,20 @@ public:
 		time_used = 0;
 
 		explore     = 0.85;
-		ravefactor  = 50;
+		ravefactor  = 0; // 50
 		ravescale   = false;
 		opmoves     = false;
 		skiprave    = 0;
 		keeptree    = true;
 		minimaxtree = false;
-		minimax     = true;
+		minimax     = false;
 		fpurgency   = 1;
 		prooftime   = 0;
 		proofscore  = 0;
-		localreply  = true;
+		localreply  = false;
 		locality    = false;
-		connect     = true;
-		bridge      = true;
+		connect     = false;
+		bridge      = false;
 		rolloutpattern = false;
 		instantwin  = false;
 	}
