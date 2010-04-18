@@ -127,12 +127,17 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 
 			child->exp += (won == 0 ? 0.5 : won == toplay);
 
-			//update the rave scores
-			if(ravefactor > min_rave)
+			if(child->outcome == toplay){ //backup a win right away. Losses and ties can wait
+				node->outcome = child->outcome;
+				node->bestmove = child->move;
+				if(!minimaxtree)
+					nodes -= node->dealloc();
+			}else if(ravefactor > min_rave){ //update the rave scores
 				update_rave(node, movelist, won, toplay);
+			}
 
 			return won;
-		}else{
+		}else{ //backup the win/loss/tie
 			node->outcome = child->outcome;
 			node->bestmove = child->move;
 			if(!minimaxtree)
@@ -217,7 +222,7 @@ Player::Node * Player::choose_move(const Node * node, int toplay) const {
 		Node * child = & node->children[i];
 
 		if(child->outcome >= 0){
-			if(child->outcome == toplay)
+			if(child->outcome == toplay) //return a win immediately
 				return child;
 
 			val = (child->outcome == 0 ? -1 : -2); //-1 for tie so any unknown is better, -2 for loss so it's even worse
