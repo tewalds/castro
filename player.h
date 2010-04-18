@@ -321,6 +321,7 @@ public:
 	bool  opmoves;    //take the opponents rave updates too, a good move for my opponent is a good move for me.
 	int   skiprave;   //how often to skip rave, skip once in this many checks
 	bool  keeptree;   //reuse the tree from the previous move
+	bool  minimaxtree;//keep the solved part of the tree
 	bool  minimax;    //solve the minimax tree within the uct tree
 	float fpurgency;  //what value to return for a move that hasn't been played yet
 //knowledge
@@ -352,6 +353,7 @@ public:
 		opmoves = false;
 		skiprave = 0;
 		keeptree = true;
+		minimaxtree = false;
 		minimax = true;
 		fpurgency = 1;
 		prooftime = 0;

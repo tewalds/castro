@@ -135,7 +135,8 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		}else{
 			node->outcome = child->outcome;
 			node->bestmove = child->move;
-			nodes -= node->dealloc();
+			if(!minimaxtree)
+				nodes -= node->dealloc();
 		}
 	}
 
