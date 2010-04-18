@@ -11,6 +11,7 @@
 	$players = [];
 	$cmds = [];
 	$msg = nil;
+	$log = nil;
 
 	while(ARGV.length > 0)
 		arg = ARGV.shift
@@ -24,6 +25,7 @@
 		when "-s", "--size"     then $boardsize     = ARGV.shift.to_i;
 		when "-c", "--cmd"      then $cmds << ARGV.shift;
 		when "-z", "--msg"      then $msg = ARGV.shift;
+		when "-l", "--log"      then $log = ARGV.shift;
 		when "-h", "--help"     then
 			puts "Run a round robin tournament between players that all understand GTP."
 			puts "Usage: #{$0} [<options>] players..."
@@ -36,6 +38,7 @@
 			puts "  -s --size     Board size [#{$boardsize}]"
 			puts "  -c --cmd      Send an arbitrary GTP command at the beginning of the game"
 			puts "  -z --msg      Output a message of what this is testing with the results"
+			puts "  -l --log      Log the games to this directory, disabled by default"
 			puts "  -h --help     Print this help"
 			exit;
 		else
@@ -54,20 +57,33 @@ trap("SIGTERM") { $interrupt = true; }
 trap("SIGINT")  { $interrupt = true; }
 trap("SIGHUP")  { $interrupt = true; }
 
+def timer
+	start = Time.now
+	yield
+	return Time.now - start
+end
+
 def play_game(n, p1, p2)
 #start the programs
 	begin
-		fds = [];
+		fds = [nil];
 		IO.popen($players[p1], "w+"){|fd1|
 			fds << fd1;
 	
 		IO.popen($players[p2], "w+"){|fd2|
 			fds << fd2;
 
+			log = nil;
+			if($log)
+				log = File.open("#{$log}/#{n}-#{p1}-#{p2}", "w");
+				log.write("# Game #{n} between  #{$players[p1]} vs #{$players[p2]}\n")
+			end
+
 		#send the initial commands
 			$cmds.each{|cmd|
 				puts cmd;
-			
+				log.write(cmd+"\n") if log
+
 				fd1.write(cmd+"\n");
 				fd1.gets; fd1.gets;
 			
@@ -75,35 +91,51 @@ def play_game(n, p1, p2)
 				fd2.gets; fd2.gets;
 			}
 
-			turnstrings = ["white","black"];
+			turnstrings = ["draw","white","black"];
 
-			turn = 0;
+			turn = 1;
 			i = 1;
+			ret = nil;
+			totaltime = timer {
 			loop{
 				$0 = "Game #{n}/#{$num_games} move #{i}: #{$players[p1]} vs #{$players[p2]}"
 				i += 1;
 
 				#ask for a move
 				print "genmove #{turnstrings[turn]}: ";
-				fds[turn].write("genmove #{turnstrings[turn]}\n");
-				ret = fds[turn].gets.slice(2, 100).rstrip;
-				fds[turn].gets;
-				puts ret;
-
-				turn = 1-turn;
+				time = timer {
+					fds[turn].write("genmove #{turnstrings[turn]}\n");
+					ret = fds[turn].gets.slice(2, 100).rstrip;
+					fds[turn].gets;
+				}
+				puts ret
 
 				break if(ret == "resign" || ret == "none")
 
+				turn = 3-turn;
+
 				#pass the move to the other player
-				fds[turn].write("play #{turnstrings[1-turn]} #{ret}\n");
+				fds[turn].write("play #{turnstrings[3-turn]} #{ret}\n");
 				fds[turn].gets;
 				fds[turn].gets;
+
+				log.write("play #{turnstrings[3-turn]} #{ret}\n") if log
+				log.write("# took #{time} seconds\n\n") if log
 			}
+			}
+
+			fd1.write("havannah_winner\n");
+			ret = fd1.gets.slice(2, 100).rstrip;
+			fd1.gets;
+			turn = turnstrings.index(ret);
+
+			log.write("# Winner: #{ret}, #{$players[turn]}\n") if log
+			log.write("# Total time: #{totaltime} seconds\n") if log
 
 			fd1.write("quit\n");
 			fd2.write("quit\n");
 
-			return turn+1;
+			return turn;
 		}
 		}
 	rescue
@@ -250,35 +282,53 @@ end
 	}
 	
 #start output
-	puts "\n\n";
-	puts "#{$msg}\n" if $msg;
+	out = "\n\n";
+	out << "#{$msg}\n" if $msg;
 	(0...$num).each{|i|
-		puts "Player #{i+1}: #{$players[i]}";
+		out << "Player #{i+1}: #{$players[i]}\n";
 	}
 	puts "\n";
 
 #win vs loss matrix
-	puts "Win vs Loss Matrix:";
-	print "   ";
-	(1..$num).each{|i| print i.to_s.rjust(3) }
-	puts ""
+	out << "Win vs Loss Matrix:\n";
+	out << "   ";
+	(1..$num).each{|i| out << i.to_s.rjust(3) }
+	out << "\n"
 
 	(0...$num).each{|i|
 		wins = 0;
 		losses = 0;
-		print (i+1).to_s.rjust(2) + ":"
+		out << (i+1).to_s.rjust(2) + ":"
 		(0...$num).each{|j|
 			if(i == j)
-				print "   ";
+				out << "   ";
 			else
-				print $results[i][j].to_s.rjust(3);
+				out << $results[i][j].to_s.rjust(3);
 				wins += $results[i][j];
 				losses += $results[j][i];
 			end
 		}
 		ties = ($against && i > 0 ? 1 : $num-1)*2*$rounds - wins - losses;
-		puts " : #{wins} wins, #{losses} losses, #{ties} ties";
+		out << " : #{wins} wins, #{losses} losses, #{ties} ties\n";
 	}
 
-	puts "Played #{$num_games} games, Total Time: #{time.to_i} s";
+	out << "Played #{$num_games} games, Total Time: #{time.to_i} s\n";
+
+	print out
+
+	if($log)
+		File.open("#{$log}/players", "w"){|fp|
+			$players.each{|p|
+				fp.write("#{p}\n")
+			}
+		}
+
+		File.open("#{$log}/results", "w"){|fp|
+			$outcomes.each{|i,j,r| fp.write("#{i},#{j},#{r}\n") }
+		}
+
+		File.open("#{$log}/summary", "w"){|fp|
+			fp.write(out);
+		}
+	end
 
