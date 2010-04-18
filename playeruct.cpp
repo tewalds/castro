@@ -241,20 +241,19 @@ Player::Node * Player::choose_move(const Node * node, int toplay) const {
 
 void Player::update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay){
 	//update the rave score of all children that were played
-	unsigned int m = 0, c = 0, mls = movelist.size();
-	while(m < mls && c < node->numchildren){
-		Node * child = & node->children[c];
-		const RaveMoveList::RaveMove & rave = movelist[m];
+	RaveMoveList::iterator rave = movelist.begin(), raveend = movelist.end();
+	Node * child = node->children, * childend = node->children + node->numchildren;
 
-		if(rave == child->move){
-			if(rave.player == toplay || opmoves)
-				child->rave += (rave.player == won ? rave.score : 0);
-			m++;
-			c++;
-		}else if(rave > child->move){
-			c++;
-		}else{//(rave < child->move){
-			m++;
+	while(rave != raveend && child != childend){
+		if(*rave == child->move){
+			if(rave->player == toplay || opmoves)
+				child->rave += (rave->player == won ? rave->score : 0);
+			rave++;
+			child++;
+		}else if(*rave > child->move){
+			child++;
+		}else{ //(*rave < child->move)
+			rave++;
 		}
 	}
 }

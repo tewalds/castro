@@ -258,6 +258,7 @@ public:
 
 			RaveMove(const Move & m, char p = 0, float s = 1) : Move(m), player(p), score(s) { }
 		};
+		typedef vector<RaveMove>::const_iterator iterator;
 
 		vector<RaveMove> list;
 
@@ -277,6 +278,13 @@ public:
 		const RaveMove & operator[](int i) const {
 			return list[i];
 		}
+		iterator begin() const {
+			return list.begin();
+		}
+		iterator end() const {
+			return list.end();
+		}
+
 		//remove the moves that were played by the loser
 		//sort in y,x order
 		void clean(bool scale){
