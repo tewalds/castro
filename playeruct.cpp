@@ -383,12 +383,21 @@ int Player::rand_game(Board & board, RaveMoveList & movelist, Move move, int dep
 
 	i = 0;
 	while((won = board.won()) < 0){
+		if(instantwin){
+			for(Board::MoveIterator m = board.moveit(); !m.done(); ++m){
+				if(board.test_win(*m) > 0){
+					move = *m;
+					goto makemove; //yes, evil...
+				}
+			}
+		}
 		if(!rolloutpattern || !check_pattern(board, move)){
 			do{
 				move = order[i++];
 			}while(!board.valid_move(move));
 		}
 
+makemove:
 		board.move(move);
 		movelist.add(move);
 		depth++;

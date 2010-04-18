@@ -386,7 +386,9 @@ public:
 				"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
 				"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
 				"Rollout policy:\n" +
-				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
+				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" +
+				"  -w --instantwin  Look for instant wins in roll outs                [" + to_str(player.instantwin) + "]\n"
+				);
 
 		for(unsigned int i = 0; i < args.size(); i++) {
 			string arg = args[i];
@@ -423,6 +425,8 @@ public:
 				player.bridge = from_str<bool>(args[++i]);
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);
+			}else if((arg == "-w" || arg == "--instantwin") && i+1 < args.size()){
+				player.instantwin = from_str<bool>(args[++i]);
 			}else{
 				return GTPResponse(false, "Missing or unknown parameter");
 			}

@@ -3,12 +3,10 @@
 prior knowledge
 - split knowledge factor from experience
 - criticality
-- virtual connect pattern
 
 rollout policy
 - use weighted random choices instead of uniform random:
 - different weights for black vs white?
-- instant win
 - local reply?
 - locality?
 - connections?

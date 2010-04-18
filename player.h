@@ -332,6 +332,7 @@ public:
 	bool  bridge;     //boost replying to a probe at a bridge
 //rollout
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
+	bool  instantwin; //look for instant wins in rollouts
 
 
 	Node root;
@@ -364,6 +365,7 @@ public:
 		connect = 1;
 		bridge = 1;
 		rolloutpattern = false;
+		instantwin = false;
 	}
 	~Player(){ root.dealloc(); }
 	void timedout(){ timeout = true; }
