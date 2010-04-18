@@ -376,7 +376,7 @@ public:
 				"  -i --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
 				"  -k --keeptree    Keep the tree from the previous move              [" + to_str(player.keeptree) + "]\n" +
 				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
-				"  -n --minimaxtree Keep the proven part of the UCT tree              [" + to_str(player.minimaxtree) + "]\" +
+				"  -n --minimaxtree Keep the proven part of the UCT tree              [" + to_str(player.minimaxtree) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
 				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"Node initialization knowledge:\n" +
@@ -384,6 +384,7 @@ public:
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
 				"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
 				"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
+				"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
 				"Rollout policy:\n" +
 				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" );
 
@@ -418,6 +419,8 @@ public:
 				player.locality = from_str<bool>(args[++i]);
 			}else if((arg == "-c" || arg == "--connect") && i+1 < args.size()){
 				player.connect = from_str<bool>(args[++i]);
+			}else if((arg == "-b" || arg == "--bridge") && i+1 < args.size()){
+				player.bridge = from_str<bool>(args[++i]);
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);
 			}else{

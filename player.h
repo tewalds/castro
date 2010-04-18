@@ -329,6 +329,7 @@ public:
 	bool  localreply; //boost for a local reply, ie a move near the previous move
 	bool  locality;   //boost for playing near previous stones
 	bool  connect;    //boost for having connections to edges and corners
+	bool  bridge;     //boost replying to a probe at a bridge
 //rollout
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 
@@ -361,6 +362,7 @@ public:
 		localreply = 1;
 		locality = 1;
 		connect = 1;
+		bridge = 1;
 		rolloutpattern = false;
 	}
 	~Player(){ root.dealloc(); }
@@ -408,6 +410,7 @@ protected:
 	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
 	Node * choose_move(const Node * node, int toplay) const;
 	void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
+	vector<Move> list_bridge_probes(const Board & board, Move & move);
 	int rand_game(Board & board, RaveMoveList & movelist, Move move, int depth);
 	bool check_pattern(const Board & board, Move & move);
 };

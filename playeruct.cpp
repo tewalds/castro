@@ -161,6 +161,10 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 //create children
 	nodes += node->alloc(board.movesremain());
 
+	vector<Move> vcs;
+	if(bridge)
+		vcs = list_bridge_probes(board, node->move);
+
 	Node * child = node->children;
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 		*child = Node(*move);
@@ -187,6 +191,15 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 
 		if(connect) //boost for moves that connect to edges/corners
 			child->exp.add(board.test_connectivity(*move));
+
+		if(bridge){
+			for(vector<Move>::iterator vc = vcs.begin(); vc != vcs.end(); ++vc){
+				if(*move == *vc){
+					child->exp.add(5);
+					break;
+				}
+			}
+		}
 
 		child++;
 	}
@@ -240,6 +253,49 @@ void Player::update_rave(const Node * node, const RaveMoveList & movelist, int w
 		}
 	}
 }
+
+//return a list of positions where the opponent is probing your virtual connections
+vector<Move> Player::list_bridge_probes(const Board & board, Move & move){
+	vector<Move> ret;
+	Move temp;
+
+	int state = 0;
+	int piece = 3 - board.get(move);
+	for(int i = 0; i < 8; i++){
+		Move cur = move + neighbours[i % 6];
+
+		bool on = board.onboard2(cur);
+		int v;
+		if(on)
+			v = board.get(cur);
+
+	//state machine that progresses when it see the pattern, but counting borders as part of the pattern
+		if(state == 0){
+			if(!on || v == piece)
+				state = 1;
+			//else state = 0;
+		}else if(state == 1){
+			if(on){
+				if(v == 0){
+					state = 2;
+					temp = cur;
+				}else if(v != piece)
+					state = 0;
+				//else (v==piece) => state = 1;
+			}
+			//else state = 1;
+		}else{ // state == 2
+			if(!on || v == piece){
+				ret.push_back(temp);
+				state = 1;
+			}else{
+				state = 0;
+			}
+		}
+	}
+	return ret;
+}
+
 
 //look for good forced moves. In this case I only look for keeping a virtual connection active
 //so looking from the last played position's perspective, which is a move by the opponent
