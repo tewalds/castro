@@ -386,10 +386,7 @@ public:
 			}
 		}
 
-		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3)
-			return turn;
-
-		if(numgroups >= 2 && detectring(pos, turn))
+		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3 || (numgroups >= 2 && detectring(pos, turn)))
 			return turn;
 
 		if(nummoves+1 == numcells())
