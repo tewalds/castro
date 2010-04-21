@@ -403,7 +403,7 @@ protected:
 	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
 	Node * choose_move(const Node * node, int toplay) const;
 	void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
-	vector<Move> list_bridge_probes(const Board & board, Move & move);
+	bool test_bridge_probe(const Board & board, const Move & move, const Move & test);
 	int rand_game(Board & board, RaveMoveList & movelist, Move move, int depth);
 	bool check_pattern(const Board & board, Move & move);
 };

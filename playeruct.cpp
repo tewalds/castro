@@ -166,10 +166,6 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 //create children
 	nodes += node->alloc(board.movesremain());
 
-	vector<Move> vcs;
-	if(bridge)
-		vcs = list_bridge_probes(board, node->move);
-
 	Node * child = node->children;
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 		*child = Node(*move);
@@ -197,14 +193,8 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		if(connect) //boost for moves that connect to edges/corners
 			child->exp.add(board.test_connectivity(*move));
 
-		if(bridge){
-			for(vector<Move>::iterator vc = vcs.begin(); vc != vcs.end(); ++vc){
-				if(*move == *vc){
-					child->exp.add(5);
-					break;
-				}
-			}
-		}
+		if(bridge && test_bridge_probe(board, node->move, *move))
+			child->exp.add(5);
 
 		child++;
 	}
@@ -259,9 +249,11 @@ void Player::update_rave(const Node * node, const RaveMoveList & movelist, int w
 }
 
 //return a list of positions where the opponent is probing your virtual connections
-vector<Move> Player::list_bridge_probes(const Board & board, Move & move){
-	vector<Move> ret;
-	Move temp;
+bool Player::test_bridge_probe(const Board & board, const Move & move, const Move & test){
+	if(move.dist(test) != 1)
+		return false;
+
+	bool equals = false;
 
 	int state = 0;
 	int piece = 3 - board.get(move);
@@ -282,7 +274,7 @@ vector<Move> Player::list_bridge_probes(const Board & board, Move & move){
 			if(on){
 				if(v == 0){
 					state = 2;
-					temp = cur;
+					equals = (test == cur);
 				}else if(v != piece)
 					state = 0;
 				//else (v==piece) => state = 1;
@@ -290,14 +282,15 @@ vector<Move> Player::list_bridge_probes(const Board & board, Move & move){
 			//else state = 1;
 		}else{ // state == 2
 			if(!on || v == piece){
-				ret.push_back(temp);
+				if(equals)
+					return true;
 				state = 1;
 			}else{
 				state = 0;
 			}
 		}
 	}
-	return ret;
+	return false;
 }
 
 
