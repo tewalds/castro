@@ -181,20 +181,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			}
 		}
 
-		if(localreply){ //give exp boost for moves near the previous move
-			int dist = node->move.dist(*move);
-			if(dist <= 2)
-				child->exp.add(3 - dist);
-		}
-
-		if(locality) //give exp boost for moves near previous stones
-			child->exp.add(board.local(*move));
-
-		if(connect) //boost for moves that connect to edges/corners
-			child->exp.add(board.test_connectivity(*move));
-
-		if(bridge && test_bridge_probe(board, node->move, *move))
-			child->exp.add(5);
+		add_knowledge(board, node, child);
 
 		child++;
 	}
@@ -247,6 +234,24 @@ void Player::update_rave(const Node * node, const RaveMoveList & movelist, int w
 		}
 	}
 }
+
+void Player::add_knowledge(Board & board, Node * node, Node * child){
+	if(localreply){ //give exp boost for moves near the previous move
+		int dist = node->move.dist(child->move);
+		if(dist <= 2)
+			child->exp.add(3 - dist);
+	}
+
+	if(locality) //give exp boost for moves near previous stones
+		child->exp.add(board.local(child->move));
+
+	if(connect) //boost for moves that connect to edges/corners
+		child->exp.add(board.test_connectivity(child->move));
+
+	if(bridge && test_bridge_probe(board, node->move, child->move))
+		child->exp.add(5);
+}
+
 
 //return a list of positions where the opponent is probing your virtual connections
 bool Player::test_bridge_probe(const Board & board, const Move & move, const Move & test){
