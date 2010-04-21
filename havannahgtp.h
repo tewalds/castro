@@ -378,9 +378,9 @@ public:
 				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
 				"  -n --minimaxtree Keep the proven part of the UCT tree              [" + to_str(player.minimaxtree) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
-				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
+//				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"Node initialization knowledge:\n" +
-				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
+//				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
 				"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
 				"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
@@ -411,10 +411,10 @@ public:
 				player.minimaxtree = from_str<bool>(args[++i]);
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
-			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
-				player.prooftime = from_str<float>(args[++i]);
-			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
-				player.proofscore = from_str<int>(args[++i]);
+//			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
+//				player.prooftime = from_str<float>(args[++i]);
+//			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
+//				player.proofscore = from_str<int>(args[++i]);
 			}else if((arg == "-l" || arg == "--localreply") && i+1 < args.size()){
 				player.localreply = from_str<bool>(args[++i]);
 			}else if((arg == "-y" || arg == "--locality") && i+1 < args.size()){

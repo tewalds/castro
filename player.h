@@ -127,7 +127,7 @@ public:
 				s += children[i].size();
 			return s;
 		}
-
+/*
 		int construct(const Solver::PNSNode * n, int pnsscore){
 			move = n->move;
 
@@ -154,7 +154,7 @@ public:
 			}
 			return num;
 		}
-
+*/
 		~Node(){
 			assert(children == NULL && numchildren == 0);
 		}

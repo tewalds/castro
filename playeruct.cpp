@@ -24,7 +24,7 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 	int starttime = time_msec();
 
 /*
-	//not sure how to handle the solver in combination with keeping the tree around between moves
+	//not sure how to handle the solver in combination with keeping the tree around between moves, nor adding knowledge in tree
 
 	double ptime = time * prooftime * board.num_moves() / board.numcells(); //ie scale up from 0 to prooftime
 	if(ptime > 0.01){ //minimum of 10ms worth of solve time
