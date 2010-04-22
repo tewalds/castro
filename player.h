@@ -40,6 +40,9 @@ public:
 			n++;
 			return *this;
 		}
+		ExpPair operator + (const ExpPair & a){
+			return ExpPair(s + a.s, n + a.n);
+		}
 		ExpPair & operator*=(int m){
 			s *= m;
 			n *= m;
@@ -72,6 +75,7 @@ public:
 	struct Node {
 		ExpPair rave;
 		ExpPair exp;
+		ExpPair know;
 		Move move;
 		Move bestmove; //if outcome is set, then bestmove is the way to get there
 		int16_t outcome;
@@ -190,19 +194,21 @@ public:
 //*
 		//new way, more standard way of changing over from rave scores to real scores
 		float value(float ravefactor, float fpurgency){
-			if(ravefactor <= min_rave)
-				return (exp.num() == 0 ? fpurgency : exp.avg());
+			ExpPair efexp = exp + know;
 
-			if(rave.num() == 0 && exp.num() == 0)
+			if(ravefactor <= min_rave)
+				return (efexp.num() == 0 ? fpurgency : efexp.avg());
+
+			if(rave.num() == 0 && efexp.num() == 0)
 				return fpurgency;
 
-			float alpha = ravefactor/(ravefactor + exp.num());
+			float alpha = ravefactor/(ravefactor + efexp.num());
 //			float alpha = sqrt(ravefactor/(ravefactor + 3*exp.num()));
 //			float alpha = (float)rave.num()/((float)exp.num() + (float)rave.num() + 4.0*exp.num()*rave.num()*ravefactor);
 
 			float val = 0;
 			if(rave.num()) val += alpha*rave.avg();
-			if(exp.num())  val += (1-alpha)*exp.avg();
+			if(efexp.num())val += (1-alpha)*efexp.avg();
 
 			return val;
 		}
