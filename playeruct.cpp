@@ -238,12 +238,12 @@ void Player::update_rave(const Node * node, const RaveMoveList & movelist, int w
 void Player::add_knowledge(Board & board, Node * node, Node * child){
 	if(localreply){ //give exp boost for moves near the previous move
 		int dist = node->move.dist(child->move);
-		if(dist <= 2)
-			child->know.addwins(3 - dist);
+		if(dist < 4)
+			child->know.addwins(4 - dist);
 	}
 
 	if(locality) //give exp boost for moves near previous stones
-		child->know.addlosses(3 - board.local(child->move));
+		child->know.addwins(board.local(child->move));
 
 	if(connect) //boost for moves that connect to edges/corners
 		child->know.addwins(board.test_connectivity(child->move));
