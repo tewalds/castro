@@ -25,7 +25,8 @@ public:
 		float avg() const { return s/n; }
 		float sum() const { return s; }
 		uint32_t num() const { return n; }
-		void add(int num){ add(num, num); }
+		void addwins(int num){ add(num, num); }
+		void addlosses(int num){ add(0, num); }
 		void add(float val, int num){
 			s += val;
 			n += num;
