@@ -243,7 +243,7 @@ void Player::add_knowledge(Board & board, Node * node, Node * child){
 	}
 
 	if(locality) //give exp boost for moves near previous stones
-		child->know.addwins(board.local(child->move));
+		child->know.addlosses(3 - board.local(child->move));
 
 	if(connect) //boost for moves that connect to edges/corners
 		child->know.addwins(board.test_connectivity(child->move));
