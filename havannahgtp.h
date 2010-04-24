@@ -368,6 +368,7 @@ public:
 		if(args.size() == 0)
 			return GTPResponse(true, string("\n") +
 				"Set player parameters, eg: player_params -e 3 -r 40 -t 0.1 -p 0\n" +
+				"  -d --defaults    Reset all the parameters to size dependent defaults\n" +
 				"Tree traversal:\n" +
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
@@ -393,40 +394,59 @@ public:
 		for(unsigned int i = 0; i < args.size(); i++) {
 			string arg = args[i];
 
-			if((arg == "-e" || arg == "--explore") && i+1 < args.size()){
+			if(arg == "-d" || arg == "--defaults"){
+				player.set_default_params();
+			}else if((arg == "-e" || arg == "--explore") && i+1 < args.size()){
 				player.explore = from_str<float>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-f" || arg == "--ravefactor") && i+1 < args.size()){
 				player.ravefactor = from_str<float>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-r" || arg == "--ravescale") && i+1 < args.size()){
 				player.ravescale = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-o" || arg == "--opmoves") && i+1 < args.size()){
 				player.opmoves = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-i" || arg == "--skiprave") && i+1 < args.size()){
 				player.skiprave = from_str<int>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-k" || arg == "--keeptree") && i+1 < args.size()){
 				player.keeptree = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-m" || arg == "--minimax") && i+1 < args.size()){
 				player.minimax = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-n" || arg == "--minimaxtree") && i+1 < args.size()){
 				player.minimaxtree = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
+				player.defaults = false;
 //			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
 //				player.prooftime = from_str<float>(args[++i]);
+//				player.defaults = false;
 //			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
 //				player.proofscore = from_str<int>(args[++i]);
+//				player.defaults = false;
 			}else if((arg == "-l" || arg == "--localreply") && i+1 < args.size()){
 				player.localreply = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-y" || arg == "--locality") && i+1 < args.size()){
 				player.locality = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-c" || arg == "--connect") && i+1 < args.size()){
 				player.connect = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-b" || arg == "--bridge") && i+1 < args.size()){
 				player.bridge = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-w" || arg == "--instantwin") && i+1 < args.size()){
 				player.instantwin = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else{
 				return GTPResponse(false, "Missing or unknown parameter");
 			}

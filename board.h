@@ -101,7 +101,9 @@ private:
 	vector<Cell> cells;
 
 public:
-	Board(){ }
+	Board(){
+		size = 0;
+	}
 
 	Board(int s){
 		size = s;

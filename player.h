@@ -311,6 +311,7 @@ public:
 
 	static const float min_rave = 0.1;
 
+	bool  defaults;   //use the default settings on board reset
 	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
 //tree traversal
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
@@ -347,22 +348,27 @@ public:
 		nodes = 0;
 		time_used = 0;
 
-		explore     = 0.85;
-		ravefactor  = 0; // 50
+		set_default_params();
+	}
+	void set_default_params(){
+		int s = rootboard.get_size();
+		defaults    = true;
+		explore     = (s == 4 ? 0.85 : 0);
+		ravefactor  = (s == 4 ? 0 : 500);
 		ravescale   = false;
 		opmoves     = false;
 		skiprave    = 0;
 		keeptree    = true;
 		minimaxtree = false;
-		minimax     = false;
+		minimax     = true;
 		fpurgency   = 1;
 		prooftime   = 0;
 		proofscore  = 0;
 		localreply  = false;
 		locality    = false;
-		connect     = false;
+		connect     = (s == 4);
 		bridge      = false;
-		rolloutpattern = false;
+		rolloutpattern = true;
 		instantwin  = false;
 	}
 	~Player(){ root.dealloc(); }
@@ -372,6 +378,9 @@ public:
 		rootboard = board;
 		nodes -= root.dealloc();
 		root = Node();
+
+		if(defaults)
+			set_default_params();
 	}
 	void move(const Move & m){
 		rootboard.move(m, true);
