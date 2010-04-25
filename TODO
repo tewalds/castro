@@ -1,8 +1,8 @@
 
 
 prior knowledge
-- split knowledge factor from experience
 - criticality
+- copy knowledge from proof tree
 
 rollout policy
 - use weighted random choices instead of uniform random:
@@ -10,6 +10,7 @@ rollout policy
 - local reply?
 - locality?
 - connections?
+- avoid loss?
 
 Time control
 - quiecense search - if the highest winrate != most played, keep simulating until it is
