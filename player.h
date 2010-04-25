@@ -52,6 +52,7 @@ public:
 	};
 /*/
 	class ExpPair {
+		static const float k = 10000;
 		float v;
 		uint32_t n;
 	public:
@@ -60,11 +61,27 @@ public:
 		float avg() const { return v; }
 		float sum() const { return v*n; }
 		uint32_t num() const { return n; }
+		void addwins(int num){ add(num, num); }
+		void addlosses(int num){ add(0, num); }
+		void add(float val, int num){
+			*this += ExpPair(val, num);
+		}
+		ExpPair & operator+=(const ExpPair & a){
+			//there's got to be a better way...
+			for(int i = 0; i < a.n; i++)
+				*this += a.v;
+			return *this;
+		}
 		ExpPair & operator+=(float nv){
 			n++;
-			v += (nv - v)/n;
-//			v += (nv - v)/(n < 1000 ? n : 1000);
+//			v += (nv - v)/n;
+			v += (nv - v)/(n < k ? n : k);
 			return *this;
+		}
+		ExpPair operator + (const ExpPair & a){
+			ExpPair ret = *this;
+			ret += a;
+			return ret;
 		}
 		ExpPair & operator*=(int m){
 			n *= m;
