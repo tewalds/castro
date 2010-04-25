@@ -23,14 +23,12 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 
 	int starttime = time_msec();
 
-/*
-	//not sure how to handle the solver in combination with keeping the tree around between moves, nor adding knowledge in tree
 
-	double ptime = time * prooftime * board.num_moves() / board.numcells(); //ie scale up from 0 to prooftime
+	double ptime = time * prooftime * rootboard.num_moves() / rootboard.numcells(); //ie scale up from 0 to prooftime
 	if(ptime > 0.01){ //minimum of 10ms worth of solve time
 		Solver solver;
 		Timer timer2 = Timer(ptime, bind(&Solver::timedout, &solver));
-		int ret = solver.run_pnsab(board, (board.toplay() == 1 ? 2 : 1), memlimit/2);
+		int ret = solver.run_pnsab(rootboard, (rootboard.toplay() == 1 ? 2 : 1), memlimit/2);
 
 		//if it found a win, just play it
 		if(ret == 1){
@@ -40,10 +38,12 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 			return solver.bestmove;
 		}
 
-		nodes = root.construct(solver.root, proofscore);
+	//not sure how to transfer the knowledge in the proof tree to the UCT tree
+	//the difficulty is taking into account keeping the tree between moves and adding knowledge heuristics to unproven nodes
+//		nodes = root.construct(solver.root, proofscore);
 		solver.reset();
 	}
-*/
+
 
 	runs = 0;
 	RaveMoveList movelist(rootboard.movesremain());

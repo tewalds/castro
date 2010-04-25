@@ -369,6 +369,7 @@ public:
 			return GTPResponse(true, string("\n") +
 				"Set player parameters, eg: player_params -e 3 -r 40 -t 0.1 -p 0\n" +
 				"  -d --defaults    Reset all the parameters to size dependent defaults\n" +
+				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"Tree traversal:\n" +
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
@@ -379,7 +380,6 @@ public:
 				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
 				"  -n --minimaxtree Keep the proven part of the UCT tree              [" + to_str(player.minimaxtree) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
-//				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"Node initialization knowledge:\n" +
 //				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
@@ -423,9 +423,9 @@ public:
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
 				player.defaults = false;
-//			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
-//				player.prooftime = from_str<float>(args[++i]);
-//				player.defaults = false;
+			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
+				player.prooftime = from_str<float>(args[++i]);
+				player.defaults = false;
 //			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
 //				player.proofscore = from_str<int>(args[++i]);
 //				player.defaults = false;
