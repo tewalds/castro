@@ -151,6 +151,7 @@ public:
 	bool onboard2(const Move & m)const { return (m.x >= 0 && m.y >= 0 && m.x < size_d && m.y < size_d && onboard(m) ); }
 
 	bool canswap() const { return (nummoves == 1 && toPlay == 2); }
+//	bool canswap() const { return false; }
 
 	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard2(x, y) && !get(x,y)); } //ignores swap rule!
 	bool valid_move(const Move & m) const { return (outcome == -1 && ((onboard2(m) && !get(m)) || (m == M_SWAP && canswap()))); }

@@ -44,7 +44,7 @@ int Solver::run_dfpnsab(const Board & board, int ties, int memlimit){ //1 = win,
 
 	bool mem = true;
 	while(mem && !timeout && root->phi != 0 && root->delta != 0)
-		mem = dfpnsab(board, root, 0, INF16/2, INF16/2);
+		mem = dfpnsab(board, root, 0, INF32/2, INF32/2);
 
 	if(!mem)
 		fprintf(stderr, "Ran out of memory\n");
@@ -60,7 +60,7 @@ int Solver::run_dfpnsab(const Board & board, int ties, int memlimit){ //1 = win,
 	return 0;
 }
 
-bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, int tp, int td){
+bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td){
 	if(depth > maxdepth)
 		maxdepth = depth;
 
@@ -106,11 +106,11 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, int tp, int
 		Board next = board;
 		next.move(c1->move);
 		
-		int tpc = min((int)(INF16-1), (td + c1->phi - node->delta));
-		int tdc = min(tp, c2->delta + 1);
-		
+		uint32_t tpc = min(INF32/2, (td + c1->phi - node->delta));
+		uint32_t tdc = min(tp, c2->delta + 1);
+
 //		printf("depth: %i, tp: %i, td: %i, tpc: %i, tdc: %i\n", depth, tp, td, tpc, tdc);
-		
+
 		mem = dfpnsab(next, c1, depth + 1, tpc, tdc);
 
 		if(c1->phi == 0 || c1->delta == 0)

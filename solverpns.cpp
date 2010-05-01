@@ -114,8 +114,8 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 }
 
 bool Solver::updatePDnum(PNSNode * node){
-	unsigned int min = INF16;
-	unsigned int sum = 0;
+	uint32_t min = INF32;
+	uint64_t sum = 0;
 
 	PNSNode * i = node->children;
 	PNSNode * end = node->children + node->numchildren;
@@ -126,8 +126,8 @@ bool Solver::updatePDnum(PNSNode * node){
 			min = i->delta;
 	}
 
-	if(sum >= INF16)
-		sum = INF16-1;
+	if(sum >= INF32)
+		sum = INF32-1;
 
 	if(min == node->phi && sum == node->delta){
 		return false;

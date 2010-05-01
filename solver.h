@@ -10,7 +10,6 @@
 
 
 class Solver {
-	static const unsigned int INF16 = (1<<15)-1;
 	static const unsigned int INF32 = (1<<30)-1;
 
 //memory management for PNS which uses a tree to store the nodes
@@ -20,8 +19,8 @@ class Solver {
 public:
 
 	struct PNSNode {
+		uint32_t phi, delta;
 		Move move;
-		uint16_t phi, delta;
 		uint16_t numchildren;
 		PNSNode * children;
 
@@ -42,8 +41,8 @@ public:
 				outcome = (ties ? 2 : -2);
 
 			if(     outcome ==  0)   { phi = value; delta = value; }
-			else if(outcome ==  2)   { phi = INF16; delta = 0;     }
-			else /*(outcome == -2)*/ { phi = 0;     delta = INF16; }
+			else if(outcome ==  2)   { phi = INF32; delta = 0;     }
+			else /*(outcome == -2)*/ { phi = 0;     delta = INF32; }
 			return *this;
 		}
 		
@@ -118,7 +117,7 @@ public:
 
 	bool pns(const Board & board, PNSNode * node, int depth);   //basic proof number search
 	bool pnsab(const Board & board, PNSNode * node, int depth); //use a tiny negamax search as a pn,dn heuristic
-	bool dfpnsab(const Board & board, PNSNode * node, int depth, int tp, int td);
+	bool dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
 
 //update the phi and delta for the node
 	bool updatePDnum(PNSNode * node);
