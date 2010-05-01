@@ -1,7 +1,7 @@
 
 #include "solver.h"
 
-void Solver::solve_pnsab(const Board & board, double time, int memlimit){
+void Solver::solve_pnsab(const Board & board, double time, uint64_t memlimit){
 	reset();
 
 	if(board.won() >= 0){
@@ -35,7 +35,7 @@ void Solver::solve_pnsab(const Board & board, double time, int memlimit){
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-int Solver::run_pnsab(const Board & board, int ties, int memlimit){ //1 = win, 0 = unknown, -1 = loss
+int Solver::run_pnsab(const Board & board, int ties, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
 	assignties = ties;
 
 	if(root) delete root;
