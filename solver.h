@@ -11,11 +11,6 @@
 
 class Solver {
 	static const unsigned int INF32 = (1<<30)-1;
-
-//memory management for PNS which uses a tree to store the nodes
-	int nodesremain;
-	int assignties; //which player to assign a tie to
-
 public:
 
 	struct PNSNode {
@@ -64,10 +59,16 @@ public:
 		}
 	};
 
+
 	int outcome; // 0 = tie, 1 = white, 2 = black, -1 = white or tie, -2 = black or tie, anything else unknown
 	int maxdepth;
-	uint64_t nodes;
+	uint64_t nodes_seen;
 	Move bestmove;
+
+//memory management for PNS which uses a tree to store the nodes
+	uint64_t nodes, maxnodes;
+	int assignties; //which player to assign a tie to
+
 	bool timeout;
 
 	PNSNode * root;
@@ -83,9 +84,12 @@ public:
 	void reset(){
 		outcome = -3;
 		maxdepth = 0;
-		nodes = 0;
+		nodes_seen = 0;
 		bestmove = Move(M_UNKNOWN);
+
 		timeout = false;
+		nodes = 0;
+		maxnodes = 0;
 
 		if(root){
 			delete root;
@@ -121,6 +125,9 @@ public:
 
 //update the phi and delta for the node
 	bool updatePDnum(PNSNode * node);
+
+//remove all the leaf nodes to free up some memory
+	bool garbage_collect(PNSNode * node);
 };
 
 #endif

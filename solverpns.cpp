@@ -47,14 +47,20 @@ int Solver::run_pns(const Board & board, int ties, uint64_t memlimit){ //1 = win
 
 	if(root) delete root;
 	root = new PNSNode(0, 0, 1);
-	nodesremain = memlimit*1024*1024/sizeof(PNSNode);
+	maxnodes = memlimit*1024*1024/sizeof(PNSNode);
+	nodes = 0;
 
-	bool mem = true;
-	while(mem && !timeout && root->phi != 0 && root->delta != 0)
-		mem = pns(board, root, 0);
+	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
 
-	if(!mem)
-		fprintf(stderr, "Ran out of memory\n");
+	while(!timeout && root->phi != 0 && root->delta != 0){
+		if(!pns(board, root, 0)){
+			int64_t before = nodes;
+			garbage_collect(root);
+			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
+			if(nodes >= maxnodes)
+				break;
+		}
+	}
 
 	if(root->phi == 0){
 		for(int i = 0; i < root->numchildren; i++)
@@ -72,11 +78,11 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 		maxdepth = depth;
 
 	if(node->numchildren == 0){
-		if(nodesremain <= 0)
+		if(nodes >= maxnodes)
 			return false;
 	
-		nodesremain -= node->alloc(board.movesremain());
-		nodes += board.movesremain();
+		nodes += node->alloc(board.movesremain());
+		nodes_seen += board.movesremain();
 
 		int i = 0;
 		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
@@ -106,7 +112,7 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 		mem = pns(next, child, depth + 1);
 
 		if(child->phi == 0 || child->delta == 0)
-			nodesremain += child->dealloc();
+			nodes -= child->dealloc();
 
 	}while(!timeout && mem && !updatePDnum(node));
 
@@ -138,3 +144,20 @@ bool Solver::updatePDnum(PNSNode * node){
 	}
 }
 
+//removes the children of any node whos children are all unproven and have no children
+bool Solver::garbage_collect(PNSNode * node){
+	if(node->numchildren == 0)
+		return (node->phi != 0 && node->delta != 0);
+
+	PNSNode * i = node->children;
+	PNSNode * end = node->children + node->numchildren;
+
+	bool collect = true;
+	for( ; i != end; i++)
+		collect &= garbage_collect(i);
+
+	if(collect)
+		nodes -= node->dealloc();
+
+	return false;
+}

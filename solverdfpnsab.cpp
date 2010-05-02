@@ -40,14 +40,19 @@ int Solver::run_dfpnsab(const Board & board, int ties, uint64_t memlimit){ //1 =
 
 	if(root) delete root;
 	root = new PNSNode(0, 0, 1);
-	nodesremain = memlimit*1024*1024/sizeof(PNSNode);
+	maxnodes = memlimit*1024*1024/sizeof(PNSNode);
 
-	bool mem = true;
-	while(mem && !timeout && root->phi != 0 && root->delta != 0)
-		mem = dfpnsab(board, root, 0, INF32/2, INF32/2);
+	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
 
-	if(!mem)
-		fprintf(stderr, "Ran out of memory\n");
+	while(!timeout && root->phi != 0 && root->delta != 0){
+		if(!dfpnsab(board, root, 0, INF32/2, INF32/2)){
+			int64_t before = nodes;
+			garbage_collect(root);
+			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
+			if(nodes >= maxnodes)
+				break;
+		}
+	}
 
 	if(root->phi == 0){
 		for(int i = 0; i < root->numchildren; i++)
@@ -65,11 +70,11 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp
 		maxdepth = depth;
 
 	if(node->numchildren == 0){
-		if(nodesremain <= 0)
+		if(nodes >= maxnodes)
 			return false;
 	
-		nodesremain -= node->alloc(board.movesremain());
-		nodes += board.movesremain();
+		nodes += node->alloc(board.movesremain());
+		nodes_seen += board.movesremain();
 
 		int i = 0;
 		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
@@ -78,11 +83,11 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp
 /*
 			node->children[i] = PNSNode(*move).abval((next.won() > 0) + (next.won() >= 0), (board.toplay() == assignties));
 /*/					
-			uint64_t prevnodes = nodes;
+			uint64_t prevnodes = nodes_seen;
 
 			int abval = -negamax(next, 1, -2, 2); //higher depth goes farther but takes longer, depth 1 seems to be best
 
-			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), 1 + int(nodes - prevnodes));
+			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), 1 + int(nodes_seen - prevnodes));
 //*/
 			i++;
 		}
@@ -114,7 +119,7 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp
 		mem = dfpnsab(next, c1, depth + 1, tpc, tdc);
 
 		if(c1->phi == 0 || c1->delta == 0)
-			nodesremain += c1->dealloc();
+			nodes -= c1->dealloc();
 
 		updatePDnum(node);
 	}while(!timeout && mem && node->phi < tp && node->delta < td);

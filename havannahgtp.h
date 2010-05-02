@@ -225,7 +225,7 @@ public:
 		ret += solve_str(solve.outcome) + " ";
 		ret += move_str(solve.bestmove) + " ";
 		ret += to_str(solve.maxdepth) + " ";
-		ret += to_str(solve.nodes);
+		ret += to_str(solve.nodes_seen);
 		return ret;
 	}
 

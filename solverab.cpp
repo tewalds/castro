@@ -32,7 +32,7 @@ void Solver::solve_ab(const Board & board, double time, int mdepth){
 
 int Solver::run_negamax(const Board & board, const int depth, int alpha, int beta){
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
-		nodes++;
+		nodes_seen++;
 
 		Board next = board;
 		next.move(*move);
@@ -58,7 +58,7 @@ int Solver::negamax(const Board & board, const int depth, int alpha, int beta){
 		return 0;
 
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
-		nodes++;
+		nodes_seen++;
 
 		Board next = board;
 		next.move(*move);

@@ -32,7 +32,7 @@ void Solver::solve_scout(const Board & board, double time, int mdepth){
 
 int Solver::run_negascout(const Board & board, const int depth, int alpha, int beta){
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
-		nodes++;
+		nodes_seen++;
 
 		Board next = board;
 		next.move(*move);
@@ -60,7 +60,7 @@ int Solver::negascout(const Board & board, const int depth, int alpha, int beta)
 	int b = beta;
 	int first = true;
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
-		nodes++;
+		nodes_seen++;
 
 		Board next = board;
 		next.move(*move);

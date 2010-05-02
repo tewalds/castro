@@ -40,14 +40,19 @@ int Solver::run_pnsab(const Board & board, int ties, uint64_t memlimit){ //1 = w
 
 	if(root) delete root;
 	root = new PNSNode(0, 0, 1);
-	nodesremain = memlimit*1024*1024/sizeof(PNSNode);
+	maxnodes = memlimit*1024*1024/sizeof(PNSNode);
 
-	bool mem = true;
-	while(mem && !timeout && root->phi != 0 && root->delta != 0)
-		mem = pnsab(board, root, 0);
+	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
 
-	if(!mem)
-		fprintf(stderr, "Ran out of memory\n");
+	while(!timeout && root->phi != 0 && root->delta != 0){
+		if(!pnsab(board, root, 0)){
+			int64_t before = nodes;
+			garbage_collect(root);
+			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
+			if(nodes >= maxnodes)
+				break;
+		}
+	}
 
 	if(root->phi == 0){
 		for(int i = 0; i < root->numchildren; i++)
@@ -65,22 +70,22 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 		maxdepth = depth;
 
 	if(node->numchildren == 0){
-		if(nodesremain <= 0)
+		if(nodes >= maxnodes)
 			return false;
 	
-		nodesremain -= node->alloc(board.movesremain());
-		nodes += board.movesremain();
+		nodes += node->alloc(board.movesremain());
+		nodes_seen += board.movesremain();
 
 		int i = 0;
 		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 			Board next = board;
 			next.move(*move);
 			
-			uint64_t prevnodes = nodes;
+			uint64_t prevnodes = nodes_seen;
 
 			int abval = -negamax(next, 1, -2, 2); //higher depth goes farther but takes longer, depth 1 seems to be best
 
-			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), 1 + int(nodes - prevnodes));
+			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), 1 + int(nodes_seen - prevnodes));
 
 			i++;
 		}
@@ -103,7 +108,7 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 		mem = pnsab(next, child, depth + 1);
 
 		if(child->phi == 0 || child->delta == 0)
-			nodesremain += child->dealloc();
+			nodes -= child->dealloc();
 
 	}while(!timeout && mem && !updatePDnum(node));
 
