@@ -49,32 +49,22 @@ public:
 		Move move;
 	public:
 		MoveIterator(const Board & b) : board(b), move(Move(M_SWAP)) {
-			if(!board.valid_move(move))
+			if(!board.valid_move(move)) //find the first valid move
 				++(*this);
 		}
 
-		const Move & operator * () const {
-			return move;
-		}
-		const Move * operator -> () const {
-			return & move;
-		}
-		bool done() const {
-			return (move.y >= board.get_size_d());
-		}
-		bool operator == (const Board::MoveIterator & rhs) const {
-			return (move == rhs.move);
-		}
-		bool operator != (const Board::MoveIterator & rhs) const {
-			return (move != rhs.move);
-		}
+		const Move & operator * ()  const { return move; }
+		const Move * operator -> () const { return & move; }
+		bool done() const { return (move.y >= board.get_size_d()); }
+		bool operator == (const Board::MoveIterator & rhs) const { return (move == rhs.move); }
+		bool operator != (const Board::MoveIterator & rhs) const { return (move != rhs.move); }
 		MoveIterator & operator ++ (){ //prefix form
 			do{
 				move.x++;
 
 				if(move.x >= board.get_size_d()){
 					move.y++;
-					if(move.y >= board.get_size_d())
+					if(move.y >= board.lineend(move.y))
 						break;
 
 					move.x = board.linestart(move.y);
@@ -190,6 +180,7 @@ public:
 
 
 	int linestart(int y) const { return (y < size ? 0 : y - (size-1)); }
+	int lineend(int y)   const { return (y < size ? size + y : size_d); }
 	int linelen(int y)   const { return size_d - abs((size-1) - y); }
 
 	string to_s() const {
