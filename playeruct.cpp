@@ -265,7 +265,7 @@ bool Player::test_bridge_probe(const Board & board, const Move & move, const Mov
 	for(int i = 0; i < 8; i++){
 		Move cur = move + neighbours[i % 6];
 
-		bool on = board.onboard2(cur);
+		bool on = board.onboard(cur);
 		int v;
 		if(on)
 			v = board.get(cur);
@@ -312,7 +312,7 @@ bool Player::check_pattern(const Board & board, Move & move){
 	for(int i = 0; i < 8; i++){
 		Move cur = move + neighbours[(i+a)%6];
 
-		bool on = board.onboard2(cur);
+		bool on = board.onboard(cur);
 		int v;
 		if(on)
 			v = board.get(cur);

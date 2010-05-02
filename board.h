@@ -134,17 +134,17 @@ public:
 	int local(const Move & m) const { return cells[xy(m)].local; }
 
 	//assumes x, y are in array bounds
-	bool onboard(int x, int y)   const { return (  y -   x < size) && (  x -   y < size); }
-	bool onboard(const Move & m) const { return (m.y - m.x < size) && (m.x - m.y < size); }
+	bool onboard_fast(int x, int y)   const { return (  y -   x < size) && (  x -   y < size); }
+	bool onboard_fast(const Move & m) const { return (m.y - m.x < size) && (m.x - m.y < size); }
 	//checks array bounds too
-	bool onboard2(int x, int y)  const { return (  x >= 0 &&   y >= 0 &&   x < size_d &&   y < size_d && onboard(x, y) ); }
-	bool onboard2(const Move & m)const { return (m.x >= 0 && m.y >= 0 && m.x < size_d && m.y < size_d && onboard(m) ); }
+	bool onboard(int x, int y)  const { return (  x >= 0 &&   y >= 0 &&   x < size_d &&   y < size_d && onboard_fast(x, y) ); }
+	bool onboard(const Move & m)const { return (m.x >= 0 && m.y >= 0 && m.x < size_d && m.y < size_d && onboard_fast(m) ); }
 
 	bool canswap() const { return (nummoves == 1 && toPlay == 2); }
 //	bool canswap() const { return false; }
 
-	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard2(x, y) && !get(x,y)); } //ignores swap rule!
-	bool valid_move(const Move & m) const { return (outcome == -1 && ((onboard2(m) && !get(m)) || (m == M_SWAP && canswap()))); }
+	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard(x, y) && !get(x,y)); } //ignores swap rule!
+	bool valid_move(const Move & m) const { return (outcome == -1 && ((onboard(m) && !get(m)) || (m == M_SWAP && canswap()))); }
 
 	int iscorner(int x, int y) const {
 		if(!onboard(x,y))
@@ -187,14 +187,12 @@ public:
 		string s;
 		for(int y = 0; y < size_d; y++){
 			s += string(abs(size-1 - y) + 2, ' ');
-			for(int x = 0; x < size_d; x++){
-				if(onboard(x, y)){
-					int p = get(x, y);
-					if(p == 0) s += '.';
-					if(p == 1) s += 'W';
-					if(p == 2) s += 'B';
-					s += ' ';
-				}
+			for(int x = linestart(y); x < lineend(y); x++){
+				int p = get(x, y);
+				if(p == 0) s += '.';
+				if(p == 1) s += 'W';
+				if(p == 2) s += 'B';
+				s += ' ';
 			}
 			s += '\n';
 		}
@@ -287,7 +285,7 @@ public:
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 
-			if(onboard2(loc) && turn == get(loc)){
+			if(onboard(loc) && turn == get(loc)){
 				Cell * g = & cells[find_group(loc)];
 				testcell.corner |= g->corner;
 				testcell.edge   |= g->edge;
@@ -302,7 +300,7 @@ public:
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 			
-			if(onboard2(loc) && turn == get(loc) && followring(pos, loc, i, turn))
+			if(onboard(loc) && turn == get(loc) && followring(pos, loc, i, turn))
 				return true;
 		}
 		return false;
@@ -314,7 +312,7 @@ public:
 			int nd = (dir + i) % 6;
 			Move next = cur + neighbours[nd];
 
-			if(start == next || (onboard2(next) && turn == get(next) && followring(start, next, nd, turn)))
+			if(start == next || (onboard(next) && turn == get(next) && followring(start, next, nd, turn)))
 				return true;
 		}
 		return false;
@@ -337,7 +335,7 @@ public:
 			for(int i = 0; i < 18; i++){
 				MoveScore loc = neighbours[i] + pos;
 
-				if(onboard2(loc))
+				if(onboard(loc))
 					cells[xy(loc)].local |= loc.score;
 			}
 		}
@@ -346,7 +344,7 @@ public:
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 		
-			if(onboard2(loc) && turn == get(loc)){
+			if(onboard(loc) && turn == get(loc)){
 				alreadyjoined |= join_groups(pos, loc);
 				i++; //skip the next one. If it is the same group,
 				     //it is already connected and forms a corner, which we can ignore
@@ -371,7 +369,7 @@ public:
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 
-			if(onboard2(loc) && turn == get(loc)){
+			if(onboard(loc) && turn == get(loc)){
 				Cell * g = & cells[find_group(loc)];
 				testcell.corner |= g->corner;
 				testcell.edge   |= g->edge;
