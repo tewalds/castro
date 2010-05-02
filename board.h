@@ -49,8 +49,10 @@ public:
 		Move move;
 	public:
 		MoveIterator(const Board & b) : board(b), move(Move(M_SWAP)) {
-			if(!board.valid_move(move)) //find the first valid move
-				++(*this);
+			if(board.outcome != -1)
+				move = Move(0, board.size_d); //already done
+			else if(!board.valid_move(move)) //check if swap is valid
+				++(*this); //find the first valid move
 		}
 
 		const Move & operator * ()  const { return move; }
@@ -62,14 +64,14 @@ public:
 			do{
 				move.x++;
 
-				if(move.x >= board.get_size_d()){
+				if(move.x >= board.lineend(move.y)){
 					move.y++;
-					if(move.y >= board.lineend(move.y))
+					if(move.y >= board.get_size_d())
 						break;
 
 					move.x = board.linestart(move.y);
 				}
-			}while(!board.valid_move(move));
+			}while(!board.valid_move_fast(move));
 
 			return *this;
 		}
@@ -143,6 +145,10 @@ public:
 	bool canswap() const { return (nummoves == 1 && toPlay == 2); }
 //	bool canswap() const { return false; }
 
+	//assumes x, y are in bounds (meaning no swap) and the game isn't already finished
+	bool valid_move_fast(int x, int y)   const { return !get(x,y); }
+	bool valid_move_fast(const Move & m) const { return !get(m); }
+	//checks array bounds too
 	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard(x, y) && !get(x,y)); } //ignores swap rule!
 	bool valid_move(const Move & m) const { return (outcome == -1 && ((onboard(m) && !get(m)) || (m == M_SWAP && canswap()))); }
 
