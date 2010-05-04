@@ -45,6 +45,7 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 	}
 
 
+	root.outcome = -1;
 	runs = 0;
 	RaveMoveList movelist(rootboard.movesremain());
 	do{
@@ -56,18 +57,7 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 	}while(!timeout && root.outcome == -1 && (maxruns == 0 || runs < maxruns));
 
 //return the best one
-	Node ret;
-	if(root.outcome == 0 || root.outcome == rootboard.toplay()){ //tie or win
-		ret.move = root.bestmove;
-		ret.outcome = root.outcome;
-		ret.exp += (root.outcome == 0 ? 0.5 : (root.outcome == rootboard.toplay()));
-	}else{
-		ret.exp += 0;
-		for(int i = 0; i < root.numchildren; i++)
-//			if(ret.exp.avg() < root.children[i].exp.avg())
-			if(ret.exp.num() < root.children[i].exp.num())
-				ret = root.children[i];
-	}
+	Node * ret = return_move(& root, rootboard.toplay());
 
 	int runtime = time_msec() - starttime;
 	time_used = (double)runtime/1000;
@@ -75,34 +65,29 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(runtime) + " msec\n";
 	stats += "Game length: " + gamelen.to_s() + "\n";
 	stats += "Tree depth:  " + treelen.to_s() + "\n";
-	stats += "Move Score:  " + to_str(ret.exp.avg()) + "\n";
+	stats += "Move Score:  " + to_str(ret->exp.avg()) + "\n";
 	stats += "Games/s:     " + to_str((int)((double)runs*1000/runtime)) + "\n";
-	if(ret.outcome >= 0){
+	if(ret->outcome >= 0){
 		stats += "Solved as a ";
-		if(ret.outcome == 0)                       stats += "draw";
-		else if(ret.outcome == rootboard.toplay()) stats += "win";
-		else                                       stats += "loss";
+		if(ret->outcome == 0)                       stats += "draw";
+		else if(ret->outcome == rootboard.toplay()) stats += "win";
+		else                                        stats += "loss";
 		stats += "\n";
 	}
 	fprintf(stderr, "%s", stats.c_str());
 
-	return ret.move;
+	return ret->move;
 }
 
 vector<Move> Player::get_pv(){
 	vector<Move> pv;
 
 	Node * n = & root;
+	char turn = rootboard.toplay();
 	while(n->numchildren){
-		int maxi = 0;
-		for(int i = 1; i < n->numchildren; i++)
-//			if(n->children[maxi].exp.avg() < n->children[i].exp.avg())
-			if(n->children[maxi].exp.num() < n->children[i].exp.num())
-				maxi = i;
-
-		Node * child = & n->children[maxi];
-		pv.push_back(child->move);
-		n = child;
+		n = return_move(n, turn);
+		pv.push_back(n->move);
+		turn = 3 - turn;
 	}
 
 	if(pv.size() == 0)
@@ -110,6 +95,42 @@ vector<Move> Player::get_pv(){
 
 	return pv;
 }
+
+Player::Node * Player::return_move(const Node * node, int toplay) const {
+	Node * ret;
+	ret = return_move_outcome(node, toplay);     if(ret) return ret; //win
+	ret = return_move_outcome(node, -1);         if(ret) return ret; //unknown
+	ret = return_move_outcome(node, 0);          if(ret) return ret; //tie
+	ret = return_move_outcome(node, 3 - toplay); if(ret) return ret; //lose
+
+	assert(ret);
+	return NULL;
+}
+
+Player::Node * Player::return_move_outcome(const Node * node, int outcome) const {
+	int val, maxval = -1000000000;
+
+	Node * ret = NULL,
+		 * child = node->children,
+		 * end = node->children + node->numchildren;
+
+	for( ; child != end; child++){
+
+		if(child->outcome != outcome)
+			continue;
+
+		val = child->exp.num();
+//		val = child->exp.avg();
+
+		if(maxval < val){
+			maxval = val;
+			ret = child;
+		}
+	}
+
+	return ret;
+}
+
 
 //return the winner of the simulation
 int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){
@@ -140,7 +161,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		}else{ //backup the win/loss/tie
 			node->outcome = child->outcome;
 			node->bestmove = child->move;
-			if(!minimaxtree)
+			if(!minimaxtree && node != &root)
 				nodes -= node->dealloc();
 		}
 	}

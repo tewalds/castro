@@ -435,6 +435,8 @@ public:
 	vector<Move> get_pv();
 
 protected:
+	Node * return_move(const Node * node, int toplay) const;
+	Node * return_move_outcome(const Node * node, int outcome) const;
 	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
 	void add_knowledge(Board & board, Node * node, Node * child);
 	Node * choose_move(const Node * node, int toplay) const;
