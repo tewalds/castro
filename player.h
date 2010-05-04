@@ -336,6 +336,7 @@ public:
 	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1
 	bool  opmoves;    //take the opponents rave updates too, a good move for my opponent is a good move for me.
 	int   skiprave;   //how often to skip rave, skip once in this many checks
+	bool  shortrave;  //only update rave values on short rollouts
 	bool  keeptree;   //reuse the tree from the previous move
 	bool  minimaxtree;//keep the solved part of the tree
 	bool  minimax;    //solve the minimax tree within the uct tree
@@ -375,6 +376,7 @@ public:
 		ravescale   = false;
 		opmoves     = false;
 		skiprave    = 0;
+		shortrave   = false;
 		keeptree    = true;
 		minimaxtree = false;
 		minimax     = true;

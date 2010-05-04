@@ -154,7 +154,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		treelen.add(depth);
 
 		if(ravefactor > min_rave){
-			if(won == 0)
+			if(won == 0 || (shortrave && movelist.size() > gamelen.avg()))
 				movelist.clear();
 			else
 				movelist.clean(ravescale);
