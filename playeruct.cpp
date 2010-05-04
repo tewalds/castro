@@ -393,11 +393,14 @@ int Player::rand_game(Board & board, RaveMoveList & movelist, Move move, int dep
 				}
 			}
 		}
-		if(!rolloutpattern || !check_pattern(board, move)){
-			do{
-				move = order[i++];
-			}while(!board.valid_move(move));
-		}
+
+		if(rolloutpattern && check_pattern(board, move))
+			goto makemove;
+
+	//default...
+		do{
+			move = order[i++];
+		}while(!board.valid_move(move));
 
 makemove:
 		movelist.add(move, board.toplay());
