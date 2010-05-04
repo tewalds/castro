@@ -57,7 +57,7 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 
 //return the best one
 	Node ret;
-	if(root.outcome >= 0){
+	if(root.outcome == 0 || root.outcome == rootboard.toplay()){ //tie or win
 		ret.move = root.bestmove;
 		ret.outcome = root.outcome;
 		ret.exp += (root.outcome == 0 ? 0.5 : (root.outcome == rootboard.toplay()));
@@ -130,7 +130,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			if(child->outcome == toplay){ //backup a win right away. Losses and ties can wait
 				node->outcome = child->outcome;
 				node->bestmove = child->move;
-				if(!minimaxtree)
+				if(!minimaxtree && node != &root)
 					nodes -= node->dealloc();
 			}else if(ravefactor > min_rave){ //update the rave scores
 				update_rave(node, movelist, won, toplay);
