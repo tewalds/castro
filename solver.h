@@ -20,10 +20,10 @@ public:
 		PNSNode * children;
 
 		PNSNode() { }
-		PNSNode(int x, int y,   int v = 1)     : move(Move(x,y)), phi(v), delta(v), numchildren(0), children(NULL) { }
-		PNSNode(const Move & m, int v = 1)     : move(m),         phi(v), delta(v), numchildren(0), children(NULL) { }
-		PNSNode(int x, int y,   int p, int d)  : move(Move(x,y)), phi(p), delta(d), numchildren(0), children(NULL) { }
-		PNSNode(const Move & m, int p, int d)  : move(m),         phi(p), delta(d), numchildren(0), children(NULL) { }
+		PNSNode(int x, int y,   int v = 1)     : phi(v), delta(v), move(Move(x,y)), numchildren(0), children(NULL) { }
+		PNSNode(const Move & m, int v = 1)     : phi(v), delta(v), move(m),         numchildren(0), children(NULL) { }
+		PNSNode(int x, int y,   int p, int d)  : phi(p), delta(d), move(Move(x,y)), numchildren(0), children(NULL) { }
+		PNSNode(const Move & m, int p, int d)  : phi(p), delta(d), move(m),         numchildren(0), children(NULL) { }
 
 		~PNSNode(){
 			if(children)
