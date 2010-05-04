@@ -143,9 +143,9 @@ public:
 					", move " + to_str(move.x) + "," + to_str(move.y) + ", " + to_str(numchildren);
 		}
 
-		int size() const {
-			int s = numchildren;
-			for(int i = 0; i < numchildren; i++)
+		unsigned int size() const {
+			unsigned int s = numchildren;
+			for(unsigned int i = 0; i < numchildren; i++)
 				s += children[i].size();
 			return s;
 		}

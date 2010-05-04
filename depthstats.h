@@ -30,7 +30,7 @@ struct DepthStats {
 		sumdepthsq += depth*depth;
 	}
 
-	int avg(){
+	unsigned int avg(){
 		if(num == 0) return 0;
 		return sumdepth/num;
 	}
