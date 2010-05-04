@@ -57,7 +57,7 @@ int Solver::run_pns(const Board & board, int ties, uint64_t memlimit){ //1 = win
 			int64_t before = nodes;
 			garbage_collect(root);
 			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
-			if(nodes >= maxnodes)
+			if(maxnodes - nodes < maxnodes/100)
 				break;
 		}
 	}

@@ -49,7 +49,7 @@ int Solver::run_dfpnsab(const Board & board, int ties, uint64_t memlimit){ //1 =
 			int64_t before = nodes;
 			garbage_collect(root);
 			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
-			if(nodes >= maxnodes)
+			if(maxnodes - nodes < maxnodes/100)
 				break;
 		}
 	}
@@ -112,7 +112,7 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp
 		next.move(c1->move);
 		
 		uint32_t tpc = min(INF32/2, (td + c1->phi - node->delta));
-		uint32_t tdc = min(tp, c2->delta + 1);
+		uint32_t tdc = min(tp, (uint32_t)(c2->delta*(1.0 + epsilon) + 1));
 
 //		printf("depth: %i, tp: %i, td: %i, tpc: %i, tdc: %i\n", depth, tp, td, tpc, tdc);
 

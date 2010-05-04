@@ -68,6 +68,7 @@ public:
 //memory management for PNS which uses a tree to store the nodes
 	uint64_t nodes, maxnodes;
 	int assignties; //which player to assign a tie to
+	static const float epsilon = 0.25;
 
 	bool timeout;
 
