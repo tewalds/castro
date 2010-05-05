@@ -287,7 +287,7 @@ public:
 	int test_connectivity(const Move & pos){
 		char turn = toplay();
 
-		Cell testcell;
+		Cell testcell = cells[find_group(pos)];
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 
@@ -370,7 +370,7 @@ public:
 	int test_win(const Move & pos){
 		char turn = toplay();
 
-		Cell testcell;
+		Cell testcell = cells[find_group(pos)];
 		int numgroups = 0;
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
@@ -379,12 +379,13 @@ public:
 				Cell * g = & cells[find_group(loc)];
 				testcell.corner |= g->corner;
 				testcell.edge   |= g->edge;
+				testcell.size   += g->size;
 				i++; //skip the next one
 				numgroups++;
 			}
 		}
 
-		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3 || (numgroups >= 2 && detectring(pos, turn)))
+		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3 || (numgroups >= 2 && testcell.size >= 6 && detectring(pos, turn)))
 			return turn;
 
 		if(nummoves+1 == numcells())
