@@ -1,5 +1,10 @@
 
 
+detect frames?
+
+rave weight according to rollout length?
+- give weight based on how many standard deviations this rollout is from the average
+
 prior knowledge
 - criticality
 - copy knowledge from proof tree
