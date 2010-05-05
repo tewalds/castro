@@ -197,8 +197,10 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			if(child->outcome == toplay){ //proven win from here, don't need children
 				node->outcome = child->outcome;
 				node->bestmove = *move;
-				nodes -= node->dealloc();
-				break;
+				if(node != &root){
+					nodes -= node->dealloc();
+					break;
+				}
 			}
 		}
 
