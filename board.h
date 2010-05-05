@@ -9,6 +9,7 @@
 using namespace std;
 
 #include "move.h"
+#include "string.h"
 
 #define BITCOUNT6(a) ((a & 1) + ((a & (1<<1))>>1) + ((a & (1<<2))>>2) + ((a & (1<<3))>>3) + ((a & (1<<4))>>4) + ((a & (1<<5))>>5))
 /*
@@ -191,8 +192,17 @@ public:
 
 	string to_s() const {
 		string s;
+		s += string(size + 5, ' ');
+		for(int i = 0; i < size; i++){
+			s += char('A' + i);
+			s += " ";
+		}
+		s += "\n";
+
 		for(int y = 0; y < size_d; y++){
 			s += string(abs(size-1 - y) + 2, ' ');
+			if(y < 9) s += " ";
+			s += to_str(y+1) + " ";
 			for(int x = linestart(y); x < lineend(y); x++){
 				int p = get(x, y);
 				if(p == 0) s += '.';
@@ -200,6 +210,8 @@ public:
 				if(p == 2) s += 'B';
 				s += ' ';
 			}
+			if(y < size-1)
+				s += char('A' + size + y);
 			s += '\n';
 		}
 		return s;
