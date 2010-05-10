@@ -1,8 +1,11 @@
 
 
+if only one move doesn't lose, stop simulating and just make that move
+- this is a good idea with total time per game, but not per move
 
 rave weight according to rollout length?
 - give weight based on how many standard deviations this rollout is from the average
+- need num to be a float then, which may cause issues...
 
 
 multi-thread
