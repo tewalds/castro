@@ -124,7 +124,7 @@ public:
 	int numcells() const { return vecsize() - size*(size - 1); }
 
 	int num_moves() const { return nummoves; }
-	int movesremain() const { return numcells() - nummoves + canswap(); }
+	int movesremain() const { return (won() >= 0 ? 0 : numcells() - nummoves + canswap()); }
 
 	int xy(int x, int y)   const { return   y*size_d +   x; }
 	int xy(const Move & m) const { return m.y*size_d + m.x; }
