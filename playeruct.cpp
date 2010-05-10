@@ -142,7 +142,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 
 		if(child->outcome == -1){
 			movelist.add(child->move, toplay);
-			board.move(child->move, locality);
+			assert(board.move(child->move, locality));
 
 			int won = walk_tree(board, child, movelist, depth+1);
 
