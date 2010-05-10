@@ -133,9 +133,15 @@ public:
 	}
 
 	GTPResponse gtp_undo(vecstr args){
-		game.undo();
-		player.set_board(game.getboard(-1));
-		log("undo");
+		int num = 1;
+		if(args.size() >= 1)
+			num = from_str<int>(args[0]);
+
+		while(num--){
+			game.undo();
+			player.set_board(game.getboard(-1));
+			log("undo");
+		}
 		if(verbose)
 			return GTPResponse(true, "\n" + game.getboard().to_s());
 		else
