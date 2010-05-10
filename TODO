@@ -1,9 +1,34 @@
 
 
-detect frames?
 
 rave weight according to rollout length?
 - give weight based on how many standard deviations this rollout is from the average
+
+
+multi-thread
+- generally lockless
+- allow ponder?
+- virtual loss to encourage exploration
+- race conditions:
+  - minimax backup
+    - select a move, it's proven a loss, then back it up as a loss, though it was just a bad move selection
+    - prove a node while another thread is down that node, can't remove until all threads are back up
+      - just don't delete nodes?
+  - depth stats
+
+
+GTP server
+- listen on an ip/port
+- spawn a child on connect, connecting stdin/stdout to the connection
+
+Test
+- longer games
+- different rave functions
+- set a new baseline
+- rave extensions
+
+
+detect frames?
 
 prior knowledge
 - criticality
