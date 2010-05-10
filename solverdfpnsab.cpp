@@ -1,13 +1,14 @@
 
 #include "solver.h"
 
-void Solver::solve_dfpnsab(const Board & board, double time, uint64_t memlimit){
+void Solver::solve_dfpnsab(Board board, double time, uint64_t memlimit){
 	reset();
 
 	if(board.won() >= 0){
 		outcome = board.won();
 		return;
 	}
+	board.setswap(false);
 
 	Timer timer = Timer(time, bind(&Solver::timedout, this));
 	int starttime = time_msec();

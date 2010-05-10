@@ -8,13 +8,14 @@
  * L W L  L   from the perspective of toplay
  * U W LT U
  */
-void Solver::solve_pns(const Board & board, double time, uint64_t memlimit){
+void Solver::solve_pns(Board board, double time, uint64_t memlimit){
 	reset();
 
 	if(board.won() >= 0){
 		outcome = board.won();
 		return;
 	}
+	board.setswap(false);
 
 	Timer timer = Timer(time, bind(&Solver::timedout, this));
 	int starttime = time_msec();

@@ -1,12 +1,13 @@
 
 #include "solver.h"
 
-void Solver::solve_scout(const Board & board, double time, int mdepth){
+void Solver::solve_scout(Board board, double time, int mdepth){
 	reset();
 	if(board.won() >= 0){
 		outcome = board.won();
 		return;
 	}
+	board.setswap(false);
 
 	Timer timer = Timer(time, bind(&Solver::timedout, this));
 	int starttime = time_msec();

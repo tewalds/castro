@@ -99,11 +99,11 @@ public:
 	}
 	void timedout(){ timeout = true; }
 
-	void solve_ab     (const Board & board, double time, int mdepth = 1000);
-	void solve_scout  (const Board & board, double time, int mdepth = 1000);
-	void solve_pns    (const Board & board, double time, uint64_t memlimit);
-	void solve_pnsab  (const Board & board, double time, uint64_t memlimit);
-	void solve_dfpnsab(const Board & board, double time, uint64_t memlimit);
+	void solve_ab     (Board board, double time, int mdepth = 1000);
+	void solve_scout  (Board board, double time, int mdepth = 1000);
+	void solve_pns    (Board board, double time, uint64_t memlimit);
+	void solve_pnsab  (Board board, double time, uint64_t memlimit);
+	void solve_dfpnsab(Board board, double time, uint64_t memlimit);
 
 //protected:
 

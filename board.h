@@ -84,12 +84,13 @@ public:
 	};
 
 private:
-	short size; //the length of one side of the hexagon
-	short size_d; //diameter of the board = size*2-1
+	char size; //the length of one side of the hexagon
+	char size_d; //diameter of the board = size*2-1
 
 	short nummoves;
 	char toPlay;
 	char outcome; //-1 = unknown, 0 = tie, 1,2 = player win
+	bool allowswap;
 
 	vector<Cell> cells;
 
@@ -104,6 +105,7 @@ public:
 		nummoves = 0;
 		toPlay = 1;
 		outcome = -1;
+		allowswap = true;
 
 		cells.resize(vecsize());
 
@@ -143,8 +145,8 @@ public:
 	bool onboard(int x, int y)  const { return (  x >= 0 &&   y >= 0 &&   x < size_d &&   y < size_d && onboard_fast(x, y) ); }
 	bool onboard(const Move & m)const { return (m.x >= 0 && m.y >= 0 && m.x < size_d && m.y < size_d && onboard_fast(m) ); }
 
-	bool canswap() const { return (nummoves == 1 && toPlay == 2); }
-//	bool canswap() const { return false; }
+	void setswap(bool s) { allowswap = s; }
+	bool canswap() const { return (nummoves == 1 && toPlay == 2 && allowswap); }
 
 	//assumes x, y are in bounds (meaning no swap) and the game isn't already finished
 	bool valid_move_fast(int x, int y)   const { return !get(x,y); }
