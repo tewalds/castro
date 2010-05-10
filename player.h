@@ -130,8 +130,8 @@ public:
 		}
 
 		void neuter(){
-			numchildren = 0;
 			children = NULL;
+			numchildren = 0;
 		}
 
 		void print() const {

@@ -84,7 +84,7 @@ vector<Move> Player::get_pv(){
 
 	Node * n = & root;
 	char turn = rootboard.toplay();
-	while(n->numchildren){
+	while(n->children){
 		n = return_move(n, turn);
 		pv.push_back(n->move);
 		turn = 3 - turn;
@@ -136,7 +136,7 @@ Player::Node * Player::return_move_outcome(const Node * node, int outcome) const
 int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){
 	int toplay = board.toplay();
 
-	if(node->children){
+	if(node->children && node->outcome == -1){
 	//choose a child and recurse
 		Node * child = choose_move(node, toplay);
 
