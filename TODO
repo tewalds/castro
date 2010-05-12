@@ -23,6 +23,7 @@ multi-thread
 GTP server
 - listen on an ip/port
 - spawn a child on connect, connecting stdin/stdout to the connection
+- inetd?
 
 Test
 - longer games
