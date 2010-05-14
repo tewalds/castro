@@ -258,7 +258,7 @@ public:
 	}
 	void doswap(){
 		for(int y = 0; y < size_d; y++){
-			for(int x = 0; x < size_d; x++){
+			for(int x = linestart(y); x < lineend(y); x++){
 				if(get(x,y) != 0){
 					cells[xy(x,y)].piece = 2;
 					toPlay = 1;
