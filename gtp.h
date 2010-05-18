@@ -52,6 +52,7 @@ struct GTPCallback {
 
 class GTPclient {
 	FILE * in, * out, * logfile;
+	bool servermode;
 	vector<GTPCallback> callbacks;
 
 public:
@@ -60,6 +61,7 @@ public:
 		in = i;
 		out = o;
 		logfile = l;
+		servermode = false;
 
 		newcallback("help",             bind(&GTPclient::gtp_list_commands,    this, _1));
 		newcallback("list_commands",    bind(&GTPclient::gtp_list_commands,    this, _1));
@@ -73,6 +75,10 @@ public:
 	~GTPclient(){
 		if(logfile)
 			fclose(logfile);
+	}
+
+	void setservermode(bool m = true){
+		servermode = m;
 	}
 
 	void setinfile(FILE * i){
@@ -154,6 +160,9 @@ public:
 	}
 
 	GTPResponse gtp_logfile(vecstr args){
+		if(servermode)
+			return GTPResponse(false, "Logs disabled");
+
 		if(args.size() != 1)
 			return GTPResponse(false, "Wrong number of arguments");
 
@@ -167,11 +176,17 @@ public:
 	}
 
 	GTPResponse gtp_lognote(vecstr args){
+		if(servermode)
+			return GTPResponse(false, "Logs disabled");
+
 		log(implode(args, " "));
 		return GTPResponse(true);
 	}
 
 	GTPResponse gtp_logend(vecstr args){
+		if(servermode)
+			return GTPResponse(false, "Logs disabled");
+
 		setlogfile(NULL);
 		return GTPResponse(true);
 	}

@@ -17,6 +17,7 @@ int main(int argc, char **argv){
 				"\t-c --cmd      Pass a gtp command from the command line\n"
 				"\t-f --file     Run this gtp file before reading from stdin\n"
 				"\t-l --logfile  Log the gtp commands in standard format to this file\n"
+				"\t-s --server   Run in server mode\n"
 				);
 			exit(255);
 		}else if(arg == "-v" || arg == "--verbose"){
@@ -40,6 +41,8 @@ int main(int argc, char **argv){
 			FILE * fd = fopen(ptr, "w");
 			if(!fd) { printf("Failed to open file %s\n", ptr); exit(255); }
 			gtp.setlogfile(fd);
+		}else if(arg == "-s" || arg == "--server"){
+			gtp.setservermode(true);
 		}else{
 			printf("Unknown argument: %s\n", argv[i]);
 			exit(255);
