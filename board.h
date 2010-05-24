@@ -11,7 +11,13 @@ using namespace std;
 #include "move.h"
 #include "string.h"
 
-#define BITCOUNT6(a) ((a & 1) + ((a & (1<<1))>>1) + ((a & (1<<2))>>2) + ((a & (1<<3))>>3) + ((a & (1<<4))>>4) + ((a & (1<<5))>>5))
+static const int BitsSetTable64[] = {
+	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6
+};
+
 /*
  * the board is represented as a flattened 2d array of the form:
  *   1 2 3
@@ -40,8 +46,8 @@ class Board{
 		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e) :
 			piece(p), parent(a), size(s), corner(c), edge(e) { }
 
-		int numcorners(){ return BITCOUNT6(corner); }
-		int numedges(){   return BITCOUNT6(edge); }
+		int numcorners(){ return BitsSetTable64[corner]; }
+		int numedges()  { return BitsSetTable64[edge];   }
 	};
 
 public:
