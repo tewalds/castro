@@ -19,24 +19,23 @@ multi-thread
       - just don't delete nodes?
   - depth stats
 
-
-GTP server
-- listen on an ip/port
-- spawn a child on connect, connecting stdin/stdout to the connection
-- inetd?
-
 Test
 - longer games
 - different rave functions
 - set a new baseline
 - rave extensions
 
+avoid symmetry for the first 3-5 moves, or just build an opening book
 
 detect frames?
 
 prior knowledge
 - criticality
 - copy knowledge from proof tree
+- forced moves
+  - test for wins, then test for losses, essentially 1 ply negamax
+  - if only one move doesn't lose, give it real experience to make a "macro move" and keep playing this simulation
+- store knowledge as rave experience instead of real experience?
 
 rollout policy
 - use weighted random choices instead of uniform random:
