@@ -51,20 +51,26 @@ int Solver::run_negamax(const Board & board, const int depth, int alpha, int bet
 	return alpha;
 }
 
-int Solver::negamax(const Board & board, const int depth, int alpha, int beta){
+int Solver::negamax(Board & board, const int depth, int alpha, int beta){
 	if(board.won() >= 0)
 		return (board.won() ? -2 : -1);
 
 	if(depth <= 0 || timeout)
 		return 0;
 
+	int value;
+	static const int lookup[4] = {0, 1, 2, 2};
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 		nodes_seen++;
 
-		Board next = board;
-		next.move(*move);
+		if(depth == 1){
+			value = lookup[board.test_win(*move)+1];
+		}else{
+			Board next = board;
+			next.move(*move);
 
-		int value = -negamax(next, depth - 1, -beta, -alpha);
+			value = -negamax(next, depth - 1, -beta, -alpha);
+		}
 
 		if(value > alpha)
 			alpha = value;

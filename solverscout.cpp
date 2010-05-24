@@ -51,7 +51,7 @@ int Solver::run_negascout(const Board & board, const int depth, int alpha, int b
 	return alpha;
 }
 
-int Solver::negascout(const Board & board, const int depth, int alpha, int beta){
+int Solver::negascout(Board & board, const int depth, int alpha, int beta){
 	if(board.won() >= 0)
 		return (board.won() ? -2 : -1);
 
@@ -60,16 +60,22 @@ int Solver::negascout(const Board & board, const int depth, int alpha, int beta)
 
 	int b = beta;
 	int first = true;
+	int value;
+	static const int lookup[4] = {0, 1, 2, 2};
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 		nodes_seen++;
 
-		Board next = board;
-		next.move(*move);
+		if(depth == 1){
+			value = lookup[board.test_win(*move)+1];
+		}else{
+			Board next = board;
+			next.move(*move);
 
-		int value = -negascout(next, depth - 1, -b, -alpha);
+			value = -negascout(next, depth - 1, -b, -alpha);
 
-		if(value > alpha && value < beta && !first) // re-search
-			value = -negascout(next, depth - 1, -beta, -alpha);
+			if(value > alpha && value < beta && !first) // re-search
+				value = -negascout(next, depth - 1, -beta, -alpha);
+		}
 
 		if(value > alpha)
 			alpha = value;

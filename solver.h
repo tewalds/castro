@@ -112,8 +112,8 @@ public:
 	int run_negamax  (const Board & board, const int depth, int alpha, int beta);  //plain negamax
 	int run_negascout(const Board & board, const int depth, int alpha, int beta);  //plain negascout
 
-	int negamax  (const Board & board, const int depth, int alpha, int beta);  //plain negamax
-	int negascout(const Board & board, const int depth, int alpha, int beta);  //plain negascout
+	int negamax  (Board & board, const int depth, int alpha, int beta);  //plain negamax
+	int negascout(Board & board, const int depth, int alpha, int beta);  //plain negascout
 
 //basic proof number search building a tree
 	int run_pns    (const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
