@@ -17,13 +17,12 @@ castro: $(OBJECTS)
 
 castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h move.h \
  solver.h time.h timer.h player.h depthstats.h
-playeruct.o: playeruct.cpp player.h move.h board.h time.h timer.h \
- depthstats.h string.h solver.h
-solverab.o: solverab.cpp solver.h time.h timer.h board.h move.h
-solverdfpnsab.o: solverdfpnsab.cpp solver.h time.h timer.h board.h move.h
-solverpnsab.o: solverpnsab.cpp solver.h time.h timer.h board.h move.h
-solverpns.o: solverpns.cpp solver.h time.h timer.h board.h move.h
-solverscout.o: solverscout.cpp solver.h time.h timer.h board.h move.h
+playeruct.o: playeruct.cpp player.h move.h board.h string.h time.h timer.h depthstats.h solver.h
+solverab.o: solverab.cpp solver.h time.h timer.h board.h move.h string.h
+solverdfpnsab.o: solverdfpnsab.cpp solver.h time.h timer.h board.h move.h string.h
+solverpnsab.o: solverpnsab.cpp solver.h time.h timer.h board.h move.h string.h
+solverpns.o: solverpns.cpp solver.h time.h timer.h board.h move.h string.h
+solverscout.o: solverscout.cpp solver.h time.h timer.h board.h move.h string.h
 string.o: string.cpp string.h
 time.o: time.cpp time.h
 
