@@ -91,47 +91,111 @@ public:
 //*/
 
 	struct Node {
+		class Children {
+			uint16_t _num;
+			Node *   _children;
+		public:
+			typedef Node * iterator;
+			Children() : _num(0), _children(NULL) { }
+			Children(int n) { alloc(n); }
+			~Children() { assert(_num == 0 && _children == NULL); }
+
+			void assert_consistent() const { assert((_num == 0) == (_children == NULL)); };
+			void assert_empty()      const { assert(empty()); }
+
+			unsigned int alloc(unsigned int n){
+				assert(_num == 0);
+				assert(_children == NULL);
+				assert(n > 0);
+
+				_num = n;
+				_children = new Node[_num];
+
+				return _num;
+			}
+			void neuter(){
+				_children = 0;
+				_num = 0;
+			}
+			unsigned int dealloc(){
+				assert_consistent();
+
+				int n = _num;
+				if(_children){
+					Node * temp = _children; //CAS!
+					neuter();
+					delete[] temp;
+				}
+				return n;
+			}
+			void swap(Children & other){
+				Children temp = other;
+				other = *this;
+				*this = temp;
+				temp.neuter();
+/*
+				Node * temp = _children;
+				uint16_t tempnum = _numchildren;
+
+				_children = n._children;
+				_numchildren = n._numchildren;
+
+				n._children = _temp;
+				n._numchildren = _tempnum;
+*/
+			}
+			unsigned int num() const {
+				assert_consistent();
+				return _num;
+			}
+			bool empty() const {
+				return num() == 0;
+			}
+			Node & operator[](unsigned int offset){
+				assert(_children);
+				assert(offset >= 0 && offset < _num);
+				return _children[offset];
+			}
+			Node * begin() const {
+				assert_consistent();
+				return _children;
+			}
+			Node * end() const {
+				assert_consistent();
+				return _children + _num;
+			}
+		};
+
+	public:
 		ExpPair rave;
 		ExpPair exp;
 		ExpPair know;
-		Move move;
-		Move bestmove; //if outcome is set, then bestmove is the way to get there
+		Move    move;
+		Move    bestmove; //if outcome is set, then bestmove is the way to get there
 		int16_t outcome;
-		uint16_t numchildren;
-		Node * children;
+		Children children;
 		//don't forget to update the copy constructor/operator
 
-		Node()                            :          outcome(-1), numchildren(0), children(NULL) { }
-		Node(const Move & m, char o = -1) : move(m), outcome(o),  numchildren(0), children(NULL) { }
+		Node()                            :          outcome(-1) { }
+		Node(const Move & m, char o = -1) : move(m), outcome(o)  { }
 		Node(const Node & n) { *this = n; }
 		Node & operator = (const Node & n){
-			if(this != & n){
+			if(this != & n){ //don't copy to self
 				//don't copy to a node that already has children
-				assert(numchildren == 0 && children == NULL);
+				assert(children.empty());
 
 				rave = n.rave;
 				exp  = n.exp;
+				know = n.know;
 				move = n.move;
-				outcome = n.outcome;
 				bestmove = n.bestmove;
+				outcome = n.outcome;
 			}
 			return *this;
 		}
 
 		void swap_tree(Node & n){
-			Node * temp = children;
-			uint16_t tempnum = numchildren;
-
-			children = n.children;
-			numchildren = n.numchildren;
-
-			n.children = temp;
-			n.numchildren = tempnum;
-		}
-
-		void neuter(){
-			children = NULL;
-			numchildren = 0;
+			children.swap(n.children);
 		}
 
 		void print() const {
@@ -140,15 +204,18 @@ public:
 		string to_s() const {
 			return "Node: exp " + to_str(exp.avg(), 2) + "/" + to_str(exp.num()) +
 					", rave " + to_str(rave.avg(), 2) + "/" + to_str(rave.num()) +
-					", move " + to_str(move.x) + "," + to_str(move.y) + ", " + to_str(numchildren);
+					", move " + to_str(move.x) + "," + to_str(move.y) + ", " + to_str(children.num());
 		}
 
 		unsigned int size() const {
-			unsigned int s = numchildren;
-			for(unsigned int i = 0; i < numchildren; i++)
-				s += children[i].size();
-			return s;
+			unsigned int num = children.num();
+
+			for(Node * i = children.begin(); i != children.end(); i++)
+				num += i->size();
+
+			return num;
 		}
+
 /*
 		int construct(const Solver::PNSNode * n, int pnsscore){
 			move = n->move;
@@ -178,35 +245,20 @@ public:
 		}
 */
 		~Node(){
-			assert(children == NULL && numchildren == 0);
+			assert(children.empty());
 		}
 
-		int alloc(int num){
-			assert(numchildren == 0);
-			assert(children == NULL);
-			assert(num > 0);
+		unsigned int alloc(unsigned int num){
+			return children.alloc(num);
+		}
+		unsigned int dealloc(){
+			unsigned int num = 0;
 
-			numchildren = num;
-			children = new Node[num];
-
-			assert(numchildren == num);
+			for(Node * i = children.begin(); i != children.end(); i++)
+				num += i->dealloc();
+			num += children.dealloc();
 
 			return num;
-		}
-		int dealloc(){
-			assert((children == NULL) == (numchildren == 0));
-
-			int s = numchildren;
-			if(numchildren){
-				for(int i = 0; i < numchildren; i++)
-					s += children[i].dealloc();
-				delete[] children;
-				neuter();
-			}
-
-			assert(children == NULL && numchildren == 0);
-
-			return s;
 		}
 
 //*
@@ -409,10 +461,10 @@ public:
 		if(keeptree){
 			Node child;
 
-			for(int i = 0; i < root.numchildren; i++){
-				if(root.children[i].move == m){
-					child = root.children[i];          //copy the child experience to temp
-					child.swap_tree(root.children[i]); //move the child tree to temp
+			for(Node * i = root.children.begin(); i != root.children.end(); i++){
+				if(i->move == m){
+					child = *i;          //copy the child experience to temp
+					child.swap_tree(*i); //move the child tree to temp
 					break;
 				}
 			}

@@ -84,7 +84,7 @@ vector<Move> Player::get_pv(){
 
 	Node * n = & root;
 	char turn = rootboard.toplay();
-	while(n->children){
+	while(!n->children.empty()){
 		n = return_move(n, turn);
 		pv.push_back(n->move);
 		turn = 3 - turn;
@@ -111,8 +111,8 @@ Player::Node * Player::return_move_outcome(const Node * node, int outcome) const
 	int val, maxval = -1000000000;
 
 	Node * ret = NULL,
-		 * child = node->children,
-		 * end = node->children + node->numchildren;
+		 * child = node->children.begin(),
+		 * end = node->children.end();
 
 	for( ; child != end; child++){
 
@@ -136,7 +136,7 @@ Player::Node * Player::return_move_outcome(const Node * node, int outcome) const
 int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){
 	int toplay = board.toplay();
 
-	if(node->children && node->outcome == -1){
+	if(!node->children.empty() && node->outcome == -1){
 	//choose a child and recurse
 		Node * child = choose_move(node, toplay);
 
@@ -187,8 +187,8 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 //create children
 	nodes += node->alloc(board.movesremain());
 
-	Node * child = node->children;
-	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+	Node * child = node->children.begin();
+	for(Board::MoveIterator move = board.moveit(); !move.done() && child != node->children.end(); ++move){
 		*child = Node(*move);
 
 		if(minimax){
@@ -212,15 +212,16 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 }
 
 Player::Node * Player::choose_move(const Node * node, int toplay) const {
-	int maxi = 0;
 	float val, maxval = -1000000000;
 	float logvisits = log(node->exp.num());
 
 	float raveval = ravefactor*(skiprave == 0 || rand() % skiprave > 0); // = 0 or ravefactor
 
-	for(unsigned int i = 0; i < node->numchildren; i++){
-		Node * child = & node->children[i];
+	Node * ret = NULL,
+		 * child = node->children.begin(),
+		 * end = node->children.end();
 
+	for(; child != end; child++){
 		if(child->outcome >= 0){
 			if(child->outcome == toplay) //return a win immediately
 				return child;
@@ -232,17 +233,18 @@ Player::Node * Player::choose_move(const Node * node, int toplay) const {
 
 		if(maxval < val){
 			maxval = val;
-			maxi = i;
+			ret = child;
 		}
 	}
 
-	return & node->children[maxi];
+	return ret;
 }
 
 void Player::update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay){
 	//update the rave score of all children that were played
 	RaveMoveList::iterator rave = movelist.begin(), raveend = movelist.end();
-	Node * child = node->children, * childend = node->children + node->numchildren;
+	Node * child = node->children.begin(),
+	     * childend = node->children.end();
 
 	while(rave != raveend && child != childend){
 		if(*rave == child->move){
