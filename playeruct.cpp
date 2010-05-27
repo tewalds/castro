@@ -26,7 +26,6 @@ Move Player::mcts(double time, int maxruns, int memlimit){
 
 	double ptime = time * prooftime * rootboard.num_moves() / rootboard.numcells(); //ie scale up from 0 to prooftime
 	if(ptime > 0.01){ //minimum of 10ms worth of solve time
-		Solver solver;
 		Timer timer2 = Timer(ptime, bind(&Solver::timedout, &solver));
 		int ret = solver.run_pnsab(rootboard, (rootboard.toplay() == 1 ? 2 : 1), memlimit/2);
 
@@ -188,11 +187,29 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	nodes += node->alloc(board.movesremain());
 
 	Node * child = node->children.begin();
+	int unknown = 0;
 	for(Board::MoveIterator move = board.moveit(); !move.done() && child != node->children.end(); ++move){
 		*child = Node(*move);
 
 		if(minimax){
-			child->outcome = board.test_win(*move);
+			if(minimax == 1){
+				child->outcome = board.test_win(*move);
+			}else{
+				Board next = board;
+				next.move(*move);
+
+				int abval = solver.negamax(next, minimax-1, -2, 2);
+
+				switch(abval+2){
+					case 0: /* -2 */ child->outcome = toplay;     break;
+					case 1: /* -1 */ child->outcome = 0;          break;
+					case 2: /*  0 */ child->outcome = -1;         break;
+					case 3: /*  1 */ child->outcome = 0;          break;
+					case 4: /*  2 */ child->outcome = 3 - toplay; break;
+					default:
+						assert(abval >= -2 && abval <= 2);
+				}
+			}
 
 			if(child->outcome == toplay){ //proven win from here, don't need children
 				node->outcome = child->outcome;
@@ -202,12 +219,26 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 					break;
 				}
 			}
+
+			if(child->outcome == -1)
+				unknown++;
 		}
 
 		add_knowledge(board, node, child);
 
 		child++;
 	}
+
+	//Add experience to the one available move so the current simulation continues past this move
+	if(unknown == 1){
+		for(Node * child = node->children.begin(); child != node->children.end(); ++child){
+			if(child->outcome == -1){
+				child->exp += 1;
+				break;
+			}
+		}
+	}
+
 	return walk_tree(board, node, movelist, depth);
 }
 

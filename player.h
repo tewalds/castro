@@ -391,7 +391,7 @@ public:
 	bool  shortrave;  //only update rave values on short rollouts
 	bool  keeptree;   //reuse the tree from the previous move
 	bool  minimaxtree;//keep the solved part of the tree
-	bool  minimax;    //solve the minimax tree within the uct tree
+	int   minimax;    //solve the minimax tree within the uct tree
 	float fpurgency;  //what value to return for a move that hasn't been played yet
 //knowledge
 	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
@@ -404,6 +404,7 @@ public:
 	bool  instantwin; //look for instant wins in rollouts
 
 
+	Solver solver;
 	Node root;
 	Board rootboard;
 
@@ -431,7 +432,7 @@ public:
 		shortrave   = false;
 		keeptree    = true;
 		minimaxtree = false;
-		minimax     = true;
+		minimax     = 1;
 		fpurgency   = 1;
 		prooftime   = 0;
 		proofscore  = 0;

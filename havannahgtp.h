@@ -425,7 +425,7 @@ public:
 				player.keeptree = from_str<bool>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-m" || arg == "--minimax") && i+1 < args.size()){
-				player.minimax = from_str<bool>(args[++i]);
+				player.minimax = from_str<int>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-n" || arg == "--minimaxtree") && i+1 < args.size()){
 				player.minimaxtree = from_str<bool>(args[++i]);
