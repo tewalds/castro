@@ -66,6 +66,7 @@ public:
 		newcallback("help",             bind(&GTPclient::gtp_list_commands,    this, _1));
 		newcallback("list_commands",    bind(&GTPclient::gtp_list_commands,    this, _1));
 		newcallback("quit",             bind(&GTPclient::gtp_quit,             this, _1));
+		newcallback("exit",             bind(&GTPclient::gtp_quit,             this, _1));
 		newcallback("protocol_version", bind(&GTPclient::gtp_protocol_version, this, _1));
 		newcallback("logfile",          bind(&GTPclient::gtp_logfile,          this, _1));
 		newcallback("lognote",          bind(&GTPclient::gtp_lognote,          this, _1));
