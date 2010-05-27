@@ -23,6 +23,7 @@ public:
 	double time_per_move;
 	int max_runs;
 	int mem_allowed;
+	bool allow_swap;
 
 	Player player;
 
@@ -39,6 +40,7 @@ public:
 		time_per_move = 0;
 		mem_allowed = 1000;
 		max_runs = 0;
+		allow_swap = true;
 
 		newcallback("name",            bind(&HavannahGTP::gtp_name,          this, _1), "Name of the program");
 		newcallback("version",         bind(&HavannahGTP::gtp_version,       this, _1), "Version of the program");
@@ -50,6 +52,7 @@ public:
 		newcallback("print",           bind(&HavannahGTP::gtp_print,         this, _1), "Alias for showboard");
 		newcallback("clear_board",     bind(&HavannahGTP::gtp_clearboard,    this, _1), "Clear the board, but keep the size");
 		newcallback("boardsize",       bind(&HavannahGTP::gtp_boardsize,     this, _1), "Clear the board, set the board size");
+		newcallback("swap",            bind(&HavannahGTP::gtp_swap,          this, _1), "Enable/disable swap: swap <0|1>");
 		newcallback("time_settings",   bind(&HavannahGTP::gtp_time_settings, this, _1), "Set the time limits: time_settings [secs per game] [secs per move] [sims per move]");
 		newcallback("play",            bind(&HavannahGTP::gtp_play,          this, _1), "Place a stone: play <color> <location>");
 		newcallback("white",           bind(&HavannahGTP::gtp_playwhite,     this, _1), "Place a white stone: white <location>");
@@ -94,6 +97,23 @@ public:
 			default: return "unknown";
 		}
 	}
+
+	GTPResponse gtp_swap(vecstr args){
+		if(args.size() == 0)
+			return GTPResponse(false, "Wrong number of arguments");
+
+		log("swap " + implode(args, " "));
+
+		if(args.size() >= 1)
+			allow_swap = from_str<bool>(args[0]);
+
+		string ret = "";
+		if(allow_swap) ret += "Swap on";
+		else           ret += "Swap off";
+
+		return GTPResponse(true, ret);
+	}
+
 
 	GTPResponse gtp_time_settings(vecstr args){
 		if(args.size() == 0)
@@ -349,6 +369,7 @@ public:
 		fprintf(stderr, "time left: %.1f, max time: %.3f, max runs: %i\n", time_remain, time, max_runs);
 
 		player.move(game.get_last());
+		player.rootboard.setswap(allow_swap);
 
 		Move best = player.mcts(time, max_runs, mem);
 
