@@ -5,7 +5,7 @@
 #include <string>
 #include "string.h"
 
-Move Player::mcts(double time, int maxruns, int memlimit){
+Move Player::mcts(double time, int maxruns, uint64_t memlimit){
 	maxnodes = memlimit*1024*1024/sizeof(Node);
 	time_used = 0;
 	runs = 0;

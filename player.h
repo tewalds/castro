@@ -474,7 +474,7 @@ public:
 		assert(nodes == root.size());
 	}
 
-	Move mcts(double time, int maxruns, int memlimit);
+	Move mcts(double time, int maxruns, uint64_t memlimit);
 	vector<Move> get_pv();
 
 protected:
