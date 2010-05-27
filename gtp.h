@@ -41,19 +41,18 @@ typedef function<GTPResponse(vecstr)> gtp_callback_fn;
 
 struct GTPCallback {
 	string name;
+	string desc;
 	gtp_callback_fn func;
 
 	GTPCallback() { }
-	GTPCallback(string n, gtp_callback_fn fn){
-		name = n;
-		func = fn;
-	}
+	GTPCallback(string n, string d, gtp_callback_fn fn) : name(n), desc(d), func(fn) { }
 };
 
 class GTPclient {
 	FILE * in, * out, * logfile;
 	bool servermode;
 	vector<GTPCallback> callbacks;
+	int longest_cmd;
 
 public:
 
@@ -62,15 +61,16 @@ public:
 		out = o;
 		logfile = l;
 		servermode = false;
+		longest_cmd = 0;
 
-		newcallback("help",             bind(&GTPclient::gtp_list_commands,    this, _1));
-		newcallback("list_commands",    bind(&GTPclient::gtp_list_commands,    this, _1));
-		newcallback("quit",             bind(&GTPclient::gtp_quit,             this, _1));
-		newcallback("exit",             bind(&GTPclient::gtp_quit,             this, _1));
-		newcallback("protocol_version", bind(&GTPclient::gtp_protocol_version, this, _1));
-		newcallback("logfile",          bind(&GTPclient::gtp_logfile,          this, _1));
-		newcallback("lognote",          bind(&GTPclient::gtp_lognote,          this, _1));
-		newcallback("logend",           bind(&GTPclient::gtp_logend,           this, _1));
+		newcallback("list_commands",    bind(&GTPclient::gtp_list_commands,    this, _1, false), "List the commands");
+		newcallback("help",             bind(&GTPclient::gtp_list_commands,    this, _1, true),  "List the commands, with descriptions");
+		newcallback("quit",             bind(&GTPclient::gtp_quit,             this, _1), "Quit the program");
+		newcallback("exit",             bind(&GTPclient::gtp_quit,             this, _1), "Alias for quit");
+		newcallback("protocol_version", bind(&GTPclient::gtp_protocol_version, this, _1), "Show the gtp protocol version");
+		newcallback("logfile",          bind(&GTPclient::gtp_logfile,          this, _1), "Start logging the gtp commands to this file, disabled in server mode");
+		newcallback("lognote",          bind(&GTPclient::gtp_lognote,          this, _1), "Add a comment to the logfile");
+		newcallback("logend",           bind(&GTPclient::gtp_logend,           this, _1), "Stop logging");
 	}
 
 	~GTPclient(){
@@ -92,8 +92,10 @@ public:
 		logfile = l;
 	}
 
-	void newcallback(const string name, const gtp_callback_fn & fn){
-		newcallback(GTPCallback(name, fn));
+	void newcallback(const string name, const gtp_callback_fn & fn, const string desc = ""){
+		newcallback(GTPCallback(name, desc, fn));
+		if(longest_cmd < name.length())
+			longest_cmd = name.length();
 	}
 	
 	void newcallback(const GTPCallback & a){
@@ -200,10 +202,16 @@ public:
 		exit(0);
 	}
 	
-	GTPResponse gtp_list_commands(vecstr args){
-		string ret;
-		for(unsigned int i = 0; i < callbacks.size(); i++)
-			ret += callbacks[i].name + "\n";
+	GTPResponse gtp_list_commands(vecstr args, bool showdesc){
+		string ret = "\n";
+		for(unsigned int i = 0; i < callbacks.size(); i++){
+			ret += callbacks[i].name;
+			if(showdesc && callbacks[i].desc.length() > 0){
+				ret += string(longest_cmd + 2 - callbacks[i].name.length(), ' ');
+				ret += callbacks[i].desc;
+			}
+			ret += "\n";
+		}
 		return GTPResponse(true, ret);
 	}
 };
