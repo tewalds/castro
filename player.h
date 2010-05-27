@@ -132,17 +132,7 @@ public:
 				Children temp = other;
 				other = *this;
 				*this = temp;
-				temp.neuter();
-/*
-				Node * temp = _children;
-				uint16_t tempnum = _numchildren;
-
-				_children = n._children;
-				_numchildren = n._numchildren;
-
-				n._children = _temp;
-				n._numchildren = _tempnum;
-*/
+				temp.neuter(); //to avoid problems with the destructor of temp
 			}
 			unsigned int num() const {
 				assert_consistent();
