@@ -186,9 +186,12 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 //create children
 	nodes += node->alloc(board.movesremain());
 
-	Node * child = node->children.begin();
 	int unknown = 0;
-	for(Board::MoveIterator move = board.moveit(); !move.done() && child != node->children.end(); ++move){
+
+	Node * child = node->children.begin(),
+	     * end   = node->children.end();
+	Board::MoveIterator move = board.moveit();
+	for(; !move.done() && child != end; ++move, ++child){
 		*child = Node(*move);
 
 		if(minimax){
@@ -214,6 +217,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 			if(child->outcome == toplay){ //proven win from here, don't need children
 				node->outcome = child->outcome;
 				node->bestmove = *move;
+				unknown = 123456; //set to something big to skip the part below
 				if(node != &root){
 					nodes -= node->dealloc();
 					break;
@@ -225,9 +229,9 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 		}
 
 		add_knowledge(board, node, child);
-
-		child++;
 	}
+	//both end conditions should happen in parallel, so either both happen or neither do
+	assert(move.done() == (child == end));
 
 	//Add experience to the one available move so the current simulation continues past this move
 	if(unknown == 1){
