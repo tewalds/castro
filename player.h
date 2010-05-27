@@ -383,6 +383,7 @@ public:
 	bool  minimaxtree;//keep the solved part of the tree
 	int   minimax;    //solve the minimax tree within the uct tree
 	float fpurgency;  //what value to return for a move that hasn't been played yet
+	int   visitexpand;//number of visits before expanding a node
 //knowledge
 	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
 	bool  localreply; //boost for a local reply, ie a move near the previous move
@@ -424,6 +425,7 @@ public:
 		minimaxtree = false;
 		minimax     = 1;
 		fpurgency   = 1;
+		visitexpand = 1;
 		prooftime   = 0;
 		proofscore  = 0;
 		localreply  = false;

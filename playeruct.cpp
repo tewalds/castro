@@ -166,7 +166,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	}
 
 	int won = (minimax ? node->outcome : board.won());
-	if(won >= 0 || node->exp.num() == 0 || nodes >= maxnodes){
+	if(won >= 0 || node->exp.num() < visitexpand || nodes >= maxnodes){
 	//do random game on this node, unless it's already the end
 		if(won == -1)
 			won = rand_game(board, movelist, node->move, depth);
@@ -237,7 +237,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	if(unknown == 1){
 		for(Node * child = node->children.begin(); child != node->children.end(); ++child){
 			if(child->outcome == -1){
-				child->exp += 1;
+				child->exp.addwins(visitexpand);
 				break;
 			}
 		}

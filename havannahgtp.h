@@ -387,6 +387,7 @@ public:
 				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
 				"  -n --minimaxtree Keep the proven part of the UCT tree              [" + to_str(player.minimaxtree) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
+				"  -x --visitexpand Number of visits before expanding a node          [" + to_str(player.visitexpand) + "]\n" +
 				"Node initialization knowledge:\n" +
 //				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
@@ -432,6 +433,9 @@ public:
 				player.defaults = false;
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
+				player.defaults = false;
+			}else if((arg == "-x" || arg == "--visitexpand") && i+1 < args.size()){
+				player.visitexpand = from_str<int>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
 				player.prooftime = from_str<float>(args[++i]);
