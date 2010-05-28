@@ -477,6 +477,7 @@ public:
 	}
 
 	Move mcts(double time, int maxruns, uint64_t memlimit);
+	int solve(double time, uint64_t memlimit);
 	vector<Move> get_pv();
 
 protected:
@@ -489,6 +490,8 @@ protected:
 	bool test_bridge_probe(const Board & board, const Move & move, const Move & test);
 	int rand_game(Board & board, RaveMoveList & movelist, Move move, int depth);
 	bool check_pattern(const Board & board, Move & move);
+
+	void solve_recurse(Board & board, Node * node, double rate, double solvetime, uint64_t memlimit, int depth);
 };
 
 #endif

@@ -473,4 +473,65 @@ makemove:
 	return won;
 }
 
+int Player::solve(double time, uint64_t memlimit){
+	visitexpand = 10;
+	mcts(time/10, 0, memlimit/10);
+	timeout = false;
+
+	Timer timer = Timer(time*0.9, bind(&Player::timedout, this));
+	int starttime = time_msec();
+
+	for(double solvetime = 1; !timeout && root.outcome == -1; solvetime *= 2){
+		fprintf(stderr, "Attempting to solve at %.2f s per node\n", solvetime);
+		for(double rate = 0.11; !timeout && root.outcome == -1 && rate <= 0.5; rate += 0.05){
+			fprintf(stderr, "Solving with rate: %.2f\n", rate);
+			solve_recurse(rootboard, &root, rate, solvetime, 9*memlimit/10, 0);
+		}
+	}
+
+	fprintf(stderr, "Finished solve_player in %d msec\n", time_msec() - starttime);
+}
+
+void Player::solve_recurse(Board & board, Node * node, double rate, double solvetime, uint64_t memlimit, int depth){
+	if(!node->children.empty() && node->exp.num() > 200){
+		Node * child = node->children.begin(),
+			 * childend = node->children.end();
+
+		for( ; node->outcome == -1 && child != childend; ++child){
+			if(child->outcome == -1){
+				Board next = board;
+				next.move(child->move);
+
+				solve_recurse(next, child, rate, solvetime, memlimit, depth+1);
+
+				//back up the outcome....
+				if(child->outcome >= 0){
+					Node * choice = choose_move(node, board.toplay());
+					if(choice->outcome >= 0){
+						node->outcome = choice->outcome;
+						node->bestmove = choice->move;
+					}
+				}
+			}
+		}
+	}else{ //only solve nodes that are or are near leaves
+		//make sure the child has at least 10 simulations, one extra per pass
+		do{
+			Board copy = board;
+			RaveMoveList movelist(rootboard.movesremain());
+			int won = rand_game(copy, movelist, node->move, depth);
+			node->exp += (won == 0 ? 0.5 : won == board.toplay());
+		}while(node->exp.num() < 50);
+
+		double avg = node->exp.avg();
+		if(node->outcome == -1 && ((avg < rate && rate < avg + 0.06) || (avg > 1 - rate && 1 - rate > avg - 0.06))){
+			solver.solve_dfpnsab(board, solvetime, memlimit);
+
+			if(solver.outcome >= 0){
+				node->outcome = solver.outcome;
+				node->bestmove = solver.bestmove;
+			}
+		}
+	}
+}
 

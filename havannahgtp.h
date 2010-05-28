@@ -71,6 +71,7 @@ public:
 		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,     this, _1), "Solve with basic proof number search");
 		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pnsab,   this, _1), "Solve with proof number search, with one ply of alpha-beta");
 		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab, this, _1), "Solve with proof number search, with a depth-first optimization");
+		newcallback("solve_player",    bind(&HavannahGTP::gtp_solve_player,  this, _1), "Solve by playing for a while, then solving the leaves in increasing difficulty");
 	}
 
 	GTPResponse gtp_print(vecstr args){
@@ -245,6 +246,22 @@ public:
 
 		return GTPResponse(true, solve_str(solve));
 	}
+
+	GTPResponse gtp_solve_player(vecstr args){
+		double time = 60;
+		int mem = mem_allowed;
+
+		if(args.size() >= 1)
+			time = from_str<double>(args[0]);
+
+		if(args.size() >= 2)
+			mem = from_str<int>(args[1]);
+
+		player.solve(time, mem);
+
+		return GTPResponse(true, solve_str(player.root.outcome) + " " + move_str(player.root.bestmove));
+	}
+
 
 	string solve_str(const Solver & solve){
 		string ret = "";
