@@ -21,7 +21,9 @@ void Solver::solve_dfpnsab(Board board, double time, uint64_t memlimit){
 	if(ret1 == 1){ //win
 		outcome = turn;
 	}else{
-		int ret2 = run_dfpnsab(board, turn, memlimit);
+		int ret2 = 0;
+		if(!timeout)
+			ret2 = run_dfpnsab(board, turn, memlimit);
 
 		if(ret2 == -1){
 			outcome = otherturn; //loss
