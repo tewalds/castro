@@ -1,4 +1,5 @@
 
+build a linked list of empty moves so the move iterator can skip filled moves
 
 if only one move doesn't lose, stop simulating and just make that move
 - this is a good idea with total time per game, but not per move
@@ -32,9 +33,6 @@ detect frames?
 prior knowledge
 - criticality
 - copy knowledge from proof tree
-- forced moves
-  - test for wins, then test for losses, essentially 1 ply negamax
-  - if only one move doesn't lose, give it real experience to make a "macro move" and keep playing this simulation
 - store knowledge as rave experience instead of real experience?
 
 rollout policy
@@ -43,7 +41,9 @@ rollout policy
 - local reply?
 - locality?
 - connections?
-- avoid loss?
+- avoid loss
+  - use null move to make this equal to force win
+  - use locality to stop checking moves that are near nothing
 
 Time control
 - quiecense search - if the highest winrate != most played, keep simulating until it is
