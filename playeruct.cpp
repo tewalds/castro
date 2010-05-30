@@ -448,6 +448,7 @@ int Player::rand_game(Board & board, RaveMoveList & movelist, Move move, int dep
 		if(instantwin){
 			for(Board::MoveIterator m = board.moveit(); !m.done(); ++m){
 				if(board.test_win(*m) > 0){
+//				if(board.test_local(*m) && (board.test_win(*m, board.toplay()) > 0 || board.test_win(*m, 3 - board.toplay()) > 0)){
 					move = *m;
 					goto makemove; //yes, evil...
 				}
