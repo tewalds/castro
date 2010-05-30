@@ -152,7 +152,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 				node->bestmove = child->move;
 				if(!minimaxtree && node != &root)
 					nodes -= node->dealloc();
-			}else if(ravefactor > min_rave){ //update the rave scores
+			}else if(ravefactor > min_rave && node->children.num() > 1){ //update the rave scores
 				update_rave(node, movelist, won, toplay);
 			}
 
