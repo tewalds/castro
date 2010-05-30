@@ -346,7 +346,7 @@ public:
 		return false;
 	}
 
-	bool move(const Move & pos, bool local = false){
+	bool move(const Move & pos, bool locality = false){
 		if(!valid_move(pos))
 			return false;
 
@@ -359,8 +359,8 @@ public:
 
 		set(pos, turn);
 
-		if(local){
-			for(int i = 0; i < 18; i++){
+		if(locality){
+			for(int i = 6; i < 18; i++){
 				MoveScore loc = neighbours[i] + pos;
 
 				if(onboard(loc))
@@ -368,14 +368,18 @@ public:
 			}
 		}
 
+		bool local = (cells[xy(pos)].local == 3);
 		bool alreadyjoined = false; //useful for finding rings
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 		
-			if(onboard(loc) && turn == get(loc)){
-				alreadyjoined |= join_groups(pos, loc);
-				i++; //skip the next one. If it is the same group,
-				     //it is already connected and forms a corner, which we can ignore
+			if(onboard(loc)){
+				cells[xy(loc)].local |= 3;
+				if(local && turn == get(loc)){
+					alreadyjoined |= join_groups(pos, loc);
+					i++; //skip the next one. If it is the same group,
+						 //it is already connected and forms a corner, which we can ignore
+				}
 			}
 		}
 
@@ -388,9 +392,17 @@ public:
 		return true;	
 	}
 
+	bool test_local(const Move & pos){
+		return (cells[xy(pos)].local == 3);
+	}
+
 	//test if making this move would win, but don't actually make the move
-	int test_win(const Move & pos){
-		char turn = toplay();
+	int test_win(const Move & pos, char turn = 0){
+		if(cells[xy(pos)].local != 3)
+			return -1;
+
+		if(turn == 0)
+			turn = toplay();
 
 		Cell testcell = cells[find_group(pos)];
 		int numgroups = 0;
