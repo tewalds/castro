@@ -186,46 +186,32 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 //create children
 	nodes += node->alloc(board.movesremain());
 
-	int unknown = 0;
+	int losses = 0;
 
 	Node * child = node->children.begin(),
-	     * end   = node->children.end();
+	     * end   = node->children.end(),
+	     * loss  = NULL;
 	Board::MoveIterator move = board.moveit();
 	for(; !move.done() && child != end; ++move, ++child){
 		*child = Node(*move);
 
 		if(minimax){
-			if(minimax == 1){
-				child->outcome = board.test_win(*move);
-			}else{
-				Board next = board;
-				next.move(*move);
+			child->outcome = board.test_win(*move);
 
-				int abval = solver.negamax(next, minimax-1, -2, 2);
-
-				switch(abval+2){
-					case 0: /* -2 */ child->outcome = toplay;     break;
-					case 1: /* -1 */ child->outcome = 0;          break;
-					case 2: /*  0 */ child->outcome = -1;         break;
-					case 3: /*  1 */ child->outcome = 0;          break;
-					case 4: /*  2 */ child->outcome = 3 - toplay; break;
-					default:
-						assert(abval >= -2 && abval <= 2);
-				}
+			if(minimax >= 2 && board.test_win(*move, 3 - board.toplay()) > 0){
+				losses++;
+				loss = child;
 			}
 
 			if(child->outcome == toplay){ //proven win from here, don't need children
 				node->outcome = child->outcome;
 				node->bestmove = *move;
-				unknown = 123456; //set to something big to skip the part below
+				losses = -1000000; //set to something very negative to skip the part below
 				if(node != &root){
 					nodes -= node->dealloc();
 					break;
 				}
 			}
-
-			if(child->outcome == -1)
-				unknown++;
 		}
 
 		add_knowledge(board, node, child);
@@ -233,14 +219,18 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	//both end conditions should happen in parallel, so either both happen or neither do
 	assert(move.done() == (child == end));
 
-	//Add experience to the one available move so the current simulation continues past this move
-	if(unknown == 1){
-		for(Node * child = node->children.begin(); child != node->children.end(); ++child){
-			if(child->outcome == -1){
-				child->exp.addwins(visitexpand);
-				break;
-			}
-		}
+	//Make a macro move, add experience to the move so the current simulation continues past this move
+	if(losses == 1){
+		Node temp = *loss;
+		nodes -= node->dealloc();
+		nodes += node->alloc(1);
+		temp.exp.addwins(visitexpand);
+		*(node->children.begin()) = temp;
+	}else if(losses >= 2){ //proven loss, but at least try to block one of them
+		node->outcome = 3 - toplay;
+		node->bestmove = loss->move;
+		if(node != &root)
+			nodes -= node->dealloc();
 	}
 
 	return walk_tree(board, node, movelist, depth);
