@@ -54,8 +54,9 @@ public:
 	class MoveIterator { //only returns valid moves...
 		const Board & board;
 		Move move;
+		int lineend;
 	public:
-		MoveIterator(const Board & b) : board(b), move(Move(M_SWAP)) {
+		MoveIterator(const Board & b) : board(b), move(Move(M_SWAP)), lineend(0) {
 			if(board.outcome != -1)
 				move = Move(0, board.size_d); //already done
 			else if(!board.valid_move(move)) //check if swap is valid
@@ -71,12 +72,13 @@ public:
 			do{
 				move.x++;
 
-				if(move.x >= board.lineend(move.y)){
+				if(move.x >= lineend){
 					move.y++;
 					if(move.y >= board.get_size_d())
 						break;
 
 					move.x = board.linestart(move.y);
+					lineend = board.lineend(move.y);
 				}
 			}while(!board.valid_move_fast(move));
 
