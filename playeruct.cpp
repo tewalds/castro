@@ -451,7 +451,7 @@ int Player::rand_game(Board & board, RaveMoveList & movelist, Move move, int dep
 	//default...
 		do{
 			move = order[i++];
-		}while(!board.valid_move(move));
+		}while(!board.valid_move_fast(move));
 
 makemove:
 		movelist.add(move, board.toplay());
