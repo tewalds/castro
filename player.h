@@ -423,7 +423,7 @@ public:
 		shortrave   = false;
 		keeptree    = true;
 		minimaxtree = false;
-		minimax     = 1;
+		minimax     = 2;
 		fpurgency   = 1;
 		visitexpand = 1;
 		prooftime   = 0;
