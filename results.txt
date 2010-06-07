@@ -1902,7 +1902,210 @@ Played 800 games, Total Time: 28951 s
 
 
 
+------------------------------------------------------------
 
+
+Size 5
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0.7'
+Win vs Loss Matrix:
+     1  2
+ 1:   167 : 167 wins, 231 losses, 2 ties
+ 2:231    : 231 wins, 167 losses, 2 ties
+Played 400 games, Total Time: 15665 s
+
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0.8'
+Win vs Loss Matrix:
+     1  2
+ 1:   131 : 131 wins, 269 losses, 0 ties
+ 2:269    : 269 wins, 131 losses, 0 ties
+Played 400 games, Total Time: 14971 s
+
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0.9'
+Win vs Loss Matrix:
+     1  2
+ 1:   182 : 182 wins, 217 losses, 1 ties
+ 2:217    : 217 wins, 182 losses, 1 ties
+Played 400 games, Total Time: 16016 s
+
+
+Size 8
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0.8'
+Win vs Loss Matrix:
+     1  2
+ 1:   217 : 217 wins, 183 losses, 0 ties
+ 2:183    : 183 wins, 217 losses, 0 ties
+Played 400 games, Total Time: 29569 s
+
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0.9'
+Win vs Loss Matrix:
+     1  2
+ 1:   190 : 190 wins, 210 losses, 0 ties
+ 2:210    : 210 wins, 190 losses, 0 ties
+Played 400 games, Total Time: 29732 s
+
+
+
+-------------------------------------------------
+
+Size 5
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0.8 -l 1'
+Win vs Loss Matrix:
+     1  2
+ 1:    33 : 33 wins, 167 losses, 0 ties
+ 2:167    : 167 wins, 33 losses, 0 ties
+Played 200 games, Total Time: 31227 s
+
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0.8 -y 1'
+Win vs Loss Matrix:
+     1  2
+ 1:    91 : 91 wins, 109 losses, 0 ties
+ 2:109    : 109 wins, 91 losses, 0 ties
+Played 200 games, Total Time: 32568 s
+
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0.8 -c 1'
+Win vs Loss Matrix:
+     1  2
+ 1:   149 : 149 wins, 50 losses, 1 ties
+ 2: 50    : 50 wins, 149 losses, 1 ties
+Played 200 games, Total Time: 32210 s
+
+
+Player 1: ./castro
+Player 2: ./castro -c 'player_params -u 0.8 -b 1'
+Win vs Loss Matrix:
+     1  2
+ 1:    97 : 97 wins, 103 losses, 0 ties
+ 2:103    : 103 wins, 97 losses, 0 ties
+Played 200 games, Total Time: 32329 s
+
+
+
+
+
+Player 1: ./castro -c 'player_params -u 0.8'
+Player 2: ./castro -c 'player_params -u 0.8 -l 1'
+Win vs Loss Matrix:
+     1  2
+ 1:   225 : 225 wins, 174 losses, 1 ties
+ 2:174    : 174 wins, 225 losses, 1 ties
+Played 400 games, Total Time: 30470 s
+
+
+Player 1: ./castro -c 'player_params -u 0.8'
+Player 2: ./castro -c 'player_params -u 0.8 -y 1'
+Win vs Loss Matrix:
+     1  2
+ 1:   251 : 251 wins, 147 losses, 2 ties
+ 2:147    : 147 wins, 251 losses, 2 ties
+Played 400 games, Total Time: 30113 s
+
+
+Player 1: ./castro -c 'player_params -u 0.8'
+Player 2: ./castro -c 'player_params -u 0.8 -c 1'
+Win vs Loss Matrix:
+     1  2
+ 1:   241 : 241 wins, 159 losses, 0 ties
+ 2:159    : 159 wins, 241 losses, 0 ties
+Played 400 games, Total Time: 29631 s
+
+
+Player 1: ./castro -c 'player_params -u 0.8'
+Player 2: ./castro -c 'player_params -u 0.8 -b 1'
+Win vs Loss Matrix:
+     1  2
+ 1:   237 : 237 wins, 162 losses, 1 ties
+ 2:162    : 162 wins, 237 losses, 1 ties
+Played 400 games, Total Time: 30422 s
+
+
+-------------------------------------------------------------
+
+
+
+
+Player 1: ./castro -c 'player_params -e 0 -f 500 -c 0 -p 1'
+Player 2: ./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 0'
+Player 3: ./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 1'
+Win vs Loss Matrix:
+     1   2   3
+ 1:    198 310 : 508 wins, 288 losses, 4 ties
+ 2:199      55 : 254 wins, 543 losses, 3 ties
+ 3: 89 345     : 434 wins, 365 losses, 1 ties
+Played 1200 games, Total Time: 23725 s
+
+
+
+-------------------------------------------------------------------
+
+./tournament.rb -r 75 -p 4 -s 5 -l games/rolloutpattern/5 \
+"./castro -c 'player_params -e 0.85 -f 0 -m 1 -c 0 -p 0'" \
+"./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 0'" \
+"./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 1'" \
+"./castro -c 'player_params -e 0 -f 500 -c 0 -p 0'" \
+"./castro -c 'player_params -e 0 -f 500 -c 0 -p 1'"
+
+
+Groove, size 5:
+Player 1: ./castro -c 'player_params -e 0.85 -f 0 -m 1 -c 0 -p 0'
+Player 2: ./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 0'
+Player 3: ./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 1'
+Player 4: ./castro -c 'player_params -e 0 -f 500 -c 0 -p 0'
+Player 5: ./castro -c 'player_params -e 0 -f 500 -c 0 -p 1'
+Win vs Loss Matrix:
+     1   2   3  4  5
+ 1:     65  84 15 24 : 188 wins, 412 losses, 0 ties
+ 2: 85      82 17 21 : 205 wins, 395 losses, 0 ties
+ 3: 66  68     23  4 : 161 wins, 439 losses, 0 ties
+ 4:135 133 127    54 : 449 wins, 151 losses, 0 ties
+ 5:126 129 146 96    : 497 wins, 103 losses, 0 ties
+Played 1500 games, Total Time: 53673 s
+
+
+Starscream, size 5:
+Player 1: ./castro -c 'player_params -e 0.85 -f 0 -m 1 -c 0 -p 0'
+Player 2: ./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 0'
+Player 3: ./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 1'
+Player 4: ./castro -c 'player_params -e 0 -f 500 -c 0 -p 0'
+Player 5: ./castro -c 'player_params -e 0 -f 500 -c 0 -p 1'
+Win vs Loss Matrix:
+     1   2   3   4  5
+ 1:     77  88  50 45 : 260 wins, 338 losses, 2 ties
+ 2: 71      67  60 26 : 224 wins, 374 losses, 2 ties
+ 3: 62  83      46  4 : 195 wins, 405 losses, 0 ties
+ 4:100  90 104     40 : 334 wins, 266 losses, 0 ties
+ 5:105 124 146 110    : 485 wins, 115 losses, 0 ties
+Played 1500 games, Total Time: 56247 s
+
+Muriel, size 4:
+Player 1: ./castro -c 'player_params -e 0.85 -f 0 -m 1 -c 0 -p 0'
+Player 2: ./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 0'
+Player 3: ./castro -c 'player_params -e 0.85 -f 0 -c 1 -p 1'
+Player 4: ./castro -c 'player_params -e 0 -f 500 -c 0 -p 0'
+Player 5: ./castro -c 'player_params -e 0 -f 500 -c 0 -p 1'
+Win vs Loss Matrix:
+     1   2   3   4  5
+ 1:    207  69  41 215 : 532 wins, 653 losses, 15 ties
+ 2: 89      44  74 156 : 363 wins, 818 losses, 19 ties
+ 3:231 256      27  61 : 575 wins, 623 losses, 2 ties
+ 4:251 211 273     137 : 872 wins, 304 losses, 24 ties
+ 5: 82 144 237 162     : 625 wins, 569 losses, 6 ties
+Played 3000 games, Total Time: 58401 s
 
 
 
