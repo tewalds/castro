@@ -488,8 +488,10 @@ protected:
 	Node * choose_move(const Node * node, int toplay) const;
 	void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
 	bool test_bridge_probe(const Board & board, const Move & move, const Move & test);
-	int rand_game(Board & board, RaveMoveList & movelist, Move move, int depth);
-	bool check_pattern(const Board & board, Move & move);
+
+	int rollout(Board & board, RaveMoveList & movelist, Move move, int depth);
+	Move rollout_choose_move(Board & board, const 	Move & prev);
+	Move rollout_pattern(const Board & board, const Move & move);
 
 	void solve_recurse(Board & board, Node * node, double rate, double solvetime, uint64_t memlimit, int depth);
 };

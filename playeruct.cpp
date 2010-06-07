@@ -169,7 +169,7 @@ int Player::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int d
 	if(won >= 0 || node->exp.num() < visitexpand || nodes >= maxnodes){
 	//do random game on this node, unless it's already the end
 		if(won == -1)
-			won = rand_game(board, movelist, node->move, depth);
+			won = rollout(board, movelist, node->move, depth);
 
 		treelen.add(depth);
 
@@ -302,8 +302,7 @@ void Player::add_knowledge(Board & board, Node * node, Node * child){
 		child->know.addwins(5);
 }
 
-
-//return a list of positions where the opponent is probing your virtual connections
+//test whether this move is a forced reply to the opponent probing your virtual connections
 bool Player::test_bridge_probe(const Board & board, const Move & move, const Move & test){
 	if(move.dist(test) != 1)
 		return false;
@@ -348,13 +347,82 @@ bool Player::test_bridge_probe(const Board & board, const Move & move, const Mov
 	return false;
 }
 
+///////////////////////////////////////////
+
+
+//play a random game starting from a board state, and return the results of who won
+int Player::rollout(Board & board, RaveMoveList & movelist, Move move, int depth){
+	int won;
+
+	Move order[board.movesremain()];
+
+	int i = 0;
+	for(Board::MoveIterator m = board.moveit(); !m.done(); ++m)
+		order[i++] = *m;
+
+	random_shuffle(order, order + i);
+
+	i = 0;
+	while((won = board.won()) < 0){
+		//do a complex choice
+		move = rollout_choose_move(board, move);
+
+		//or the simple random choice if complex found nothing
+		if(move == M_UNKNOWN){
+			do{
+				move = order[i++];
+			}while(!board.valid_move_fast(move));
+		}
+
+		movelist.add(move, board.toplay());
+		board.move(move);
+		depth++;
+	}
+
+	gamelen.add(depth);
+
+	return won;
+}
+
+Move Player::rollout_choose_move(Board & board, const Move & prev){
+	//look for instant wins
+	if(instantwin == 1){
+		for(Board::MoveIterator m = board.moveit(); !m.done(); ++m)
+			if(board.test_win(*m) > 0)
+				return *m;
+	}
+
+	//look for instant wins and forced replies
+	if(instantwin == 2){
+		Move loss = M_UNKNOWN;
+		for(Board::MoveIterator m = board.moveit(); !m.done(); ++m){
+			if(board.test_local(*m)){
+				if(board.test_win(*m, board.toplay()) > 0) //win
+					return *m;
+				if(board.test_win(*m, 3 - board.toplay()) > 0) //lose
+					loss = *m;
+			}
+		}
+		if(loss != M_UNKNOWN)
+			return loss;
+	}
+
+	//force a bridge reply
+	if(rolloutpattern){
+		Move move = rollout_pattern(board, prev);
+		if(move != M_UNKNOWN)
+			return move;
+	}
+
+	return M_UNKNOWN;
+}
 
 //look for good forced moves. In this case I only look for keeping a virtual connection active
 //so looking from the last played position's perspective, which is a move by the opponent
 //if you see a pattern of mine, empty, mine in the circle around the last move, their move
 //would break the virtual connection, so should be played
 //a virtual connection to a wall is also important
-bool Player::check_pattern(const Board & board, Move & move){
+Move Player::rollout_pattern(const Board & board, const Move & move){
 	Move ret;
 	int state = 0;
 	int a = rand() % 6;
@@ -367,32 +435,6 @@ bool Player::check_pattern(const Board & board, Move & move){
 		if(on)
 			v = board.get(cur);
 
-/*
-	//state machine that progresses when it see the pattern, but only taking pieces into account
-		if(state == 0){
-			if(on && v == piece)
-				state = 1;
-			//else state = 0;
-		}else if(state == 1){
-			if(on){
-				if(v == 0){
-					state = 2;
-					ret = cur;
-				}else if(v != piece)
-					state = 0;
-				//else (v==piece) => state = 1;
-			}else
-				state = 0;
-		}else{ // state == 2
-			if(on && v == piece){
-				move = ret;
-				return true;
-			}else{
-				state = 0;
-			}
-		}
-
-/*/
 	//state machine that progresses when it see the pattern, but counting borders as part of the pattern
 		if(state == 0){
 			if(!on || v == piece)
@@ -410,59 +452,19 @@ bool Player::check_pattern(const Board & board, Move & move){
 			//else state = 1;
 		}else{ // state == 2
 			if(!on || v == piece){
-				move = ret;
-				return true;
+				return ret;
 			}else{
 				state = 0;
 			}
 		}
-//*/
 	}
-	return false;
+	return M_UNKNOWN;
 }
 
-//play a random game starting from a board state, and return the results of who won	
-int Player::rand_game(Board & board, RaveMoveList & movelist, Move move, int depth){
-	int won;
 
-	Move order[board.movesremain()];
 
-	int i = 0;
-	for(Board::MoveIterator m = board.moveit(); !m.done(); ++m)
-		order[i++] = *m;
+//////////////////////////////////////////////////////
 
-	random_shuffle(order, order + i);
-
-	i = 0;
-	while((won = board.won()) < 0){
-		if(instantwin){
-			for(Board::MoveIterator m = board.moveit(); !m.done(); ++m){
-				if(board.test_win(*m) > 0){
-//				if(board.test_local(*m) && (board.test_win(*m, board.toplay()) > 0 || board.test_win(*m, 3 - board.toplay()) > 0)){
-					move = *m;
-					goto makemove; //yes, evil...
-				}
-			}
-		}
-
-		if(rolloutpattern && check_pattern(board, move))
-			goto makemove;
-
-	//default...
-		do{
-			move = order[i++];
-		}while(!board.valid_move_fast(move));
-
-makemove:
-		movelist.add(move, board.toplay());
-		board.move(move);
-		depth++;
-	}
-
-	gamelen.add(depth);
-
-	return won;
-}
 
 int Player::solve(double time, uint64_t memlimit){
 	visitexpand = 10;
@@ -510,7 +512,7 @@ void Player::solve_recurse(Board & board, Node * node, double rate, double solve
 		do{
 			Board copy = board;
 			RaveMoveList movelist(rootboard.movesremain());
-			int won = rand_game(copy, movelist, node->move, depth);
+			int won = rollout(copy, movelist, node->move, depth);
 			node->exp += (won == 0 ? 0.5 : won == board.toplay());
 		}while(node->exp.num() < 50);
 
