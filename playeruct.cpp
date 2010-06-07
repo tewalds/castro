@@ -436,7 +436,7 @@ Move Player::rollout_choose_move(Board & board, const Move & prev){
 	}
 
 	//reuse the last good reply
-	if(lastgoodreply){
+	if(lastgoodreply && prev != M_SWAP){
 		Move move = goodreply[board.toplay()-1][board.xy(prev)];
 		if(move != M_UNKNOWN && board.valid_move_fast(move))
 			return move;
