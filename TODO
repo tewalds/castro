@@ -1,4 +1,10 @@
 
+
+do 2 ply search at node initialization if certain conditions are met
+- 1 corner and group size >= board size - 1
+- 2 edges and group size >= board size + 1
+- ring  if group size >= 5
+
 build a linked list of empty moves so the move iterator can skip filled moves
 
 if only one move doesn't lose, stop simulating and just make that move
@@ -34,6 +40,7 @@ prior knowledge
 - criticality
 - copy knowledge from proof tree
 - store knowledge as rave experience instead of real experience?
+- size of group
 
 rollout policy
 - use weighted random choices instead of uniform random:
@@ -44,6 +51,12 @@ rollout policy
 - avoid loss
   - use null move to make this equal to force win
   - use locality to stop checking moves that are near nothing
+- last-good-reply
+  - keep list of moves and their winning replies
+  - make the reply if it is valid
+  - update the list with replies made this rollout
+  - likely needs to the Move structure to allow indexing into an array?
+
 
 Time control
 - quiecense search - if the highest winrate != most played, keep simulating until it is
