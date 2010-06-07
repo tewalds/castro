@@ -56,10 +56,10 @@ public:
 		Move move;
 		int lineend;
 	public:
-		MoveIterator(const Board & b) : board(b), move(Move(M_SWAP)), lineend(0) {
+		MoveIterator(const Board & b, bool allowswap) : board(b), move(Move(M_SWAP)), lineend(0) {
 			if(board.outcome != -1)
 				move = Move(0, board.size_d); //already done
-			else if(!board.valid_move(move)) //check if swap is valid
+			else if(!allowswap || !board.valid_move(move)) //check if swap is valid
 				++(*this); //find the first valid move
 		}
 
@@ -255,8 +255,8 @@ public:
 		return toPlay;
 	}
 
-	MoveIterator moveit() const {
-		return MoveIterator(*this);
+	MoveIterator moveit(bool allowswap = true) const {
+		return MoveIterator(*this, allowswap);
 	}
 
 	void set(const Move & m, int v){
