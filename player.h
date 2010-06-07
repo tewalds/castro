@@ -392,12 +392,14 @@ public:
 	bool  bridge;     //boost replying to a probe at a bridge
 //rollout
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
-	bool  instantwin; //look for instant wins in rollouts
-
+	int   instantwin; //look for instant wins in rollouts
+	bool  lastgoodreply; //use the last-good-reply rollout heuristic
 
 	Solver solver;
 	Node root;
 	Board rootboard;
+
+	Move goodreply[2][361]; //361 is big enough for size 10 (ie 19x19), but no bigger...
 
 	int runs;
 	DepthStats treelen, gamelen;
@@ -433,7 +435,8 @@ public:
 		connect     = (s == 4);
 		bridge      = false;
 		rolloutpattern = true;
-		instantwin  = false;
+		lastgoodreply = false;
+		instantwin  = 0;
 	}
 	~Player(){ root.dealloc(); }
 	void timedout(){ timeout = true; }
@@ -445,6 +448,10 @@ public:
 
 		if(defaults)
 			set_default_params();
+
+		for(int p = 0; p < 2; p++)
+			for(int i = 0; i < 361; i++)
+				goodreply[p][i] = M_UNKNOWN;
 	}
 	void move(const Move & m){
 		rootboard.move(m, true);

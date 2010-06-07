@@ -433,8 +433,9 @@ public:
 				"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
 				"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
 				"Rollout policy:\n" +
-				"  -p --pattern     Use the virtual connection pattern in roll outs   [" + to_str(player.rolloutpattern) + "]\n" +
-				"  -w --instantwin  Look for instant wins in roll outs                [" + to_str(player.instantwin) + "]\n"
+				"  -p --pattern     Maintain the virtual connection pattern           [" + to_str(player.rolloutpattern) + "]\n" +
+				"  -g --goodreply   Reuse the last good reply to a given move         [" + to_str(player.lastgoodreply) + "]\n" +
+				"  -w --instantwin  Look for instant wins (1) and forced replies (2)  [" + to_str(player.instantwin) + "]\n"
 				);
 
 		for(unsigned int i = 0; i < args.size(); i++) {
@@ -496,8 +497,11 @@ public:
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);
 				player.defaults = false;
+			}else if((arg == "-g" || arg == "--goodreply") && i+1 < args.size()){
+				player.lastgoodreply = from_str<bool>(args[++i]);
+				player.defaults = false;
 			}else if((arg == "-w" || arg == "--instantwin") && i+1 < args.size()){
-				player.instantwin = from_str<bool>(args[++i]);
+				player.instantwin = from_str<int>(args[++i]);
 				player.defaults = false;
 			}else{
 				return GTPResponse(false, "Missing or unknown parameter");

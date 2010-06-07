@@ -357,7 +357,7 @@ int Player::rollout(Board & board, RaveMoveList & movelist, Move move, int depth
 	Move order[board.movesremain()];
 
 	int i = 0;
-	for(Board::MoveIterator m = board.moveit(); !m.done(); ++m)
+	for(Board::MoveIterator m = board.moveit(false); !m.done(); ++m)
 		order[i++] = *m;
 
 	random_shuffle(order, order + i);
@@ -380,6 +380,27 @@ int Player::rollout(Board & board, RaveMoveList & movelist, Move move, int depth
 	}
 
 	gamelen.add(depth);
+
+	//update the last good reply table
+	if(lastgoodreply && won > 0){
+		RaveMoveList::iterator rave = movelist.begin(), raveend = movelist.end();
+
+		if(rave->player == won)
+			++rave;
+
+		while(rave != raveend){
+//			assert(rave->player == 3 - won);
+
+			int m = board.xy(*rave);
+			++rave;
+
+//			assert(rave->player == won);
+
+			if(m >= 0 && *rave != M_SWAP) //don't store a swap move
+				goodreply[won-1][m] = *rave;
+			++rave;
+		}
+	}
 
 	return won;
 }
@@ -411,6 +432,13 @@ Move Player::rollout_choose_move(Board & board, const Move & prev){
 	if(rolloutpattern){
 		Move move = rollout_pattern(board, prev);
 		if(move != M_UNKNOWN)
+			return move;
+	}
+
+	//reuse the last good reply
+	if(lastgoodreply){
+		Move move = goodreply[board.toplay()-1][board.xy(prev)];
+		if(move != M_UNKNOWN && board.valid_move_fast(move))
 			return move;
 	}
 
