@@ -51,11 +51,6 @@ rollout policy
 - avoid loss
   - use null move to make this equal to force win
   - use locality to stop checking moves that are near nothing
-- last-good-reply
-  - keep list of moves and their winning replies
-  - make the reply if it is valid
-  - update the list with replies made this rollout
-  - likely needs to the Move structure to allow indexing into an array?
 
 
 Time control
