@@ -2112,9 +2112,58 @@ Played 3000 games, Total Time: 58401 s
 
 
 
+./tournament.rb -r 200 -p 4 -s 4 \
+"./castro -c 'player_params -g 0'" \
+"./castro -c 'player_params -g 1 -p 0'" \
+"./castro -c 'player_params -g 1 -p 1'" \
 
 
+muriel size 4:
+Player 1: ./castro -c 'player_params -g 0'
+Player 2: ./castro -c 'player_params -g 1 -p 0'
+Player 3: ./castro -c 'player_params -g 1 -p 1'
+Win vs Loss Matrix:
+     1   2   3
+ 1:    225 183 : 408 wins, 380 losses, 12 ties
+ 2:171      78 : 249 wins, 546 losses, 5 ties
+ 3:209 321     : 530 wins, 261 losses, 9 ties
+Played 1200 games, Total Time: 43426 s
 
+
+muriel size 5
+Player 1: ./castro -c 'player_params -g 0'
+Player 2: ./castro -c 'player_params -g 1 -p 0'
+Player 3: ./castro -c 'player_params -g 1 -p 1'
+Win vs Loss Matrix:
+     1  2  3
+ 1:    116 275 : 391 wins, 408 losses, 1 ties
+ 2:284     203 : 487 wins, 313 losses, 0 ties
+ 3:124 197     : 321 wins, 478 losses, 1 ties
+Played 1200 games, Total Time: 45813 s
+
+
+groove size 6:
+Player 1: ./castro -c 'player_params -g 0'
+Player 2: ./castro -c 'player_params -g 1 -p 0'
+Player 3: ./castro -c 'player_params -g 1 -p 1'
+Win vs Loss Matrix:
+     1   2   3
+ 1:    267 294 : 561 wins, 239 losses, 0 ties
+ 2:133     242 : 375 wins, 425 losses, 0 ties
+ 3:106 158     : 264 wins, 536 losses, 0 ties
+Played 1200 games, Total Time: 41533 s
+
+
+starscream size 8:
+Player 1: ./castro -c 'player_params -g 0'
+Player 2: ./castro -c 'player_params -g 1 -p 0'
+Player 3: ./castro -c 'player_params -g 1 -p 1'
+Win vs Loss Matrix:
+     1   2   3
+ 1:    269 266 : 535 wins, 265 losses, 0 ties
+ 2:131     140 : 271 wins, 528 losses, 1 ties
+ 3:134 259     : 393 wins, 406 losses, 1 ties
+Played 1200 games, Total Time: 45927 s
 
 
 
