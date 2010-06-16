@@ -143,12 +143,6 @@ def play_game(n, p1, p2)
 	end
 end
 
-def timer
-	start = Time.now
-	yield
-	return Time.now - start
-end
-
 class Array
 	#map_fork runs the block once for each value, each in it's own process.
 	# It takes a maximum concurrency, or nil for all at the same time
