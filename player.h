@@ -417,14 +417,14 @@ public:
 	void set_default_params(){
 		int s = rootboard.get_size();
 		defaults    = true;
-		explore     = (s == 4 ? 0.85 : 0);
+		explore     = (s == 4 ? 0.9 : 0);
 		ravefactor  = (s == 4 ? 0 : 500);
 		ravescale   = false;
 		opmoves     = false;
 		skiprave    = 0;
 		shortrave   = false;
 		keeptree    = true;
-		minimaxtree = false;
+		minimaxtree = true;
 		minimax     = 2;
 		fpurgency   = 1;
 		visitexpand = 1;
