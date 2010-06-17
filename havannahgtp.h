@@ -433,6 +433,7 @@ public:
 				"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
 				"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
 				"Rollout policy:\n" +
+				"  -h --weightrand  Weight the moves by the rave values at the root   [" + to_str(player.weightedrandom) + "]\n" +
 				"  -p --pattern     Maintain the virtual connection pattern           [" + to_str(player.rolloutpattern) + "]\n" +
 				"  -g --goodreply   Reuse the last good reply to a given move         [" + to_str(player.lastgoodreply) + "]\n" +
 				"  -w --instantwin  Look for instant wins (1) and forced replies (2)  [" + to_str(player.instantwin) + "]\n"
@@ -493,6 +494,9 @@ public:
 				player.defaults = false;
 			}else if((arg == "-b" || arg == "--bridge") && i+1 < args.size()){
 				player.bridge = from_str<bool>(args[++i]);
+				player.defaults = false;
+			}else if((arg == "-h" || arg == "--weightrand") && i+1 < args.size()){
+				player.weightedrandom = from_str<bool>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);

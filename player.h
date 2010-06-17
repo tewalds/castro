@@ -391,9 +391,10 @@ public:
 	bool  connect;    //boost for having connections to edges and corners
 	bool  bridge;     //boost replying to a probe at a bridge
 //rollout
+	bool  weightedrandom; //use a weighted shuffle for move ordering, based on the rave results
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
-	int   instantwin; //look for instant wins in rollouts
-	bool  lastgoodreply; //use the last-good-reply rollout heuristic
+	int   instantwin;     //look for instant wins in rollouts
+	bool  lastgoodreply;  //use the last-good-reply rollout heuristic
 
 	Solver solver;
 	Node root;
@@ -434,6 +435,7 @@ public:
 		locality    = false;
 		connect     = (s == 4);
 		bridge      = false;
+		weightedrandom = false;
 		rolloutpattern = true;
 		lastgoodreply = false;
 		instantwin  = 0;

@@ -5,6 +5,8 @@
 #include <string>
 #include "string.h"
 
+#include "weightedrandtree.h"
+
 Move Player::mcts(double time, int maxruns, uint64_t memlimit){
 	maxnodes = memlimit*1024*1024/sizeof(Node);
 	time_used = 0;
@@ -47,6 +49,7 @@ Move Player::mcts(double time, int maxruns, uint64_t memlimit){
 	root.outcome = -1;
 	runs = 0;
 	RaveMoveList movelist(rootboard.movesremain());
+	root.exp.addwins(visitexpand);
 	do{
 		root.exp += 0;
 		runs++;
@@ -354,15 +357,25 @@ bool Player::test_bridge_probe(const Board & board, const Move & move, const Mov
 int Player::rollout(Board & board, RaveMoveList & movelist, Move move, int depth){
 	int won;
 
-	Move order[board.movesremain()];
+	//use the root's children as a move list...
+	int num = root.children.num();
+	bool fswap = (root.children[0].move == M_SWAP);
 
-	int i = 0;
-	for(Board::MoveIterator m = board.moveit(false); !m.done(); ++m)
-		order[i++] = *m;
+	WeightedRandTree wtree;
+	int order[num];
+	int * rmove = order + fswap;
 
-	random_shuffle(order, order + i);
+	if(weightedrandom){
+		wtree.resize(num);
+		for(int i = fswap; i < num; i++)
+			wtree.set_weight_fast(i, max(0.1f, root.children[i].rave.avg()));
+		wtree.rebuild_tree();
+	}else{
+		for(int i = 0; i < num; i++)
+			order[i] = i;
+		random_shuffle(rmove, order + num);
+	}
 
-	i = 0;
 	while((won = board.won()) < 0){
 		//do a complex choice
 		move = rollout_choose_move(board, move);
@@ -370,7 +383,14 @@ int Player::rollout(Board & board, RaveMoveList & movelist, Move move, int depth
 		//or the simple random choice if complex found nothing
 		if(move == M_UNKNOWN){
 			do{
-				move = order[i++];
+				if(weightedrandom){
+					int j = wtree.choose();
+					wtree.set_weight(j, 0);
+					move = root.children[j].move;
+				}else{
+					move = root.children[*rmove].move;
+					rmove++;
+				}
 			}while(!board.valid_move_fast(move));
 		}
 
