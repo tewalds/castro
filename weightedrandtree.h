@@ -74,16 +74,18 @@ public:
 			return;
 		
 		weights[i] = w;
-		i /= 2;
 
-		while((i /= 2) >= 1)
+		while(i /= 2)
 			weights[i] = weights[i*2] + weights[i*2 + 1];
 	}
 
 	unsigned int choose() const {
 		float r;
 		unsigned int i;
+		int a = 0;
 		do{
+			assert(++a < 100);
+
 			r = unitrand() * weights[1];
 			i = 2;
 			while(i < size){
