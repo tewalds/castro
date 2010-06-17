@@ -73,11 +73,11 @@ public:
 		if(weights[i] == w)
 			return;
 		
-		float diff = w - weights[i];
+		weights[i] = w;
+		i /= 2;
 
-		do{
-			weights[i] += diff;
-		}while((i /= 2) >= 1);
+		while((i /= 2) >= 1)
+			weights[i] = weights[i*2] + weights[i*2 + 1];
 	}
 
 	unsigned int choose() const {
@@ -96,7 +96,7 @@ public:
 		
 			if(r > weights[i])
 				i++;
-		}while(weights[i] == 0);
+		}while(weights[i] <= 0.0001f);
 
 		return i - size;
 	}
