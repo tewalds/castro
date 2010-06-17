@@ -357,23 +357,50 @@ bool Player::test_bridge_probe(const Board & board, const Move & move, const Mov
 int Player::rollout(Board & board, RaveMoveList & movelist, Move move, int depth){
 	int won;
 
-	//use the root's children as a move list...
-	int num = root.children.num();
-	bool fswap = (root.children[0].move == M_SWAP);
+	int num = board.movesremain();
+	Move moves[num];
+
+	int i = 0;
+	for(Board::MoveIterator m = board.moveit(false); !m.done(); ++m)
+		moves[i++] = *m;
+
+	bool wrand = (weightedrandom && ravefactor > min_rave && root.children.num() > 1);
 
 	WeightedRandTree wtree;
 	int order[num];
-	int * rmove = order + fswap;
+	int * rmove = order;
 
-	if(weightedrandom){
+	if(wrand){
 		wtree.resize(num);
-		for(int i = fswap; i < num; i++)
-			wtree.set_weight_fast(i, max(0.1f, root.children[i].rave.avg()));
+
+		Move * m = moves,
+		     * mend = moves + num;
+		Node * child = root.children.begin(),
+		     * childend = root.children.end();
+
+		while(m != mend && child != childend){
+			if(*m == child->move){
+				wtree.set_weight_fast(m - moves, max(0.1f, child->rave.avg()));
+				m++;
+				child++;
+			}else if(*m > child->move){
+				child++;
+			}else{ //(m < child->move)
+				wtree.set_weight_fast(m - moves, 0.1f);
+				m++;
+			}
+		}
+
+		while(m != mend){
+			wtree.set_weight_fast(m - moves, 0.1f);
+			m++;
+		}
+
 		wtree.rebuild_tree();
 	}else{
 		for(int i = 0; i < num; i++)
 			order[i] = i;
-		random_shuffle(rmove, order + num);
+		random_shuffle(order, order + num);
 	}
 
 	while((won = board.won()) < 0){
@@ -383,12 +410,12 @@ int Player::rollout(Board & board, RaveMoveList & movelist, Move move, int depth
 		//or the simple random choice if complex found nothing
 		if(move == M_UNKNOWN){
 			do{
-				if(weightedrandom){
+				if(wrand){
 					int j = wtree.choose();
 					wtree.set_weight(j, 0);
-					move = root.children[j].move;
+					move = moves[j];
 				}else{
-					move = root.children[*rmove].move;
+					move = moves[*rmove];
 					rmove++;
 				}
 			}while(!board.valid_move_fast(move));
