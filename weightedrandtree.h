@@ -37,6 +37,7 @@ public:
 		if(weights)
 			delete[] weights;
 
+		if(s < 2) s = 2;
 		s = roundup(s);
 
 		size = s;
