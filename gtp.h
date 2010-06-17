@@ -52,7 +52,7 @@ class GTPclient {
 	FILE * in, * out, * logfile;
 	bool servermode;
 	vector<GTPCallback> callbacks;
-	int longest_cmd;
+	unsigned int longest_cmd;
 
 public:
 
