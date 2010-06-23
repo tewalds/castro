@@ -96,12 +96,12 @@ public:
 			Node *   _children;
 		public:
 			typedef Node * iterator;
-			Children() : _num(0), _children(NULL) { }
-			Children(int n) { alloc(n); }
-			~Children() { assert(_num == 0 && _children == NULL); }
+			Children()      : _num(0), _children(NULL) { }
+			Children(int n) : _num(0), _children(NULL) { alloc(n); }
+			~Children() { assert_empty(); }
 
-			void assert_consistent() const { assert((_num == 0) == (_children == NULL)); };
-			void assert_empty()      const { assert(empty()); }
+			void assert_consistent() const { assert((_num == 0) == (_children == NULL)); }
+			void assert_empty()      const { assert((_num == 0) && (_children == NULL)); }
 
 			unsigned int alloc(unsigned int n){
 				assert(_num == 0);
