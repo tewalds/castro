@@ -289,20 +289,20 @@ void Player::update_rave(const Node * node, const RaveMoveList & movelist, int w
 }
 
 void Player::add_knowledge(Board & board, Node * node, Node * child){
-	if(localreply){ //give exp boost for moves near the previous move
+	if(localreply){ //boost for moves near the previous move
 		int dist = node->move.dist(child->move);
 		if(dist < 4)
-			child->know.addwins(4 - dist);
+			child->know += 4 - dist;
 	}
 
-	if(locality) //give exp boost for moves near previous stones
-		child->know.addwins(board.local(child->move));
+	if(locality) //boost for moves near previous stones
+		child->know += board.local(child->move);
 
 	if(connect) //boost for moves that connect to edges/corners
-		child->know.addwins(board.test_connectivity(child->move));
+		child->know += board.test_connectivity(child->move);
 
-	if(bridge && test_bridge_probe(board, node->move, child->move))
-		child->know.addwins(5);
+	if(bridge && test_bridge_probe(board, node->move, child->move)) //boost for maintaining a virtual connection
+		child->know += 5;
 }
 
 //test whether this move is a forced reply to the opponent probing your virtual connections

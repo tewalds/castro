@@ -94,7 +94,7 @@ public:
 
 	struct Node {
 		class Children {
-			uint16_t _num;
+			uint32_t _num;
 			Node *   _children;
 		public:
 			typedef Node * iterator;
@@ -161,15 +161,16 @@ public:
 	public:
 		ExpPair rave;
 		ExpPair exp;
-		ExpPair know;
+		int16_t know;
+		int16_t outcome;
 		Move    move;
 		Move    bestmove; //if outcome is set, then bestmove is the way to get there
-		int16_t outcome;
 		Children children;
+		//seems to need padding to multiples of 8 bytes or it segfaults?
 		//don't forget to update the copy constructor/operator
 
-		Node()                            :          outcome(-1) { }
-		Node(const Move & m, char o = -1) : move(m), outcome(o)  { }
+		Node()                            : know(0), outcome(-1)          { }
+		Node(const Move & m, char o = -1) : know(0), outcome(o), move(m)  { }
 		Node(const Node & n) { *this = n; }
 		Node & operator = (const Node & n){
 			if(this != & n){ //don't copy to self
@@ -270,8 +271,8 @@ public:
 				if(exp.num())  val += (1-alpha)*exp.avg();
 			}
 
-			if(know.sum() > 0)
-				val += knowfactor * know.sum() / sqrt((float)(exp.num() + 1));
+			if(know > 0)
+				val += knowfactor * know / sqrt((float)(exp.num() + 1));
 
 			return val;
 		}
