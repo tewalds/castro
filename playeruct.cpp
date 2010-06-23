@@ -256,7 +256,7 @@ Player::Node * Player::choose_move(const Node * node, int toplay) const {
 
 			val = (child->outcome == 0 ? -1 : -2); //-1 for tie so any unknown is better, -2 for loss so it's even worse
 		}else{
-			val = child->value(raveval, fpurgency) + explore*sqrt(logvisits/(child->exp.num() + 1));
+			val = child->value(raveval, knowfactor, fpurgency) + explore*sqrt(logvisits/(child->exp.num() + 1));
 		}
 
 		if(maxval < val){

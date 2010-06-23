@@ -252,25 +252,26 @@ public:
 
 			return num;
 		}
-
 //*
 		//new way, more standard way of changing over from rave scores to real scores
-		float value(float ravefactor, float fpurgency){
-			ExpPair efexp = exp + know;
+		float value(float ravefactor, float knowfactor, float fpurgency){
+			float val = fpurgency;
 
-			if(ravefactor <= min_rave)
-				return (efexp.num() == 0 ? fpurgency : efexp.avg());
+			if(ravefactor <= min_rave){
+				if(exp.num() > 0)
+					val = exp.avg();
+			}else if(rave.num() || exp.num()){
+				float alpha = ravefactor/(ravefactor + exp.num());
+//				float alpha = sqrt(ravefactor/(ravefactor + 3*exp.num()));
+//				float alpha = (float)rave.num()/((float)exp.num() + (float)rave.num() + 4.0*exp.num()*rave.num()*ravefactor);
 
-			if(rave.num() == 0 && efexp.num() == 0)
-				return fpurgency;
+				val = 0;
+				if(rave.num()) val += alpha*rave.avg();
+				if(exp.num())  val += (1-alpha)*exp.avg();
+			}
 
-			float alpha = ravefactor/(ravefactor + efexp.num());
-//			float alpha = sqrt(ravefactor/(ravefactor + 3*exp.num()));
-//			float alpha = (float)rave.num()/((float)exp.num() + (float)rave.num() + 4.0*exp.num()*rave.num()*ravefactor);
-
-			float val = 0;
-			if(rave.num()) val += alpha*rave.avg();
-			if(efexp.num())val += (1-alpha)*efexp.avg();
+			if(know.sum() > 0)
+				val += knowfactor * know.sum() / sqrt((float)(exp.num() + 1));
 
 			return val;
 		}
@@ -377,6 +378,7 @@ public:
 //tree traversal
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
+	float knowfactor; //weight to give to knowledge values
 	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1
 	bool  opmoves;    //take the opponents rave updates too, a good move for my opponent is a good move for me.
 	int   skiprave;   //how often to skip rave, skip once in this many checks
@@ -422,6 +424,7 @@ public:
 		defaults    = true;
 		explore     = (s == 4 ? 0.9 : 0);
 		ravefactor  = (s == 4 ? 0 : 500);
+		knowfactor  = 0.1;
 		ravescale   = false;
 		opmoves     = false;
 		skiprave    = 0;
