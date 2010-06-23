@@ -13,6 +13,8 @@
 #include "depthstats.h"
 #include "solver.h"
 
+typedef unsigned int uint;
+
 class Player {
 public:
 //*
@@ -383,7 +385,7 @@ public:
 	bool  minimaxtree;//keep the solved part of the tree
 	int   minimax;    //solve the minimax tree within the uct tree
 	float fpurgency;  //what value to return for a move that hasn't been played yet
-	int   visitexpand;//number of visits before expanding a node
+	uint  visitexpand;//number of visits before expanding a node
 //knowledge
 	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
 	bool  localreply; //boost for a local reply, ie a move near the previous move
@@ -486,7 +488,7 @@ public:
 	}
 
 	Move mcts(double time, int maxruns, uint64_t memlimit);
-	int solve(double time, uint64_t memlimit);
+	void solve(double time, uint64_t memlimit);
 	vector<Move> get_pv();
 
 protected:

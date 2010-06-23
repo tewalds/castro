@@ -475,7 +475,7 @@ public:
 				player.fpurgency = from_str<float>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-x" || arg == "--visitexpand") && i+1 < args.size()){
-				player.visitexpand = from_str<int>(args[++i]);
+				player.visitexpand = from_str<uint>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
 				player.prooftime = from_str<float>(args[++i]);

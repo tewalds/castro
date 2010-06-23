@@ -541,7 +541,7 @@ Move Player::rollout_pattern(const Board & board, const Move & move){
 //////////////////////////////////////////////////////
 
 
-int Player::solve(double time, uint64_t memlimit){
+void Player::solve(double time, uint64_t memlimit){
 	visitexpand = 10;
 	mcts(time/10, 0, memlimit/10);
 	timeout = false;
