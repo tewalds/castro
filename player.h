@@ -94,7 +94,7 @@ public:
 
 	struct Node {
 		class Children {
-			uint32_t _num;
+			uint32_t _num; //can be smaller, but will be padded anyway.
 			Node *   _children;
 		public:
 			typedef Node * iterator;
@@ -423,9 +423,9 @@ public:
 	void set_default_params(){
 		int s = rootboard.get_size();
 		defaults    = true;
-		explore     = (s == 4 ? 0.9 : 0);
-		ravefactor  = (s == 4 ? 0 : 500);
-		knowfactor  = 0.1;
+		explore     = 0;
+		ravefactor  = 1000;
+		knowfactor  = 0.02;
 		ravescale   = false;
 		opmoves     = false;
 		skiprave    = 0;
@@ -439,8 +439,8 @@ public:
 		proofscore  = 0;
 		localreply  = false;
 		locality    = false;
-		connect     = (s == 4);
-		bridge      = false;
+		connect     = false;
+		bridge      = true;
 		weightedrandom = false;
 		rolloutpattern = true;
 		lastgoodreply = false;
