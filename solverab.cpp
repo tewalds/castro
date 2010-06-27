@@ -58,13 +58,16 @@ int Solver::negamax(Board & board, const int depth, int alpha, int beta){
 	if(depth <= 0 || timeout)
 		return 0;
 
-	int value;
+	int value, losses = 0;
 	static const int lookup[4] = {0, 1, 2, 2};
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 		nodes_seen++;
 
-		if(depth == 1){
+		if(depth <= 2){
 			value = lookup[board.test_win(*move)+1];
+
+			if(board.test_win(*move, 3 - board.toplay()) > 0)
+				losses++;
 		}else{
 			Board next = board;
 			next.move(*move);
@@ -78,6 +81,9 @@ int Solver::negamax(Board & board, const int depth, int alpha, int beta){
 		if(alpha >= beta)
 			return beta;
 	}
+	if(losses >= 2)
+		return -2;
+
 	return alpha;
 }
 
