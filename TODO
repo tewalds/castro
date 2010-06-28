@@ -1,18 +1,15 @@
 
 
+detect dead areas, areas where your opponent has limited you to one corner or two sides and no rings
+- negative knowledge?
+- really dead (completely enclosed) vs almost/temporarily dead (enclosed with VCs)?
+
 do 2 ply search at node initialization if certain conditions are met
 - 1 corner and group size >= board size - 1
 - 2 edges and group size >= board size + 1
 - ring  if group size >= 5
 
 build a linked list of empty moves so the move iterator can skip filled moves
-
-if only one move doesn't lose, stop simulating and just make that move
-- this is a good idea with total time per game, but not per move
-
-rave weight according to rollout length?
-- give weight based on how many standard deviations this rollout is from the average
-- need num to be a float then, which may cause issues...
 
 
 multi-thread
@@ -24,13 +21,22 @@ multi-thread
     - select a move, it's proven a loss, then back it up as a loss, though it was just a bad move selection
     - prove a node while another thread is down that node, can't remove until all threads are back up
       - just don't delete nodes?
+      - reference count?
   - depth stats
+    - use thread context?
+- different parameters (ie ravefactor) for each player thread?
+  - useful for testing parameters at different parts of the game
 
-Test
-- longer games
-- different rave functions
-- set a new baseline
-- rave extensions
+
+share the tree between the player and solver
+- add phi/delta to UCTNode
+- need way of knowing whether the node has been initialized by the player or solver
+- how to deal with areas of the tree that are initialized by the other?
+- rave updates for parts of the tree that aren't yet initialized?
+- phi/delta as knowledge again?
+- thread safety?
+- run multiple different solvers? dfpnsab/pnsab
+
 
 avoid symmetry for the first 3-5 moves, or just build an opening book
 
@@ -55,5 +61,7 @@ rollout policy
 
 Time control
 - quiecense search - if the highest winrate != most played, keep simulating until it is
+- if only one move doesn't lose, stop simulating and just make that move
+  - good idea with total time per game, but not per move
 
 
