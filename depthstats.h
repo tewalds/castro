@@ -22,6 +22,21 @@ struct DepthStats {
 		sumdepth = 0;
 		sumdepthsq = 0;
 	}
+
+	DepthStats & operator += (const DepthStats & o){
+		num += o.num;
+		sumdepth += o.sumdepth;
+		sumdepthsq += o.sumdepthsq;
+		if(mindepth > o.mindepth) mindepth = o.mindepth;
+		if(maxdepth < o.maxdepth) maxdepth = o.maxdepth;
+		return *this;
+	}
+	DepthStats operator + (const DepthStats & o) const {
+		DepthStats n = *this;
+		n += o;
+		return n;
+	}
+
 	void add(unsigned int depth){
 		num++;
 		if(mindepth > depth) mindepth = depth;
@@ -30,15 +45,15 @@ struct DepthStats {
 		sumdepthsq += depth*depth;
 	}
 
-	unsigned int avg(){
+	unsigned int avg() const {
 		if(num == 0) return 0;
 		return sumdepth/num;
 	}
-	double std_dev(){
+	double std_dev() const {
 		if(num == 0) return 0;
 		return sqrt((double)sumdepthsq/num - ((double)sumdepth/num)*((double)sumdepth/num));
 	}
-	string to_s(){
+	string to_s() const {
 		if(num == 0) return "num=0";
 		return to_str(avg()) +", dev=" + to_str(std_dev()) + ", min=" + to_str(mindepth) + ", max=" + to_str(maxdepth) + ", num=" + to_str(num);
 	}
