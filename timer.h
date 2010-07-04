@@ -3,34 +3,32 @@
 #define _TIMER_H_
 
 #include <tr1/functional>
-#include <pthread.h>
 #include <unistd.h>
+#include "thread.h"
 
 using namespace std;
 using namespace tr1;
 using namespace placeholders; //for bind
 
 class Timer {
-	pthread_t thread;
+	Thread thread;
 	bool destruct;
 	function<void()> callback;
 	double timeout;
 
-	static void * waiter(void * blah){
-		Timer * timer = (Timer *)blah;
-		sleep((int)timer->timeout);
-		usleep((int)((timer->timeout - (int)timer->timeout)*1000000));
-		timer->callback();
-		return NULL;
+	void waiter(){
+		sleep((int)timeout);
+		usleep((int)((timeout - (int)timeout)*1000000));
+		callback();
 	}
 
-	static void nullcallback(){ }
+	void nullcallback(){ }
 
 public:
 	Timer() {
 		timeout = 0;
 		destruct = false;
-		callback = &Timer::nullcallback;
+		callback = bind(&Timer::nullcallback, this);
 	}
 
 	Timer(double time, function<void()> fn){
@@ -48,16 +46,16 @@ public:
 			fn();
 		}else{
 			destruct = true;
-			pthread_create(&thread, NULL, (void* (*)(void*)) &Timer::waiter, this);
+			thread(bind(&Timer::waiter, this));
 		}
 	}
 
 	void cancel(){
 		if(destruct){
 			destruct = false;
-			callback = &Timer::nullcallback;
-			pthread_cancel(thread);
-			pthread_join(thread, NULL);
+			callback = bind(&Timer::nullcallback, this);
+			thread.cancel();
+			thread.join();
 		}
 	}
 
