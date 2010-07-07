@@ -9,9 +9,8 @@
 #include "move.h"
 #include "board.h"
 #include "time.h"
-#include "timer.h"
 #include "depthstats.h"
-#include "solver.h"
+#include "thread.h"
 
 typedef unsigned int uint;
 
@@ -209,34 +208,6 @@ public:
 			return num;
 		}
 
-/*
-		int construct(const Solver::PNSNode * n, int pnsscore){
-			move = n->move;
-
-			if(n->delta == 0){ //a win!
-				exp = ExpPair(1000, 1000);
-			}else if(n->phi == 0){ //a loss or tie
-				//set high but not insurmountable visits just in case it is a tie
-				exp = ExpPair(0, 100);
-			}else if(pnsscore > 0){
-				if(n->phi >= n->delta)
-					exp = (ExpPair((1 - n->delta/(2*n->phi)), 1) *= pnsscore);
-				else
-					exp = (ExpPair((n->phi/(2*n->delta)), 1) *= pnsscore);
-			}
-
-			numchildren = n->numchildren;
-			children = NULL;
-
-			int num = numchildren;
-			if(numchildren){
-				children = new Node[numchildren];
-				for(int i = 0; i < numchildren; i++)
-					num += children[i].construct(& n->children[i], pnsscore);
-			}
-			return num;
-		}
-*/
 		~Node(){
 			assert(children.empty());
 		}
@@ -370,12 +341,57 @@ public:
 		}
 	};
 
+	class PlayerThread {
+	protected:
+		Thread thread;
+		Player * player;
+		int runs;
+		DepthStats treelen, gamelen;
+
+		PlayerThread(){}
+	public:
+		virtual void reset() { }
+	};
+
+	class PlayerUCT : public PlayerThread {
+		Move goodreply[2][361]; //361 is big enough for size 10 (ie 19x19), but no bigger...
+
+	public:
+		PlayerUCT(Player * p) {
+			player = p;
+			reset();
+			thread(bind(&PlayerUCT::run, this));
+		}
+
+		void reset(){
+			runs = 0;
+			treelen.reset();
+			gamelen.reset();
+
+			for(int p = 0; p < 2; p++)
+				for(int i = 0; i < 361; i++)
+					goodreply[p][i] = M_UNKNOWN;
+		}
+
+	private:
+		void run();
+		int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
+		void add_knowledge(Board & board, Node * node, Node * child);
+		Node * choose_move(const Node * node, int toplay) const;
+		void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
+		bool test_bridge_probe(const Board & board, const Move & move, const Move & test);
+
+		int rollout(Board & board, RaveMoveList & movelist, Move move, int depth);
+		Move rollout_choose_move(Board & board, const 	Move & prev);
+		Move rollout_pattern(const Board & board, const Move & move);
+	};
+
 public:
 
 	static const float min_rave = 0.1;
 
 	bool  defaults;   //use the default settings on board reset
-	float prooftime;  //fraction of time spent in proof number search, looking for a provable win and losses to avoid
+	bool  ponder;     //think during opponents time?
 //tree traversal
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
@@ -385,12 +401,10 @@ public:
 	int   skiprave;   //how often to skip rave, skip once in this many checks
 	bool  shortrave;  //only update rave values on short rollouts
 	bool  keeptree;   //reuse the tree from the previous move
-	bool  minimaxtree;//keep the solved part of the tree
 	int   minimax;    //solve the minimax tree within the uct tree
 	float fpurgency;  //what value to return for a move that hasn't been played yet
 	uint  visitexpand;//number of visits before expanding a node
 //knowledge
-	int   proofscore; //how many virtual rollouts to assign based on the proof number search values
 	bool  localreply; //boost for a local reply, ie a move near the previous move
 	bool  locality;   //boost for playing near previous stones
 	bool  connect;    //boost for having connections to edges and corners
@@ -401,16 +415,14 @@ public:
 	int   instantwin;     //look for instant wins in rollouts
 	int   lastgoodreply;  //use the last-good-reply rollout heuristic
 
-	Solver solver;
-	Node root;
 	Board rootboard;
-
-	Move goodreply[2][361]; //361 is big enough for size 10 (ie 19x19), but no bigger...
-
-	int runs;
-	DepthStats treelen, gamelen;
+	Node  root;
 	uint64_t nodes, maxnodes;
-	bool timeout;
+
+	vector<PlayerThread *> threads;
+	RWLock  lock; // stop the thread runners from doing work
+	CondVar cond; // tell the master thread that the threads are done
+
 
 	double time_used;
 
@@ -418,11 +430,16 @@ public:
 		nodes = 0;
 		time_used = 0;
 
+		lock.wrlock();
+
+		threads.push_back(new PlayerUCT(this));
+
 		set_default_params();
 	}
 	void set_default_params(){
 		int s = rootboard.get_size();
 		defaults    = true;
+		ponder      = false;
 		explore     = 0;
 		ravefactor  = 1000;
 		knowfactor  = 0.02;
@@ -431,12 +448,9 @@ public:
 		skiprave    = 0;
 		shortrave   = false;
 		keeptree    = true;
-		minimaxtree = true;
 		minimax     = 2;
 		fpurgency   = 1;
 		visitexpand = 1;
-		prooftime   = 0;
-		proofscore  = 0;
 		localreply  = false;
 		locality    = false;
 		connect     = false;
@@ -447,7 +461,7 @@ public:
 		instantwin  = 0;
 	}
 	~Player(){ root.dealloc(); }
-	void timedout(){ timeout = true; }
+	void timedout() { cond.broadcast(); }
 
 	void set_board(const Board & board){
 		rootboard = board;
@@ -456,12 +470,11 @@ public:
 
 		if(defaults)
 			set_default_params();
-
-		for(int p = 0; p < 2; p++)
-			for(int i = 0; i < 361; i++)
-				goodreply[p][i] = M_UNKNOWN;
 	}
 	void move(const Move & m){
+		if(ponder)
+			lock.wrlock();
+
 		rootboard.move(m, true);
 
 		uint64_t nodesbefore = nodes;
@@ -489,26 +502,24 @@ public:
 			root.move = m;
 		}
 		assert(nodes == root.size());
+
+		if(ponder)
+			lock.unlock();
 	}
 
-	Move mcts(double time, int maxruns, uint64_t memlimit);
-	void solve(double time, uint64_t memlimit);
+	double gamelen(){
+		DepthStats len;
+		for(unsigned int i = 0; i < threads.size(); i++)
+			len += threads[i]->gamelen;
+		return len.avg();
+	}
+
+	Move genmove(double time, int maxruns, uint64_t memlimit);
 	vector<Move> get_pv();
 
 protected:
 	Node * return_move(const Node * node, int toplay) const;
 	Node * return_move_outcome(const Node * node, int outcome) const;
-	int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
-	void add_knowledge(Board & board, Node * node, Node * child);
-	Node * choose_move(const Node * node, int toplay) const;
-	void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
-	bool test_bridge_probe(const Board & board, const Move & move, const Move & test);
-
-	int rollout(Board & board, RaveMoveList & movelist, Move move, int depth);
-	Move rollout_choose_move(Board & board, const 	Move & prev);
-	Move rollout_pattern(const Board & board, const Move & move);
-
-	void solve_recurse(Board & board, Node * node, double rate, double solvetime, uint64_t memlimit, int depth);
 };
 
 #endif

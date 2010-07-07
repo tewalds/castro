@@ -71,7 +71,6 @@ public:
 		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,     this, _1), "Solve with basic proof number search");
 		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pnsab,   this, _1), "Solve with proof number search, with one ply of alpha-beta");
 		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab, this, _1), "Solve with proof number search, with a depth-first optimization");
-		newcallback("solve_player",    bind(&HavannahGTP::gtp_solve_player,  this, _1), "Solve by playing for a while, then solving the leaves in increasing difficulty");
 	}
 
 	GTPResponse gtp_print(vecstr args){
@@ -247,22 +246,6 @@ public:
 		return GTPResponse(true, solve_str(solve));
 	}
 
-	GTPResponse gtp_solve_player(vecstr args){
-		double time = 60;
-		int mem = mem_allowed;
-
-		if(args.size() >= 1)
-			time = from_str<double>(args[0]);
-
-		if(args.size() >= 2)
-			mem = from_str<int>(args[1]);
-
-		player.solve(time, mem);
-
-		return GTPResponse(true, solve_str(player.root.outcome) + " " + move_str(player.root.bestmove));
-	}
-
-
 	string solve_str(const Solver & solve){
 		string ret = "";
 		ret += solve_str(solve.outcome) + " ";
@@ -356,8 +339,8 @@ public:
 				time += time_param*time_remain/100;
 				break;
 			case TIME_STATS:
-				if(player.gamelen.avg() > 0){
-					time += 2.0*time_param*time_remain / player.gamelen.avg();
+				if(player.gamelen() > 0){
+					time += 2.0*time_param*time_remain / player.gamelen();
 					break;
 				}//fall back to even
 			case TIME_EVEN:
@@ -388,7 +371,7 @@ public:
 		player.move(game.get_last());
 		player.rootboard.setswap(allow_swap);
 
-		Move best = player.mcts(time, max_runs, mem);
+		Move best = player.genmove(time, max_runs, mem);
 
 		time_remain += time_per_move - player.time_used;
 		if(time_remain < 0)
@@ -413,7 +396,6 @@ public:
 			return GTPResponse(true, string("\n") +
 				"Set player parameters, eg: player_params -e 3 -r 40 -t 0.1 -p 0\n" +
 				"  -d --defaults    Reset all the parameters to size dependent defaults\n" +
-				"  -t --prooftime   Fraction of time to spend proving the node        [" + to_str(player.prooftime) + "]\n" +
 				"Tree traversal:\n" +
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
@@ -424,11 +406,9 @@ public:
 				"  -s --shortrave   Only use moves from short rollouts for rave       [" + to_str(player.shortrave) + "]\n" +
 				"  -k --keeptree    Keep the tree from the previous move              [" + to_str(player.keeptree) + "]\n" +
 				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
-				"  -n --minimaxtree Keep the proven part of the UCT tree              [" + to_str(player.minimaxtree) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
 				"  -x --visitexpand Number of visits before expanding a node          [" + to_str(player.visitexpand) + "]\n" +
 				"Node initialization knowledge:\n" +
-//				"  -s --proofscore  Number of visits to give based on a partial proof [" + to_str(player.proofscore) + "]\n" +
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
 				"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
 				"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
@@ -472,21 +452,12 @@ public:
 			}else if((arg == "-m" || arg == "--minimax") && i+1 < args.size()){
 				player.minimax = from_str<int>(args[++i]);
 				player.defaults = false;
-			}else if((arg == "-n" || arg == "--minimaxtree") && i+1 < args.size()){
-				player.minimaxtree = from_str<bool>(args[++i]);
-				player.defaults = false;
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-x" || arg == "--visitexpand") && i+1 < args.size()){
 				player.visitexpand = from_str<uint>(args[++i]);
 				player.defaults = false;
-			}else if((arg == "-t" || arg == "--prooftime") && i+1 < args.size()){
-				player.prooftime = from_str<float>(args[++i]);
-				player.defaults = false;
-//			}else if((arg == "-s" || arg == "--proofscore") && i+1 < args.size()){
-//				player.proofscore = from_str<int>(args[++i]);
-//				player.defaults = false;
 			}else if((arg == "-l" || arg == "--localreply") && i+1 < args.size()){
 				player.localreply = from_str<bool>(args[++i]);
 				player.defaults = false;

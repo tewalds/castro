@@ -1,7 +1,7 @@
 .PHONY: clean fresh run gendeps
 
 LDFLAGS   += -lpthread
-OBJECTS		= castro.o string.o time.o solverab.o solverscout.o solverpns.o solverpnsab.o solverdfpnsab.o playeruct.o
+OBJECTS		= castro.o string.o time.o solverab.o solverscout.o solverpns.o solverpnsab.o solverdfpnsab.o player.o playeruct.o
 
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall

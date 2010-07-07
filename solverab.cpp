@@ -9,7 +9,7 @@ void Solver::solve_ab(Board board, double time, int mdepth){
 	}
 	board.setswap(false);
 
-	Timer timer = Timer(time, bind(&Solver::timedout, this));
+	Timer timer(time, bind(&Solver::timedout, this));
 	int starttime = time_msec();
 
 	int turn = board.toplay();

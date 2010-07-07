@@ -4,6 +4,8 @@
 #ifndef _MY_THREAD_H_
 #define _MY_THREAD_H_
 
+#include <cstdio>
+
 #include <tr1/functional>
 #include <pthread.h>
 #include <unistd.h>
@@ -31,8 +33,20 @@ public:
 	Thread()                    : destruct(false), func(nullfunc) { }
 	Thread(function<void()> fn) : destruct(false), func(nullfunc) { (*this)(fn); }
 
-	Thread(const Thread & o) { assert(false && "No copy constructor for Thread!\n"); }
-	Thread & operator = (const Thread & o) { assert(false && "No copy operator for Thread!\n"); }
+	//act as a move constructor, no copy constructor
+	Thread(Thread & o) { *this = o; }
+	Thread & operator = (Thread & o) {
+		assert(destruct == false); //don't overwrite a thread
+
+		thread = o.thread;
+		destruct = o.destruct;
+		func = o.func;
+
+		//set the other object to no longer own the thread
+		o.thread = pthread_t();
+		o.destruct = false;
+		func = nullfunc;
+	}
 
 	int operator()(function<void()> fn){
 		assert(destruct == false);
