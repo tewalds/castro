@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <cassert>
+#include <time.h>
 
 using namespace std;
 using namespace tr1;
@@ -71,6 +72,7 @@ public:
 };
 
 class Mutex {
+protected:
 	pthread_mutex_t mutex;
 
 public:
@@ -80,6 +82,26 @@ public:
 	int lock()    { return pthread_mutex_lock(&mutex); }
 	int trylock() { return pthread_mutex_trylock(&mutex); }
 	int unlock()  { return pthread_mutex_unlock(&mutex); }
+};
+
+class CondVar : public Mutex {
+protected:
+	pthread_cond_t cond;
+
+public:
+	CondVar() { Mutex(); pthread_cond_init(&cond, NULL);}
+	~CondVar(){ pthread_cond_destroy(&cond); }
+
+	int broadcast(){ return pthread_cond_broadcast(&cond); }
+	int signal()   { return pthread_cond_signal(&cond); }
+
+	int wait(){ return pthread_cond_wait(&cond, &mutex); }
+	int timedwait(double timeout){
+		timespec t;
+		t.tv_sec = (int)timeout;
+		t.tv_nsec = (timeout - (int)timeout) * 1000000000;
+		return pthread_cond_timedwait(&cond, &mutex, &t);
+	}
 };
 
 #endif
