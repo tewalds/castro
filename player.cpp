@@ -11,9 +11,6 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 	maxnodes = memlimit*1024*1024/sizeof(Node);
 	time_used = 0;
 
-	for(unsigned int i = 0; i < threads.size(); i++)
-		threads[i]->reset();
-
 	if(rootboard.won() >= 0 || (time <= 0 && maxruns == 0))
 		return Move(M_RESIGN);
 
@@ -29,13 +26,15 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 
 	//let them run!
 
-	lock.unlock(); //remove the write lock
+	if(!ponder)
+		lock.unlock(); //remove the write lock
 
 	cond.lock(); //lock the signal that defines the end condition
 	cond.wait(); //wait a signal to end (could be from the timer)
 	cond.unlock();
 
-	lock.wrlock(); //stop the runners
+	if(!ponder)
+		lock.wrlock(); //stop the runners
 	//maybe	let them run again after making the move?
 
 
@@ -52,6 +51,7 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 		gamelen += threads[i]->gamelen;
 		treelen += threads[i]->treelen;
 		runs += threads[i]->runs;
+		threads[i]->reset();
 	}
 
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(runtime) + " msec\n";

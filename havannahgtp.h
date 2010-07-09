@@ -31,6 +31,7 @@ public:
 		GTPclient(i, o, l);
 
 		player.set_board(game.getboard());
+		player.start_threads();
 
 		verbose = false;
 		hguicoords = false;

@@ -345,11 +345,11 @@ public:
 	protected:
 		Thread thread;
 		Player * player;
+	public:
 		int runs;
 		DepthStats treelen, gamelen;
 
 		PlayerThread(){}
-	public:
 		virtual void reset() { }
 	};
 
@@ -430,16 +430,12 @@ public:
 		nodes = 0;
 		time_used = 0;
 
-		lock.wrlock();
-
-		threads.push_back(new PlayerUCT(this));
-
 		set_default_params();
 	}
 	void set_default_params(){
 		int s = rootboard.get_size();
 		defaults    = true;
-		ponder      = false;
+		ponder      = true;
 		explore     = 0;
 		ravefactor  = 1000;
 		knowfactor  = 0.02;
@@ -460,16 +456,43 @@ public:
 		lastgoodreply = false;
 		instantwin  = 0;
 	}
-	~Player(){ root.dealloc(); }
+	~Player(){ lock.wrlock(); root.dealloc(); }
 	void timedout() { cond.broadcast(); }
 
+	void start_threads(){
+		if(!ponder)
+			lock.wrlock();
+
+		threads.push_back(new PlayerUCT(this));
+	}
+
+	void start_ponder(){
+		if(ponder == false){
+			ponder = true;
+			lock.unlock();
+		}
+	}
+
+	void stop_ponder(){
+		if(ponder == true){
+			ponder = false;
+			lock.wrlock();
+		}
+	}
+
 	void set_board(const Board & board){
+		if(ponder)
+			lock.wrlock();
+
 		rootboard = board;
 		nodes -= root.dealloc();
 		root = Node();
 
 		if(defaults)
 			set_default_params();
+
+		if(ponder)
+			lock.unlock();
 	}
 	void move(const Move & m){
 		if(ponder)
