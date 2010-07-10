@@ -376,6 +376,7 @@ public:
 	private:
 		void run();
 		int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
+		int create_children(Board & board, Node * node, int toplay);
 		void add_knowledge(Board & board, Node * node, Node * child);
 		Node * choose_move(const Node * node, int toplay) const;
 		void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);

@@ -57,24 +57,30 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 	}
 
 	int won = (player->minimax ? node->outcome : board.won());
-	if(won >= 0 || node->exp.num() < player->visitexpand || player->nodes >= player->maxnodes){
-	//do random game on this node, unless it's already the end
-		if(won == -1)
-			won = rollout(board, movelist, node->move, depth);
 
-		treelen.add(depth);
+	//create children if valid
+	if(won == -1 && node->exp.num() >= player->visitexpand && player->nodes < player->maxnodes)
+		if(create_children(board, node, toplay))
+			return walk_tree(board, node, movelist, depth);
 
-		if(player->ravefactor > min_rave){
-			if(won == 0 || (player->shortrave && movelist.size() > gamelen.avg()))
-				movelist.clear();
-			else
-				movelist.clean(player->ravescale);
-		}
+	//do random game on this node if it's not already decided
+	if(won == -1)
+		won = rollout(board, movelist, node->move, depth);
 
-		return won;
+
+	treelen.add(depth);
+
+	if(player->ravefactor > min_rave){
+		if(won == 0 || (player->shortrave && movelist.size() > gamelen.avg()))
+			movelist.clear();
+		else
+			movelist.clean(player->ravescale);
 	}
 
-//create children
+	return won;
+}
+
+int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	player->nodes += node->alloc(board.movesremain());
 
 	int losses = 0;
@@ -124,7 +130,7 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 			player->nodes -= node->dealloc();
 	}
 
-	return walk_tree(board, node, movelist, depth);
+	return true;
 }
 
 Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay) const {
