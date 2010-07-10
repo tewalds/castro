@@ -436,7 +436,7 @@ public:
 				"Rollout policy:\n" +
 				"  -h --weightrand  Weight the moves by the rave values at the root   [" + to_str(player.weightedrandom) + "]\n" +
 				"  -p --pattern     Maintain the virtual connection pattern           [" + to_str(player.rolloutpattern) + "]\n" +
-				"  -g --goodreply   Reuse the last good reply to a given move         [" + to_str(player.lastgoodreply) + "]\n" +
+				"  -g --goodreply   Reuse the last good reply (1), remove losses (2)  [" + to_str(player.lastgoodreply) + "]\n" +
 				"  -w --instantwin  Look for instant wins (1) and forced replies (2)  [" + to_str(player.instantwin) + "]\n"
 				);
 
@@ -506,7 +506,7 @@ public:
 				player.rolloutpattern = from_str<bool>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-g" || arg == "--goodreply") && i+1 < args.size()){
-				player.lastgoodreply = from_str<bool>(args[++i]);
+				player.lastgoodreply = from_str<int>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-w" || arg == "--instantwin") && i+1 < args.size()){
 				player.instantwin = from_str<int>(args[++i]);

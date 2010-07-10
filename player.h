@@ -399,7 +399,7 @@ public:
 	bool  weightedrandom; //use a weighted shuffle for move ordering, based on the rave results
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 	int   instantwin;     //look for instant wins in rollouts
-	bool  lastgoodreply;  //use the last-good-reply rollout heuristic
+	int   lastgoodreply;  //use the last-good-reply rollout heuristic
 
 	Solver solver;
 	Node root;

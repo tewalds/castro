@@ -437,7 +437,7 @@ int Player::rollout(Board & board, RaveMoveList & movelist, Move move, int depth
 			if(m >= 0){
 				if(rave->player == won && *rave != M_SWAP)
 					goodreply[rave->player - 1][m] = *rave;
-				else
+				else if(lastgoodreply == 2)
 					goodreply[rave->player - 1][m] = M_UNKNOWN;
 			}
 			m = board.xy(*rave);
