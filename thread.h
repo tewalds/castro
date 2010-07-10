@@ -4,8 +4,6 @@
 #ifndef _MY_THREAD_H_
 #define _MY_THREAD_H_
 
-#include <cstdio>
-
 #include <tr1/functional>
 #include <pthread.h>
 #include <unistd.h>
