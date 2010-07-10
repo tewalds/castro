@@ -25,6 +25,17 @@ multi-thread
 - different parameters (ie ravefactor) for each player thread?
   - useful for testing parameters at different parts of the game
 
+
+child allocation
+- lock the node
+  - on failure, do a random game
+  - set _num = -1 ?
+  - must relax consistency assertions
+- create a new node
+- create children
+- swap the tree into place
+
+
 ponder
 - once a move is generated, it isn't made until the next move is registered
   - usefulf for knowing the results, bad for pondering, continues to think about the previous move
