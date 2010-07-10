@@ -81,12 +81,17 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 }
 
 int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
-	player->nodes += node->alloc(board.movesremain());
+	if(!node->children.lock())
+		return false;
+
+	Node::Children temp;
+
+	temp.alloc(board.movesremain());
 
 	int losses = 0;
 
-	Node * child = node->children.begin(),
-	     * end   = node->children.end(),
+	Node * child = temp.begin(),
+	     * end   = temp.end(),
 	     * loss  = NULL;
 	Board::MoveIterator move = board.moveit();
 	for(; !move.done() && child != end; ++move, ++child){
@@ -103,11 +108,12 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 			if(child->outcome == toplay){ //proven win from here, don't need children
 				node->outcome = child->outcome;
 				node->bestmove = *move;
-				losses = -1000000; //set to something very negative to skip the part below
 				if(node != & player->root){
-					player->nodes -= node->dealloc();
-					break;
+					node->children.unlock();
+					temp.dealloc();
+					return true;
 				}
+				losses = -1000000; //set to something very negative to skip the part below
 			}
 		}
 
@@ -118,17 +124,24 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 
 	//Make a macro move, add experience to the move so the current simulation continues past this move
 	if(losses == 1){
-		Node temp = *loss;
-		player->nodes -= node->dealloc();
-		player->nodes += node->alloc(1);
-		temp.exp.addwins(player->visitexpand);
-		*(node->children.begin()) = temp;
+		Node macro = *loss;
+		temp.dealloc();
+		temp.alloc(1);
+		macro.exp.addwins(player->visitexpand);
+		*(temp.begin()) = macro;
 	}else if(losses >= 2){ //proven loss, but at least try to block one of them
 		node->outcome = 3 - toplay;
 		node->bestmove = loss->move;
-		if(node != &player->root)
-			player->nodes -= node->dealloc();
+		if(node != &player->root){
+			node->children.unlock();
+			temp.dealloc();
+			return true;
+		}
 	}
+
+	player->nodes += temp.num();
+	node->children.atomic_set(temp);
+	temp.neuter();
 
 	return true;
 }

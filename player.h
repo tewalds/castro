@@ -93,6 +93,8 @@ public:
 
 	struct Node {
 		class Children {
+			static const int LOCK = 1; //needs to be cast to (Node *) at usage point
+
 			uint32_t _num; //can be smaller, but will be padded anyway.
 			Node *   _children;
 		public:
@@ -101,8 +103,16 @@ public:
 			Children(int n) : _num(0), _children(NULL) { alloc(n); }
 			~Children() { assert_empty(); }
 
-			void assert_consistent() const { assert((_num == 0) == (_children == NULL)); }
+			void assert_consistent() const { assert((_num == 0) || (_children > (Node *) LOCK)); }
 			void assert_empty()      const { assert((_num == 0) && (_children == NULL)); }
+
+			bool lock()   { return CAS(_children, NULL, LOCK); }
+			bool unlock() { return CAS(_children, LOCK, NULL); }
+
+			void atomic_set(Children & o){
+				assert(CAS(_children, LOCK, o._children)); //undoes the lock
+				assert(CAS(_num, 0, o._num)); //keeps consistency
+			}
 
 			unsigned int alloc(unsigned int n){
 				assert(_num == 0);
@@ -143,7 +153,7 @@ public:
 				return num() == 0;
 			}
 			Node & operator[](unsigned int offset){
-				assert(_children);
+				assert(_children > (Node *) LOCK);
 				assert(offset >= 0 && offset < _num);
 				return _children[offset];
 			}
@@ -436,7 +446,7 @@ public:
 	void set_default_params(){
 		int s = rootboard.get_size();
 		defaults    = true;
-		ponder      = true;
+		ponder      = false;
 		explore     = 0;
 		ravefactor  = 1000;
 		knowfactor  = 0.02;
