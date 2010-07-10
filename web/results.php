@@ -10,7 +10,7 @@ function askresults($input){
 	$numgames   = $db->query("SELECT count(*) FROM games")->fetchfield();
 
 ?>
-	<table><form action=/results method=POST>
+	<table><form action=/results method=GET>
 		<tr>
 			<td valign=top>
 				Players:<br>
@@ -40,6 +40,9 @@ function showresults($input){
 	global $db;
 
 	askresults($input);
+
+	if(count($input['baselines']) == 0 && count($input['players']) == 0 && count($input['times']) == 0)
+		return true;
 
 	if(count($input['baselines']) == 0 || count($input['players']) == 0 || count($input['times']) == 0){
 		echo "You must select options from all categories to see any results!";
