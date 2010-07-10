@@ -432,19 +432,15 @@ int Player::rollout(Board & board, RaveMoveList & movelist, Move move, int depth
 	if(lastgoodreply && won > 0){
 		RaveMoveList::iterator rave = movelist.begin(), raveend = movelist.end();
 
-		if(rave->player == won)
-			++rave;
-
+		int m = -1;
 		while(rave != raveend){
-//			assert(rave->player == 3 - won);
-
-			int m = board.xy(*rave);
-			++rave;
-
-//			assert(rave->player == won);
-
-			if(m >= 0 && *rave != M_SWAP) //don't store a swap move
-				goodreply[won-1][m] = *rave;
+			if(m >= 0){
+				if(rave->player == won && *rave != M_SWAP)
+					goodreply[rave->player - 1][m] = *rave;
+				else
+					goodreply[rave->player - 1][m] = M_UNKNOWN;
+			}
+			m = board.xy(*rave);
 			++rave;
 		}
 	}
