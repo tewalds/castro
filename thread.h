@@ -14,6 +14,13 @@ using namespace std;
 using namespace tr1;
 using namespace placeholders; //for bind
 
+// http://gcc.gnu.org/onlinedocs/gcc/Atomic-Builtins.html
+// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2427.html
+#define CAS(var, old, new) __sync_bool_compare_and_swap(&(var), old, new)
+#define INCR(var)          __sync_add_and_fetch(&(var), 1)
+#define PLUS(var, val)     __sync_add_and_fetch(&(var), val)
+
+
 class Thread {
 	pthread_t thread;
 	bool destruct;
