@@ -34,7 +34,7 @@ end
 
 require 'net/http'
 
-expectedtime = 15.0 # expect 15 seconds
+expectedtime = 11.0 # expect 11 seconds
 benchtime = timer { system($player, "-f", "test/speed4.tst"); }
 
 puts "benchtime: " + benchtime.inspect
