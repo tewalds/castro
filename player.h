@@ -403,6 +403,7 @@ public:
 
 	bool  defaults;   //use the default settings on board reset
 	bool  ponder;     //think during opponents time?
+	int   numthreads; //number of player threads to run
 //tree traversal
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
@@ -447,6 +448,7 @@ public:
 		int s = rootboard.get_size();
 		defaults    = true;
 		ponder      = false;
+		numthreads  = 1;
 		explore     = 0;
 		ravefactor  = 1000;
 		knowfactor  = 0.02;
@@ -474,7 +476,8 @@ public:
 		if(!ponder)
 			lock.wrlock();
 
-		threads.push_back(new PlayerUCT(this));
+		for(int i = 0; i < numthreads; i++)
+			threads.push_back(new PlayerUCT(this));
 	}
 
 	void start_ponder(){
