@@ -325,7 +325,7 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 			if(m >= 0){
 				if(rave->player == won && *rave != M_SWAP)
 					goodreply[rave->player - 1][m] = *rave;
-				else if(lastgoodreply == 2)
+				else if(player->lastgoodreply == 2)
 					goodreply[rave->player - 1][m] = M_UNKNOWN;
 			}
 			m = board.xy(*rave);
