@@ -16,30 +16,22 @@ typedef unsigned int uint;
 
 class Player {
 public:
-//*
 	class ExpPair {
-		float s;
-		uint32_t n;
+		uint32_t s, n;
+		ExpPair(uint32_t S, uint32_t N) : s(S), n(N) { }
 	public:
 		ExpPair() : s(0), n(0) { }
-		ExpPair(float S, uint32_t N) : s(S), n(N) { }
-		float avg() const { return s/n; }
-		float sum() const { return s; }
+		float avg() const { return 0.5f*s/n; }
 		uint32_t num() const { return n; }
-		void addwins(int num){ add(num, num); }
-		void addlosses(int num){ add(0, num); }
-		void add(float val, int num){
-			s += val;
-			n += num;
-		}
+		void addvloss(){ INCR(n); }
+		void addvtie() { INCR(s); }
+		void addvwin() { PLUS(s, 2); }
+
+		void addwins(int num)  { n += num; s += 2*num; }
+		void addlosses(int num){ n += num; }
 		ExpPair & operator+=(const ExpPair & a){
 			s += a.s;
 			n += a.n;
-			return *this;
-		}
-		ExpPair & operator+=(float nv){
-			s += nv;
-			n++;
 			return *this;
 		}
 		ExpPair operator + (const ExpPair & a){
@@ -51,45 +43,6 @@ public:
 			return *this;
 		}
 	};
-/*/
-	class ExpPair {
-		static const float k = 10000;
-		float v;
-		uint32_t n;
-	public:
-		ExpPair() : v(0), n(0) { }
-		ExpPair(float S, uint32_t N) : v(S/N), n(N) { }
-		float avg() const { return v; }
-		float sum() const { return v*n; }
-		uint32_t num() const { return n; }
-		void addwins(int num){ add(num, num); }
-		void addlosses(int num){ add(0, num); }
-		void add(float val, int num){
-			*this += ExpPair(val, num);
-		}
-		ExpPair & operator+=(const ExpPair & a){
-			//there's got to be a better way...
-			for(int i = 0; i < a.n; i++)
-				*this += a.v;
-			return *this;
-		}
-		ExpPair & operator+=(float nv){
-			n++;
-//			v += (nv - v)/n;
-			v += (nv - v)/(n < k ? n : k);
-			return *this;
-		}
-		ExpPair operator + (const ExpPair & a){
-			ExpPair ret = *this;
-			ret += a;
-			return ret;
-		}
-		ExpPair & operator*=(int m){
-			n *= m;
-			return *this;
-		}
-	};
-//*/
 
 	struct Node {
 		class Children {
@@ -305,9 +258,8 @@ public:
 	struct RaveMoveList {
 		struct RaveMove : public Move {
 			char player;
-			float score;
 
-			RaveMove(const Move & m, char p = 0, float s = 1) : Move(m), player(p), score(s) { }
+			RaveMove(const Move & m, char p = 0) : Move(m), player(p) { }
 		};
 		typedef vector<RaveMove>::const_iterator iterator;
 
@@ -318,7 +270,7 @@ public:
 		}
 
 		void add(const Move & move, char player){
-			list.push_back(RaveMove(move, player, 1));
+			list.push_back(RaveMove(move, player));
 		}
 		void clear(){
 			list.clear();
@@ -335,18 +287,8 @@ public:
 		iterator end() const {
 			return list.end();
 		}
-
-		//remove the moves that were played by the loser
 		//sort in y,x order
-		void clean(bool scale){
-			if(scale){
-				float base = 2; //2 instead of 1 so the average of wins stays at 1
-				float factor = 2*base/(list.size()+1); //+1 to keep it from going negative, 4 = base*2 since half the values are skipped
-
-				for(unsigned int i = 0; i < list.size(); i++)
-					list[i].score = base - i/2*factor;
-			}
-
+		void clean(){
 			sort(list.begin(), list.end()); //sort in y,x order
 		}
 	};
@@ -408,8 +350,6 @@ public:
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
 	float knowfactor; //weight to give to knowledge values
-	bool  ravescale;  //scale rave numbers from 2 down to 0 in decreasing order of move recency instead of always 1
-	bool  opmoves;    //take the opponents rave updates too, a good move for my opponent is a good move for me.
 	int   skiprave;   //how often to skip rave, skip once in this many checks
 	bool  shortrave;  //only update rave values on short rollouts
 	bool  keeptree;   //reuse the tree from the previous move
@@ -452,8 +392,6 @@ public:
 		explore     = 0;
 		ravefactor  = 1000;
 		knowfactor  = 0.02;
-		ravescale   = false;
-		opmoves     = false;
 		skiprave    = 0;
 		shortrave   = false;
 		keeptree    = true;

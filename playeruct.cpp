@@ -38,9 +38,13 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 			movelist.add(child->move, toplay);
 			assert(board.move(child->move, player->locality));
 
+			child->exp.addvloss();
+
 			int won = walk_tree(board, child, movelist, depth+1);
 
-			child->exp += (won == 0 ? 0.5 : won == toplay);
+			if(won == toplay) child->exp.addvwin();
+			else if(won == 0) child->exp.addvtie();
+			//else loss is already added
 
 			if(child->outcome == toplay){ //backup a win right away. Losses and ties can wait
 				node->outcome = child->outcome;
@@ -59,7 +63,7 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 	int won = (player->minimax ? node->outcome : board.won());
 
 	//create children if valid
-	if(won == -1 && node->exp.num() >= player->visitexpand && player->nodes < player->maxnodes)
+	if(won == -1 && node->exp.num() >= player->visitexpand+1 && player->nodes < player->maxnodes)
 		if(create_children(board, node, toplay))
 			return walk_tree(board, node, movelist, depth);
 
@@ -74,7 +78,7 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 		if(won == 0 || (player->shortrave && movelist.size() > gamelen.avg()))
 			movelist.clear();
 		else
-			movelist.clean(player->ravescale);
+			movelist.clean();
 	}
 
 	return won;
@@ -183,8 +187,11 @@ void Player::PlayerUCT::update_rave(const Node * node, const RaveMoveList & move
 
 	while(rave != raveend && child != childend){
 		if(*rave == child->move){
-			if(rave->player == toplay || player->opmoves)
-				child->rave += (rave->player == won ? rave->score : 0);
+			if(rave->player == toplay){
+				child->rave.addvloss();
+				if(rave->player == won)
+					child->rave.addvwin();
+			}
 			rave++;
 			child++;
 		}else if(*rave > child->move){

@@ -22,7 +22,7 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 		timer.set(time, bind(&Player::timedout, this));
 
 	root.outcome = -1;
-	root.exp.addwins(visitexpand);
+	root.exp.addwins(visitexpand+1); //+1 to compensate for the virtual loss
 
 	//let them run!
 

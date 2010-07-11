@@ -401,8 +401,6 @@ public:
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
 				"  -a --knowfactor  The knowledge factor: kf*know/sqrt(visits+1)      [" + to_str(player.knowfactor) + "]\n" +
-				"  -r --ravescale   Scale the rave values from 2 - 0 instead all 1    [" + to_str(player.ravescale) + "]\n" +
-				"  -o --opmoves     Treat good opponent moves as good moves for you   [" + to_str(player.opmoves) + "]\n" +
 				"  -i --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
 				"  -s --shortrave   Only use moves from short rollouts for rave       [" + to_str(player.shortrave) + "]\n" +
 				"  -k --keeptree    Keep the tree from the previous move              [" + to_str(player.keeptree) + "]\n" +
@@ -434,12 +432,6 @@ public:
 				player.defaults = false;
 			}else if((arg == "-a" || arg == "--knowfactor") && i+1 < args.size()){
 				player.knowfactor = from_str<float>(args[++i]);
-				player.defaults = false;
-			}else if((arg == "-r" || arg == "--ravescale") && i+1 < args.size()){
-				player.ravescale = from_str<bool>(args[++i]);
-				player.defaults = false;
-			}else if((arg == "-o" || arg == "--opmoves") && i+1 < args.size()){
-				player.opmoves = from_str<bool>(args[++i]);
 				player.defaults = false;
 			}else if((arg == "-i" || arg == "--skiprave") && i+1 < args.size()){
 				player.skiprave = from_str<int>(args[++i]);
