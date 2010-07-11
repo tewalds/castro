@@ -295,6 +295,7 @@ public:
 
 	class PlayerThread {
 	protected:
+	public:
 		Thread thread;
 		Player * player;
 	public:
@@ -383,6 +384,9 @@ public:
 		time_used = 0;
 
 		set_default_params();
+
+		if(!ponder)
+			lock.wrlock();
 	}
 	void set_default_params(){
 		int s = rootboard.get_size();
@@ -410,25 +414,16 @@ public:
 	~Player(){ lock.wrlock(); root.dealloc(); }
 	void timedout() { cond.broadcast(); }
 
-	void start_threads(){
-		if(!ponder)
-			lock.wrlock();
-
-		for(int i = 0; i < numthreads; i++)
+	void reset_threads(){ //better have the write lock before calling this
+		for(int i = threads.size(); i < numthreads; i++)
 			threads.push_back(new PlayerUCT(this));
 	}
 
-	void start_ponder(){
-		if(ponder == false){
-			ponder = true;
-			lock.unlock();
-		}
-	}
-
-	void stop_ponder(){
-		if(ponder == true){
-			ponder = false;
-			lock.wrlock();
+	void set_ponder(bool p){
+		if(ponder != p){
+			if(p) lock.unlock();
+			else  lock.wrlock();
+			ponder = p;
 		}
 	}
 
@@ -442,6 +437,8 @@ public:
 
 		if(defaults)
 			set_default_params();
+
+		reset_threads();
 
 		if(ponder)
 			lock.unlock();

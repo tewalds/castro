@@ -31,7 +31,6 @@ public:
 		GTPclient(i, o, l);
 
 		player.set_board(game.getboard());
-		player.start_threads();
 
 		verbose = false;
 		hguicoords = false;
@@ -397,6 +396,8 @@ public:
 			return GTPResponse(true, string("\n") +
 				"Set player parameters, eg: player_params -e 3 -r 40 -t 0.1 -p 0\n" +
 				"  -d --defaults    Reset all the parameters to size dependent defaults\n" +
+				"  -t --threads     Number of UCT threads                             [" + to_str(player.numthreads) + "]\n" +
+				"  -o --ponder      Continue to ponder during the opponents time      [" + to_str(player.ponder) + "]\n" +
 				"Tree traversal:\n" +
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
@@ -424,6 +425,14 @@ public:
 
 			if(arg == "-d" || arg == "--defaults"){
 				player.set_default_params();
+			}else if((arg == "-t" || arg == "--threads") && i+1 < args.size()){
+				player.numthreads = from_str<int>(args[++i]);
+				bool p = player.ponder;
+				player.set_ponder(false); //stop the threads while resetting them
+				player.reset_threads();
+				player.set_ponder(p);
+			}else if((arg == "-o" || arg == "--ponder") && i+1 < args.size()){
+				player.set_ponder(from_str<bool>(args[++i]));
 			}else if((arg == "-e" || arg == "--explore") && i+1 < args.size()){
 				player.explore = from_str<float>(args[++i]);
 				player.defaults = false;
