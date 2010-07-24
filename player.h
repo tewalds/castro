@@ -2,17 +2,16 @@
 #ifndef __PLAYER_H_
 #define __PLAYER_H_
 
-#include <stdint.h>
 #include <cmath>
 #include <cassert>
 
+#include "types.h"
 #include "move.h"
 #include "board.h"
 #include "time.h"
 #include "depthstats.h"
 #include "thread.h"
 
-typedef unsigned int uint;
 
 class Player {
 public:
@@ -340,6 +339,61 @@ public:
 		Move rollout_pattern(const Board & board, const Move & move);
 	};
 
+	class Sync {
+		RWLock  lock; // stop the thread runners from doing work
+		CondVar cond; // tell the master thread that the threads are done
+		volatile bool stop; // write lock asked
+		volatile bool writelock; //is the write lock
+
+	public:
+		Sync() : stop(false), writelock(false) { }
+
+		int wrlock(){ //aquire the write lock, set stop, blocks
+			assert(writelock == false);
+
+//			fprintf(stderr, "ask write lock\n");
+
+			CAS(stop, false, true);
+			int r = lock.wrlock();
+			writelock = true;
+			CAS(stop, true, false);
+//			fprintf(stderr, "got write lock\n");
+			return r;
+		}
+		int rdlock(){ //aquire the read lock, blocks
+//			fprintf(stderr, "Ask for read lock\n");
+			if(stop){
+//				fprintf(stderr, "Spinning on read lock\n");
+				while(stop)
+					continue;
+//				fprintf(stderr, "Done spinning on read lock\n");
+			}
+			int ret = lock.rdlock();
+//			fprintf(stderr, "Got a read lock\n");
+			return ret;
+		}
+		int relock(){ //succeeds if stop isn't requested
+			return (stop == false);
+		}
+		int unlock(){ //unlocks the lock
+			if(writelock){
+//				fprintf(stderr, "unlock read lock\n");
+			}else{
+//				fprintf(stderr, "unlock write lock\n");
+			}
+			writelock = false;
+			return lock.unlock();
+		}
+		int done(){   //signals that the timeout happened or solved
+			return cond.broadcast();
+		}
+		int wait(){   //waits for the signal
+			cond.lock(); //lock the signal that defines the end condition
+			cond.wait(); //wait a signal to end (could be from the timer)
+			cond.unlock();
+		}
+	};
+
 public:
 
 	static const float min_rave = 0.1;
@@ -370,12 +424,10 @@ public:
 
 	Board rootboard;
 	Node  root;
-	uint64_t nodes, maxnodes;
+	uword nodes, maxnodes;
 
 	vector<PlayerThread *> threads;
-	RWLock  lock; // stop the thread runners from doing work
-	CondVar cond; // tell the master thread that the threads are done
-
+	Sync sync;
 
 	double time_used;
 
@@ -386,7 +438,7 @@ public:
 		set_default_params();
 
 		if(!ponder)
-			lock.wrlock();
+			sync.wrlock();
 	}
 	void set_default_params(){
 		int s = rootboard.get_size();
@@ -411,8 +463,12 @@ public:
 		lastgoodreply = false;
 		instantwin  = 0;
 	}
-	~Player(){ lock.wrlock(); root.dealloc(); }
-	void timedout() { cond.broadcast(); }
+	~Player(){
+		if(ponder)
+			sync.wrlock();
+		root.dealloc();
+	}
+	void timedout() { sync.done(); }
 
 	void reset_threads(){ //better have the write lock before calling this
 		for(int i = threads.size(); i < numthreads; i++)
@@ -421,15 +477,15 @@ public:
 
 	void set_ponder(bool p){
 		if(ponder != p){
-			if(p) lock.unlock();
-			else  lock.wrlock();
+			if(p) sync.unlock();
+			else  sync.wrlock();
 			ponder = p;
 		}
 	}
 
 	void set_board(const Board & board){
 		if(ponder)
-			lock.wrlock();
+			sync.wrlock();
 
 		rootboard = board;
 		nodes -= root.dealloc();
@@ -441,15 +497,15 @@ public:
 		reset_threads();
 
 		if(ponder)
-			lock.unlock();
+			sync.unlock();
 	}
 	void move(const Move & m){
 		if(ponder)
-			lock.wrlock();
+			sync.wrlock();
 
 		rootboard.move(m, true);
 
-		uint64_t nodesbefore = nodes;
+		uword nodesbefore = nodes;
 
 		if(keeptree){
 			Node child;
@@ -467,7 +523,7 @@ public:
 			root.swap_tree(child);
 
 			if(nodesbefore > 0)
-				fprintf(stderr, "Nodes before: %llu, after: %llu, saved %.1f%% of the tree\n", nodesbefore, nodes, 100.0*nodes/nodesbefore);
+				fprintf(stderr, "Nodes before: %u, after: %u, saved %.1f%% of the tree\n", nodesbefore, nodes, 100.0*nodes/nodesbefore);
 		}else{
 			nodes -= root.dealloc();
 			root = Node();
@@ -476,7 +532,7 @@ public:
 		assert(nodes == root.size());
 
 		if(ponder)
-			lock.unlock();
+			sync.unlock();
 	}
 
 	double gamelen(){

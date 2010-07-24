@@ -9,21 +9,23 @@
 
 void Player::PlayerUCT::run(){
 	RaveMoveList movelist;
-	while(1){
-		player->lock.rdlock(); //wait for the write lock to come off
+//	fprintf(stderr, "Runner start\n");
+	while(player->root.outcome == -1){
+		player->sync.rdlock(); //wait for the write lock to come off
+
 		do{
 			if(player->root.outcome != -1){ //solved, return early
-				player->lock.unlock();
-				player->cond.broadcast(); //let the main thread know
+				player->sync.done(); //let the main thread know
 				break;
 			}
 			runs++;
 			Board copy = player->rootboard;
 			movelist.clear();
 			walk_tree(copy, & player->root, movelist, 0);
-			player->lock.unlock();
-		}while(player->lock.tryrdlock() == 0); //fails when the write lock comes back
+		}while(player->sync.relock()); //fails when the write lock comes back
+		player->sync.unlock();
 	}
+//	fprintf(stderr, "Runner exit\n");
 }
 
 //return the winner of the simulation
@@ -143,7 +145,7 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 		}
 	}
 
-	player->nodes += temp.num();
+	PLUS(player->nodes, temp.num());
 	node->children.atomic_set(temp);
 	temp.neuter();
 

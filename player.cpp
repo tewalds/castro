@@ -27,17 +27,12 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 	//let them run!
 
 	if(!ponder)
-		lock.unlock(); //remove the write lock
-
-	cond.lock(); //lock the signal that defines the end condition
-	cond.wait(); //wait a signal to end (could be from the timer)
-	cond.unlock();
+		sync.unlock(); //remove the write lock
+	
+	sync.wait(); //wait for the timer or solved
 
 	if(!ponder)
-		lock.wrlock(); //stop the runners
-	//maybe	let them run again after making the move?
-
-
+		sync.wrlock(); //stop the runners
 
 //return the best one
 	Node * ret = return_move(& root, rootboard.toplay());
