@@ -24,7 +24,7 @@ multi-thread
       - reference count?
 - different parameters (ie ravefactor) for each player thread?
   - useful for testing parameters at different parts of the game
-
+- need to restart the threads on board reset if they exited
 
 child allocation
 - lock the node
