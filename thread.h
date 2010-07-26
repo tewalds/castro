@@ -43,7 +43,7 @@ public:
 	}
 
 	int detach(){ assert(destruct == true); return pthread_detach(thread); }
-	int join()  { assert(destruct == true); return pthread_join(thread, NULL); destruct = false; }
+	int join()  { assert(destruct == true); destruct = false; return pthread_join(thread, NULL); }
 	int cancel(){ assert(destruct == true); return pthread_cancel(thread); }
 
 	~Thread(){
