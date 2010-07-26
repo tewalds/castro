@@ -10,19 +10,16 @@
 void Player::PlayerUCT::run(){
 	RaveMoveList movelist;
 //	fprintf(stderr, "Runner start\n");
-	while(player->root.outcome == -1){
+	while(!cancelled && player->root.outcome == -1){
 		player->sync.rdlock(); //wait for the write lock to come off
 
-		do{
-			if(player->root.outcome != -1){ //solved, return early
-				player->sync.done(); //let the main thread know
-				break;
-			}
+		while(player->sync.relock() && player->root.outcome == -1){ //has the lock and not solved yet
 			runs++;
 			Board copy = player->rootboard;
 			movelist.clear();
 			walk_tree(copy, & player->root, movelist, 0);
-		}while(player->sync.relock()); //fails when the write lock comes back
+		}
+		player->sync.done(); //let the main thread know in case it was solved early
 		player->sync.unlock();
 	}
 //	fprintf(stderr, "Runner exit\n");

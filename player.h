@@ -297,12 +297,15 @@ public:
 	public:
 		Thread thread;
 		Player * player;
+		bool cancelled;
 	public:
 		int runs;
 		DepthStats treelen, gamelen;
 
-		PlayerThread(){}
+		PlayerThread() : cancelled(false) {}
 		virtual void reset() { }
+		void cancel(){ cancelled = true; }
+		int join(){ return thread.join(); }
 	};
 
 	class PlayerUCT : public PlayerThread {
@@ -310,6 +313,7 @@ public:
 
 	public:
 		PlayerUCT(Player * p) {
+			PlayerThread();
 			player = p;
 			reset();
 			thread(bind(&PlayerUCT::run, this));
@@ -362,7 +366,7 @@ public:
 		}
 		int rdlock(){ //aquire the read lock, blocks
 //			fprintf(stderr, "Ask for read lock\n");
-			if(stop){
+			if(stop){ //spin on the read lock so that the write lock isn't starved
 //				fprintf(stderr, "Spinning on read lock\n");
 				while(stop)
 					continue;
@@ -471,7 +475,22 @@ public:
 	void timedout() { sync.done(); }
 
 	void reset_threads(){ //better have the write lock before calling this
-		for(int i = threads.size(); i < numthreads; i++)
+	//kill all the threads
+		for(int i = 0; i < threads.size(); i++)
+			threads[i]->cancel();
+
+		sync.unlock(); //let the runners run and exit
+		usleep(10);    //seems to be needed to allow the runners to be scheduled
+		sync.wrlock(); //wait for the runners to exit
+
+	//make sure they exited cleanly
+		for(int i = 0; i < threads.size(); i++)
+			threads[i]->join();
+
+		threads.clear();
+
+	//start new threads
+		for(int i = 0; i < numthreads; i++)
 			threads.push_back(new PlayerUCT(this));
 	}
 
