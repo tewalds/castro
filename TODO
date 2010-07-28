@@ -13,18 +13,23 @@ build a linked list of empty moves so the move iterator can skip filled moves
 
 
 multi-thread
-- generally lockless
-- allow ponder?
-- virtual loss to encourage exploration
-- race conditions:
-  - minimax backup
-    - select a move, it's proven a loss, then back it up as a loss, though it was just a bad move selection
-    - prove a node while another thread is down that node, can't remove until all threads are back up
-      - just don't delete nodes?
-      - reference count?
+- how to do max runs?
+  - assign a subset to each thread and assume they run approx the same rate?
+    - once the first finishes the others will get stopped by the write lock...
+  - shared counter?
 - different parameters (ie ravefactor) for each player thread?
   - useful for testing parameters at different parts of the game
-- need to restart the threads on board reset if they exited
+  - need a different criteria for move selection, since several threads may be exploring the wrong part of the tree
+    - highest lower bound?
+- ponder continues calculating the current move, not the opponents move
+  - make the move as soon as it is generated?
+  - output the stats in verbose/debug mode?
+
+is set_defaults needed? resets thead count...
+
+if the root is solved, don't need to let the threads run since they already quit
+- may need to calculate one or two ply if it was implicit
+
 
 child allocation
 - lock the node
