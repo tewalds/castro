@@ -335,6 +335,7 @@ public:
 		int create_children(Board & board, Node * node, int toplay);
 		void add_knowledge(Board & board, Node * node, Node * child);
 		Node * choose_move(const Node * node, int toplay) const;
+		bool do_backup(Node * node, Node * backup, int toplay);
 		void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
 		bool test_bridge_probe(const Board & board, const Move & move, const Move & test);
 

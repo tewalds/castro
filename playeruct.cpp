@@ -31,32 +31,28 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 
 	if(!node->children.empty() && node->outcome == -1){
 	//choose a child and recurse
-		Node * child = choose_move(node, toplay);
+		Node * child;
+		do{
+			child = choose_move(node, toplay);
 
-		if(child->outcome == -1){
-			movelist.add(child->move, toplay);
-			assert(board.move(child->move, player->locality));
+			if(child->outcome == -1){
+				movelist.add(child->move, toplay);
+				assert(board.move(child->move, player->locality));
 
-			child->exp.addvloss();
+				child->exp.addvloss();
 
-			int won = walk_tree(board, child, movelist, depth+1);
+				int won = walk_tree(board, child, movelist, depth+1);
 
-			if(won == toplay) child->exp.addvwin();
-			else if(won == 0) child->exp.addvtie();
-			//else loss is already added
+				if(won == toplay) child->exp.addvwin();
+				else if(won == 0) child->exp.addvtie();
+				//else loss is already added
 
-			if(child->outcome == toplay){ //backup a win right away. Losses and ties can wait
-				node->outcome = child->outcome;
-				node->bestmove = child->move;
-			}else if(player->ravefactor > min_rave && node->children.num() > 1){ //update the rave scores
-				update_rave(node, movelist, won, toplay);
+				if(!do_backup(node, child, toplay) && player->ravefactor > min_rave && node->children.num() > 1) //update the rave scores
+					update_rave(node, movelist, won, toplay);
+
+				return won;
 			}
-
-			return won;
-		}else{ //backup the win/loss/tie
-			node->outcome = child->outcome;
-			node->bestmove = child->move;
-		}
+		}while(!do_backup(node, child, toplay));
 	}
 
 	int won = (player->minimax ? node->outcome : board.won());
@@ -176,6 +172,50 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay) con
 	}
 
 	return ret;
+}
+
+bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
+	if(node->outcome != -1) //already proven by a different thread
+		return true;
+
+	if(backup->outcome == -1) //not yet proven by this child, so no chance
+		return false;
+
+	if(backup->outcome != toplay){
+		int val, maxval = -1000000000;
+		backup = NULL;
+
+		Node * child = node->children.begin(),
+			 * end = node->children.end();
+
+		for( ; child != end; child++){
+
+			if(child->outcome == toplay){
+				backup = child;
+				val = 3;
+				break;
+			}
+			else if(child->outcome == -1)
+				val = 2;
+			else if(child->outcome == 0)
+				val = 1;
+			else
+				val = 0;
+
+			if(maxval < val){
+				maxval = val;
+				backup = child;
+			}
+		}
+
+		if(val == 2) //no win, but found an unknown
+			return false;
+	}
+
+	if(CAS(node->outcome, -1, backup->outcome))
+		node->bestmove = backup->bestmove;
+
+	return true;
 }
 
 void Player::PlayerUCT::update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay){
