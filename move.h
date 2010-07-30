@@ -15,7 +15,7 @@ enum MoveSpecial {
 struct Move {
 	int8_t y, x;
 
-	Move() : y(0), x(0) { }
+	Move() : y(M_UNKNOWN), x(110) { }
 	Move(MoveSpecial a) : y(a), x(120) { } //big x so it will always wrap to y=0 with swap
 	Move(int X, int Y) : y(Y), x(X) { }
 
