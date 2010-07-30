@@ -569,8 +569,11 @@ public:
 	}
 
 	GTPResponse gtp_verbose(vecstr args){
-		verbose = true;
-		return GTPResponse(true, "Verbose on");
+		if(args.size() >= 1)
+			verbose = from_str<bool>(args[0]);
+		else
+			verbose = !verbose;
+		return GTPResponse(true, "Verbose " + to_str(verbose));
 	}
 
 	GTPResponse gtp_hguicoords(vecstr args){
