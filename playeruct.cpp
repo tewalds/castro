@@ -107,12 +107,9 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 			if(child->outcome == toplay){ //proven win from here, don't need children
 				node->outcome = child->outcome;
 				node->bestmove = *move;
-				if(node != & player->root){
-					node->children.unlock();
-					temp.dealloc();
-					return true;
-				}
-				losses = -1000000; //set to something very negative to skip the part below
+				node->children.unlock();
+				temp.dealloc();
+				return true;
 			}
 		}
 
@@ -131,11 +128,9 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	}else if(losses >= 2){ //proven loss, but at least try to block one of them
 		node->outcome = 3 - toplay;
 		node->bestmove = loss->move;
-		if(node != &player->root){
-			node->children.unlock();
-			temp.dealloc();
-			return true;
-		}
+		node->children.unlock();
+		temp.dealloc();
+		return true;
 	}
 
 	PLUS(player->nodes, temp.num());

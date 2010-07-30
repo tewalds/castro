@@ -566,7 +566,7 @@ public:
 	vector<Move> get_pv();
 
 protected:
-	Node * return_move(const Node * node, int toplay) const;
+	Node * return_move(Node * node, int toplay) const;
 	Node * return_move_outcome(const Node * node, int outcome) const;
 };
 

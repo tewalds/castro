@@ -10,35 +10,46 @@
 Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 	maxnodes = memlimit*1024*1024/sizeof(Node);
 	time_used = 0;
+	int toplay = rootboard.toplay();
 
 	if(rootboard.won() >= 0 || (time <= 0 && maxruns == 0))
 		return Move(M_RESIGN);
 
 
-	int starttime = time_msec();
+	Time starttime;
 
 	Timer timer;
 	if(time > 0)
 		timer.set(time, bind(&Player::timedout, this));
 
-	root.outcome = -1;
+	//solve to depth 1 just in case this is a terminal node
+	if(root.outcome == -1 && root.children.empty()){
+		Solver solver;
+		solver.solve_ab(rootboard, 1, 2);
+		if(solver.outcome >= 0){
+			root.outcome = solver.outcome;
+			root.bestmove = solver.bestmove;
+		}
+	}
+
+
 	root.exp.addwins(visitexpand+1); //+1 to compensate for the virtual loss
 
 	//let them run!
-
-	if(!ponder)
-		sync.unlock(); //remove the write lock
+	if(root.outcome == -1){
+		if(!ponder)
+			sync.unlock(); //remove the write lock
 	
-	sync.wait(); //wait for the timer or solved
+		sync.wait(); //wait for the timer or solved
 
-	if(!ponder)
-		sync.wrlock(); //stop the runners
+		if(!ponder)
+			sync.wrlock(); //stop the runners
+	}
 
 //return the best one
-	Node * ret = return_move(& root, rootboard.toplay());
+	Node * ret = return_move(& root, toplay);
 
-	int runtime = time_msec() - starttime;
-	time_used = (double)runtime/1000;
+	time_used = Time() - starttime;
 
 	DepthStats gamelen, treelen;
 	int runs = 0;
@@ -49,21 +60,23 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 		threads[i]->reset();
 	}
 
-	string stats = "Finished " + to_str(runs) + " runs in " + to_str(runtime) + " msec\n";
-	stats += "Game length: " + gamelen.to_s() + "\n";
-	stats += "Tree depth:  " + treelen.to_s() + "\n";
-	stats += "Move Score:  " + to_str(ret->exp.avg()) + "\n";
-	stats += "Games/s:     " + to_str((int)((double)runs*1000/runtime)) + "\n";
-	if(ret->outcome >= 0){
+	string stats = "Finished " + to_str(runs) + " runs in " + to_str((int)(time_used*1000)) + " msec: " + to_str((int)(runs/time_used)) + " Games/s\n";
+	if(runs > 0){
+		stats += "Game length: " + gamelen.to_s() + "\n";
+		stats += "Tree depth:  " + treelen.to_s() + "\n";
+	}
+	if(ret)
+		stats += "Move Score:  " + to_str(ret->exp.avg()) + "\n";
+	if(root.outcome >= 0){
 		stats += "Solved as a ";
-		if(ret->outcome == 0)                       stats += "draw";
-		else if(ret->outcome == rootboard.toplay()) stats += "win";
-		else                                        stats += "loss";
+		if(root.outcome == 0)           stats += "draw";
+		else if(root.outcome == toplay) stats += "win";
+		else                            stats += "loss";
 		stats += "\n";
 	}
 	fprintf(stderr, "%s", stats.c_str());
 
-	return ret->move;
+	return root.bestmove;
 }
 
 vector<Move> Player::get_pv(){
@@ -83,15 +96,25 @@ vector<Move> Player::get_pv(){
 	return pv;
 }
 
-Player::Node * Player::return_move(const Node * node, int toplay) const {
-	Node * ret;
-	ret = return_move_outcome(node, toplay);     if(ret) return ret; //win
-	ret = return_move_outcome(node, -1);         if(ret) return ret; //unknown
-	ret = return_move_outcome(node, 0);          if(ret) return ret; //tie
-	ret = return_move_outcome(node, 3 - toplay); if(ret) return ret; //lose
+Player::Node * Player::return_move(Node * node, int toplay) const {
+	Node * ret = NULL;
+	if(!ret) ret = return_move_outcome(node, toplay);     //win
+	if(!ret) ret = return_move_outcome(node, -1);         //unknown
+	if(!ret) ret = return_move_outcome(node, 0);          //tie
+	if(!ret) ret = return_move_outcome(node, 3 - toplay); //lose
 
-	assert(ret);
-	return NULL;
+//set bestmove, but don't touch outcome, if it's solved that will already be set, otherwise it shouldn't be set
+	if(ret){
+		node->bestmove = ret->move;
+	}else if(node->bestmove == M_UNKNOWN){
+		Solver solver;
+		solver.solve_ab(rootboard, 1, 2);
+		node->bestmove = solver.bestmove;
+	}
+
+	assert(node->bestmove != M_UNKNOWN);
+
+	return ret;
 }
 
 Player::Node * Player::return_move_outcome(const Node * node, int outcome) const {
