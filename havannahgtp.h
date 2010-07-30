@@ -61,7 +61,6 @@ public:
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,       this, _1), "Generate a move: genmove [color] [time] [memory]");
 		newcallback("time_control",    bind(&HavannahGTP::gtp_time_control,  this, _1), "Set the algorithm for per game time, no args gives options");
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1), "Set the algorithm for the player, no args gives options");
-		newcallback("player_stats",    bind(&HavannahGTP::gtp_player_stats,  this, _1), "Gives some information about the last move");
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,     this, _1), "List all legal moves");
 		newcallback("history",         bind(&HavannahGTP::gtp_history,       this, _1), "List of played moves");
 		newcallback("havannah_winner", bind(&HavannahGTP::gtp_winner,        this, _1), "Check the winner of the game");
@@ -159,9 +158,9 @@ public:
 
 		while(num--){
 			game.undo();
-			player.set_board(game.getboard(-1));
 			log("undo");
 		}
+		player.set_board(game.getboard());
 		if(verbose)
 			return GTPResponse(true, "\n" + game.getboard().to_s());
 		else
@@ -368,7 +367,6 @@ public:
 
 		fprintf(stderr, "time left: %.1f, max time: %.3f, max runs: %i\n", time_remain, time, max_runs);
 
-		player.move(game.get_last());
 		player.rootboard.setswap(allow_swap);
 
 		Move best = player.genmove(time, max_runs, mem);
@@ -377,7 +375,6 @@ public:
 		if(time_remain < 0)
 			time_remain = 0;
 
-		game.move(best);
 
 		string pvstr = "";
 		vector<Move> pv = player.get_pv();
@@ -387,6 +384,20 @@ public:
 
 		log("#genmove " + implode(args, " "));
 		log(string("play ") + (game.toplay() == 2 ? 'w' : 'b') + ' ' + move_str(best, false));
+
+
+		if(verbose){
+			string s = "";
+			for(Player::Node * child = player.root.children.begin(); child != player.root.children.end(); child++){
+				s += move_str(child->move, true) + "-";
+				s += to_str(child->exp.avg(), 2) + "/" + to_str(child->exp.num()) + "-";
+				s += to_str(child->rave.avg(), 2) + "/" + to_str(child->rave.num()) + " ";
+			}
+			fprintf(stderr, "Exp-Rave:    %s\n", s.c_str());
+		}
+
+		player.move(best);
+		game.move(best);
 
 		return GTPResponse(true, move_str(best));
 	}
@@ -491,22 +502,6 @@ public:
 		return GTPResponse(true);
 	}
 
-	GTPResponse gtp_player_stats(vecstr args){
-		string s;
-		s += "Nodes: " + to_str(player.nodes) + "\n";
-		s += player.rootboard.to_s();
-
-		s += "Exp-Rave: ";
-		for(Player::Node * child = player.root.children.begin(); child != player.root.children.end(); child++){
-			s += move_str(child->move, true) + "-";
-			s += to_str(child->exp.avg(), 2) + "/" + to_str(child->exp.num()) + "-";
-			s += to_str(child->rave.avg(), 2) + "/" + to_str(child->rave.num()) + " ";
-		}
-		s += "\n";
-
-		return GTPResponse(true, s);
-	}
-
 	GTPResponse play(const string & pos, int toplay){
 		if(toplay != game.toplay())
 			return GTPResponse(false, "It is the other player's turn!");
@@ -519,7 +514,7 @@ public:
 		if(!game.valid(move))
 			return GTPResponse(false, "Invalid move");
 
-		player.move(game.get_last());
+		player.move(move);
 
 		game.move(move);
 
