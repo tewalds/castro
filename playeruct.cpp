@@ -13,7 +13,7 @@ void Player::PlayerUCT::run(){
 	while(!cancelled && player->root.outcome == -1){
 		player->sync.rdlock(); //wait for the write lock to come off
 
-		while(player->sync.relock() && player->root.outcome == -1){ //has the lock and not solved yet
+		while(player->sync.relock() && player->root.outcome == -1 && (maxruns == 0 || runs < maxruns)){ //has the lock and not solved yet
 			runs++;
 			Board copy = player->rootboard;
 			movelist.clear();

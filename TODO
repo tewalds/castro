@@ -13,10 +13,6 @@ build a linked list of empty moves so the move iterator can skip filled moves
 
 
 multi-thread
-- how to do max runs?
-  - assign a subset to each thread and assume they run approx the same rate?
-    - once the first finishes the others will get stopped by the write lock...
-  - shared counter?
 - different parameters (ie ravefactor) for each player thread?
   - useful for testing parameters at different parts of the game
   - need a different criteria for move selection, since several threads may be exploring the wrong part of the tree

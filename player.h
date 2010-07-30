@@ -299,10 +299,10 @@ public:
 		Player * player;
 		bool cancelled;
 	public:
-		int runs;
+		int runs, maxruns;
 		DepthStats treelen, gamelen;
 
-		PlayerThread() : cancelled(false) {}
+		PlayerThread() : cancelled(false), runs(0), maxruns(0) {}
 		virtual void reset() { }
 		void cancel(){ cancelled = true; }
 		int join(){ return thread.join(); }

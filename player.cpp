@@ -32,6 +32,14 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 		}
 	}
 
+	int runs = 0;
+	for(unsigned int i = 0; i < threads.size(); i++){
+		runs += threads[i]->runs;
+		threads[i]->reset();
+		threads[i]->maxruns = maxruns;
+	}
+	if(runs)
+		fprintf(stderr, "Pondered %i runs\n", runs);
 
 	root.exp.addwins(visitexpand+1); //+1 to compensate for the virtual loss
 
@@ -52,7 +60,7 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 	time_used = Time() - starttime;
 
 	DepthStats gamelen, treelen;
-	int runs = 0;
+	runs = 0;
 	for(unsigned int i = 0; i < threads.size(); i++){
 		gamelen += threads[i]->gamelen;
 		treelen += threads[i]->treelen;
