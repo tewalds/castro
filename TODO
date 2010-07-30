@@ -21,16 +21,9 @@ multi-thread
   - useful for testing parameters at different parts of the game
   - need a different criteria for move selection, since several threads may be exploring the wrong part of the tree
     - highest lower bound?
-- ponder continues calculating the current move, not the opponents move
-  - make the move as soon as it is generated?
-  - output the stats in verbose/debug mode?
 
 is set_defaults needed? resets thead count...
 
-
-ponder
-- once a move is generated, it isn't made until the next move is registered
-  - usefulf for knowing the results, bad for pondering, continues to think about the previous move
 
 share the tree between the player and solver
 - add phi/delta to UCTNode
