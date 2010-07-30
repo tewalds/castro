@@ -403,7 +403,6 @@ public:
 
 	static const float min_rave = 0.1;
 
-	bool  defaults;   //use the default settings on board reset
 	bool  ponder;     //think during opponents time?
 	int   numthreads; //number of player threads to run
 //tree traversal
@@ -440,14 +439,6 @@ public:
 		nodes = 0;
 		time_used = 0;
 
-		set_default_params();
-
-		if(!ponder)
-			sync.wrlock();
-	}
-	void set_default_params(){
-		int s = rootboard.get_size();
-		defaults    = true;
 		ponder      = false;
 		numthreads  = 1;
 		explore     = 0;
@@ -467,6 +458,11 @@ public:
 		rolloutpattern = true;
 		lastgoodreply = false;
 		instantwin  = 0;
+
+		//no threads started until a board is set
+
+		if(!ponder)
+			sync.wrlock();
 	}
 	~Player(){
 		if(ponder)
@@ -510,9 +506,6 @@ public:
 		rootboard = board;
 		nodes -= root.dealloc();
 		root = Node();
-
-		if(defaults)
-			set_default_params();
 
 		reset_threads();
 

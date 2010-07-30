@@ -22,8 +22,6 @@ multi-thread
   - need a different criteria for move selection, since several threads may be exploring the wrong part of the tree
     - highest lower bound?
 
-is set_defaults needed? resets thead count...
-
 
 share the tree between the player and solver
 - add phi/delta to UCTNode
