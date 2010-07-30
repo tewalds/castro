@@ -27,19 +27,6 @@ multi-thread
 
 is set_defaults needed? resets thead count...
 
-if the root is solved, don't need to let the threads run since they already quit
-- may need to calculate one or two ply if it was implicit
-
-
-child allocation
-- lock the node
-  - on failure, do a random game
-  - set _num = -1 ?
-  - must relax consistency assertions
-- create a new node
-- create children
-- swap the tree into place
-
 
 ponder
 - once a move is generated, it isn't made until the next move is registered
