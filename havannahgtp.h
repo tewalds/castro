@@ -406,17 +406,19 @@ public:
 		if(args.size() == 0)
 			return GTPResponse(true, string("\n") +
 				"Set player parameters, eg: player_params -e 1 -f 0 -t 2 -o 1 -p 0\n" +
-				"  -t --threads     Number of UCT threads                             [" + to_str(player.numthreads) + "]\n" +
+				"Processing:\n" +
+				"  -t --threads     Number of MCTS threads                            [" + to_str(player.numthreads) + "]\n" +
 				"  -o --ponder      Continue to ponder during the opponents time      [" + to_str(player.ponder) + "]\n" +
 				"Tree traversal:\n" +
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
 				"  -a --knowfactor  The knowledge factor: kf*know/sqrt(visits+1)      [" + to_str(player.knowfactor) + "]\n" +
 				"  -i --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
+				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
+				"Tree building:\n" +
 				"  -s --shortrave   Only use moves from short rollouts for rave       [" + to_str(player.shortrave) + "]\n" +
 				"  -k --keeptree    Keep the tree from the previous move              [" + to_str(player.keeptree) + "]\n" +
 				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
-				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
 				"  -x --visitexpand Number of visits before expanding a node          [" + to_str(player.visitexpand) + "]\n" +
 				"Node initialization knowledge:\n" +
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
