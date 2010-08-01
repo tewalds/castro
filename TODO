@@ -27,6 +27,7 @@ share the tree between the player and solver
 - phi/delta as knowledge again?
 - thread safety?
 - run multiple different solvers? dfpnsab/pnsab
+- how to deal with pns not handling ties?
 
 
 avoid symmetry for the first 3-5 moves, or just build an opening book
