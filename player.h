@@ -394,8 +394,9 @@ public:
 		}
 		int wait(){   //waits for the signal
 			cond.lock(); //lock the signal that defines the end condition
-			cond.wait(); //wait a signal to end (could be from the timer)
+			int ret = cond.wait(); //wait a signal to end (could be from the timer)
 			cond.unlock();
+			return ret;
 		}
 	};
 
@@ -473,7 +474,7 @@ public:
 
 	void reset_threads(){ //better have the write lock before calling this
 	//kill all the threads
-		for(int i = 0; i < threads.size(); i++)
+		for(unsigned int i = 0; i < threads.size(); i++)
 			threads[i]->cancel();
 
 		sync.unlock(); //let the runners run and exit
@@ -481,7 +482,7 @@ public:
 		sync.wrlock(); //wait for the runners to exit
 
 	//make sure they exited cleanly
-		for(int i = 0; i < threads.size(); i++)
+		for(unsigned int i = 0; i < threads.size(); i++)
 			threads[i]->join();
 
 		threads.clear();
