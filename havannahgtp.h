@@ -129,7 +129,7 @@ public:
 
 	GTPResponse gtp_boardsize(vecstr args){
 		if(args.size() != 1)
-			return GTPResponse(false, "Wrong number of arguments");
+			return GTPResponse(false, "Current board size: " + to_str(game.getsize()));
 
 		log("boardsize " + args[0]);
 
