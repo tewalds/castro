@@ -10,6 +10,9 @@ do 2 ply search at node initialization if certain conditions are met
 - ring  if group size >= 5
 
 build a linked list of empty moves so the move iterator can skip filled moves
+- probably not worth it since the iterator is used so rarely
+- could build a doubly linked list since memory in this area is cheap
+- more expensive in the solver than the player
 
 
 multi-thread
