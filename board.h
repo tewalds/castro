@@ -325,7 +325,7 @@ public:
 
 	// recursively follow a ring
 	bool detectring(const Move & pos, char turn){
-		for(int i = 0; i < 6; i++){
+		for(int i = 0; i < 4; i++){ //4 instead of 6 since any ring must have its first endpoint in the first 4
 			Move loc = pos + neighbours[i];
 			
 			if(onboard(loc) && turn == get(loc) && followring(pos, loc, i, turn))
