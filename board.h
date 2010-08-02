@@ -374,7 +374,7 @@ public:
 			Move loc = pos + neighbours[i];
 		
 			if(onboard(loc)){
-				cells[xy(loc)].local |= 3;
+				cells[xy(loc)].local = 3;
 				if(local && turn == get(loc)){
 					alreadyjoined |= join_groups(pos, loc);
 					i++; //skip the next one. If it is the same group,
