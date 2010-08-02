@@ -37,7 +37,7 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 
 			if(child->outcome == -1){
 				movelist.add(child->move, toplay);
-				assert(board.move(child->move, player->locality));
+				assert(board.move(child->move, (player->minimax == 0), player->locality));
 
 				child->exp.addvloss();
 

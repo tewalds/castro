@@ -346,7 +346,7 @@ public:
 		return false;
 	}
 
-	bool move(const Move & pos, bool locality = false){
+	bool move(const Move & pos, bool checkwin = true, bool locality = false){
 		if(!valid_move(pos))
 			return false;
 
@@ -383,11 +383,13 @@ public:
 			}
 		}
 
-		Cell * g = & cells[find_group(pos)];
-		if(g->numcorners() >= 2 || g->numedges() >= 3 || (alreadyjoined && g->size >= 6 && detectring(pos, turn))){
-			outcome = turn;
-		}else if(nummoves == numcells()){
-			outcome = 0;
+		if(checkwin){
+			Cell * g = & cells[find_group(pos)];
+			if(g->numcorners() >= 2 || g->numedges() >= 3 || (alreadyjoined && g->size >= 6 && detectring(pos, turn))){
+				outcome = turn;
+			}else if(nummoves == numcells()){
+				outcome = 0;
+			}
 		}
 		return true;	
 	}

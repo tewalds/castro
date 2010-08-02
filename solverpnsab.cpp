@@ -105,7 +105,7 @@ bool Solver::pnsab(const Board & board, PNSNode * node, int depth){
 		PNSNode * child = &(node->children[i]);
 
 		Board next = board;
-		next.move(child->move);
+		next.move(child->move, false);
 		mem = pnsab(next, child, depth + 1);
 
 		if(child->phi == 0 || child->delta == 0)

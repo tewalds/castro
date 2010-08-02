@@ -112,7 +112,7 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp
 		}
 
 		Board next = board;
-		next.move(c1->move);
+		next.move(c1->move, false);
 		
 		uint32_t tpc = min(INF32/2, (td + c1->phi - node->delta));
 		uint32_t tdc = min(tp, (uint32_t)(c2->delta*(1.0 + epsilon) + 1));
