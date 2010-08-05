@@ -14,6 +14,12 @@ build a linked list of empty moves so the move iterator can skip filled moves
 - could build a doubly linked list since memory in this area is cheap
 - more expensive in the solver than the player
 
+final move selection
+- what to do when the node with the most work is solved as a loss, but there is an unsolved node with little experience
+  - might be an easy win for the opponent
+- fast wins
+- slow loss/ties
+
 
 multi-thread
 - different parameters (ie ravefactor) for each player thread?
