@@ -411,10 +411,11 @@ public:
 	float ravefactor; //big numbers favour rave scores, small ignore it
 	float knowfactor; //weight to give to knowledge values
 	int   skiprave;   //how often to skip rave, skip once in this many checks
+	float fpurgency;  //what value to return for a move that hasn't been played yet
+//tree building
 	bool  shortrave;  //only update rave values on short rollouts
 	bool  keeptree;   //reuse the tree from the previous move
 	int   minimax;    //solve the minimax tree within the uct tree
-	float fpurgency;  //what value to return for a move that hasn't been played yet
 	uint  visitexpand;//number of visits before expanding a node
 //knowledge
 	bool  localreply; //boost for a local reply, ie a move near the previous move
@@ -446,10 +447,10 @@ public:
 		ravefactor  = 1000;
 		knowfactor  = 0.02;
 		skiprave    = 0;
+		fpurgency   = 1;
 		shortrave   = false;
 		keeptree    = true;
 		minimax     = 2;
-		fpurgency   = 1;
 		visitexpand = 1;
 		localreply  = false;
 		locality    = false;
