@@ -259,11 +259,11 @@ public:
 			return Move(M_SWAP);
 
 		Move m;
-		m.x = tolower(str[0]) - 'a';
-		m.y = atoi(str.c_str() + 1) - 1;
+		m.y = tolower(str[0]) - 'a';
+		m.x = atoi(str.c_str() + 1) - 1;
 
-		if(!hguicoords && m.x >= game.getsize())
-			m.y += m.x + 1 - game.getsize();
+		if(!hguicoords && m.y >= game.getsize())
+			m.x += m.y + 1 - game.getsize();
 
 		return m;
 	}
@@ -281,10 +281,10 @@ public:
 		if(m == M_SWAP)    return "swap";
 		if(m == M_RESIGN)  return "resign";
 
-		if(!hguic && m.x >= game.getsize())
-			m.y -= m.x + 1 - game.getsize();
+		if(!hguic && m.y >= game.getsize())
+			m.x -= m.y + 1 - game.getsize();
 
-		return string() + char(m.x + 'a') + to_str(m.y + 1);
+		return string() + char(m.y + 'a') + to_str(m.x + 1);
 	}
 
 	GTPResponse gtp_all_legal(vecstr args){

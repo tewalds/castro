@@ -202,17 +202,17 @@ public:
 
 	string to_s() const {
 		string s;
-		s += string(size + 5, ' ');
+		s += string(size + 4, ' ');
 		for(int i = 0; i < size; i++){
-			s += char('A' + i);
+			s += to_str(i+1);
 			s += " ";
 		}
 		s += "\n";
 
 		for(int y = 0; y < size_d; y++){
 			s += string(abs(size-1 - y) + 2, ' ');
-			if(y < 9) s += " ";
-			s += to_str(y+1) + " ";
+			s += char('A' + y);
+			s += " ";
 			for(int x = linestart(y); x < lineend(y); x++){
 				int p = get(x, y);
 				if(p == 0) s += '.';
@@ -221,7 +221,7 @@ public:
 				s += ' ';
 			}
 			if(y < size-1)
-				s += char('A' + size + y);
+				s += to_str(1 + size + y);
 			s += '\n';
 		}
 		return s;
