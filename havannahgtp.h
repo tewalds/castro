@@ -386,14 +386,19 @@ public:
 		log(string("play ") + (game.toplay() == 2 ? 'w' : 'b') + ' ' + move_str(best, false));
 
 
-		if(verbose){
+		if(verbose && !player.root.children.empty()){
 			string s = "";
-			for(Player::Node * child = player.root.children.begin(); child != player.root.children.end(); child++){
-				s += move_str(child->move, true) + "-";
-				s += to_str(child->exp.avg(), 2) + "/" + to_str(child->exp.num()) + "-";
-				s += to_str(child->rave.avg(), 2) + "/" + to_str(child->rave.num()) + " ";
+			Player::Node * child = player.root.children.begin(),
+			             * childend = player.root.children.end();
+			for( ; child != childend; child++){
+				s += move_str(child->move, true);
+				s += "," + to_str(child->exp.avg(), 2) + "," + to_str(child->exp.num());
+				s += "," + to_str(child->rave.avg(), 2) + "," + to_str(child->rave.num());
+				if(child->outcome >= 0)
+					s += "," + won_str(child->outcome);
+				s += "\n";
 			}
-			fprintf(stderr, "Exp-Rave:    %s\n", s.c_str());
+			fprintf(stderr, "Exp-Rave:    %s", s.c_str());
 		}
 
 		player.move(best);
