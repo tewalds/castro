@@ -406,6 +406,9 @@ public:
 
 	bool  ponder;     //think during opponents time?
 	int   numthreads; //number of player threads to run
+//final move selection
+	float msrave;     //rave factor in final move selection, -1 means use number instead of value
+	float msexplore;  //the UCT constant in final move selection
 //tree traversal
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
@@ -443,19 +446,26 @@ public:
 
 		ponder      = false;
 		numthreads  = 1;
+
+		msrave      = -1;
+		msexplore   = 1.0;
+
 		explore     = 0;
 		ravefactor  = 1000;
 		knowfactor  = 0.02;
 		skiprave    = 0;
 		fpurgency   = 1;
+
 		shortrave   = false;
 		keeptree    = true;
 		minimax     = 2;
 		visitexpand = 1;
+
 		localreply  = false;
 		locality    = false;
 		connect     = false;
 		bridge      = true;
+
 		weightedrandom = false;
 		rolloutpattern = true;
 		lastgoodreply = false;
@@ -562,7 +572,6 @@ public:
 
 protected:
 	Node * return_move(Node * node, int toplay) const;
-	Node * return_move_outcome(const Node * node, int outcome) const;
 };
 
 #endif

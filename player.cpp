@@ -90,12 +90,14 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 vector<Move> Player::get_pv(){
 	vector<Move> pv;
 
-	Node * n = & root;
+	Node * r, * n = & root;
 	char turn = rootboard.toplay();
 	while(!n->children.empty()){
-		n = return_move(n, turn);
-		pv.push_back(n->move);
+		r = return_move(n, turn);
+		if(!r) break;
+		pv.push_back(r->move);
 		turn = 3 - turn;
+		n = r;
 	}
 
 	if(pv.size() == 0)
@@ -105,11 +107,29 @@ vector<Move> Player::get_pv(){
 }
 
 Player::Node * Player::return_move(Node * node, int toplay) const {
-	Node * ret = NULL;
-	if(!ret) ret = return_move_outcome(node, toplay);     //win
-	if(!ret) ret = return_move_outcome(node, -1);         //unknown
-	if(!ret) ret = return_move_outcome(node, 0);          //tie
-	if(!ret) ret = return_move_outcome(node, 3 - toplay); //lose
+	double val, maxval = -10000000000.0; //10 billion
+
+	Node * ret = NULL,
+		 * child = node->children.begin(),
+		 * end = node->children.end();
+
+	for( ; child != end; child++){
+		if(child->outcome != -1){
+			if(child->outcome == toplay) val =  8000000000.0 - child->exp.num(); //shortest win
+			else if(child->outcome == 0) val = -4000000000.0 + child->exp.num(); //longest tie
+			else                         val = -8000000000.0 + child->exp.num(); //longest loss
+		}else{ //not proven
+			if(msrave < 0)
+				val = child->exp.num();
+			else
+				val = child->value(msrave, 0, 0) - msexplore*sqrt(log(node->exp.num())/(child->exp.num() + 1));
+		}
+
+		if(maxval < val){
+			maxval = val;
+			ret = child;
+		}
+	}
 
 //set bestmove, but don't touch outcome, if it's solved that will already be set, otherwise it shouldn't be set
 	if(ret){
@@ -124,29 +144,4 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 
 	return ret;
 }
-
-Player::Node * Player::return_move_outcome(const Node * node, int outcome) const {
-	int val, maxval = -1000000000;
-
-	Node * ret = NULL,
-		 * child = node->children.begin(),
-		 * end = node->children.end();
-
-	for( ; child != end; child++){
-
-		if(child->outcome != outcome)
-			continue;
-
-		val = child->exp.num();
-//		val = child->exp.avg();
-
-		if(maxval < val){
-			maxval = val;
-			ret = child;
-		}
-	}
-
-	return ret;
-}
-
 

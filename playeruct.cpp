@@ -15,6 +15,7 @@ void Player::PlayerUCT::run(){
 
 		while(player->sync.relock() && player->root.outcome == -1 && (maxruns == 0 || runs < maxruns)){ //has the lock and not solved yet
 			runs++;
+			player->root.exp.addvloss();
 			Board copy = player->rootboard;
 			movelist.clear();
 			walk_tree(copy, & player->root, movelist, 0);

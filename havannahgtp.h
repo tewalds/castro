@@ -414,6 +414,9 @@ public:
 				"Processing:\n" +
 				"  -t --threads     Number of MCTS threads                            [" + to_str(player.numthreads) + "]\n" +
 				"  -o --ponder      Continue to ponder during the opponents time      [" + to_str(player.ponder) + "]\n" +
+				"Final move selection:\n" +
+				"  -E --msexplore   Lower bound constant in final move selection      [" + to_str(player.msexplore) + "]\n" +
+				"  -F --msrave      Rave factor, 0 for pure exp, -1 for # of sims     [" + to_str(player.msrave) + "]\n" +
 				"Tree traversal:\n" +
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
@@ -448,6 +451,10 @@ public:
 				player.set_ponder(p);
 			}else if((arg == "-o" || arg == "--ponder") && i+1 < args.size()){
 				player.set_ponder(from_str<bool>(args[++i]));
+			}else if((arg == "-E" || arg == "--msexplore") && i+1 < args.size()){
+				player.msexplore = from_str<float>(args[++i]);
+			}else if((arg == "-F" || arg == "--msrave") && i+1 < args.size()){
+				player.msrave = from_str<float>(args[++i]);
 			}else if((arg == "-e" || arg == "--explore") && i+1 < args.size()){
 				player.explore = from_str<float>(args[++i]);
 			}else if((arg == "-f" || arg == "--ravefactor") && i+1 < args.size()){
