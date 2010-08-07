@@ -55,14 +55,9 @@ function players_list($input){
 			<td><input type="text" name="names[]"   value="" size=40 /></td>
 			<td><input type="text" name="weights[]" value="" size=5  /></td>
 			<td><input type="text" name="params[]"  value="" size=30 /></td>
-		</tr><tr id="before">
+		</tr><tr id="before" class='f'>
 			<td colspan="3">
-				<a class="body" href="#" onClick="copyInputRow('addplayers','before'); return false;">Add a row</a>. Blank rows will be ignored.
-			</td>
-		</tr>
-		<tr>
-			<td colspan="3" align="center">
-				<input type="submit" value="Add Players" />
+				<input type="submit" value="Add Players" /> <a class="body" href="javascript: copyInputRow('addplayers','before'); void(0);">Add a row</a>. Blank rows will be ignored.
 			</td>
 		</tr>
 	</table>
@@ -131,8 +126,6 @@ function players_update($input){
 
 function players_add($input){
 	global $db;
-
-print_r($input);
 
 	for($i = 0; $i < count($input['names']); $i++){
 		if(empty($input['names'][$i]) || !isset($input['weights'][$i]) || empty($input['params'][$i]))
