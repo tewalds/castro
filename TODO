@@ -3,6 +3,7 @@
 detect dead areas, areas where your opponent has limited you to one corner or two sides and no rings
 - negative knowledge?
 - really dead (completely enclosed) vs almost/temporarily dead (enclosed with VCs)?
+- still useful to block opponent wins?
 
 do 2 ply search at node initialization if certain conditions are met
 - 1 corner and group size >= board size - 1
@@ -17,6 +18,7 @@ build a linked list of empty moves so the move iterator can skip filled moves
 final move selection
 - what to do when the node with the most work is solved as a loss, but there is an unsolved node with little experience
   - might be an easy win for the opponent
+  - take extra time if possible
 - fast wins
 - slow loss/ties
 
