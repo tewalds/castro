@@ -490,15 +490,15 @@ public:
 		for(unsigned int i = 0; i < threads.size(); i++)
 			threads[i]->cancel();
 
-		sync.unlock(); //let the runners run and exit
-		usleep(10);    //seems to be needed to allow the runners to be scheduled
-		sync.wrlock(); //wait for the runners to exit
+		sync.unlock(); //let the runners run and exit since rdlock is not a cancellation point
 
 	//make sure they exited cleanly
 		for(unsigned int i = 0; i < threads.size(); i++)
 			threads[i]->join();
 
 		threads.clear();
+
+		sync.wrlock(); //lock so the new threads don't run
 
 	//start new threads
 		for(int i = 0; i < numthreads; i++)
