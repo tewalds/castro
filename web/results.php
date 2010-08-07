@@ -162,23 +162,22 @@ function showresults($input){
 	if($input['data']){
 		echo "<br><br>";
 		echo "<table>";
-		echo "<tr bgcolor='#DDDDDD'>";
-		echo "<td>Player ID</td>";
-		echo "<td>Player Name</td>";
-		echo "<td>Board size</td>";
-		echo "<td>Win rate</td>";
-		echo "<td>95% confidence</td>";
-		echo "<td>Wins</td>";
-		echo "<td>Losses</td>";
-		echo "<td>Ties</td>";
-		echo "<td>Games</td>";
+		echo "<tr>";
+		echo "<th>Player ID</th>";
+		echo "<th>Player Name</th>";
+		echo "<th>Board size</th>";
+		echo "<th>Win rate</th>";
+		echo "<th>95% confidence</th>";
+		echo "<th>Wins</th>";
+		echo "<th>Losses</th>";
+		echo "<th>Ties</th>";
+		echo "<th>Games</th>";
 		echo "</tr>";
-		$colors = array('#F7F7F7', '#EFEFEF');
-		$i = 0;
+		$i = 1;
 		foreach($data as $row){
 			$rate = ($row['wins'] + $row['ties']/2.0)/$row['numgames'];
 			$err = 2.0*sqrt($rate*(1-$rate)/$row['numgames']);
-			echo "<tr bgcolor='$colors[$i]'>";
+			echo "<tr class='l" . ($i = 3 - $i) . "'>";
 			echo "<td>$row[player]</td>";
 			echo "<td>$row[name]</td>";
 			echo "<td>$row[size]</td>";
@@ -189,7 +188,6 @@ function showresults($input){
 			echo "<td>$row[ties]</td>";
 			echo "<td>$row[numgames]</td>";
 			echo "</tr>";
-			$i = 1-$i;
 		}
 		echo "</table>";
 	}
@@ -205,27 +203,52 @@ function gethosts($input){
 
 	echo "<table>";
 	echo "<tr>";
-	echo "<td>Host</td>";
-	echo "<td>Games</td>";
+	echo "<th>Host</th>";
+	echo "<th>Games</th>";
 	echo "</tr>";
+	$i = 1;
 	$sum = 0;
 	foreach($data as $row){
-		echo "<tr>";
+		echo "<tr class='l" . ($i = 3 - $i) . "'>";
 		echo "<td>$row[host]</td>";
 		echo "<td>$row[count]</td>";
 		echo "</tr>";
 		$sum += $row['count'];
 	}
-	echo "<tr>";
+	echo "<tr class='f'>";
 	echo "<td>" . count($data) . "</td>";
 	echo "<td>$sum</td>";
 	echo "</tr>";
+	echo "</table>";
+
+	return true;
 }
 
 function getrecent($input){
 	global $db;
 
+	$data = $db->query("SELECT players.name, count(*) as count FROM games, players WHERE games.player = players.player && timestamp > UNIX_TIMESTAMP()-3600 GROUP BY name ORDER BY name")->fetchrowset();
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>Player</th>";
+	echo "<th>Games</th>";
+	echo "</tr>";
+	$i = 1;
+	$sum = 0;
+	foreach($data as $row){
+		echo "<tr class='l" . ($i = 3 - $i) . "'>";
+		echo "<td>$row[name]</td>";
+		echo "<td>$row[count]</td>";
+		echo "</tr>";
+		$sum += $row['count'];
+	}
+	echo "<tr class='f'>";
+	echo "<td>" . count($data) . "</td>";
+	echo "<td>$sum</td>";
+	echo "</tr>";
+	echo "</table>";
 
+	return true;
 }
 
 
