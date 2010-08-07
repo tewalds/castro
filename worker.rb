@@ -55,7 +55,9 @@ def loop_fork(concurrency, &block)
 
 	loop {
 		children << fork {
-			block.call
+			loop {
+				block.call
+			}
 			exit;
 		}
 
