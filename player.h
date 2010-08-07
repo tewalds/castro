@@ -22,6 +22,8 @@ public:
 		ExpPair() : s(0), n(0) { }
 		float avg() const { return 0.5f*s/n; }
 		uint32_t num() const { return n; }
+		uint32_t sum() const { return s/2; }
+
 		void addvloss(){ INCR(n); }
 		void addvtie() { INCR(s); }
 		void addvwin() { PLUS(s, 2); }

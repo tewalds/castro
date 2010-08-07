@@ -119,8 +119,10 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 			else if(child->outcome == 0) val = -4000000000.0 + child->exp.num(); //longest tie
 			else                         val = -8000000000.0 + child->exp.num(); //longest loss
 		}else{ //not proven
-			if(msrave < 0)
+			if(msrave == -1) //num simulations
 				val = child->exp.num();
+			else if(msrave == -2) //num wins
+				val = child->exp.sum();
 			else
 				val = child->value(msrave, 0, 0) - msexplore*sqrt(log(node->exp.num())/(child->exp.num() + 1));
 		}
