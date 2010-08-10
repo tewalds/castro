@@ -420,7 +420,7 @@ public:
 				"Tree traversal:\n" +
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
-				"  -a --knowfactor  The knowledge factor: kf*know/sqrt(visits+1)      [" + to_str(player.knowfactor) + "]\n" +
+				"  -a --knowledge   Use knowledge: 0.01*know/sqrt(visits+1)           [" + to_str(player.knowledge) + "]\n" +
 				"  -i --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
 				"Tree building:\n" +
@@ -459,8 +459,8 @@ public:
 				player.explore = from_str<float>(args[++i]);
 			}else if((arg == "-f" || arg == "--ravefactor") && i+1 < args.size()){
 				player.ravefactor = from_str<float>(args[++i]);
-			}else if((arg == "-a" || arg == "--knowfactor") && i+1 < args.size()){
-				player.knowfactor = from_str<float>(args[++i]);
+			}else if((arg == "-a" || arg == "--knowledge") && i+1 < args.size()){
+				player.knowledge = from_str<bool>(args[++i]);
 			}else if((arg == "-i" || arg == "--skiprave") && i+1 < args.size()){
 				player.skiprave = from_str<int>(args[++i]);
 			}else if((arg == "-s" || arg == "--shortrave") && i+1 < args.size()){
@@ -474,13 +474,13 @@ public:
 			}else if((arg == "-x" || arg == "--visitexpand") && i+1 < args.size()){
 				player.visitexpand = from_str<uint>(args[++i]);
 			}else if((arg == "-l" || arg == "--localreply") && i+1 < args.size()){
-				player.localreply = from_str<bool>(args[++i]);
+				player.localreply = from_str<int>(args[++i]);
 			}else if((arg == "-y" || arg == "--locality") && i+1 < args.size()){
-				player.locality = from_str<bool>(args[++i]);
+				player.locality = from_str<int>(args[++i]);
 			}else if((arg == "-c" || arg == "--connect") && i+1 < args.size()){
-				player.connect = from_str<bool>(args[++i]);
+				player.connect = from_str<int>(args[++i]);
 			}else if((arg == "-b" || arg == "--bridge") && i+1 < args.size()){
-				player.bridge = from_str<bool>(args[++i]);
+				player.bridge = from_str<int>(args[++i]);
 			}else if((arg == "-h" || arg == "--weightrand") && i+1 < args.size()){
 				player.weightedrandom = from_str<bool>(args[++i]);
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){

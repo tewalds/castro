@@ -190,7 +190,7 @@ public:
 		}
 //*
 		//new way, more standard way of changing over from rave scores to real scores
-		float value(float ravefactor, float knowfactor, float fpurgency){
+		float value(float ravefactor, bool knowledge, float fpurgency){
 			float val = fpurgency;
 
 			if(ravefactor <= min_rave){
@@ -206,8 +206,8 @@ public:
 				if(exp.num())  val += (1-alpha)*exp.avg();
 			}
 
-			if(know > 0)
-				val += knowfactor * know / sqrt((float)(exp.num() + 1));
+			if(knowledge && know > 0)
+				val += 0.01f * know / sqrt((float)(exp.num() + 1));
 
 			return val;
 		}
@@ -414,7 +414,7 @@ public:
 //tree traversal
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
-	float knowfactor; //weight to give to knowledge values
+	bool  knowledge;  //whether to include knowledge
 	int   skiprave;   //how often to skip rave, skip once in this many checks
 	float fpurgency;  //what value to return for a move that hasn't been played yet
 //tree building
@@ -423,10 +423,10 @@ public:
 	int   minimax;    //solve the minimax tree within the uct tree
 	uint  visitexpand;//number of visits before expanding a node
 //knowledge
-	bool  localreply; //boost for a local reply, ie a move near the previous move
-	bool  locality;   //boost for playing near previous stones
-	bool  connect;    //boost for having connections to edges and corners
-	bool  bridge;     //boost replying to a probe at a bridge
+	int   localreply; //boost for a local reply, ie a move near the previous move
+	int   locality;   //boost for playing near previous stones
+	int   connect;    //boost for having connections to edges and corners
+	int   bridge;     //boost replying to a probe at a bridge
 //rollout
 	bool  weightedrandom; //use a weighted shuffle for move ordering, based on the rave results
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
@@ -454,7 +454,7 @@ public:
 
 		explore     = 0;
 		ravefactor  = 1000;
-		knowfactor  = 0.02;
+		knowledge   = true;
 		skiprave    = 0;
 		fpurgency   = 1;
 
@@ -463,10 +463,10 @@ public:
 		minimax     = 2;
 		visitexpand = 1;
 
-		localreply  = false;
-		locality    = false;
-		connect     = false;
-		bridge      = true;
+		localreply  = 0;
+		locality    = 0;
+		connect     = 20;
+		bridge      = 10;
 
 		weightedrandom = false;
 		rolloutpattern = true;

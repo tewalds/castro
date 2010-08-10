@@ -158,7 +158,7 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay) con
 
 			val = (child->outcome == 0 ? -1 : -2); //-1 for tie so any unknown is better, -2 for loss so it's even worse
 		}else{
-			val = child->value(raveval, player->knowfactor, player->fpurgency) + player->explore*sqrt(logvisits/(child->exp.num() + 1));
+			val = child->value(raveval, player->knowledge, player->fpurgency) + player->explore*sqrt(logvisits/(child->exp.num() + 1));
 		}
 
 		if(maxval < val){
@@ -241,17 +241,17 @@ void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
 	if(player->localreply){ //boost for moves near the previous move
 		int dist = node->move.dist(child->move);
 		if(dist < 4)
-			child->know += 4 - dist;
+			child->know += player->localreply*(4 - dist);
 	}
 
 	if(player->locality) //boost for moves near previous stones
-		child->know += board.local(child->move);
+		child->know += player->locality*board.local(child->move);
 
 	if(player->connect) //boost for moves that connect to edges/corners
-		child->know += board.test_connectivity(child->move);
+		child->know += player->connect*board.test_connectivity(child->move);
 
 	if(player->bridge && test_bridge_probe(board, node->move, child->move)) //boost for maintaining a virtual connection
-		child->know += 5;
+		child->know += player->bridge;
 }
 
 //test whether this move is a forced reply to the opponent probing your virtual connections
