@@ -10,7 +10,7 @@ $router->add("GET", "/info", "home.php", "info", null);
 $router->add("GET", "/get", "home.php", "get", array("test" => "string"));
 $router->add("POST","/post", "home.php", "post", array("test" => "string"));
 
-$router->add("GET", "/results", "results.php", "showresults", array("baselines" => "array", "times" => "array", "players" => "array", "errorbars" => "bool", "data" => "bool"));
+$router->add("GET", "/results", "results.php", "showresults", array("baselines" => "array", "times" => "array", "players" => "array", "errorbars" => "bool", "simpledata" => "bool", "data" => "bool"));
 $router->add("GET", "/results/hosts", "results.php", "gethosts", null);
 $router->add("GET", "/results/recent", "results.php", "getrecent", null);
 

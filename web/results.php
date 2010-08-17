@@ -14,7 +14,7 @@ function askresults($input){
 		<tr>
 			<td valign=top>
 				Players:<br>
-				<select name=players[] multiple=multiple size=13 style='width: 375px'><?= make_select_list_multiple_key($players, $input['players']) ?></select>
+				<select name=players[] multiple=multiple size=15 style='width: 375px'><?= make_select_list_multiple_key($players, $input['players']) ?></select>
 			</td>
 			<td valign=top>
 				Baselines:<br>
@@ -24,6 +24,7 @@ function askresults($input){
 				<select name=times[] multiple=multiple style='width: 500px'><?= make_select_list_multiple_key($timelimits, $input['times']) ?></select>
 				<br><br>
 				<?= makeCheckBox("errorbars", "Show Errorbars", $input['errorbars']) ?><br>
+				<?= makeCheckBox("simpledata", "Show Simple Data", $input['simpledata']) ?><br>
 				<?= makeCheckBox("data", "Show Data", $input['data']) ?><br>
 				<br>
 				<input type=submit value="Show Graph!"> <?= $numgames ?> games logged
@@ -114,7 +115,8 @@ function showresults($input){
 
 	$num = count($chd);
 
-	foreach($chd as & $line)  $line = implode(",", $line);
+	$chdlines = $chd;
+	foreach($chdlines as & $line)  $line = implode(",", $line);
 
 	$errorlines = "";
 	if($input['errorbars'])
@@ -135,7 +137,7 @@ function showresults($input){
 //			"&chxp=2,50|3,50" . //center the labels
 			"&chco=$chco" . //line colours
 //			"&chdl=" . implode("|", $legend) . //legend
-			"&chd=t$num:" . implode("|", $chd) . $errorlines . //data lines and errorlines
+			"&chd=t$num:" . implode("|", $chdlines) . $errorlines . //data lines and errorlines
 			"&chm=h,FF0000,0,0.5,1";
 	if($input['errorbars']){
 		$i = 0;
@@ -157,6 +159,41 @@ function showresults($input){
 	}
 	echo "</table>";
 	echo "</td></tr></table>";	
+
+	if($input['simpledata']){
+?>
+		<br><br>
+		<table width=800>
+		<tr>
+		<th colspan=2>Player</th>
+		<th colspan=7>Board size</th>
+		<th rowspan=2>Avg</th>
+		</tr>
+		<tr>
+		<th>ID</th>
+		<th>Name</th>
+		<th>4</th>
+		<th>5</th>
+		<th>6</th>
+		<th>7</th>
+		<th>8</th>
+		<th>9</th>
+		<th>10</th>
+		</tr>
+<?
+		$i = 1;
+		foreach($chd as $p => $row){
+			echo "<tr class='l" . ($i = 3 - $i) . "'>";
+			echo "<td>$p</td>";
+			echo "<td>$legend[$p]</td>";
+			foreach($row as $s)
+				echo "<td>$s</td>";
+			echo "<td>" . number_format(array_sum($row)/7, 1) . "</td>";
+			echo "</tr>";
+		}
+		echo "</table>";
+	}
+
 
 
 	if($input['data']){
