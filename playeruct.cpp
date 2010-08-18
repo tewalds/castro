@@ -34,7 +34,7 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 	//choose a child and recurse
 		Node * child;
 		do{
-			child = choose_move(node, toplay);
+			child = choose_move(node, toplay, board.movesremain());
 
 			if(child->outcome == -1){
 				movelist.add(child->move, toplay);
@@ -141,11 +141,13 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	return true;
 }
 
-Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay) const {
+Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int remain) const {
 	float val, maxval = -1000000000;
 	float logvisits = log(node->exp.num());
 
-	float raveval = player->ravefactor*(player->skiprave == 0 || rand() % player->skiprave > 0); // = 0 or ravefactor
+	float raveval = 0;
+	if(player->skiprave == 0 || rand() % player->skiprave > 0)
+		raveval = player->ravefactor + player->decrrave*remain;
 
 	Node * ret = NULL,
 		 * child = node->children.begin(),

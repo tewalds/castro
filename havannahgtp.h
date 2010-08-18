@@ -420,6 +420,7 @@ public:
 				"Tree traversal:\n" +
 				"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
+				"  -d --decrrave    Decrease the rave factor over time: rf += d*empty [" + to_str(player.decrrave) + "]\n" +
 				"  -a --knowledge   Use knowledge: 0.01*know/sqrt(visits+1)           [" + to_str(player.knowledge) + "]\n" +
 				"  -i --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
@@ -459,6 +460,8 @@ public:
 				player.explore = from_str<float>(args[++i]);
 			}else if((arg == "-f" || arg == "--ravefactor") && i+1 < args.size()){
 				player.ravefactor = from_str<float>(args[++i]);
+			}else if((arg == "-d" || arg == "--decrrave") && i+1 < args.size()){
+				player.decrrave = from_str<float>(args[++i]);
 			}else if((arg == "-a" || arg == "--knowledge") && i+1 < args.size()){
 				player.knowledge = from_str<bool>(args[++i]);
 			}else if((arg == "-i" || arg == "--skiprave") && i+1 < args.size()){

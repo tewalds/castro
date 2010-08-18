@@ -336,7 +336,7 @@ public:
 		int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
 		int create_children(Board & board, Node * node, int toplay);
 		void add_knowledge(Board & board, Node * node, Node * child);
-		Node * choose_move(const Node * node, int toplay) const;
+		Node * choose_move(const Node * node, int toplay, int remain) const;
 		bool do_backup(Node * node, Node * backup, int toplay);
 		void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
 		bool test_bridge_probe(const Board & board, const Move & move, const Move & test);
@@ -414,6 +414,7 @@ public:
 //tree traversal
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
+	float decrrave;   //decrease rave over time, add this value for each empty position on the board
 	bool  knowledge;  //whether to include knowledge
 	int   skiprave;   //how often to skip rave, skip once in this many checks
 	float fpurgency;  //what value to return for a move that hasn't been played yet
@@ -454,6 +455,7 @@ public:
 
 		explore     = 0;
 		ravefactor  = 1000;
+		decrrave    = 0;
 		knowledge   = true;
 		skiprave    = 0;
 		fpurgency   = 1;
