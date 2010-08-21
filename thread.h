@@ -156,7 +156,7 @@ public:
 	int timedwait(double timeout){
 		timespec t;
 		t.tv_sec = (int)timeout;
-		t.tv_nsec = (timeout - (int)timeout) * 1000000000;
+		t.tv_nsec = (long int)((timeout - (int)timeout) * 1000000000);
 		return pthread_cond_timedwait(&cond, &mutex, &t);
 	}
 };
