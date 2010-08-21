@@ -23,6 +23,7 @@ function askresults($input){
 				Time Limit:<br>
 				<select name=times[] multiple=multiple style='width: 500px'><?= make_select_list_multiple_key($timelimits, $input['times']) ?></select>
 				<br><br>
+				<?= makeCheckBox("scale", "Scale Graph", $input['scale']) ?><br>
 				<?= makeCheckBox("errorbars", "Show Errorbars", $input['errorbars']) ?><br>
 				<?= makeCheckBox("simpledata", "Show Simple Data", $input['simpledata']) ?><br>
 				<?= makeCheckBox("data", "Show Data", $input['data']) ?><br>
@@ -89,6 +90,8 @@ function showresults($input){
 		"FF7700"
 	);
 
+	$lbound = 50;
+	$ubound = 50;
 	$chd = array();
 	$chm1 = array();
 	$chm2 = array();
@@ -103,9 +106,26 @@ function showresults($input){
 		$rate = ($row['wins'] + $row['ties']/2.0)/$row['numgames'];
 		$err = 2.0*sqrt($rate*(1-$rate)/$row['numgames']);
 
-		$chd[$row['player']][$row['size']-4] = (int)($rate*100);
-		$chm1[$row['player']][$row['size']-4] = max((int)($rate*100 - $err*100), 0);
-		$chm2[$row['player']][$row['size']-4] = min((int)($rate*100 + $err*100), 100);
+		$rate *= 100;
+		$err  *= 100;
+
+		if($lbound > $rate) $lbound = $rate;
+		if($ubound < $rate) $ubound = $rate;
+
+		$chd[$row['player']][$row['size']-4] = round($rate);
+		$chm1[$row['player']][$row['size']-4] = max(round($rate - $err), 0);
+		$chm2[$row['player']][$row['size']-4] = min(round($rate + $err), 100);
+	}
+
+	if($input['scale']){
+		$diff = $ubound - $lbound;
+		$interval = ($diff <= 10 ? 1 : ($diff <= 20 ? 2 : ($diff <= 60 ? 5 : 10)));
+		$lbound = max(0, floor($lbound/$interval)*$interval);
+		$ubound = min(100, ceil($ubound/$interval)*$interval);
+	}else{
+		$interval = 10;
+		$lbound = 0;
+		$ubound = 100;
 	}
 
 #	ksort($chd);
@@ -123,7 +143,6 @@ function showresults($input){
 		foreach($chd as $k => $v)
 			$errorlines .= "|" . implode(",", $chm1[$k]) . "|" . implode(",", $chm2[$k]);
 
-
 	$chco = implode(",", array_slice($colors, 0, $num));
 
 	echo "<table><tr><td>";
@@ -132,13 +151,14 @@ function showresults($input){
 			"chs=600x500" . //size
 			"&cht=lc" . //line graph
 			"&chxt=x,y". //,x,y" . //x and y axis
-			"&chxr=0,4,10,1|1,0,100,10" . //4-10 on x, 0-100 on y
+			"&chxr=0,4,10,1|1,$lbound,$ubound,$interval" . //4-10 on x, lbound-ubound on y
 //			"&chxl=2:|Board Size|3:|Win Rate" . //labels
 //			"&chxp=2,50|3,50" . //center the labels
 			"&chco=$chco" . //line colours
 //			"&chdl=" . implode("|", $legend) . //legend
 			"&chd=t$num:" . implode("|", $chdlines) . $errorlines . //data lines and errorlines
-			"&chm=h,FF0000,0,0.5,1";
+			"&chds=$lbound,$ubound" . //scale the data lines between upper and lower bound
+			"&chm=h,FF0000,0," . (50 - $lbound)/($ubound - $lbound) . ",1"; //add 50% line
 	if($input['errorbars']){
 		$i = 0;
 		foreach($chd as $v){
