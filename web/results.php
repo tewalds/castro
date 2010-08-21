@@ -106,15 +106,15 @@ function showresults($input){
 		$rate = ($row['wins'] + $row['ties']/2.0)/$row['numgames'];
 		$err = 2.0*sqrt($rate*(1-$rate)/$row['numgames']);
 
-		$rate *= 100;
-		$err  *= 100;
+		$rate *= 1000;
+		$err  *= 1000;
 
-		if($lbound > $rate) $lbound = $rate;
-		if($ubound < $rate) $ubound = $rate;
+		if($lbound > $rate/10) $lbound = $rate/10;
+		if($ubound < $rate/10) $ubound = $rate/10;
 
 		$chd[$row['player']][$row['size']-4] = round($rate);
 		$chm1[$row['player']][$row['size']-4] = max(round($rate - $err), 0);
-		$chm2[$row['player']][$row['size']-4] = min(round($rate + $err), 100);
+		$chm2[$row['player']][$row['size']-4] = min(round($rate + $err), 1000);
 	}
 
 	if($input['scale']){
@@ -157,7 +157,7 @@ function showresults($input){
 			"&chco=$chco" . //line colours
 //			"&chdl=" . implode("|", $legend) . //legend
 			"&chd=t$num:" . implode("|", $chdlines) . $errorlines . //data lines and errorlines
-			"&chds=$lbound,$ubound" . //scale the data lines between upper and lower bound
+			"&chds=" . ($lbound*10) . "," . ($ubound*10) . //scale the data lines between upper and lower bound
 			"&chm=h,FF0000,0," . (50 - $lbound)/($ubound - $lbound) . ",1"; //add 50% line
 	if($input['errorbars']){
 		$i = 0;
@@ -207,8 +207,8 @@ function showresults($input){
 			echo "<td>$p</td>";
 			echo "<td>$legend[$p]</td>";
 			foreach($row as $s)
-				echo "<td>$s</td>";
-			echo "<td>" . number_format(array_sum($row)/7, 1) . "</td>";
+				echo "<td>" . number_format($s/10, 1) . "</td>";
+			echo "<td>" . number_format(array_sum($row)/70, 1) . "</td>";
 			echo "</tr>";
 		}
 		echo "</table>";
@@ -238,8 +238,8 @@ function showresults($input){
 			echo "<td>$row[player]</td>";
 			echo "<td>$row[name]</td>";
 			echo "<td>$row[size]</td>";
-			echo "<td>" . number_format($rate, 2) . "</td>";
-			echo "<td>" . number_format($err, 2) . "</td>";
+			echo "<td>" . number_format($rate*100, 1) . "</td>";
+			echo "<td>" . number_format($err*100, 1) . "</td>";
 			echo "<td>$row[wins]</td>";
 			echo "<td>$row[losses]</td>";
 			echo "<td>$row[ties]</td>";
