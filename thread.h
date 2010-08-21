@@ -16,10 +16,48 @@ using namespace placeholders; //for bind
 
 // http://gcc.gnu.org/onlinedocs/gcc/Atomic-Builtins.html
 // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2427.html
-#define CAS(var, old, new) __sync_bool_compare_and_swap(&(var), old, new)
-#define INCR(var)          __sync_add_and_fetch(&(var), 1)
-#define PLUS(var, val)     __sync_add_and_fetch(&(var), val)
 
+#ifdef SINGLE_THREAD
+
+//#define CAS(var, old, new) (((var) == (old)) ? ((var) = (new), true) : false )
+//#define INCR(var)          (++(var))
+//#define PLUS(var, val)     ((var) += (val))
+
+template<class A, class B, class C> bool CAS(A & var, const B & old, const C & newval){
+	if(var == old){
+		var = newval;
+		return true;
+	}
+	return false;
+}
+
+template<class A> A INCR(A & var){
+	return ++var;
+}
+
+template<class A, class B> A PLUS(A & var, const B & val){
+	return (var += val);
+}
+
+#else
+
+//#define CAS(var, old, new) __sync_bool_compare_and_swap(&(var), old, new)
+//#define INCR(var)          __sync_add_and_fetch(&(var), 1)
+//#define PLUS(var, val)     __sync_add_and_fetch(&(var), val)
+
+template<class A, class B, class C> bool CAS(A & var, const B & old, const C & newval){
+	return __sync_bool_compare_and_swap(& var, old, newval);
+}
+
+template<class A> A INCR(A & var){
+	return __sync_add_and_fetch(& var, 1);
+}
+
+template<class A, class B> A PLUS(A & var, const B & val){
+	return __sync_add_and_fetch(& var, val);
+}
+
+#endif
 
 class Thread {
 	pthread_t thread;

@@ -412,7 +412,9 @@ public:
 			return GTPResponse(true, string("\n") +
 				"Set player parameters, eg: player_params -e 1 -f 0 -t 2 -o 1 -p 0\n" +
 				"Processing:\n" +
+#ifndef SINGLE_THREAD
 				"  -t --threads     Number of MCTS threads                            [" + to_str(player.numthreads) + "]\n" +
+#endif
 				"  -o --ponder      Continue to ponder during the opponents time      [" + to_str(player.ponder) + "]\n" +
 				"Final move selection:\n" +
 				"  -E --msexplore   Lower bound constant in final move selection      [" + to_str(player.msexplore) + "]\n" +

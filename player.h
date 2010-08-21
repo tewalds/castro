@@ -60,11 +60,11 @@ public:
 			void assert_consistent() const { assert((_num == 0) || (_children > (Node *) LOCK)); }
 			void assert_empty()      const { assert((_num == 0) && (_children == NULL)); }
 
-			bool lock()   { return CAS(_children, NULL, LOCK); }
-			bool unlock() { return CAS(_children, LOCK, NULL); }
+			bool lock()   { return CAS(_children, (Node *) NULL, (Node *) LOCK); }
+			bool unlock() { return CAS(_children, (Node *) LOCK, (Node *) NULL); }
 
 			void atomic_set(Children & o){
-				assert(CAS(_children, LOCK, o._children)); //undoes the lock
+				assert(CAS(_children, (Node *) LOCK, o._children)); //undoes the lock
 				assert(CAS(_num, 0, o._num)); //keeps consistency
 			}
 
@@ -448,6 +448,7 @@ public:
 		time_used = 0;
 
 		ponder      = false;
+//#ifdef SINGLE_THREAD ... make sure only 1 thread
 		numthreads  = 1;
 
 		msrave      = -1;
