@@ -451,8 +451,8 @@ public:
 //#ifdef SINGLE_THREAD ... make sure only 1 thread
 		numthreads  = 1;
 
-		msrave      = -1;
-		msexplore   = 1.0;
+		msrave      = 0;
+		msexplore   = 0.5;
 
 		explore     = 0;
 		ravefactor  = 1000;
