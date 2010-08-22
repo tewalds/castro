@@ -51,11 +51,6 @@ function showresults($input){
 		return true;
 	}
 
-	if(count($input['players']) > 9){
-		echo "You may not select more than 9 players";
-		return true;
-	}
-
 	$data = $db->pquery(
 		"SELECT 
 			results.player, 
@@ -145,40 +140,45 @@ function showresults($input){
 
 	$chco = implode(",", array_slice($colors, 0, $num));
 
-	echo "<table><tr><td>";
-	echo "<img src=\"http://chart.apis.google.com/chart?" .
-//			"chs=750x400" . //size
-			"chs=600x500" . //size
-			"&cht=lc" . //line graph
-			"&chxt=x,y". //,x,y" . //x and y axis
-			"&chxr=0,4,10,1|1,$lbound,$ubound,$interval" . //4-10 on x, lbound-ubound on y
-//			"&chxl=2:|Board Size|3:|Win Rate" . //labels
-//			"&chxp=2,50|3,50" . //center the labels
-			"&chco=$chco" . //line colours
-//			"&chdl=" . implode("|", $legend) . //legend
-			"&chd=t$num:" . implode("|", $chdlines) . $errorlines . //data lines and errorlines
-			"&chds=" . ($lbound*10) . "," . ($ubound*10) . //scale the data lines between upper and lower bound
-			"&chm=h,FF0000,0," . (50 - $lbound)/($ubound - $lbound) . ",1"; //add 50% line
-	if($input['errorbars']){
+	if(count($input['players']) <= 9){
+		echo "<table><tr><td>";
+		echo "<img src=\"http://chart.apis.google.com/chart?" .
+	//			"chs=750x400" . //size
+				"chs=600x500" . //size
+				"&cht=lc" . //line graph
+				"&chxt=x,y". //,x,y" . //x and y axis
+				"&chxr=0,4,10,1|1,$lbound,$ubound,$interval" . //4-10 on x, lbound-ubound on y
+	//			"&chxl=2:|Board Size|3:|Win Rate" . //labels
+	//			"&chxp=2,50|3,50" . //center the labels
+				"&chco=$chco" . //line colours
+	//			"&chdl=" . implode("|", $legend) . //legend
+				"&chd=t$num:" . implode("|", $chdlines) . $errorlines . //data lines and errorlines
+				"&chds=" . ($lbound*10) . "," . ($ubound*10) . //scale the data lines between upper and lower bound
+				"&chm=h,FF0000,0," . (50 - $lbound)/($ubound - $lbound) . ",1"; //add 50% line
+		if($input['errorbars']){
+			$i = 0;
+			foreach($chd as $v){
+				echo "|E,$colors[$i]," . (2*$i + $num) . ",,1:7";
+				$i++;
+			}
+		}
+
+		//echo "&chof=validate";
+
+		echo "\" />";
+		echo "</td><td>";
+		echo "<table>";
 		$i = 0;
-		foreach($chd as $v){
-			echo "|E,$colors[$i]," . (2*$i + $num) . ",,1:7";
+		foreach($legend as $n){
+			echo "<tr><td bgcolor=$colors[$i]>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>$n</td></tr>";
 			$i++;
 		}
+		echo "</table>";
+		echo "</td></tr></table>";
+	}else{
+		echo "A graph can't contain more than 9 players<br><br>";
 	}
 
-	//echo "&chof=validate";
-
-	echo "\" />";
-	echo "</td><td>";
-	echo "<table>";
-	$i = 0;
-	foreach($legend as $n){
-		echo "<tr><td bgcolor=$colors[$i]>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>$n</td></tr>";
-		$i++;
-	}
-	echo "</table>";
-	echo "</td></tr></table>";	
 
 	if($input['simpledata']){
 ?>
@@ -217,34 +217,42 @@ function showresults($input){
 
 
 	if($input['data']){
-		echo "<br><br>";
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>Player ID</th>";
-		echo "<th>Player Name</th>";
-		echo "<th>Board size</th>";
-		echo "<th>Win rate</th>";
-		echo "<th>95% confidence</th>";
-		echo "<th>Wins</th>";
-		echo "<th>Losses</th>";
-		echo "<th>Ties</th>";
-		echo "<th>Games</th>";
-		echo "</tr>";
+?>		<br><br>
+		<table>
+		<tr>
+			<th colspan=2>Player</th>
+			<th rowspan=2>Board<br>Size</th>
+			<th colspan=2>Outcome</th>
+			<th colspan=4>Games</th>
+		</tr>
+		<tr>
+			<th>ID</th>
+			<th>Name</th>
+			<th>Win rate</th>
+			<th>95% Conf</th>
+			<th>Wins</th>
+			<th>Losses</th>
+			<th>Ties</th>
+			<th>Total</th>
+		</tr>
+<?
 		$i = 1;
+		$name = "";
 		foreach($data as $row){
 			$rate = ($row['wins'] + $row['ties']/2.0)/$row['numgames'];
 			$err = 2.0*sqrt($rate*(1-$rate)/$row['numgames']);
 			echo "<tr class='l" . ($i = 3 - $i) . "'>";
 			echo "<td>$row[player]</td>";
-			echo "<td>$row[name]</td>";
-			echo "<td>$row[size]</td>";
-			echo "<td>" . number_format($rate*100, 1) . "</td>";
-			echo "<td>" . number_format($err*100, 1) . "</td>";
-			echo "<td>$row[wins]</td>";
-			echo "<td>$row[losses]</td>";
-			echo "<td>$row[ties]</td>";
-			echo "<td>$row[numgames]</td>";
+			echo "<td>" . ($row['name'] == $name ? '' : $row['name']) . "</td>";
+			echo "<td align=center>$row[size]</td>";
+			echo "<td align=right>" . number_format($rate*100, 1) . "</td>";
+			echo "<td align=right>" . number_format($err*100, 1) . "</td>";
+			echo "<td align=right>$row[wins]</td>";
+			echo "<td align=right>$row[losses]</td>";
+			echo "<td align=right>$row[ties]</td>";
+			echo "<td align=right>$row[numgames]</td>";
 			echo "</tr>";
+			$name = $row['name'];
 		}
 		echo "</table>";
 	}
