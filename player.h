@@ -408,6 +408,7 @@ public:
 
 	bool  ponder;     //think during opponents time?
 	int   numthreads; //number of player threads to run
+	u64   maxmem;     //maximum memory for the tree in bytes
 //final move selection
 	float msrave;     //rave factor in final move selection, -1 means use number instead of value
 	float msexplore;  //the UCT constant in final move selection
@@ -450,6 +451,7 @@ public:
 		ponder      = false;
 //#ifdef SINGLE_THREAD ... make sure only 1 thread
 		numthreads  = 1;
+		maxmem      = 1000;
 
 		msrave      = 0;
 		msexplore   = 0.5;
@@ -572,7 +574,7 @@ public:
 		return len.avg();
 	}
 
-	Move genmove(double time, int maxruns, uint64_t memlimit);
+	Move genmove(double time, int maxruns);
 	vector<Move> get_pv();
 
 protected:

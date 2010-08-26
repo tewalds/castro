@@ -58,7 +58,7 @@ public:
 		newcallback("white",           bind(&HavannahGTP::gtp_playwhite,     this, _1), "Place a white stone: white <location>");
 		newcallback("black",           bind(&HavannahGTP::gtp_playblack,     this, _1), "Place a black stone: black <location>");
 		newcallback("undo",            bind(&HavannahGTP::gtp_undo,          this, _1), "Undo one or more moves: undo [amount to undo]");
-		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,       this, _1), "Generate a move: genmove [color] [time] [memory]");
+		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,       this, _1), "Generate a move: genmove [color] [time]");
 		newcallback("time_control",    bind(&HavannahGTP::gtp_time_control,  this, _1), "Set the algorithm for per game time, no args gives options");
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1), "Set the algorithm for the player, no args gives options");
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,     this, _1), "List all legal moves");
@@ -357,19 +357,15 @@ public:
 
 	GTPResponse gtp_genmove(vecstr args){
 		double time = get_time();
-		int mem = mem_allowed;
 
 		if(args.size() >= 2)
 			time = from_str<double>(args[1]);
-
-		if(args.size() >= 3)
-			mem = from_str<int>(args[2]);
 
 		fprintf(stderr, "time left: %.1f, max time: %.3f, max runs: %i\n", time_remain, time, max_runs);
 
 		player.rootboard.setswap(allow_swap);
 
-		Move best = player.genmove(time, max_runs, mem);
+		Move best = player.genmove(time, max_runs);
 
 		time_remain += time_per_move - player.time_used;
 		if(time_remain < 0)
@@ -416,6 +412,7 @@ public:
 				"  -t --threads     Number of MCTS threads                            [" + to_str(player.numthreads) + "]\n" +
 #endif
 				"  -o --ponder      Continue to ponder during the opponents time      [" + to_str(player.ponder) + "]\n" +
+				"  -M --maxmem      Max memory in Mb to use for the tree              [" + to_str(player.maxmem) + "]\n" +
 				"Final move selection:\n" +
 				"  -E --msexplore   Lower bound constant in final move selection      [" + to_str(player.msexplore) + "]\n" +
 				"  -F --msrave      Rave factor, 0 for pure exp, -1 # sims, -2 # wins [" + to_str(player.msrave) + "]\n" +
@@ -454,6 +451,8 @@ public:
 				player.set_ponder(p);
 			}else if((arg == "-o" || arg == "--ponder") && i+1 < args.size()){
 				player.set_ponder(from_str<bool>(args[++i]));
+			}else if((arg == "-M" || arg == "--maxmem") && i+1 < args.size()){
+				player.maxmem = from_str<int>(args[++i]);
 			}else if((arg == "-E" || arg == "--msexplore") && i+1 < args.size()){
 				player.msexplore = from_str<float>(args[++i]);
 			}else if((arg == "-F" || arg == "--msrave") && i+1 < args.size()){
