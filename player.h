@@ -457,8 +457,8 @@ public:
 		msexplore   = 0.5;
 
 		explore     = 0;
-		ravefactor  = 1000;
-		decrrave    = 0;
+		ravefactor  = 500;
+		decrrave    = 200;
 		knowledge   = true;
 		skiprave    = 0;
 		fpurgency   = 1;
@@ -470,13 +470,13 @@ public:
 
 		localreply  = 0;
 		locality    = 0;
-		connect     = 20;
-		bridge      = 10;
+		connect     = 5;
+		bridge      = 0;
 
 		weightedrandom = false;
-		rolloutpattern = true;
-		lastgoodreply = false;
-		instantwin  = 0;
+		rolloutpattern = false;
+		lastgoodreply  = false;
+		instantwin     = 0;
 
 		//no threads started until a board is set
 
