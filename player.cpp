@@ -23,7 +23,7 @@ Move Player::genmove(double time, int maxruns, uint64_t memlimit){
 		timer.set(time, bind(&Player::timedout, this));
 
 	//solve to depth 1 just in case this is a terminal node
-	if(root.outcome == -1 && root.children.empty()){
+	if(root.outcome == -1 && root.children.empty() && rootboard.num_moves() > 0){
 		Solver solver;
 		solver.solve_ab(rootboard, 1, 2);
 		if(solver.outcome >= 0){
