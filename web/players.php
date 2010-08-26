@@ -4,9 +4,9 @@ include("lib.php");
 
 function players_route($input){
 	switch($input['action']){
-		case 'disable': return players_disable($input);
-		case 'edit'   : return players_edit($input);
-		default:        return players_list($input);
+		case 'Set Weight': return players_set_weight($input);
+		case 'Edit'      : return players_edit($input);
+		default:           return players_list($input);
 	}
 }
 
@@ -38,8 +38,9 @@ function players_list($input){
 <?	} ?>
 	<tr class='f'>
 		<td colspan='5'>
-			<input type=submit name=action value=disable>
-			<input type=submit name=action value=edit>
+			<input type=submit name=action value='Edit'>
+			Weight: <input type=text name=weight value=0 size=3>
+			<input type=submit name=action value='Set Weight'>
 		</td>
 	</tr>
 	</table>
@@ -68,12 +69,12 @@ function players_list($input){
 }
 
 
-function players_disable($input){
+function players_set_weight($input){
 	global $db;
 
-	$db->pquery("UPDATE players SET weight = 0 WHERE player IN (?)", $input['check']);
+	$db->pquery("UPDATE players SET weight = ? WHERE player IN (?)", $input['weight'], $input['check']);
 	
-	echo "Players disabled<br>";
+	echo "Players updated<br>";
 	
 	return players_list($input);
 }

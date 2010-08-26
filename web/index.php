@@ -15,7 +15,7 @@ $router->add("GET", "/results/hosts", "results.php", "gethosts", null);
 $router->add("GET", "/results/recent", "results.php", "getrecent", null);
 
 $router->add("GET",  "/players",        "players.php", "players_list",   null);
-$router->add("POST", "/players/route",  "players.php", "players_route",  array("action" => "string", "check" => "array"));
+$router->add("POST", "/players/route",  "players.php", "players_route",  array("action" => "string", "check" => "array", "weight" => "int"));
 $router->add("POST", "/players/update", "players.php", "players_update", array("players" => "array", "names" => "array", "weights" => "array", "params" => "array"));
 $router->add("POST", "/players/add",    "players.php", "players_add",    array("names" => "array", "weights" => "array", "params" => "array"));
 
