@@ -470,8 +470,8 @@ public:
 
 		localreply  = 0;
 		locality    = 0;
-		connect     = 5;
-		bridge      = 0;
+		connect     = 20;
+		bridge      = 25;
 
 		weightedrandom = false;
 		rolloutpattern = false;
