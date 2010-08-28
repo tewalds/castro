@@ -1,7 +1,7 @@
 
-#include "solver.h"
+#include "solverab.h"
 
-void Solver::solve_ab(Board board, double time, int mdepth){
+void SolverAB::solve(Board board, double time, int mdepth){
 	reset();
 	if(board.won() >= 0){
 		outcome = board.won();
@@ -9,15 +9,36 @@ void Solver::solve_ab(Board board, double time, int mdepth){
 	}
 	board.setswap(false);
 
-	Timer timer(time, bind(&Solver::timedout, this));
+	Timer timer(time, bind(&SolverAB::timedout, this));
 	int starttime = time_msec();
 
 	int turn = board.toplay();
 
-	for(maxdepth = 1; !timeout && maxdepth < mdepth; maxdepth++){
+	for(maxdepth = 2; !timeout && maxdepth <= mdepth; maxdepth++){
 		fprintf(stderr, "Starting depth %d\n", maxdepth);
 
-		int ret = run_negamax(board, maxdepth, -2, 2);
+		//the first depth of negamax
+		int ret, alpha = -2, beta = 2;
+		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+			nodes_seen++;
+
+			Board next = board;
+			next.move(*move);
+
+			int value = -negamax(next, maxdepth - 1, -beta, -alpha);
+
+			if(value > alpha){
+				alpha = value;
+				bestmove = *move;
+			}
+
+			if(alpha >= beta){
+				ret = beta;
+				break;
+			}
+		}
+		ret = alpha;
+
 
 		if(ret){
 			if(     ret == -2){ outcome = (turn == 1 ? 2 : 1); bestmove = Move(M_NONE); }
@@ -31,33 +52,16 @@ void Solver::solve_ab(Board board, double time, int mdepth){
 	fprintf(stderr, "Timed out after %d msec\n", time_msec() - starttime);
 }
 
-int Solver::run_negamax(const Board & board, const int depth, int alpha, int beta){
-	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
-		nodes_seen++;
 
-		Board next = board;
-		next.move(*move);
-
-		int value = -negamax(next, maxdepth - 1, -beta, -alpha);
-
-		if(value > alpha){
-			alpha = value;
-			bestmove = *move;
-		}
-
-		if(alpha >= beta)
-			return beta;
-	}
-	return alpha;
-}
-
-int Solver::negamax(Board & board, const int depth, int alpha, int beta){
+int SolverAB::negamax(Board & board, const int depth, int alpha, int beta){
 	if(board.won() >= 0)
 		return (board.won() ? -2 : -1);
 
 	if(depth <= 0 || timeout)
 		return 0;
 
+	int b = beta;
+	int first = true;
 	int value, losses = 0;
 	static const int lookup[4] = {0, 1, 2, 2};
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
@@ -72,7 +76,10 @@ int Solver::negamax(Board & board, const int depth, int alpha, int beta){
 			Board next = board;
 			next.move(*move);
 
-			value = -negamax(next, depth - 1, -beta, -alpha);
+			value = -negamax(next, depth - 1, -b, -alpha);
+
+			if(scout && value > alpha && value < beta && !first) // re-search
+				value = -negamax(next, depth - 1, -beta, -alpha);
 		}
 
 		if(value > alpha)
@@ -80,7 +87,13 @@ int Solver::negamax(Board & board, const int depth, int alpha, int beta){
 
 		if(alpha >= beta)
 			return beta;
+
+		if(scout){
+			b = alpha + 1; // set up null window
+			first = false;
+		}
 	}
+
 	if(losses >= 2)
 		return -2;
 

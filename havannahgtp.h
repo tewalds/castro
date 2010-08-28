@@ -6,6 +6,8 @@
 #include "game.h"
 #include "string.h"
 #include "solver.h"
+#include "solverpns.h"
+#include "solverab.h"
 #include "player.h"
 #include "board.h"
 #include "move.h"
@@ -179,8 +181,8 @@ public:
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
 
-		Solver solve;
-		solve.solve_ab(game.getboard(), time);
+		SolverAB solve(false);
+		solve.solve(game.getboard(), time);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -191,8 +193,8 @@ public:
 		if(args.size() >= 1)
 			time = from_str<double>(args[0]);
 
-		Solver solve;
-		solve.solve_scout(game.getboard(), time);
+		SolverAB solve(true);
+		solve.solve(game.getboard(), time);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -207,7 +209,7 @@ public:
 		if(args.size() >= 2)
 			mem = from_str<int>(args[1]);
 
-		Solver solve;
+		SolverPNS solve;
 		solve.solve_pns(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
@@ -223,7 +225,7 @@ public:
 		if(args.size() >= 2)
 			mem = from_str<int>(args[1]);
 
-		Solver solve;
+		SolverPNS solve;
 		solve.solve_pnsab(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
@@ -239,7 +241,7 @@ public:
 		if(args.size() >= 2)
 			mem = from_str<int>(args[1]);
 
-		Solver solve;
+		SolverPNS solve;
 		solve.solve_dfpnsab(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));

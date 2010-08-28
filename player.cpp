@@ -4,7 +4,7 @@
 #include <cmath>
 #include <string>
 #include "string.h"
-#include "solver.h"
+#include "solverab.h"
 #include "timer.h"
 
 Move Player::genmove(double time, int maxruns){
@@ -24,8 +24,8 @@ Move Player::genmove(double time, int maxruns){
 
 	//solve to depth 1 just in case this is a terminal node
 	if(root.outcome == -1 && root.children.empty() && rootboard.num_moves() > 0){
-		Solver solver;
-		solver.solve_ab(rootboard, 1, 2);
+		SolverAB solver;
+		solver.solve(rootboard, 1, 2);
 		if(solver.outcome >= 0){
 			root.outcome = solver.outcome;
 			root.bestmove = solver.bestmove;
@@ -137,8 +137,8 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 	if(ret){
 		node->bestmove = ret->move;
 	}else if(node->bestmove == M_UNKNOWN){
-		Solver solver;
-		solver.solve_ab(rootboard, 1, 2);
+		SolverAB solver;
+		solver.solve(rootboard, 1, 2);
 		node->bestmove = solver.bestmove;
 	}
 

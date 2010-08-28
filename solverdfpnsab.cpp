@@ -1,7 +1,8 @@
 
-#include "solver.h"
+#include "solverpns.h"
+#include "solverab.h"
 
-void Solver::solve_dfpnsab(Board board, double time, uint64_t memlimit){
+void SolverPNS::solve_dfpnsab(Board board, double time, uint64_t memlimit){
 	reset();
 
 	if(board.won() >= 0){
@@ -10,7 +11,7 @@ void Solver::solve_dfpnsab(Board board, double time, uint64_t memlimit){
 	}
 	board.setswap(false);
 
-	Timer timer(time, bind(&Solver::timedout, this));
+	Timer timer(time, bind(&SolverPNS::timedout, this));
 	int starttime = time_msec();
 
 	int turn = board.toplay();
@@ -38,7 +39,7 @@ void Solver::solve_dfpnsab(Board board, double time, uint64_t memlimit){
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-int Solver::run_dfpnsab(const Board & board, int ties, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
+int SolverPNS::run_dfpnsab(const Board & board, int ties, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
 	assignties = ties;
 
 	if(root) delete root;
@@ -68,7 +69,7 @@ int Solver::run_dfpnsab(const Board & board, int ties, uint64_t memlimit){ //1 =
 	return 0;
 }
 
-bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td){
+bool SolverPNS::dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td){
 	if(depth > maxdepth)
 		maxdepth = depth;
 
@@ -88,7 +89,8 @@ bool Solver::dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp
 /*/					
 			uint64_t prevnodes = nodes_seen;
 
-			int abval = -negamax(next, 1, -2, 2); //higher depth goes farther but takes longer, depth 1 seems to be best
+			SolverAB solveab(false);
+			int abval = -solveab.negamax(next, 1, -2, 2); //higher depth goes farther but takes longer, depth 1 seems to be best
 
 			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), 1 + int(nodes_seen - prevnodes));
 //*/

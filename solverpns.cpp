@@ -1,5 +1,5 @@
 
-#include "solver.h"
+#include "solverpns.h"
 
 /* three possible outcomes from run_pns: Win, Loss, Unknown (ran out of time/memory)
  * Ties are grouped with loss first, win second, forcing two runs:
@@ -8,7 +8,7 @@
  * L W L  L   from the perspective of toplay
  * U W LT U
  */
-void Solver::solve_pns(Board board, double time, uint64_t memlimit){
+void SolverPNS::solve_pns(Board board, double time, uint64_t memlimit){
 	reset();
 
 	if(board.won() >= 0){
@@ -17,7 +17,7 @@ void Solver::solve_pns(Board board, double time, uint64_t memlimit){
 	}
 	board.setswap(false);
 
-	Timer timer(time, bind(&Solver::timedout, this));
+	Timer timer(time, bind(&SolverPNS::timedout, this));
 	int starttime = time_msec();
 
 	int turn = board.toplay();
@@ -43,7 +43,7 @@ void Solver::solve_pns(Board board, double time, uint64_t memlimit){
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-int Solver::run_pns(const Board & board, int ties, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
+int SolverPNS::run_pns(const Board & board, int ties, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
 	assignties = ties;
 
 	if(root) delete root;
@@ -74,7 +74,7 @@ int Solver::run_pns(const Board & board, int ties, uint64_t memlimit){ //1 = win
 	return 0;
 }
 
-bool Solver::pns(const Board & board, PNSNode * node, int depth){
+bool SolverPNS::pns(const Board & board, PNSNode * node, int depth){
 	if(depth > maxdepth)
 		maxdepth = depth;
 
@@ -120,7 +120,7 @@ bool Solver::pns(const Board & board, PNSNode * node, int depth){
 	return mem;
 }
 
-bool Solver::updatePDnum(PNSNode * node){
+bool SolverPNS::updatePDnum(PNSNode * node){
 	uint32_t min = INF32;
 	uint64_t sum = 0;
 
@@ -146,7 +146,7 @@ bool Solver::updatePDnum(PNSNode * node){
 }
 
 //removes the children of any node whos children are all unproven and have no children
-bool Solver::garbage_collect(PNSNode * node){
+bool SolverPNS::garbage_collect(PNSNode * node){
 	if(node->numchildren == 0)
 		return (node->phi != 0 && node->delta != 0);
 
