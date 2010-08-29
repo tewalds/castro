@@ -68,11 +68,14 @@ public:
 	int assignties; //which player to assign a tie to
 	static const float epsilon = 0.25;
 
+	int ab;
+
 	bool timeout;
 
 	PNSNode * root;
 
-	SolverPNS() {
+	SolverPNS(int AB = 0) {
+		ab = AB;
 		root = NULL;
 		reset();
 	}
@@ -97,19 +100,16 @@ public:
 	}
 	void timedout(){ timeout = true; }
 
-	void solve_pns    (Board board, double time, uint64_t memlimit);
-	void solve_pnsab  (Board board, double time, uint64_t memlimit);
-	void solve_dfpnsab(Board board, double time, uint64_t memlimit);
+	void solve_pns  (Board board, double time, uint64_t memlimit);
+	void solve_dfpns(Board board, double time, uint64_t memlimit);
 
 
 //basic proof number search building a tree
-	int run_pns    (const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
-	int run_pnsab  (const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
-	int run_dfpnsab(const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
+	int run_pns  (const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
+	int run_dfpns(const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
 
-	bool pns    (const Board & board, PNSNode * node, int depth);   //basic proof number search
-	bool pnsab  (const Board & board, PNSNode * node, int depth); //use a tiny negamax search as a pn,dn heuristic
-	bool dfpnsab(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
+	bool pns  (const Board & board, PNSNode * node, int depth);   //basic proof number search
+	bool dfpns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
 
 //update the phi and delta for the node
 	bool updatePDnum(PNSNode * node);

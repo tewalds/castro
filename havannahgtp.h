@@ -209,7 +209,7 @@ public:
 		if(args.size() >= 2)
 			mem = from_str<int>(args[1]);
 
-		SolverPNS solve;
+		SolverPNS solve(0);
 		solve.solve_pns(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
@@ -225,8 +225,8 @@ public:
 		if(args.size() >= 2)
 			mem = from_str<int>(args[1]);
 
-		SolverPNS solve;
-		solve.solve_pnsab(game.getboard(), time, mem);
+		SolverPNS solve(1);
+		solve.solve_pns(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -241,8 +241,8 @@ public:
 		if(args.size() >= 2)
 			mem = from_str<int>(args[1]);
 
-		SolverPNS solve;
-		solve.solve_dfpnsab(game.getboard(), time, mem);
+		SolverPNS solve(1);
+		solve.solve_dfpns(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
 	}

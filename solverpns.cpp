@@ -1,5 +1,6 @@
 
 #include "solverpns.h"
+#include "solverab.h"
 
 /* three possible outcomes from run_pns: Win, Loss, Unknown (ran out of time/memory)
  * Ties are grouped with loss first, win second, forcing two runs:
@@ -28,7 +29,9 @@ void SolverPNS::solve_pns(Board board, double time, uint64_t memlimit){
 	if(ret1 == 1){ //win
 		outcome = turn;
 	}else{
-		int ret2 = run_pns(board, turn, memlimit);
+		int ret2 = 0;
+		if(!timeout)
+			ret2 = run_pns(board, turn, memlimit);
 
 		if(ret2 == -1){
 			outcome = otherturn; //loss
@@ -90,7 +93,18 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth){
 			Board next = board;
 			next.move(*move);
 
-			node->children[i] = PNSNode(*move).abval((next.won() > 0) + (next.won() >= 0), (board.toplay() == assignties));
+			int abval = (next.won() > 0) + (next.won() >= 0);
+			int pd = 1; // phi & delta value
+
+			if(ab && abval == 0){
+				uint64_t prevnodes = nodes_seen;
+
+				SolverAB solveab(false);
+				abval = -solveab.negamax(next, ab, -2, 2);
+				pd = 1 + int(nodes_seen - prevnodes);
+			}
+
+			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), pd);
 
 			i++;
 		}

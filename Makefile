@@ -1,7 +1,7 @@
 .PHONY: clean fresh run gendeps
 
 LDFLAGS   += -lpthread
-OBJECTS		= castro.o string.o solverab.o solverpns.o solverpnsab.o solverdfpnsab.o player.o playeruct.o
+OBJECTS		= castro.o string.o solverab.o solverpns.o solverdfpns.o player.o playeruct.o
 
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall
@@ -19,8 +19,7 @@ castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h move.h \
 player.o: player.cpp player.h types.h move.h board.h string.h time.h depthstats.h thread.h solverab.h timer.h solver.h
 playeruct.o: playeruct.cpp player.h types.h move.h board.h string.h time.h depthstats.h thread.h weightedrandtree.h
 solverab.o: solverab.cpp solverab.h time.h timer.h thread.h board.h move.h string.h solver.h
-solverdfpnsab.o: solverdfpnsab.cpp solverpns.h time.h timer.h thread.h board.h move.h string.h solver.h solverab.h
-solverpnsab.o: solverpnsab.cpp solverpns.h time.h timer.h thread.h board.h move.h string.h solver.h solverab.h
+solverdfpns.o: solverdfpns.cpp solverpns.h time.h timer.h thread.h board.h move.h string.h solver.h solverab.h
 solverpns.o: solverpns.cpp solverpns.h time.h timer.h thread.h board.h move.h string.h solver.h
 string.o: string.cpp string.h
 

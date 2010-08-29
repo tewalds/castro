@@ -2,7 +2,7 @@
 #include "solverpns.h"
 #include "solverab.h"
 
-void SolverPNS::solve_pnsab(Board board, double time, uint64_t memlimit){
+void SolverPNS::solve_dfpns(Board board, double time, uint64_t memlimit){
 	reset();
 
 	if(board.won() >= 0){
@@ -17,12 +17,14 @@ void SolverPNS::solve_pnsab(Board board, double time, uint64_t memlimit){
 	int turn = board.toplay();
 	int otherturn = (turn == 1 ? 2 : 1);
 
-	int ret1 = run_pnsab(board, otherturn, memlimit);
+	int ret1 = run_dfpns(board, otherturn, memlimit);
 
 	if(ret1 == 1){ //win
 		outcome = turn;
 	}else{
-		int ret2 = run_pnsab(board, turn, memlimit);
+		int ret2 = 0;
+		if(!timeout)
+			ret2 = run_dfpns(board, turn, memlimit);
 
 		if(ret2 == -1){
 			outcome = otherturn; //loss
@@ -37,7 +39,7 @@ void SolverPNS::solve_pnsab(Board board, double time, uint64_t memlimit){
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-int SolverPNS::run_pnsab(const Board & board, int ties, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
+int SolverPNS::run_dfpns(const Board & board, int ties, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
 	assignties = ties;
 
 	if(root) delete root;
@@ -47,7 +49,7 @@ int SolverPNS::run_pnsab(const Board & board, int ties, uint64_t memlimit){ //1 
 	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
 
 	while(!timeout && root->phi != 0 && root->delta != 0){
-		if(!pnsab(board, root, 0)){
+		if(!dfpns(board, root, 0, INF32/2, INF32/2)){
 			int64_t before = nodes;
 			garbage_collect(root);
 			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
@@ -67,7 +69,7 @@ int SolverPNS::run_pnsab(const Board & board, int ties, uint64_t memlimit){ //1 
 	return 0;
 }
 
-bool SolverPNS::pnsab(const Board & board, PNSNode * node, int depth){
+bool SolverPNS::dfpns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td){
 	if(depth > maxdepth)
 		maxdepth = depth;
 
@@ -82,13 +84,19 @@ bool SolverPNS::pnsab(const Board & board, PNSNode * node, int depth){
 		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 			Board next = board;
 			next.move(*move);
-			
-			uint64_t prevnodes = nodes_seen;
 
-			SolverAB solveab(false);
-			int abval = -solveab.negamax(next, 1, -2, 2); //higher depth goes farther but takes longer, depth 1 seems to be best
+			int abval = (next.won() > 0) + (next.won() >= 0);
+			int pd = 1; // phi & delta value
 
-			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), 1 + int(nodes_seen - prevnodes));
+			if(ab && abval == 0){
+				uint64_t prevnodes = nodes_seen;
+
+				SolverAB solveab(false);
+				abval = -solveab.negamax(next, ab, -2, 2);
+				pd = 1 + int(nodes_seen - prevnodes);
+			}
+
+			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), pd);
 
 			i++;
 		}
@@ -100,20 +108,30 @@ bool SolverPNS::pnsab(const Board & board, PNSNode * node, int depth){
 
 	bool mem;
 	do{
-		int i = 0;
-		for(; i < node->numchildren; i++)
-			if(node->children[i].delta == node->phi)
-				break;
-		PNSNode * child = &(node->children[i]);
+		PNSNode * c1 = node->children;
+		PNSNode * c2 = node->children;
+		for(PNSNode * i = node->children; i != node->children + node->numchildren; i++){
+			if(i->delta <= c1->delta){
+				c2 = c1;
+				c1 = i;
+			}
+		}
 
 		Board next = board;
-		next.move(child->move, false);
-		mem = pnsab(next, child, depth + 1);
+		next.move(c1->move, false);
+		
+		uint32_t tpc = min(INF32/2, (td + c1->phi - node->delta));
+		uint32_t tdc = min(tp, (uint32_t)(c2->delta*(1.0 + epsilon) + 1));
 
-		if(child->phi == 0 || child->delta == 0)
-			nodes -= child->dealloc();
+//		printf("depth: %i, tp: %i, td: %i, tpc: %i, tdc: %i\n", depth, tp, td, tpc, tdc);
 
-	}while(!timeout && mem && !updatePDnum(node));
+		mem = dfpns(next, c1, depth + 1, tpc, tdc);
+
+		if(c1->phi == 0 || c1->delta == 0)
+			nodes -= c1->dealloc();
+
+		updatePDnum(node);
+	}while(!timeout && mem && node->phi < tp && node->delta < td);
 
 	return mem;
 }
