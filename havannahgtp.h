@@ -6,8 +6,9 @@
 #include "game.h"
 #include "string.h"
 #include "solver.h"
-#include "solverpns.h"
 #include "solverab.h"
+#include "solverpns.h"
+#include "solverpns_heap.h"
 #include "player.h"
 #include "board.h"
 #include "move.h"
@@ -69,9 +70,14 @@ public:
 		newcallback("havannah_solve",  bind(&HavannahGTP::gtp_solve,         this, _1), "Use the default solver: havannah_solve [time] [memory]");
 		newcallback("solve_ab",        bind(&HavannahGTP::gtp_solve_ab,      this, _1), "Solve with negamax");
 		newcallback("solve_scout",     bind(&HavannahGTP::gtp_solve_scout,   this, _1), "Solve with negascout");
-		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,     this, _1), "Solve with basic proof number search");
-		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pnsab,   this, _1), "Solve with proof number search, with one ply of alpha-beta");
-		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_dfpnsab, this, _1), "Solve with proof number search, with a depth-first optimization");
+		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,     this, _1, 0, false), "Solve with basic proof number search");
+		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pns,     this, _1, 1, false), "Solve with proof number search, with one ply of alpha-beta");
+		newcallback("solve_dfpns",     bind(&HavannahGTP::gtp_solve_pns,     this, _1, 0, true),  "Solve with proof number search, with a depth-first optimization");
+		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_pns,     this, _1, 1, true),  "Solve with proof number search, with a depth-first optimization and one ply of alpha-beta");
+		newcallback("solve_hpns",      bind(&HavannahGTP::gtp_solve_hpns,    this, _1, 0, false), "Solve with basic proof number search");
+		newcallback("solve_hpnsab",    bind(&HavannahGTP::gtp_solve_hpns,    this, _1, 1, false), "Solve with proof number search, with one ply of alpha-beta");
+		newcallback("solve_hdfpns",    bind(&HavannahGTP::gtp_solve_hpns,    this, _1, 0, true),  "Solve with proof number search, with a depth-first optimization");
+		newcallback("solve_hdfpnsab",  bind(&HavannahGTP::gtp_solve_hpns,    this, _1, 1, true),  "Solve with proof number search, with a depth-first optimization and one ply of alpha-beta");
 	}
 
 	GTPResponse gtp_print(vecstr args){
@@ -172,7 +178,7 @@ public:
 	GTPResponse gtp_solve(vecstr args){
 		log("havannah_solve " + implode(args, " "));
 
-		return gtp_solve_pnsab(args);
+		return gtp_solve_pns(args, 1, true);
 	}
 
 	GTPResponse gtp_solve_ab(vecstr args){
@@ -199,7 +205,7 @@ public:
 		return GTPResponse(true, solve_str(solve));
 	}
 
-	GTPResponse gtp_solve_pns(vecstr args){
+	GTPResponse gtp_solve_pns(vecstr args, int ab, bool df){
 		double time = 60;
 		int mem = mem_allowed;
 
@@ -209,13 +215,13 @@ public:
 		if(args.size() >= 2)
 			mem = from_str<int>(args[1]);
 
-		SolverPNS solve(0);
+		SolverPNS solve(ab, df);
 		solve.solve(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
 	}
 
-	GTPResponse gtp_solve_pnsab(vecstr args){
+	GTPResponse gtp_solve_hpns(vecstr args, int ab, bool df){
 		double time = 60;
 		int mem = mem_allowed;
 
@@ -225,27 +231,12 @@ public:
 		if(args.size() >= 2)
 			mem = from_str<int>(args[1]);
 
-		SolverPNS solve(1, false);
+		SolverPNSHeap solve(ab, df);
 		solve.solve(game.getboard(), time, mem);
 
 		return GTPResponse(true, solve_str(solve));
 	}
 
-	GTPResponse gtp_solve_dfpnsab(vecstr args){
-		double time = 60;
-		int mem = mem_allowed;
-
-		if(args.size() >= 1)
-			time = from_str<double>(args[0]);
-
-		if(args.size() >= 2)
-			mem = from_str<int>(args[1]);
-
-		SolverPNS solve(1, true);
-		solve.solve(game.getboard(), time, mem);
-
-		return GTPResponse(true, solve_str(solve));
-	}
 
 	string solve_str(const Solver & solve){
 		string ret = "";
