@@ -66,16 +66,20 @@ public:
 //memory management for PNS which uses a tree to store the nodes
 	uint64_t nodes, maxnodes;
 	int assignties; //which player to assign a tie to
-	static const float epsilon = 0.25;
 
-	int ab;
+	int   ab; // how deep of an alpha-beta search to run at each leaf node
+	bool  df; // go depth first?
+	float epsilon; //if depth first, how wide should the threshold be?
 
 	bool timeout;
 
 	PNSNode * root;
 
-	SolverPNS(int AB = 0) {
+	SolverPNS(int AB = 0, bool DF = true, float eps = 0.25) {
 		ab = AB;
+		df = DF;
+		epsilon = eps;
+
 		root = NULL;
 		reset();
 	}
@@ -100,16 +104,11 @@ public:
 	}
 	void timedout(){ timeout = true; }
 
-	void solve_pns  (Board board, double time, uint64_t memlimit);
-	void solve_dfpns(Board board, double time, uint64_t memlimit);
-
+	void solve(Board board, double time, uint64_t memlimit);
 
 //basic proof number search building a tree
-	int run_pns  (const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
-	int run_dfpns(const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
-
-	bool pns  (const Board & board, PNSNode * node, int depth);   //basic proof number search
-	bool dfpns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
+	int run_pns(const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
+	bool pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
 
 //update the phi and delta for the node
 	bool updatePDnum(PNSNode * node);

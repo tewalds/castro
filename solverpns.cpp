@@ -9,7 +9,7 @@
  * L W L  L   from the perspective of toplay
  * U W LT U
  */
-void SolverPNS::solve_pns(Board board, double time, uint64_t memlimit){
+void SolverPNS::solve(Board board, double time, uint64_t memlimit){
 	reset();
 
 	if(board.won() >= 0){
@@ -57,7 +57,7 @@ int SolverPNS::run_pns(const Board & board, int ties, uint64_t memlimit){ //1 = 
 	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
 
 	while(!timeout && root->phi != 0 && root->delta != 0){
-		if(!pns(board, root, 0)){
+		if(!pns(board, root, 0, INF32/2, INF32/2)){
 			int64_t before = nodes;
 			garbage_collect(root);
 			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
@@ -77,7 +77,7 @@ int SolverPNS::run_pns(const Board & board, int ties, uint64_t memlimit){ //1 = 
 	return 0;
 }
 
-bool SolverPNS::pns(const Board & board, PNSNode * node, int depth){
+bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td){
 	if(depth > maxdepth)
 		maxdepth = depth;
 
@@ -116,20 +116,39 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth){
 	
 	bool mem;
 	do{
-		int i = 0;
-		for(; i < node->numchildren; i++)
-			if(node->children[i].delta == node->phi)
-				break;
-		PNSNode * child = &(node->children[i]);
+		PNSNode * child = node->children,
+		        * child2 = node->children,
+		        * childend = node->children + node->numchildren;
+
+		uint32_t tpc, tdc;
+
+		if(df){
+			for(PNSNode * i = node->children; i != childend; i++){
+				if(i->delta <= child->delta){
+					child2 = child;
+					child = i;
+				}
+			}
+
+			tpc = min(INF32/2, (td + child->phi - node->delta));
+			tdc = min(tp, (uint32_t)(child2->delta*(1.0 + epsilon) + 1));
+		}else{
+			tpc = tdc = 0;
+			while(child->delta != node->phi)
+				child++;
+		}
 
 		Board next = board;
 		next.move(child->move, false);
-		mem = pns(next, child, depth + 1);
+		mem = pns(next, child, depth + 1, tpc, tdc);
 
 		if(child->phi == 0 || child->delta == 0)
 			nodes -= child->dealloc();
 
-	}while(!timeout && mem && !updatePDnum(node));
+		if(updatePDnum(node) && !df)
+			break;
+
+	}while(!timeout && mem && (!df || (node->phi < tp && node->delta < td)));
 
 	return mem;
 }
