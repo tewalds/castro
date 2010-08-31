@@ -88,7 +88,8 @@ bool SolverPNSHeap::pns(const Board & board, PNSNode * node, int depth, uint32_t
 		nodes += node->alloc(board.movesremain());
 		nodes_seen += board.movesremain();
 
-		int i = 0;
+		PNSNode * child = node->children;
+		uint64_t sum = 0;
 		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 			Board next = board;
 			next.move(*move);
@@ -104,13 +105,20 @@ bool SolverPNSHeap::pns(const Board & board, PNSNode * node, int depth, uint32_t
 				pd = 1 + int(nodes_seen - prevnodes);
 			}
 
-			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), pd);
+			*child = PNSNode(*move).abval(abval, (board.toplay() == assignties), pd);
 
-			i++;
+			sum += child->phi;
+
+			child++;
 		}
 
+		if(sum >= INF32)
+			sum = INF32-1;
+
 		node->build_heap();
-		updatePDnum(node);
+
+		node->phi = node->children[0].delta;
+		node->delta = sum;
 
 		return true;
 	}
@@ -136,41 +144,38 @@ bool SolverPNSHeap::pns(const Board & board, PNSNode * node, int depth, uint32_t
 
 		Board next = board;
 		next.move(child->move, false);
+
+		uint32_t prev_phi   = child->phi,
+		         prev_delta = child->delta;
+
 		mem = pns(next, child, depth + 1, tpc, tdc);
 
 		if(child->phi == 0 || child->delta == 0)
 			nodes -= child->dealloc();
 
-		node->heapify();
+		bool updated = false;
+		if(prev_phi != child->phi){ //update the sum
+			node->delta -= prev_phi;
+			node->delta += child->phi;
+			if(node->delta >= INF32)
+				node->delta = INF32-1;
 
-		if(updatePDnum(node) && !df)
+			updated = true;
+		}
+
+		if(prev_delta != child->delta){ //update the min
+			child = NULL; //child pointer is invalid after heapify
+			node->heapify();
+			node->phi = node->children[0].delta;
+			updated = true;
+		}
+
+		if(updated && !df)
 			break;
 
 	}while(!timeout && mem && (!df || (node->phi < tp && node->delta < td)));
 
 	return mem;
-}
-
-bool SolverPNSHeap::updatePDnum(PNSNode * node){
-	uint32_t min = node->children[0].delta;
-	uint64_t sum = 0;
-
-	PNSNode * i = node->children,
-	        * end = node->children + node->numchildren;
-
-	for( ; i != end; i++)
-		sum += i->phi;
-
-	if(sum >= INF32)
-		sum = INF32-1;
-
-	if(min == node->phi && sum == node->delta){
-		return false;
-	}else{
-		node->phi = min;
-		node->delta = sum;
-		return true;
-	}
 }
 
 //removes the children of any node whos children are all unproven and have no children

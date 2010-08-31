@@ -139,9 +139,6 @@ public:
 	int run_pns(const Board & board, int ties, uint64_t memlimit); //1 = win, 0 = unknown, -1 = loss
 	bool pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
 
-//update the phi and delta for the node
-	bool updatePDnum(PNSNode * node);
-
 //remove all the leaf nodes to free up some memory
 	bool garbage_collect(PNSNode * node);
 };
