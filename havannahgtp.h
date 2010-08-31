@@ -66,6 +66,7 @@ public:
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1), "Set the algorithm for the player, no args gives options");
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,     this, _1), "List all legal moves");
 		newcallback("history",         bind(&HavannahGTP::gtp_history,       this, _1), "List of played moves");
+		newcallback("playgame",        bind(&HavannahGTP::gtp_playgame,      this, _1), "Play a list of moves");
 		newcallback("havannah_winner", bind(&HavannahGTP::gtp_winner,        this, _1), "Check the winner of the game");
 		newcallback("havannah_solve",  bind(&HavannahGTP::gtp_solve,         this, _1), "Use the default solver: havannah_solve [time] [memory]");
 		newcallback("solve_ab",        bind(&HavannahGTP::gtp_solve_ab,      this, _1), "Solve with negamax");
@@ -515,6 +516,15 @@ public:
 			return GTPResponse(true, "Placement: " + move_str(move) + ", outcome: " + won_str(game.getboard().won()) + "\n" + game.getboard().to_s());
 		else
 			return GTPResponse(true);
+	}
+
+	GTPResponse gtp_playgame(vecstr args){
+		GTPResponse ret(true);
+
+		for(unsigned int i = 0; ret.success && i < args.size(); i++)
+			ret = play(args[i], game.toplay());
+
+		return ret;
 	}
 
 	GTPResponse gtp_play(vecstr args){
