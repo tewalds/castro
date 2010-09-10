@@ -62,6 +62,8 @@ public:
 		newcallback("black",           bind(&HavannahGTP::gtp_playblack,     this, _1), "Place a black stone: black <location>");
 		newcallback("undo",            bind(&HavannahGTP::gtp_undo,          this, _1), "Undo one or more moves: undo [amount to undo]");
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,       this, _1), "Generate a move: genmove [color] [time]");
+		newcallback("move_stats",      bind(&HavannahGTP::gtp_move_stats,    this, _1), "Output the move stats for the player tree as it stands now");
+		newcallback("pv",              bind(&HavannahGTP::gtp_pv,            this, _1), "Output the principle variation for the player tree as it stands now");
 		newcallback("time_control",    bind(&HavannahGTP::gtp_time_control,  this, _1), "Set the algorithm for per game time, no args gives options");
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1), "Set the algorithm for the player, no args gives options");
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,     this, _1), "List all legal moves");
@@ -349,6 +351,29 @@ public:
 		return time;
 	}
 
+	GTPResponse gtp_move_stats(vecstr args){
+		string s = "";
+		Player::Node * child = player.root.children.begin(),
+		             * childend = player.root.children.end();
+		for( ; child != childend; child++){
+			s += move_str(child->move, true);
+			s += "," + to_str(child->exp.avg(), 2) + "," + to_str(child->exp.num());
+			s += "," + to_str(child->rave.avg(), 2) + "," + to_str(child->rave.num());
+			if(child->outcome >= 0)
+				s += "," + won_str(child->outcome);
+			s += "\n";
+		}
+		return GTPResponse(true, s);
+	}
+
+	GTPResponse gtp_pv(vecstr args){
+		string pvstr = "";
+		vector<Move> pv = player.get_pv();
+		for(unsigned int i = 0; i < pv.size(); i++)
+			pvstr += move_str(pv[i], true) + " ";
+		return GTPResponse(true, pvstr);
+	}
+
 	GTPResponse gtp_genmove(vecstr args){
 		double time = get_time();
 
@@ -365,31 +390,13 @@ public:
 		if(time_remain < 0)
 			time_remain = 0;
 
-
-		string pvstr = "";
-		vector<Move> pv = player.get_pv();
-		for(unsigned int i = 0; i < pv.size(); i++)
-			pvstr += move_str(pv[i], true) + " ";
-		fprintf(stderr, "PV:          %s\n", pvstr.c_str());
-
 		log("#genmove " + implode(args, " "));
 		log(string("play ") + (game.toplay() == 2 ? 'w' : 'b') + ' ' + move_str(best, false));
 
 
-		if(verbose && !player.root.children.empty()){
-			string s = "";
-			Player::Node * child = player.root.children.begin(),
-			             * childend = player.root.children.end();
-			for( ; child != childend; child++){
-				s += move_str(child->move, true);
-				s += "," + to_str(child->exp.avg(), 2) + "," + to_str(child->exp.num());
-				s += "," + to_str(child->rave.avg(), 2) + "," + to_str(child->rave.num());
-				if(child->outcome >= 0)
-					s += "," + won_str(child->outcome);
-				s += "\n";
-			}
-			fprintf(stderr, "Exp-Rave:    %s", s.c_str());
-		}
+		fprintf(stderr, "PV:          %s\n", gtp_pv(vecstr()).to_s().c_str());
+		if(verbose && !player.root.children.empty())
+			fprintf(stderr, "Exp-Rave:\n%s", gtp_move_stats(vecstr()).to_s().c_str());
 
 		player.move(best);
 		game.move(best);
