@@ -453,8 +453,8 @@ public:
 		numthreads  = 1;
 		maxmem      = 1000;
 
-		msrave      = 0;
-		msexplore   = 0.5;
+		msrave      = -2;
+		msexplore   = 0;
 
 		explore     = 0;
 		ravefactor  = 500;
