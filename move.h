@@ -31,8 +31,9 @@ struct Move {
 	Move operator- (const Move & b) const { return Move(x - b.x, y - b.y); }
 	Move & operator-=(const Move & b)     { y -= b.y; x -= b.x; return *this; }
 
+	int z() const { return (x - y); }
 	int dist(const Move & b) const {
-		return (abs(x - b.x) + abs(y - b.y) + abs((x - y) - (b.x - b.y)))/2;
+		return (abs(x - b.x) + abs(y - b.y) + abs(z() - b.z()))/2;
 	}
 };
 
