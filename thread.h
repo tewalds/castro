@@ -161,5 +161,36 @@ public:
 	}
 };
 
+class Barrier {
+private:
+	CondVar cond;
+	volatile int count,   //number of threads to wait for
+	             waiting; //number of threads waiting
+
+//not copyable
+	Barrier(const Barrier & b) { }
+	Barrier operator=(const Barrier & b) { return Barrier(count); }
+
+public:
+	Barrier(int n) : count(n), waiting(0) { }
+
+	bool wait(){
+		cond.lock();
+		bool flip = (++waiting == count);
+
+		if(flip){
+			waiting = 0;
+			cond.broadcast();
+		}else{
+			while(waiting < count)
+				cond.wait();
+		}
+		cond.unlock();
+
+		return flip;
+	}
+};
+
+
 #endif
 
