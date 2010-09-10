@@ -8,7 +8,6 @@
 #include "timer.h"
 
 Move Player::genmove(double time, int maxruns){
-	maxnodes = maxmem*1024*1024/sizeof(Node);
 	time_used = 0;
 	int toplay = rootboard.toplay();
 

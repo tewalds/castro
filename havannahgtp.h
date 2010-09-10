@@ -453,7 +453,7 @@ public:
 			}else if((arg == "-o" || arg == "--ponder") && i+1 < args.size()){
 				player.set_ponder(from_str<bool>(args[++i]));
 			}else if((arg == "-M" || arg == "--maxmem") && i+1 < args.size()){
-				player.maxmem = from_str<int>(args[++i]);
+				player.set_maxmem(from_str<int>(args[++i]));
 			}else if((arg == "-E" || arg == "--msexplore") && i+1 < args.size()){
 				player.msexplore = from_str<float>(args[++i]);
 			}else if((arg == "-F" || arg == "--msrave") && i+1 < args.size()){

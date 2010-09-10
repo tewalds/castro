@@ -478,6 +478,9 @@ public:
 		lastgoodreply  = false;
 		instantwin     = 0;
 
+
+		set_maxmem(maxmem);
+
 		//no threads started until a board is set
 
 		if(!ponder)
@@ -489,6 +492,11 @@ public:
 		root.dealloc();
 	}
 	void timedout() { sync.done(); }
+
+	void set_maxmem(u64 m){
+		maxmem = m;
+		maxnodes = maxmem*1024*1024/sizeof(Node);
+	}
 
 	void reset_threads(){ //better have the write lock before calling this
 	//kill all the threads
