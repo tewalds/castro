@@ -10,7 +10,7 @@
 void Player::PlayerUCT::run(){
 	RaveMoveList movelist;
 //	fprintf(stderr, "Runner start\n");
-	while(!cancelled && player->root.outcome == -1){
+	while(!cancelled){
 		player->sync.rdlock(); //wait for the write lock to come off
 
 		while(!cancelled && player->sync.relock() && player->root.outcome == -1 && (maxruns == 0 || runs < maxruns)){ //has the lock and not solved yet

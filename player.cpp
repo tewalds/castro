@@ -49,7 +49,7 @@ Move Player::genmove(double time, int maxruns){
 	
 		sync.wait(); //wait for the timer or solved
 
-		if(!ponder)
+		if(!ponder || root.outcome != -1)
 			sync.wrlock(); //stop the runners
 	}
 

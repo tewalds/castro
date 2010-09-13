@@ -540,7 +540,7 @@ public:
 			sync.unlock();
 	}
 	void move(const Move & m){
-		if(ponder)
+		if(ponder && root.outcome == -1)
 			sync.wrlock();
 
 		rootboard.move(m, true);
@@ -571,7 +571,7 @@ public:
 		}
 		assert(nodes == root.size());
 
-		if(ponder)
+		if(ponder && root.outcome == -1)
 			sync.unlock();
 	}
 
