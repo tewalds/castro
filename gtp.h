@@ -24,15 +24,14 @@ struct GTPResponse {
 	GTPResponse(bool s, string r = ""){
 		success = s;
 		response = r;
+		rtrim(response);
 	}
 	
 	GTPResponse(string r){
-		success = true;
-		response = r;
+		GTPResponse(true, r);
 	}
 
 	string to_s(){
-		rtrim(response);
 		return (success ? '=' : '?') + id + ' ' + response + "\n\n";
 	}
 };

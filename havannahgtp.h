@@ -394,9 +394,9 @@ public:
 		log(string("play ") + (game.toplay() == 2 ? 'w' : 'b') + ' ' + move_str(best, false));
 
 
-		fprintf(stderr, "PV:          %s\n", gtp_pv(vecstr()).to_s().c_str());
+		fprintf(stderr, "PV:          %s\n", gtp_pv(vecstr()).response.c_str());
 		if(verbose && !player.root.children.empty())
-			fprintf(stderr, "Exp-Rave:\n%s", gtp_move_stats(vecstr()).to_s().c_str());
+			fprintf(stderr, "Exp-Rave:\n%s\n", gtp_move_stats(vecstr()).response.c_str());
 
 		player.move(best);
 		game.move(best);
