@@ -60,7 +60,7 @@ public:
 		bool unique;
 		HashSet hashes;
 	public:
-		MoveIterator(const Board & b, bool allowswap, bool u = false) : board(b), lineend(0), move(Move(M_SWAP)), unique(u) {
+		MoveIterator(const Board & b, bool Unique, bool allowswap) : board(b), lineend(0), move(Move(M_SWAP)), unique(Unique) {
 			if(board.outcome != -1)
 				move = Move(0, board.size_d); //already done
 			else if(!allowswap || !board.valid_move(move)) //check if swap is valid
@@ -270,8 +270,8 @@ public:
 		return toPlay;
 	}
 
-	MoveIterator moveit(bool allowswap = true) const {
-		return MoveIterator(*this, allowswap);
+	MoveIterator moveit(bool unique = false, int swap = -1) const {
+		return MoveIterator(*this, unique, (swap == -1 ? allowswap : swap));
 	}
 
 	void set(const Move & m, int v){

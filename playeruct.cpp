@@ -312,7 +312,7 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 	Move moves[num];
 
 	int i = 0;
-	for(Board::MoveIterator m = board.moveit(false); !m.done(); ++m)
+	for(Board::MoveIterator m = board.moveit(false, false); !m.done(); ++m)
 		moves[i++] = *m;
 
 	bool wrand = (player->weightedrandom && player->ravefactor > min_rave && player->root.children.num() > 1);
