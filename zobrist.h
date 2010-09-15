@@ -22,6 +22,9 @@ public:
 		return strings[i];
 	}
 
+	hash_t test(int permutation, int position) const {
+		return values[permutation] ^ strings[position];
+	}
 	void update(int permutation, int position){
 		values[permutation] ^= strings[position];
 	}

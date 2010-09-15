@@ -11,6 +11,7 @@ using namespace std;
 #include "move.h"
 #include "string.h"
 #include "zobrist.h"
+#include "hashset.h"
 
 static const int BitsSetTable64[] = {
 	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
@@ -54,14 +55,20 @@ class Board{
 public:
 	class MoveIterator { //only returns valid moves...
 		const Board & board;
-		Move move;
 		int lineend;
+		Move move;
+		bool unique;
+		HashSet hashes;
 	public:
-		MoveIterator(const Board & b, bool allowswap) : board(b), move(Move(M_SWAP)), lineend(0) {
+		MoveIterator(const Board & b, bool allowswap, bool u = false) : board(b), lineend(0), move(Move(M_SWAP)), unique(u) {
 			if(board.outcome != -1)
 				move = Move(0, board.size_d); //already done
 			else if(!allowswap || !board.valid_move(move)) //check if swap is valid
 				++(*this); //find the first valid move
+			if(unique){
+				hashes.init(board.movesremain());
+				hashes.add(board.test_hash(move, board.toplay()));
+			}
 		}
 
 		const Move & operator * ()  const { return move; }
@@ -81,7 +88,10 @@ public:
 					move.x = board.linestart(move.y);
 					lineend = board.lineend(move.y);
 				}
-			}while(!board.valid_move_fast(move));
+			}while(!board.valid_move_fast(move) && (!unique || !hashes.exists(board.test_hash(move, board.toplay()))));
+
+			if(unique)
+				hashes.add(board.test_hash(move, board.toplay()));
 
 			return *this;
 		}
@@ -351,13 +361,6 @@ public:
 		return false;
 	}
 
-	hash_t test_hash(const Move & pos, int turn){
-		update_hash(pos, turn);
-		hash_t ret = hash.get();
-		update_hash(pos, turn);
-		return ret;
-	}
-
 	void update_hash(const Move & pos, int turn){
 		//mirror is simply flip x,y
 		int x = pos.x - size+1,
@@ -380,6 +383,27 @@ public:
 		hash.update(10, 3*xyc(-z, -y) + turn);
 		hash.update(11, 3*xyc( x, -z) + turn);
 	}
+
+	hash_t test_hash(const Move & pos, int turn) const {
+		int x = pos.x - size+1,
+		    y = pos.y - size+1,
+		    z = y - x;
+
+		hash_t m = hash.test(0,  3*xyc( x,  y) + turn);
+		m = min(m, hash.test(1,  3*xyc( y,  z) + turn));
+		m = min(m, hash.test(2,  3*xyc( z, -x) + turn));
+		m = min(m, hash.test(3,  3*xyc(-x, -y) + turn));
+		m = min(m, hash.test(4,  3*xyc(-y, -z) + turn));
+		m = min(m, hash.test(5,  3*xyc(-z,  x) + turn));
+		m = min(m, hash.test(6,  3*xyc( y,  x) + turn));
+		m = min(m, hash.test(7,  3*xyc( z,  y) + turn));
+		m = min(m, hash.test(8,  3*xyc(-x,  z) + turn));
+		m = min(m, hash.test(9,  3*xyc(-y, -x) + turn));
+		m = min(m, hash.test(10, 3*xyc(-z, -y) + turn));
+		m = min(m, hash.test(11, 3*xyc( x, -z) + turn));
+		return m;
+	}
+
 
 	bool move(const Move & pos, bool checkwin = true, bool locality = false, bool zobrist = false){
 		if(!valid_move(pos))
