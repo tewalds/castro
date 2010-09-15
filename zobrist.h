@@ -1,0 +1,42 @@
+
+#ifndef _ZOBRIST_H_
+#define _ZOBRIST_H_
+
+#include "types.h"
+
+typedef uint64_t hash_t;
+
+class Zobrist {
+private:
+	static const hash_t strings[4096];
+
+	hash_t values[12];
+
+public:
+	Zobrist(){
+		for(int i = 0; i < 12; i++)
+			values[i] = 0;
+	}
+
+	static hash_t string(int i) {
+		return strings[i];
+	}
+
+	void update(int permutation, int position){
+		values[permutation] ^= strings[position];
+	}
+	hash_t get(int permutation){
+		return values[permutation];
+	}
+
+	hash_t get(){
+		hash_t m = values[0];
+		for(int i = 1; i < 12; i++)
+			if(m > values[i])
+				m = values[i];
+		return m;
+	}
+};
+
+#endif
+

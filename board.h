@@ -10,6 +10,7 @@ using namespace std;
 
 #include "move.h"
 #include "string.h"
+#include "zobrist.h"
 
 static const int BitsSetTable64[] = {
 	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
@@ -101,6 +102,7 @@ private:
 	bool allowswap;
 
 	vector<Cell> cells;
+	Zobrist hash;
 
 public:
 	Board(){
@@ -138,6 +140,9 @@ public:
 
 	int xy(int x, int y)   const { return   y*size_d +   x; }
 	int xy(const Move & m) const { return m.y*size_d + m.x; }
+
+	int xyc(int x, int y)   const { return xy(  x + size-1,   y + size-1); }
+	int xyc(const Move & m) const { return xy(m.x + size-1, m.y + size-1); }
 	
 	//assumes valid x,y
 	int get(int i)          const { return cells[i].piece; }
@@ -346,7 +351,37 @@ public:
 		return false;
 	}
 
-	bool move(const Move & pos, bool checkwin = true, bool locality = false){
+	hash_t test_hash(const Move & pos, int turn){
+		update_hash(pos, turn);
+		hash_t ret = hash.get();
+		update_hash(pos, turn);
+		return ret;
+	}
+
+	void update_hash(const Move & pos, int turn){
+		//mirror is simply flip x,y
+		int x = pos.x - size+1,
+		    y = pos.y - size+1,
+		    z = y - x;
+
+//x,y; y,z; z,-x; -x,-y; -y,-z; -z,x
+//y,x; z,y; -x,z; -y,-x; -z,-y; x,-z
+
+		hash.update(0,  3*xyc( x,  y) + turn);
+		hash.update(1,  3*xyc( y,  z) + turn);
+		hash.update(2,  3*xyc( z, -x) + turn);
+		hash.update(3,  3*xyc(-x, -y) + turn);
+		hash.update(4,  3*xyc(-y, -z) + turn);
+		hash.update(5,  3*xyc(-z,  x) + turn);
+		hash.update(6,  3*xyc( y,  x) + turn);
+		hash.update(7,  3*xyc( z,  y) + turn);
+		hash.update(8,  3*xyc(-x,  z) + turn);
+		hash.update(9,  3*xyc(-y, -x) + turn);
+		hash.update(10, 3*xyc(-z, -y) + turn);
+		hash.update(11, 3*xyc( x, -z) + turn);
+	}
+
+	bool move(const Move & pos, bool checkwin = true, bool locality = false, bool zobrist = false){
 		if(!valid_move(pos))
 			return false;
 
@@ -358,6 +393,9 @@ public:
 		char turn = toplay();
 
 		set(pos, turn);
+
+		if(zobrist)
+			update_hash(pos, turn);
 
 		if(locality){
 			for(int i = 6; i < 18; i++){

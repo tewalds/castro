@@ -373,7 +373,7 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 		}
 
 		movelist.add(move, board.toplay());
-		board.move(move);
+		board.move(move, true, false, false);
 		depth++;
 	}
 
