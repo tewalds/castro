@@ -81,15 +81,18 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 	if(depth > maxdepth)
 		maxdepth = depth;
 
+	bool unique = (board.num_moves() <= unique_depth);
+
 	if(node->numchildren == 0){
 		if(nodes >= maxnodes)
 			return false;
-	
-		nodes += node->alloc(board.movesremain());
-		nodes_seen += board.movesremain();
+
+		int numnodes = board.movesremain();
+		nodes += node->alloc(numnodes);
+		nodes_seen += numnodes;
 
 		int i = 0;
-		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+		for(Board::MoveIterator move = board.moveit(unique); !move.done(); ++move){
 			Board next = board;
 			next.move(*move);
 
@@ -108,6 +111,8 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 
 			i++;
 		}
+		for(; i < numnodes; i++) //add losses to the end so they aren't considered, only used when unique is true
+			node->children[i] = PNSNode(Move(M_NONE), 0, INF32);
 
 		updatePDnum(node);
 
@@ -139,7 +144,7 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 		}
 
 		Board next = board;
-		next.move(child->move, false);
+		next.move(child->move, false, false, unique);
 		mem = pns(next, child, depth + 1, tpc, tdc);
 
 		if(child->phi == 0 || child->delta == 0)
