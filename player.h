@@ -543,7 +543,7 @@ public:
 		if(ponder && root.outcome == -1)
 			sync.wrlock();
 
-		rootboard.move(m, true);
+		rootboard.move(m, true, true, true);
 
 		uword nodesbefore = nodes;
 

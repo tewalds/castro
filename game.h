@@ -37,7 +37,7 @@ public:
 		if(offset <= 0)
 			offset += hist.size();
 		for(int i = 0; i < offset; i++)
-			board.move(hist[i], true);
+			board.move(hist[i], true, true, true);
 		return board;
 	}
 
