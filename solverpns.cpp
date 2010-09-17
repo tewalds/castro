@@ -101,7 +101,8 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 
 				SolverAB solveab(false);
 				abval = -solveab.negamax(next, ab, -2, 2);
-				pd = 1 + int(nodes_seen - prevnodes);
+				pd = 1;
+				nodes_seen += solveab.nodes_seen;
 			}else{
 				int won = board.test_win(*move);
 				abval = (won > 0) + (won >= 0);
