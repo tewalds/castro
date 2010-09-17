@@ -38,7 +38,7 @@ const MoveScore neighbours[18] = {
 class Board{
 	struct Cell {
 		unsigned piece  : 2; //who controls this cell, 0 for none, 1,2 for players
-		unsigned parent : 9; //parent for this group of cells
+		mutable unsigned parent : 9; //parent for this group of cells
 		unsigned size   : 7; //size of this group of cells
 		unsigned corner : 6; //which corners are this group connected to
 		unsigned edge   : 6; //which edges are this group connected to
@@ -291,9 +291,9 @@ public:
 		}
 	}
 
-	int find_group(const Move & m) { return find_group(xy(m)); }
-	int find_group(int x, int y)   { return find_group(xy(x, y)); }
-	int find_group(int i){
+	int find_group(const Move & m) const { return find_group(xy(m)); }
+	int find_group(int x, int y)   const { return find_group(xy(x, y)); }
+	int find_group(int i) const {
 		if(cells[i].parent != i)
 			cells[i].parent = find_group(cells[i].parent);
 		return cells[i].parent;
@@ -321,7 +321,7 @@ public:
 		return false;
 	}
 
-	int test_connectivity(const Move & pos){
+	int test_connectivity(const Move & pos) const {
 		char turn = toplay();
 
 		Cell testcell = cells[find_group(pos)];
@@ -329,7 +329,7 @@ public:
 			Move loc = pos + neighbours[i];
 
 			if(onboard(loc) && turn == get(loc)){
-				Cell * g = & cells[find_group(loc)];
+				const Cell * g = & cells[find_group(loc)];
 				testcell.corner |= g->corner;
 				testcell.edge   |= g->edge;
 				i++; //skip the next one
@@ -339,7 +339,7 @@ public:
 	}
 
 	// recursively follow a ring
-	bool detectring(const Move & pos, char turn){
+	bool detectring(const Move & pos, char turn) const {
 		for(int i = 0; i < 4; i++){ //4 instead of 6 since any ring must have its first endpoint in the first 4
 			Move loc = pos + neighbours[i];
 			
@@ -350,7 +350,7 @@ public:
 	}
 	// only take the 3 directions that are valid in a ring
 	// the backwards directions are either invalid or not part of the shortest loop
-	bool followring(const Move & start, const Move & cur, const int & dir, const int & turn){
+	bool followring(const Move & start, const Move & cur, const int & dir, const int & turn) const {
 		for(int i = 5; i <= 7; i++){
 			int nd = (dir + i) % 6;
 			Move next = cur + neighbours[nd];
@@ -456,12 +456,12 @@ public:
 		return true;	
 	}
 
-	bool test_local(const Move & pos){
+	bool test_local(const Move & pos) const {
 		return (cells[xy(pos)].local == 3);
 	}
 
 	//test if making this move would win, but don't actually make the move
-	int test_win(const Move & pos, char turn = 0){
+	int test_win(const Move & pos, char turn = 0) const {
 		if(cells[xy(pos)].local != 3)
 			return -1;
 
@@ -474,7 +474,7 @@ public:
 			Move loc = pos + neighbours[i];
 
 			if(onboard(loc) && turn == get(loc)){
-				Cell * g = & cells[find_group(loc)];
+				const Cell * g = & cells[find_group(loc)];
 				testcell.corner |= g->corner;
 				testcell.edge   |= g->edge;
 				testcell.size   += g->size;
