@@ -363,6 +363,10 @@ public:
 		return false;
 	}
 
+	hash_t gethash() const {
+		return (nummoves > unique_depth ? hash.get(0) : hash.get());
+	}
+
 	void update_hash(const Move & pos, int turn){
 		if(nummoves > unique_depth){ //simple update, no rotations/symmetry
 			hash.update(0, 3*xy(pos) + turn);
