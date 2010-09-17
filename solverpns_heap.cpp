@@ -81,16 +81,19 @@ bool SolverPNSHeap::pns(const Board & board, PNSNode * node, int depth, uint32_t
 	if(depth > maxdepth)
 		maxdepth = depth;
 
+	bool unique = (board.num_moves() <= unique_depth);
+
 	if(node->numchildren == 0){
 		if(nodes >= maxnodes)
 			return false;
 	
-		nodes += node->alloc(board.movesremain());
-		nodes_seen += board.movesremain();
+		int numnodes = board.movesremain();
+		nodes += node->alloc(numnodes);
+		nodes_seen += numnodes;
 
 		PNSNode * child = node->children;
 		uint64_t sum = 0;
-		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+		for(Board::MoveIterator move = board.moveit(unique); !move.done(); ++move){
 			Board next = board;
 			next.move(*move);
 
@@ -111,6 +114,10 @@ bool SolverPNSHeap::pns(const Board & board, PNSNode * node, int depth, uint32_t
 
 			child++;
 		}
+
+		//add losses to the end so they aren't considered, only used when unique is true
+		for(; child != node->children + numnodes; child++)
+			*child = PNSNode(Move(M_NONE), 0, INF32);
 
 		if(sum >= INF32)
 			sum = INF32-1;
@@ -143,7 +150,7 @@ bool SolverPNSHeap::pns(const Board & board, PNSNode * node, int depth, uint32_t
 		}
 
 		Board next = board;
-		next.move(child->move, false);
+		next.move(child->move, false, false, unique);
 
 		uint32_t prev_phi   = child->phi,
 		         prev_delta = child->delta;
