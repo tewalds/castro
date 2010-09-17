@@ -107,6 +107,7 @@ private:
 	char size_d; //diameter of the board = size*2-1
 
 	short nummoves;
+	short unique_depth; //update and test rotations/symmetry with less than this many pieces on the board
 	char toPlay;
 	char outcome; //-1 = unknown, 0 = tie, 1,2 = player win
 	bool allowswap;
@@ -123,6 +124,7 @@ public:
 		size = s;
 		size_d = s*2-1;
 		nummoves = 0;
+		unique_depth = 5;
 		toPlay = 1;
 		outcome = -1;
 		allowswap = true;
@@ -271,7 +273,7 @@ public:
 	}
 
 	MoveIterator moveit(bool unique = false, int swap = -1) const {
-		return MoveIterator(*this, unique, (swap == -1 ? allowswap : swap));
+		return MoveIterator(*this, (unique ? nummoves <= unique_depth : false), (swap == -1 ? allowswap : swap));
 	}
 
 	void set(const Move & m, int v){
@@ -362,6 +364,11 @@ public:
 	}
 
 	void update_hash(const Move & pos, int turn){
+		if(nummoves > unique_depth){ //simple update, no rotations/symmetry
+			hash.update(0, 3*xy(pos) + turn);
+			return;
+		}
+
 		//mirror is simply flip x,y
 		int x = pos.x - size+1,
 		    y = pos.y - size+1,
@@ -385,6 +392,9 @@ public:
 	}
 
 	hash_t test_hash(const Move & pos, int turn) const {
+		if(nummoves > unique_depth) //simple test, no rotations/symmetry
+			return hash.test(0, 3*xy(pos) + turn);
+
 		int x = pos.x - size+1,
 		    y = pos.y - size+1,
 		    z = y - x;
@@ -404,8 +414,7 @@ public:
 		return m;
 	}
 
-
-	bool move(const Move & pos, bool checkwin = true, bool locality = false, bool zobrist = false){
+	bool move(const Move & pos, bool checkwin = true, bool locality = false){
 		if(!valid_move(pos))
 			return false;
 
@@ -417,9 +426,7 @@ public:
 		char turn = toplay();
 
 		set(pos, turn);
-
-		if(zobrist)
-			update_hash(pos, turn);
+		update_hash(pos, turn);
 
 		if(locality){
 			for(int i = 6; i < 18; i++){

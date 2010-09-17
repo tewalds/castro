@@ -7,8 +7,6 @@
 
 class Solver {
 public:
-	static const int unique_depth = 5;
-
 	int outcome; // 0 = tie, 1 = white, 2 = black, -1 = white or tie, -2 = black or tie, anything else unknown
 	int maxdepth;
 	uint64_t nodes_seen;
