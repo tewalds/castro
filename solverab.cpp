@@ -19,11 +19,11 @@ void SolverAB::solve(Board board, double time, int mdepth){
 
 		//the first depth of negamax
 		int ret, alpha = -2, beta = 2;
-		for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
 			nodes_seen++;
 
 			Board next = board;
-			next.move(*move);
+			next.move(*move, true, false, true);
 
 			int value = -negamax(next, maxdepth - 1, -beta, -alpha);
 
@@ -60,11 +60,13 @@ int SolverAB::negamax(Board & board, const int depth, int alpha, int beta){
 	if(depth <= 0 || timeout)
 		return 0;
 
+	bool unique = (board.num_moves() <= 5);
+
 	int b = beta;
 	int first = true;
 	int value, losses = 0;
 	static const int lookup[4] = {0, 1, 2, 2};
-	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+	for(Board::MoveIterator move = board.moveit(unique); !move.done(); ++move){
 		nodes_seen++;
 
 		if(depth <= 2){
@@ -74,7 +76,7 @@ int SolverAB::negamax(Board & board, const int depth, int alpha, int beta){
 				losses++;
 		}else{
 			Board next = board;
-			next.move(*move);
+			next.move(*move, true, false, unique);
 
 			value = -negamax(next, depth - 1, -b, -alpha);
 
