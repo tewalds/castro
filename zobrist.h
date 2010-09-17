@@ -28,11 +28,11 @@ public:
 	void update(int permutation, int position){
 		values[permutation] ^= strings[position];
 	}
-	hash_t get(int permutation){
+	hash_t get(int permutation) const {
 		return values[permutation];
 	}
 
-	hash_t get(){
+	hash_t get() const {
 		hash_t m = values[0];
 		for(int i = 1; i < 12; i++)
 			if(m > values[i])
