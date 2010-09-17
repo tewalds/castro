@@ -13,17 +13,18 @@ void SolverAB::solve(Board board, double time, int mdepth){
 	int starttime = time_msec();
 
 	int turn = board.toplay();
+	bool unique = (board.num_moves() <= unique_depth);
 
 	for(maxdepth = 2; !timeout && maxdepth <= mdepth; maxdepth++){
 		fprintf(stderr, "Starting depth %d\n", maxdepth);
 
 		//the first depth of negamax
 		int ret, alpha = -2, beta = 2;
-		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
+		for(Board::MoveIterator move = board.moveit(unique); !move.done(); ++move){
 			nodes_seen++;
 
 			Board next = board;
-			next.move(*move, true, false, true);
+			next.move(*move, true, false, unique);
 
 			int value = -negamax(next, maxdepth - 1, -beta, -alpha);
 
@@ -60,7 +61,7 @@ int SolverAB::negamax(Board & board, const int depth, int alpha, int beta){
 	if(depth <= 0 || timeout)
 		return 0;
 
-	bool unique = (board.num_moves() <= 5);
+	bool unique = (board.num_moves() <= unique_depth);
 
 	int b = beta;
 	int first = true;
