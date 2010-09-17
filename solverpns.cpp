@@ -93,18 +93,21 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 
 		int i = 0;
 		for(Board::MoveIterator move = board.moveit(unique); !move.done(); ++move){
-			Board next = board;
-			next.move(*move);
+			int abval, pd = 1; // alpha-beta value, phi & delta value
 
-			int abval = (next.won() > 0) + (next.won() >= 0);
-			int pd = 1; // phi & delta value
+			if(ab){
+				Board next = board;
+				next.move(*move, false, false, unique);
 
-			if(ab && abval == 0){
 				uint64_t prevnodes = nodes_seen;
 
 				SolverAB solveab(false);
 				abval = -solveab.negamax(next, ab, -2, 2);
 				pd = 1 + int(nodes_seen - prevnodes);
+			}else{
+				int won = board.test_win(*move);
+				abval = (won > 0) + (won >= 0);
+				pd = 1; // phi & delta value
 			}
 
 			node->children[i] = PNSNode(*move).abval(abval, (board.toplay() == assignties), pd);
