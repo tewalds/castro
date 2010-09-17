@@ -61,14 +61,14 @@ public:
 		HashSet hashes;
 	public:
 		MoveIterator(const Board & b, bool Unique, bool allowswap) : board(b), lineend(0), move(Move(M_SWAP)), unique(Unique) {
-			if(board.outcome != -1)
-				move = Move(0, board.size_d); //already done
-			else if(!allowswap || !board.valid_move(move)) //check if swap is valid
-				++(*this); //find the first valid move
 			if(unique){
 				hashes.init(board.movesremain());
 				hashes.add(board.test_hash(move, board.toplay()));
 			}
+			if(board.outcome != -1)
+				move = Move(0, board.size_d); //already done
+			else if(!allowswap || !board.valid_move(move)) //check if swap is valid
+				++(*this); //find the first valid move
 		}
 
 		const Move & operator * ()  const { return move; }
@@ -82,13 +82,13 @@ public:
 
 				if(move.x >= lineend){
 					move.y++;
-					if(move.y >= board.get_size_d())
-						break;
+					if(move.y >= board.get_size_d()) //done
+						return *this;
 
 					move.x = board.linestart(move.y);
 					lineend = board.lineend(move.y);
 				}
-			}while(!board.valid_move_fast(move) && (!unique || !hashes.exists(board.test_hash(move, board.toplay()))));
+			}while(!board.valid_move_fast(move) || (unique && hashes.exists(board.test_hash(move, board.toplay()))));
 
 			if(unique)
 				hashes.add(board.test_hash(move, board.toplay()));
