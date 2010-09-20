@@ -137,9 +137,11 @@ bool SolverPNSTT::updatePDnum(const Board & board, PNSNode * node){
 	if(sum >= INF32)
 		sum = INF32-1;
 
-	if(min == node->phi && sum == node->delta){
+	hash_t hash = board.gethash();
+	if(hash == node->hash && min == node->phi && sum == node->delta){
 		return false;
 	}else{
+		node->hash = hash; //just in case it was overwritten by something else
 		node->phi = min;
 		node->delta = sum;
 		return true;
