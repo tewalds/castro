@@ -355,6 +355,7 @@ public:
 	public:
 		Sync() : stop(false), writelock(false) { }
 
+		bool is_wrlocked(){ return writelock; }
 		int wrlock(){ //aquire the write lock, set stop, blocks
 			assert(writelock == false);
 
@@ -487,7 +488,7 @@ public:
 			sync.wrlock();
 	}
 	~Player(){
-		if(ponder)
+		if(!sync.is_wrlocked())
 			sync.wrlock();
 		root.dealloc();
 	}
@@ -527,7 +528,7 @@ public:
 	}
 
 	void set_board(const Board & board){
-		if(ponder)
+		if(!sync.is_wrlocked())
 			sync.wrlock();
 
 		rootboard = board;
@@ -540,7 +541,7 @@ public:
 			sync.unlock();
 	}
 	void move(const Move & m){
-		if(ponder && root.outcome == -1)
+		if(!sync.is_wrlocked())
 			sync.wrlock();
 
 		rootboard.move(m, true, true);
@@ -570,6 +571,9 @@ public:
 			root.move = m;
 		}
 		assert(nodes == root.size());
+
+		root.exp.addwins(visitexpand+1); //+1 to compensate for the virtual loss
+		root.outcome = -1;
 
 		if(ponder && root.outcome == -1)
 			sync.unlock();

@@ -21,16 +21,6 @@ Move Player::genmove(double time, int maxruns){
 	if(time > 0)
 		timer.set(time, bind(&Player::timedout, this));
 
-	//solve to depth 1 just in case this is a terminal node
-	if(root.outcome == -1 && root.children.empty() && rootboard.num_moves() > 0){
-		SolverAB solver;
-		solver.solve(rootboard, 1, 2);
-		if(solver.outcome >= 0){
-			root.outcome = solver.outcome;
-			root.bestmove = solver.bestmove;
-		}
-	}
-
 	int runs = 0;
 	for(unsigned int i = 0; i < threads.size(); i++){
 		runs += threads[i]->runs;
@@ -40,18 +30,15 @@ Move Player::genmove(double time, int maxruns){
 	if(runs)
 		fprintf(stderr, "Pondered %i runs\n", runs);
 
-	root.exp.addwins(visitexpand+1); //+1 to compensate for the virtual loss
-
 	//let them run!
-	if(root.outcome == -1){
-		if(!ponder)
-			sync.unlock(); //remove the write lock
-	
-		sync.wait(); //wait for the timer or solved
+	if(sync.is_wrlocked())
+		sync.unlock(); //remove the write lock
 
-		if(!ponder || root.outcome != -1)
-			sync.wrlock(); //stop the runners
-	}
+	sync.wait(); //wait for the timer or solved
+
+	if(!ponder || root.outcome != -1)
+		sync.wrlock(); //stop the runners
+
 
 //return the best one
 	Node * ret = return_move(& root, toplay);
