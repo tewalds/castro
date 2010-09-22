@@ -127,7 +127,7 @@ public:
 		unique_depth = 5;
 		toPlay = 1;
 		outcome = -1;
-		allowswap = true;
+		allowswap = false;
 
 		cells.resize(vecsize());
 

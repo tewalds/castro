@@ -34,8 +34,6 @@ public:
 	HavannahGTP(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
 		GTPclient(i, o, l);
 
-		player.set_board(game.getboard());
-
 		verbose = false;
 		hguicoords = false;
 		time_control = TIME_STATS;
@@ -44,7 +42,9 @@ public:
 		time_per_move = 0;
 		mem_allowed = 1000;
 		max_runs = 0;
-		allow_swap = true;
+		allow_swap = false;
+
+		player.set_board(game.getboard());
 
 		newcallback("name",            bind(&HavannahGTP::gtp_name,          this, _1), "Name of the program");
 		newcallback("version",         bind(&HavannahGTP::gtp_version,       this, _1), "Version of the program");
