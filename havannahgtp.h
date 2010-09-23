@@ -14,18 +14,44 @@
 #include "board.h"
 #include "move.h"
 
+struct TimeControl {
+	enum Method { PERCENT, EVEN, STATS };
+	Method method; //method to use to distribute the remaining time
+	double param;  //param for the method, such as the percentage used or multiple of even
+	double game;
+	double move;
+	bool   flexible; //whether time_per_move can be saved for future moves
+	int    max_sims;
+
+	TimeControl(){
+		method   = STATS;
+		param    = 2;
+		game     = 120;
+		move     = 0;
+		flexible = true;
+		max_sims = 0;
+	}
+
+	string method_name(){
+		switch(method){
+			case PERCENT: return "percent";
+			case EVEN:    return "even";
+			case STATS:   return "stats";
+			default:      return "WTF? unknown time control method";
+		}
+	}
+};
+
 class HavannahGTP : public GTPclient {
 	HavannahGame game;
 
 public:
 	bool verbose;
 	bool hguicoords;
-	enum time_control_t { TIME_PERCENT, TIME_EVEN, TIME_STATS };
-	time_control_t time_control;
-	double time_param;
-	double time_remain;
-	double time_per_move;
-	int max_runs;
+
+	TimeControl time;
+	double      time_remain; //time remaining for this game
+
 	int mem_allowed;
 	bool allow_swap;
 
@@ -36,12 +62,10 @@ public:
 
 		verbose = false;
 		hguicoords = false;
-		time_control = TIME_STATS;
-		time_param  = 2;
-		time_remain = 120;
-		time_per_move = 0;
+
+		time_remain = time.game;
+
 		mem_allowed = 1000;
-		max_runs = 0;
 		allow_swap = false;
 
 		player.set_board(game.getboard());
@@ -57,7 +81,6 @@ public:
 		newcallback("clear_board",     bind(&HavannahGTP::gtp_clearboard,    this, _1), "Clear the board, but keep the size");
 		newcallback("boardsize",       bind(&HavannahGTP::gtp_boardsize,     this, _1), "Clear the board, set the board size");
 		newcallback("swap",            bind(&HavannahGTP::gtp_swap,          this, _1), "Enable/disable swap: swap <0|1>");
-		newcallback("time_settings",   bind(&HavannahGTP::gtp_time_settings, this, _1), "Set the time limits: time_settings [secs per game] [secs per move] [sims per move]");
 		newcallback("play",            bind(&HavannahGTP::gtp_play,          this, _1), "Place a stone: play <color> <location>");
 		newcallback("white",           bind(&HavannahGTP::gtp_playwhite,     this, _1), "Place a white stone: white <location>");
 		newcallback("black",           bind(&HavannahGTP::gtp_playblack,     this, _1), "Place a black stone: black <location>");
@@ -65,7 +88,7 @@ public:
 		newcallback("genmove",         bind(&HavannahGTP::gtp_genmove,       this, _1), "Generate a move: genmove [color] [time]");
 		newcallback("move_stats",      bind(&HavannahGTP::gtp_move_stats,    this, _1), "Output the move stats for the player tree as it stands now");
 		newcallback("pv",              bind(&HavannahGTP::gtp_pv,            this, _1), "Output the principle variation for the player tree as it stands now");
-		newcallback("time_control",    bind(&HavannahGTP::gtp_time_control,  this, _1), "Set the algorithm for per game time, no args gives options");
+		newcallback("time",            bind(&HavannahGTP::gtp_time,          this, _1), "Set the time limits and the algorithm for per game time");
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1), "Set the algorithm for the player, no args gives options");
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,     this, _1), "List all legal moves");
 		newcallback("history",         bind(&HavannahGTP::gtp_history,       this, _1), "List of played moves");
@@ -129,20 +152,6 @@ public:
 		return GTPResponse(true, ret);
 	}
 
-
-	GTPResponse gtp_time_settings(vecstr args){
-		if(args.size() == 0)
-			return GTPResponse(false, "Wrong number of arguments");
-
-		log("time_settings " + implode(args, " "));
-
-		if(args.size() >= 1) time_remain   = from_str<double>(args[0]);
-		if(args.size() >= 2) time_per_move = from_str<double>(args[1]);
-		if(args.size() >= 3) max_runs      = from_str<int>(args[2]);
-
-		return GTPResponse(true);
-	}
-
 	GTPResponse gtp_boardsize(vecstr args){
 		if(args.size() != 1)
 			return GTPResponse(false, "Current board size: " + to_str(game.getsize()));
@@ -156,12 +165,16 @@ public:
 		game = HavannahGame(size);
 		player.set_board(game.getboard());
 
+		time_remain = time.game;
+
 		return GTPResponse(true);
 	}
 
 	GTPResponse gtp_clearboard(vecstr args){
 		game.clear();
 		player.set_board(game.getboard());
+
+		time_remain = time.game;
 
 		log("clear_board");
 		return GTPResponse(true);
@@ -319,57 +332,80 @@ public:
 		return GTPResponse(true, ret);
 	}
 
-	GTPResponse gtp_time_control(vecstr args){
-		bool matched = false;
-		if(args.size() >= 1){
-			if(     args[0] == "-p" || args[0] == "--percent"){ time_control = TIME_PERCENT; time_param = 10; matched = true; }
-			else if(args[0] == "-e" || args[0] == "--even"   ){ time_control = TIME_EVEN;    time_param = 2;  matched = true; }
-			else if(args[0] == "-s" || args[0] == "--stats"  ){ time_control = TIME_STATS;   time_param = 2;  matched = true; }
+
+
+	GTPResponse gtp_time(vecstr args){
+		if(args.size() == 0)
+			return GTPResponse(true, string("\n") +
+				"Update the time settings, eg: time -s 2.5 -m 10 -g 600 -f 1\n" +
+				"Method for distributing remaining time, current: " + time.method_name() + " " + to_str(time.param) + "\n" +
+				"  -p --percent  Percentage of the remaining time every move            [10.0]\n" +
+				"  -e --even     Multiple of even split of the maximum  remaining moves [2.0]\n" +
+				"  -s --stats    Multiple of even split of the expected remaining moves [2.0]\n" +
+				"Time allocation\n" +
+				"  -m --move     Time per move                                          [" + to_str(time.move) + "]\n" +
+				"  -g --game     Time per game                                          [" + to_str(time.game) + "]\n" +
+				"  -f --flexible Add remaining time per move to remaining time          [" + to_str(time.flexible) + "]\n" +
+				"  -i --maxsims  Maximum number of simulations per move                 [" + to_str(time.max_sims) + "]\n" +
+				"Current game\n" +
+				"  -r --remain   Remaining time for this game                           [" + to_str(time_remain) + "]\n");
+
+		for(unsigned int i = 0; i < args.size(); i++) {
+			string arg = args[i];
+
+			if(arg == "-p" || arg == "--percent"){
+				time.method = TimeControl::PERCENT;
+				time.param = 10;
+				if(i+1 < args.size() && from_str<double>(args[i+1]) > 0) time.param = from_str<double>(args[++i]);
+			}else if(arg == "-e" || arg == "--even"){
+				time.method = TimeControl::EVEN;
+				time.param = 2;
+				if(i+1 < args.size() && from_str<double>(args[i+1]) > 0) time.param = from_str<double>(args[++i]);
+			}else if(arg == "-s" || arg == "--stats"){
+				time.method = TimeControl::STATS;
+				time.param = 2;
+				if(i+1 < args.size() && from_str<double>(args[i+1]) > 0) time.param = from_str<double>(args[++i]);
+			}else if((arg == "-m" || arg == "--move") && i+1 < args.size()){
+				time.move = from_str<double>(args[++i]);
+			}else if((arg == "-g" || arg == "--game") && i+1 < args.size()){
+				time.game = from_str<float>(args[++i]);
+			}else if((arg == "-f" || arg == "--flexible") && i+1 < args.size()){
+				time.flexible = from_str<bool>(args[++i]);
+			}else if((arg == "-i" || arg == "--maxsims") && i+1 < args.size()){
+				time.max_sims = from_str<int>(args[++i]);
+			}else if((arg == "-r" || arg == "--remain") && i+1 < args.size()){
+				time_remain = from_str<double>(args[++i]);
+			}else{
+				return GTPResponse(false, "Missing or unknown parameter");
+			}
 		}
 
-		string current;
-		if(time_control == TIME_PERCENT) current = "percent";
-		if(time_control == TIME_EVEN)    current = "even";
-		if(time_control == TIME_STATS)   current = "stats";
-
-		if(matched){
-			if(args.size() >= 2)
-				time_param = from_str<double>(args[1]);
-			return GTPResponse(true, current + " " + to_str(time_param));
-		}
-
-		return GTPResponse(true, string("\n") +
-			"Choose the time control to use for the player, eg: time_control -e 2.5\n" +
-			"Current time control: " + current + " " + to_str(time_param) + "\n" +
-			"  -p --percent  Percentage of the remaining time every move                          [10.0]\n" +
-			"  -e --even     Multiple of even split of the maximum  remaining moves (1.0 is even) [2.0]\n" +
-			"  -s --stats    Multiple of even split of the expected remaining moves (1.0 is even) [2.0]\n" 
-			);
+		return GTPResponse(true);
 	}
 
 	double get_time(){
-		double time = 0;
+		double ret = 0;
 
-		switch(time_control){
-			case TIME_PERCENT:
-				time += time_param*time_remain/100;
+		switch(time.method){
+			case TimeControl::PERCENT:
+				ret += time.param*time_remain/100;
 				break;
-			case TIME_STATS:
+			case TimeControl::STATS:
 				if(player.gamelen() > 0){
-					time += 2.0*time_param*time_remain / player.gamelen();
+					ret += 2.0*time.param*time_remain / player.gamelen();
 					break;
 				}//fall back to even
-			case TIME_EVEN:
-				time += 2.0*time_param*time_remain / game.movesremain();
+			case TimeControl::EVEN:
+				ret += 2.0*time.param*time_remain / game.movesremain();
 				break;
 		}
 
-		if(time > time_remain)
-			time = time_remain;
+		if(ret > time_remain)
+			ret = time_remain;
 
-		time += time_per_move;
+		ret += time.move;
 
-		return time;
+		return ret;
 	}
 
 	GTPResponse gtp_move_stats(vecstr args){
@@ -396,18 +432,22 @@ public:
 	}
 
 	GTPResponse gtp_genmove(vecstr args){
-		double time = get_time();
+		double use_time = get_time();
 
 		if(args.size() >= 2)
-			time = from_str<double>(args[1]);
+			use_time = from_str<double>(args[1]);
 
-		fprintf(stderr, "time left: %.1f, max time: %.3f, max runs: %i\n", time_remain, time, max_runs);
+		fprintf(stderr, "time remain: %.1f, time: %.3f, sims: %i\n", time_remain, use_time, time.max_sims);
 
 		player.rootboard.setswap(allow_swap);
 
-		Move best = player.genmove(time, max_runs);
+		Move best = player.genmove(use_time, time.max_sims);
 
-		time_remain += time_per_move - player.time_used;
+		if(time.flexible)
+			time_remain += time.move - player.time_used;
+		else
+			time_remain += min(0.0, time.move - player.time_used);
+
 		if(time_remain < 0)
 			time_remain = 0;
 
