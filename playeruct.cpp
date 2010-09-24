@@ -6,6 +6,7 @@
 #include "string.h"
 
 #include "weightedrandtree.h"
+#include "rand.h"
 
 void Player::PlayerUCT::run(){
 	RaveMoveList movelist;
@@ -18,6 +19,8 @@ void Player::PlayerUCT::run(){
 			player->root.exp.addvloss();
 			Board copy = player->rootboard;
 			movelist.clear();
+			use_rave    = (unitrand() < player->userave);
+			use_explore = (unitrand() < player->useexplore);
 			walk_tree(copy, & player->root, movelist, 0);
 		}
 		player->sync.done(); //let the main thread know in case it was solved early
@@ -145,9 +148,8 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int
 	float val, maxval = -1000000000;
 	float logvisits = log(node->exp.num());
 
-	float raveval = 0;
-	if(player->skiprave == 0 || rand() % player->skiprave > 0)
-		raveval = player->ravefactor + player->decrrave*remain;
+	float raveval = use_rave * (player->ravefactor + player->decrrave*remain);
+	float explore = use_explore * player->explore;
 
 	Node * ret = NULL,
 		 * child = node->children.begin(),
@@ -160,7 +162,7 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int
 
 			val = (child->outcome == 0 ? -1 : -2); //-1 for tie so any unknown is better, -2 for loss so it's even worse
 		}else{
-			val = child->value(raveval, player->knowledge, player->fpurgency) + player->explore*sqrt(logvisits/(child->exp.num() + 1));
+			val = child->value(raveval, player->knowledge, player->fpurgency) + explore*sqrt(logvisits/(child->exp.num() + 1));
 		}
 
 		if(maxval < val){

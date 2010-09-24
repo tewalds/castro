@@ -483,7 +483,8 @@ public:
 				"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
 				"  -d --decrrave    Decrease the rave factor over time: rf += d*empty [" + to_str(player.decrrave) + "]\n" +
 				"  -a --knowledge   Use knowledge: 0.01*know/sqrt(visits+1)           [" + to_str(player.knowledge) + "]\n" +
-				"  -i --skiprave    Skip using rave values once in this many times    [" + to_str(player.skiprave) + "]\n" +
+				"  -r --userave     Use rave with this probability [0-1]              [" + to_str(player.userave) + "]\n" +
+				"  -X --useexplore  Use exploration with this probability [0-1]       [" + to_str(player.useexplore) + "]\n" +
 				"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
 				"Tree building:\n" +
 				"  -s --shortrave   Only use moves from short rollouts for rave       [" + to_str(player.shortrave) + "]\n" +
@@ -527,14 +528,16 @@ public:
 				player.decrrave = from_str<float>(args[++i]);
 			}else if((arg == "-a" || arg == "--knowledge") && i+1 < args.size()){
 				player.knowledge = from_str<bool>(args[++i]);
-			}else if((arg == "-i" || arg == "--skiprave") && i+1 < args.size()){
-				player.skiprave = from_str<int>(args[++i]);
 			}else if((arg == "-s" || arg == "--shortrave") && i+1 < args.size()){
 				player.shortrave = from_str<bool>(args[++i]);
 			}else if((arg == "-k" || arg == "--keeptree") && i+1 < args.size()){
 				player.keeptree = from_str<bool>(args[++i]);
 			}else if((arg == "-m" || arg == "--minimax") && i+1 < args.size()){
 				player.minimax = from_str<int>(args[++i]);
+			}else if((arg == "-r" || arg == "--userave") && i+1 < args.size()){
+				player.userave = from_str<float>(args[++i]);
+			}else if((arg == "-X" || arg == "--useexplore") && i+1 < args.size()){
+				player.useexplore = from_str<uint>(args[++i]);
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
 			}else if((arg == "-x" || arg == "--visitexpand") && i+1 < args.size()){

@@ -312,6 +312,8 @@ public:
 
 	class PlayerUCT : public PlayerThread {
 		Move goodreply[2][361]; //361 is big enough for size 10 (ie 19x19), but no bigger...
+		bool use_rave;    //whether to use rave for this simulation
+		bool use_explore; //whether to use exploration for this simulation
 
 	public:
 		PlayerUCT(Player * p) {
@@ -329,6 +331,9 @@ public:
 			for(int p = 0; p < 2; p++)
 				for(int i = 0; i < 361; i++)
 					goodreply[p][i] = M_UNKNOWN;
+
+			use_rave = false;
+			use_explore = false;
 		}
 
 	private:
@@ -418,7 +423,8 @@ public:
 	float ravefactor; //big numbers favour rave scores, small ignore it
 	float decrrave;   //decrease rave over time, add this value for each empty position on the board
 	bool  knowledge;  //whether to include knowledge
-	int   skiprave;   //how often to skip rave, skip once in this many checks
+	float userave;    //what probability to use rave
+	float useexplore; //what probability to use UCT exploration
 	float fpurgency;  //what value to return for a move that hasn't been played yet
 //tree building
 	bool  shortrave;  //only update rave values on short rollouts
@@ -461,7 +467,8 @@ public:
 		ravefactor  = 500;
 		decrrave    = 200;
 		knowledge   = true;
-		skiprave    = 0;
+		userave     = 1;
+		useexplore  = 1;
 		fpurgency   = 1;
 
 		shortrave   = false;
