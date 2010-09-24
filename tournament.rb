@@ -47,7 +47,7 @@
 	end
 
 	$cmds << "boardsize #{$boardsize}" if $boardsize > 0
-	$cmds << "time_settings #{$time_per_game} #{$time_per_move} #{$max_runs}" if $time_per_game > 0 || $time_per_move > 0 || $max_runs > 0
+	$cmds << "time -g #{$time_per_game} -m #{$time_per_move} -r #{$max_runs}" if $time_per_game > 0 || $time_per_move > 0 || $max_runs > 0
 
 	$num = $players.length();
 	$num_games = 0;
