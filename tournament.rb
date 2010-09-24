@@ -34,7 +34,7 @@
 			puts "  -r --rounds   Number of rounds to play [#{$rounds}]"
 			puts "  -g --timegame Time given per game [#{$time_per_game}]"
 			puts "  -t --timemove Time given per move [#{$time_per_move}]"
-			puts "  -m --maxruns  Simulations per move [#{$max_moves}]"
+			puts "  -m --maxruns  Simulations per move [#{$max_runs}]"
 			puts "  -s --size     Board size [#{$boardsize}]"
 			puts "  -c --cmd      Send an arbitrary GTP command at the beginning of the game"
 			puts "  -z --msg      Output a message of what this is testing with the results"
@@ -46,8 +46,8 @@
 		end
 	end
 
+	$cmds << "time -g #{$time_per_game} -m #{$time_per_move} -s #{$max_runs}" if $time_per_game > 0 || $time_per_move > 0 || $max_runs > 0
 	$cmds << "boardsize #{$boardsize}" if $boardsize > 0
-	$cmds << "time_settings #{$time_per_game} #{$time_per_move} #{$max_runs}" if $time_per_game > 0 || $time_per_move > 0 || $max_runs > 0
 
 	$num = $players.length();
 	$num_games = 0;
