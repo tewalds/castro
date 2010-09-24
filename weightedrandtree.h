@@ -3,6 +3,7 @@
 #define _WEIGHTED_RAND_TREE_H_
 
 #include <cstdlib>
+#include "rand.h"
 
 //rounds to power of 2 sizes, completely arbitrary weights
 // O(log n) updates, O(log n) choose
@@ -29,10 +30,6 @@ public:
 		v |= v >> 16;
 		v++;
 		return v;
-	}
-
-	static float unitrand() {
-		return ((float)rand())/RAND_MAX;
 	}
 
 	//resize and clear the tree
