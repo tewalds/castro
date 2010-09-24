@@ -101,7 +101,7 @@ loop_fork($parallel) {
 		req = Hash[*(req.flatten)]
 
 		tp = req['tp'].split(" ")
-		req['tp'] = "-g #{(tp[0].to_f*time_factor).to_f} -m #{(tp[1].to_f*time_factor).to_f} -s #{tp[2]}"
+		req['tp'] = "-g #{(tp[0].to_f*time_factor).to_f} -m #{(tp[1].to_f*time_factor).to_f} -r #{tp[2]}"
 
 puts req.inspect
 
@@ -126,8 +126,8 @@ puts req.inspect
 			log = "";
 
 			$cmds = [
-				"time #{req['tp']}",
 				"boardsize #{req['sp']}",
+				"time #{req['tp']}",
 				"player_params #{req['bp']}",
 			]
 
