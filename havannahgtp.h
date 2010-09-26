@@ -500,7 +500,8 @@ public:
 				"  -h --weightrand  Weight the moves by the rave values at the root   [" + to_str(player.weightedrandom) + "]\n" +
 				"  -p --pattern     Maintain the virtual connection pattern           [" + to_str(player.rolloutpattern) + "]\n" +
 				"  -g --goodreply   Reuse the last good reply (1), remove losses (2)  [" + to_str(player.lastgoodreply) + "]\n" +
-				"  -w --instantwin  Look for instant wins (1) and forced replies (2)  [" + to_str(player.instantwin) + "]\n"
+				"  -w --instantwin  Look for instant wins (1) and forced replies (2)  [" + to_str(player.instantwin) + "]\n" +
+				"  -W --instwindep  How deep to check instant wins, - multiplies size [" + to_str(player.instwindepth) + "]\n"
 				);
 
 		for(unsigned int i = 0; i < args.size(); i++) {
@@ -558,6 +559,8 @@ public:
 				player.lastgoodreply = from_str<int>(args[++i]);
 			}else if((arg == "-w" || arg == "--instantwin") && i+1 < args.size()){
 				player.instantwin = from_str<int>(args[++i]);
+			}else if((arg == "-W" || arg == "--instwindep") && i+1 < args.size()){
+				player.instwindepth = from_str<int>(args[++i]);
 			}else{
 				return GTPResponse(false, "Missing or unknown parameter");
 			}

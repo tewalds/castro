@@ -356,9 +356,13 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 		random_shuffle(order, order + num);
 	}
 
+	int doinstwin = player->instwindepth;
+	if(doinstwin < 0)
+		doinstwin *= - board.get_size();
+
 	while((won = board.won()) < 0){
 		//do a complex choice
-		move = rollout_choose_move(board, move);
+		move = rollout_choose_move(board, move, doinstwin);
 
 		//or the simple random choice if complex found nothing
 		if(move == M_UNKNOWN){
@@ -401,16 +405,16 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 	return won;
 }
 
-Move Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev){
+Move Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev, int & doinstwin){
 	//look for instant wins
-	if(player->instantwin == 1){
+	if(player->instantwin == 1 && --doinstwin >= 0){
 		for(Board::MoveIterator m = board.moveit(); !m.done(); ++m)
 			if(board.test_win(*m) > 0)
 				return *m;
 	}
 
 	//look for instant wins and forced replies
-	if(player->instantwin == 2){
+	if(player->instantwin == 2 && --doinstwin >= 0){
 		Move loss = M_UNKNOWN;
 		for(Board::MoveIterator m = board.moveit(); !m.done(); ++m){
 			if(board.test_local(*m)){

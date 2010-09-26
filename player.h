@@ -347,7 +347,7 @@ public:
 		bool test_bridge_probe(const Board & board, const Move & move, const Move & test);
 
 		int rollout(Board & board, RaveMoveList & movelist, Move move, int depth);
-		Move rollout_choose_move(Board & board, const 	Move & prev);
+		Move rollout_choose_move(Board & board, const 	Move & prev, int & doinstwin);
 		Move rollout_pattern(const Board & board, const Move & move);
 	};
 
@@ -439,8 +439,9 @@ public:
 //rollout
 	bool  weightedrandom; //use a weighted shuffle for move ordering, based on the rave results
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
-	int   instantwin;     //look for instant wins in rollouts
 	int   lastgoodreply;  //use the last-good-reply rollout heuristic
+	int   instantwin;     //look for instant wins in rollouts
+	int   instwindepth;   //how deep to look for instant wins
 
 	Board rootboard;
 	Node  root;
@@ -485,6 +486,7 @@ public:
 		rolloutpattern = false;
 		lastgoodreply  = false;
 		instantwin     = 0;
+		instwindepth   = 1000;
 
 
 		set_maxmem(maxmem);
