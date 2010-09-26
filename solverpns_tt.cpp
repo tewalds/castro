@@ -22,33 +22,38 @@ void SolverPNSTT::solve(Board board, double time, uint64_t memlimit){
 	int starttime = time_msec();
 
 	int turn = board.toplay();
-	int otherturn = (turn == 1 ? 2 : 1);
+	int otherturn = 3 - turn;
 
-	int ret1 = run_pns(board, otherturn, memlimit);
+	if(ties == 3){ //do both
+		assignties = otherturn;
+		int ret1 = run_pns(board, memlimit);
 
-	if(ret1 == 1){ //win
-		outcome = turn;
-	}else{
-		int ret2 = 0;
-		if(!timeout)
-			ret2 = run_pns(board, turn, memlimit);
-
-		if(ret2 == -1){
-			outcome = otherturn; //loss
+		if(ret1 == turn){ //win
+			outcome = turn;
 		}else{
-			if(ret1 == -1 && ret2 == 1) outcome = 0;          //tie
-			if(ret1 == -1 && ret2 == 0) outcome = -otherturn; //loss or tie
-			if(ret1 ==  0 && ret2 == 1) outcome = -turn;      //win or tie
-			if(ret1 ==  0 && ret2 == 0) outcome = -3;         //unknown
+			int ret2 = -3;
+			assignties = turn;
+			if(!timeout)
+				ret2 = run_pns(board, memlimit);
+
+			if(ret2 == otherturn){
+				outcome = otherturn; //loss
+			}else{
+				if(ret1 == otherturn && ret2 == turn) outcome = 0;          //tie
+				if(ret1 == otherturn && ret2 == -3  ) outcome = -otherturn; //loss or tie
+				if(ret1 == -3        && ret2 == turn) outcome = -turn;      //win or tie
+				if(ret1 == -3        && ret2 == -3  ) outcome = -3;         //unknown
+			}
 		}
+	}else{
+		assignties = ties; //could be 0, 1 or 2
+		outcome = run_pns(board, memlimit);
 	}
 
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-int SolverPNSTT::run_pns(const Board & board, int ties, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
-	assignties = ties;
-
+int SolverPNSTT::run_pns(const Board & board, uint64_t memlimit){
 	maxnodes = memlimit*1024*1024/sizeof(PNSNode);
 
 	if(TT) delete[] TT;
@@ -62,18 +67,42 @@ int SolverPNSTT::run_pns(const Board & board, int ties, uint64_t memlimit){ //1 
 	while(!timeout && root.phi != 0 && root.delta != 0)
 		pns(board, &root, 0, INF32/2, INF32/2);
 
-	if(root.phi == 0){
+
+//	printf("DRAW: %u, LOSS: %u\n", DRAW, LOSS);
+//	printf("root : %u, %u\n", root->phi, root->delta);
+//	for(PNSNode * i = root->children; i != root->children + root->numchildren; i++)
+//		printf("%i,%i : %u, %u\n", i->move.x, i->move.y, i->phi, i->delta);
+
+	if(root.phi == 0 && root.delta == LOSS){ //look for the winning move
 		PNSNode * i = NULL;
 		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
 			i = tt(board, *move);
-			if(i->delta == 0)
+			if(i->delta == 0){
 				bestmove = *move;
+				break;
+			}
 		}
-		return 1;
+		return board.toplay();
 	}
-	if(root.delta == 0)
-		return -1;
-	return 0;
+	if(root.phi == 0 && root.delta == DRAW){ //look for the move to tie
+		PNSNode * i = NULL;
+		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
+			i = tt(board, *move);
+			if(i->delta == DRAW){
+				bestmove = *move;
+				break;
+			}
+		}
+		return 0;
+	}
+
+	if(root.delta == 0){ //loss
+		bestmove = M_NONE;
+		return 3 - board.toplay();
+	}
+
+	bestmove = M_UNKNOWN;
+	return -3;
 }
 
 void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td){
@@ -122,28 +151,37 @@ void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t t
 }
 
 bool SolverPNSTT::updatePDnum(const Board & board, PNSNode * node){
-	uint32_t min = INF32;
+	uint32_t min = LOSS;
 	uint64_t sum = 0;
 
+	bool win = false;
 	PNSNode * i = NULL;
 	for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
 		i = tt(board, *move);
 
+		win |= (i->phi == LOSS);
 		sum += i->phi;
 		if( min > i->delta)
 			min = i->delta;
 	}
 
-	if(sum >= INF32)
-		sum = INF32-1;
+	if(win)
+		sum = LOSS;
+	else if(sum >= INF32)
+		sum = INF32;
 
 	hash_t hash = board.gethash();
 	if(hash == node->hash && min == node->phi && sum == node->delta){
 		return false;
 	}else{
 		node->hash = hash; //just in case it was overwritten by something else
-		node->phi = min;
-		node->delta = sum;
+		if(sum == 0 && min == DRAW){
+			node->phi = 0;
+			node->delta = DRAW;
+		}else{
+			node->phi = min;
+			node->delta = sum;
+		}
 		return true;
 	}
 }
@@ -170,7 +208,7 @@ SolverPNSTT::PNSNode * SolverPNSTT::tt(const Board & board, Move move){
 			pd = 1; // phi & delta value
 		}
 
-		*node = PNSNode(hash).abval(abval, (board.toplay() == assignties), pd);
+		*node = PNSNode(hash).abval(abval, board.toplay(), assignties, pd);
 		nodes_seen++;
 	}
 
