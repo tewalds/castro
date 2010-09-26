@@ -91,6 +91,7 @@ public:
 	~SolverPNS(){
 		if(root)
 			delete root;
+		root = NULL;
 	}
 	void reset(){
 		outcome = -3;

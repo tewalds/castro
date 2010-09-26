@@ -54,10 +54,11 @@ void SolverPNS::solve(Board board, double time, uint64_t memlimit){
 }
 
 int SolverPNS::run_pns(const Board & board, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
-	if(root) delete root;
-	root = new PNSNode(0, 0, 1);
 	maxnodes = memlimit*1024*1024/sizeof(PNSNode);
 	nodes = 0;
+
+	if(root) delete root;
+	root = new PNSNode(0, 0, 1);
 
 	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
 
