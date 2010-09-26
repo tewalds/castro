@@ -100,8 +100,6 @@ public:
 	bool  df; // go depth first?
 	float epsilon; //if depth first, how wide should the threshold be?
 
-	bool timeout;
-
 	PNSNode * root;
 
 	SolverPNSHeap(int AB = 0, bool DF = true, float eps = 0.25) {
@@ -131,7 +129,6 @@ public:
 			root = NULL;
 		}
 	}
-	void timedout(){ timeout = true; }
 
 	void solve(Board board, double time, uint64_t memlimit);
 

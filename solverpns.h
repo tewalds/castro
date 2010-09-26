@@ -108,7 +108,6 @@ public:
 			root = NULL;
 		}
 	}
-	void timedout(){ timeout = true; }
 
 	void solve(Board board, double time, uint64_t memlimit);
 

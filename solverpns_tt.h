@@ -50,8 +50,6 @@ public:
 	float epsilon; //if depth first, how wide should the threshold be?
 	int   ties;    //0 handle ties, 1 assign p1, 2 assign p2, 3 do two searches, once assigned to each
 
-	bool timeout;
-
 	SolverPNSTT(int AB = 0, bool DF = true, float eps = 0.25) {
 		ab = AB;
 		df = DF;
@@ -81,7 +79,6 @@ public:
 			TT = NULL;
 		}
 	}
-	void timedout(){ timeout = true; }
 
 	void solve(Board board, double time, uint64_t memlimit);
 

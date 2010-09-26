@@ -14,8 +14,6 @@
 
 class SolverAB : public Solver {
 public:
-
-	bool timeout;
 	bool scout;
 
 	SolverAB(bool Scout = false) {
@@ -30,7 +28,6 @@ public:
 
 		timeout = false;
 	}
-	void timedout(){ timeout = true; }
 
 	void solve(Board board, double time, int mdepth = 1000);
 

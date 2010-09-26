@@ -14,6 +14,9 @@ public:
 
 	Solver() : outcome(-3), maxdepth(0), nodes_seen(0) { }
 
+protected:
+	volatile bool timeout;
+	void timedout(){ timeout = true; }
 };
 
 #endif
