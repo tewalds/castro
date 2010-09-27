@@ -6,10 +6,11 @@
 #include "string.h"
 
 #include "weightedrandtree.h"
-#include "rand.h"
+#include "mtrand.h"
 
 void Player::PlayerUCT::run(){
 	RaveMoveList movelist;
+	MTRand unitrand;
 //	fprintf(stderr, "Runner start\n");
 	while(!cancelled){
 		player->sync.rdlock(); //wait for the write lock to come off
@@ -259,7 +260,7 @@ void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
 }
 
 //test whether this move is a forced reply to the opponent probing your virtual connections
-bool Player::PlayerUCT::test_bridge_probe(const Board & board, const Move & move, const Move & test){
+bool Player::PlayerUCT::test_bridge_probe(const Board & board, const Move & move, const Move & test) const {
 	if(move.dist(test) != 1)
 		return false;
 
@@ -351,9 +352,19 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 
 		wtree.rebuild_tree();
 	}else{
-		for(int i = 0; i < num; i++)
+		int i;
+		for(i = 0; i < num; i++)
 			order[i] = i;
-		random_shuffle(order, order + num);
+
+		i = num;
+		while(i > 1){
+			int j = rand32() % i--;
+			int tmp = order[j];
+			order[j] = order[i];
+			order[i] = tmp;
+		}
+
+//		random_shuffle(order, order + num);
 	}
 
 	int doinstwin = player->instwindepth;
@@ -453,7 +464,7 @@ Move Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev, in
 Move Player::PlayerUCT::rollout_pattern(const Board & board, const Move & move){
 	Move ret;
 	int state = 0;
-	int a = rand() % 6;
+	int a = (++rollout_pattern_offset % 6);
 	int piece = 3 - board.get(move);
 	for(int i = 0; i < 8; i++){
 		Move cur = move + neighbours[(i+a)%6];

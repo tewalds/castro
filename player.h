@@ -11,7 +11,7 @@
 #include "time.h"
 #include "depthstats.h"
 #include "thread.h"
-
+#include "mtrand.h"
 
 class Player {
 public:
@@ -297,6 +297,7 @@ public:
 	class PlayerThread {
 	protected:
 	public:
+		mutable MTRand_int32 rand32;
 		Thread thread;
 		Player * player;
 		bool cancelled;
@@ -314,6 +315,7 @@ public:
 		Move goodreply[2][361]; //361 is big enough for size 10 (ie 19x19), but no bigger...
 		bool use_rave;    //whether to use rave for this simulation
 		bool use_explore; //whether to use exploration for this simulation
+		int  rollout_pattern_offset; //where to start the rollout pattern
 
 	public:
 		PlayerUCT(Player * p) {
@@ -334,6 +336,7 @@ public:
 
 			use_rave = false;
 			use_explore = false;
+			rollout_pattern_offset = 0;
 		}
 
 	private:
@@ -344,7 +347,7 @@ public:
 		Node * choose_move(const Node * node, int toplay, int remain) const;
 		bool do_backup(Node * node, Node * backup, int toplay);
 		void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
-		bool test_bridge_probe(const Board & board, const Move & move, const Move & test);
+		bool test_bridge_probe(const Board & board, const Move & move, const Move & test) const;
 
 		int rollout(Board & board, RaveMoveList & movelist, Move move, int depth);
 		Move rollout_choose_move(Board & board, const 	Move & prev, int & doinstwin);

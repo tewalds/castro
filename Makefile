@@ -1,7 +1,7 @@
 .PHONY: clean fresh run gendeps
 
 LDFLAGS   += -lpthread
-OBJECTS		= castro.o string.o solverab.o solverpns.o solverpns_heap.o solverpns_tt.o player.o playeruct.o zobrist.o
+OBJECTS		= castro.o mtrand.o string.o solverab.o solverpns.o solverpns_heap.o solverpns_tt.o player.o playeruct.o zobrist.o
 
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall
@@ -16,11 +16,15 @@ castro: $(OBJECTS)
 
 castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h move.h \
  zobrist.h types.h hashset.h solver.h solverab.h time.h timer.h thread.h \
- solverpns.h solverpns_heap.h solverpns_tt.h player.h depthstats.h
+ solverpns.h solverpns_heap.h solverpns_tt.h player.h depthstats.h \
+ mtrand.h
+mtrand.o: mtrand.cpp mtrand.h
 player.o: player.cpp player.h types.h move.h board.h string.h zobrist.h \
- hashset.h time.h depthstats.h thread.h solverab.h timer.h solver.h
+ hashset.h time.h depthstats.h thread.h mtrand.h solverab.h timer.h \
+ solver.h
 playeruct.o: playeruct.cpp player.h types.h move.h board.h string.h \
- zobrist.h hashset.h time.h depthstats.h thread.h weightedrandtree.h
+ zobrist.h hashset.h time.h depthstats.h thread.h mtrand.h \
+ weightedrandtree.h rand.h
 solverab.o: solverab.cpp solverab.h time.h timer.h thread.h board.h \
  move.h string.h zobrist.h types.h hashset.h solver.h
 solverpns.o: solverpns.cpp solverpns.h time.h timer.h thread.h board.h \
