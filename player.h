@@ -585,7 +585,8 @@ public:
 		assert(nodes == root.size());
 
 		root.exp.addwins(visitexpand+1); //+1 to compensate for the virtual loss
-		root.outcome = -1;
+		if(rootboard.won() == -1)
+			root.outcome = -1;
 
 		if(ponder && root.outcome == -1)
 			sync.unlock();
