@@ -538,7 +538,7 @@ public:
 			}else if((arg == "-r" || arg == "--userave") && i+1 < args.size()){
 				player.userave = from_str<float>(args[++i]);
 			}else if((arg == "-X" || arg == "--useexplore") && i+1 < args.size()){
-				player.useexplore = from_str<uint>(args[++i]);
+				player.useexplore = from_str<float>(args[++i]);
 			}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 				player.fpurgency = from_str<float>(args[++i]);
 			}else if((arg == "-x" || arg == "--visitexpand") && i+1 < args.size()){
