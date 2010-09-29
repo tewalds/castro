@@ -58,7 +58,7 @@ public:
 
 		for(int i = 0; i < 12; i++)
 			for(int j = 0; j < 2; j++)
-				for(int k = 0; k < 361; k++)
+				for(int k = 0; k < board->vecsize(); k++)
 					dists[i][j][k] = 1000; //far far away!
 
 		int m = board->get_size()-1, e = board->get_size_d()-1;
@@ -107,7 +107,6 @@ public:
 
 		while(!Q.empty()){
 			MoveDist cur = Q.top(); Q.pop();
-			int colour = board->get(cur.pos);
 
 			for(int i = 0; i < 6; i++){
 				MoveDist next(cur.pos + neighbours[i], cur.dist);
@@ -127,7 +126,6 @@ public:
 
 	int get(Move pos){ return min(get(board->xy(pos), 1),  get(board->xy(pos), 2)); }
 	int get(int pos, int player){
-
 		int list[6];
 		for(int i = 0; i < 6; i++)
 			list[i] = dist(i, player, pos);
@@ -143,7 +141,7 @@ public:
 	}
 
 	//partially sort the list with selection sort
-	int partialsort(int * list, int max){
+	void partialsort(int * list, int max){
 		for(int i = 0; i < max; i++){
 			int mini = i;
 			
