@@ -1,12 +1,8 @@
 
 #include "player.h"
-#include "board.h"
 #include <cmath>
 #include <string>
 #include "string.h"
-
-#include "weightedrandtree.h"
-#include "mtrand.h"
 
 void Player::PlayerUCT::run(){
 	RaveMoveList movelist;
@@ -320,7 +316,6 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 
 	bool wrand = (player->weightedrandom && player->ravefactor > min_rave && player->root.children.num() > 1);
 
-	WeightedRandTree wtree;
 	int order[num];
 	int * rmove = order;
 

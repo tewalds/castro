@@ -12,6 +12,7 @@
 #include "depthstats.h"
 #include "thread.h"
 #include "mtrand.h"
+#include "weightedrandtree.h"
 
 class Player {
 public:
@@ -316,6 +317,7 @@ public:
 		bool use_rave;    //whether to use rave for this simulation
 		bool use_explore; //whether to use exploration for this simulation
 		int  rollout_pattern_offset; //where to start the rollout pattern
+		WeightedRandTree wtree; //struct to hold the valued for weighted random values
 
 	public:
 		PlayerUCT(Player * p) {
