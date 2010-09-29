@@ -13,6 +13,7 @@
 #include "player.h"
 #include "board.h"
 #include "move.h"
+#include "lbdist.h"
 
 struct TimeControl {
 	enum Method { PERCENT, EVEN, STATS };
@@ -78,6 +79,7 @@ public:
 		newcallback("gridcoords",      bind(&HavannahGTP::gtp_gridcoords,    this, _1), "Switch coordinate systems to match Little Golem");
 		newcallback("showboard",       bind(&HavannahGTP::gtp_print,         this, _1), "Show the board");
 		newcallback("print",           bind(&HavannahGTP::gtp_print,         this, _1), "Alias for showboard");
+		newcallback("dists",           bind(&HavannahGTP::gtp_dists,         this, _1), "Similar to print, but shows minimum win distances");
 		newcallback("clear_board",     bind(&HavannahGTP::gtp_clearboard,    this, _1), "Clear the board, but keep the size");
 		newcallback("boardsize",       bind(&HavannahGTP::gtp_boardsize,     this, _1), "Clear the board, set the board size");
 		newcallback("swap",            bind(&HavannahGTP::gtp_swap,          this, _1), "Enable/disable swap: swap <0|1>");
@@ -496,8 +498,10 @@ public:
 				"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
 				"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
 				"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
+				"  -D --dists       Give a bonus to low minimum distance to win       [" + to_str(player.dists) + "]\n" +
 				"Rollout policy:\n" +
 				"  -h --weightrand  Weight the moves by the rave values at the root   [" + to_str(player.weightedrandom) + "]\n" +
+				"  -K --weightknow  Use knowledge in the weighted random values       [" + to_str(player.weightedknow) + "]\n" +
 				"  -p --pattern     Maintain the virtual connection pattern           [" + to_str(player.rolloutpattern) + "]\n" +
 				"  -g --goodreply   Reuse the last good reply (1), remove losses (2)  [" + to_str(player.lastgoodreply) + "]\n" +
 				"  -w --instantwin  Look for instant wins (1) and forced replies (2)  [" + to_str(player.instantwin) + "]\n" +
@@ -551,8 +555,12 @@ public:
 				player.connect = from_str<int>(args[++i]);
 			}else if((arg == "-b" || arg == "--bridge") && i+1 < args.size()){
 				player.bridge = from_str<int>(args[++i]);
+			}else if((arg == "-D" || arg == "--dists") && i+1 < args.size()){
+				player.dists = from_str<int>(args[++i]);
 			}else if((arg == "-h" || arg == "--weightrand") && i+1 < args.size()){
 				player.weightedrandom = from_str<bool>(args[++i]);
+			}else if((arg == "-K" || arg == "--weightknow") && i+1 < args.size()){
+				player.weightedknow = from_str<bool>(args[++i]);
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);
 			}else if((arg == "-g" || arg == "--goodreply") && i+1 < args.size()){
@@ -668,6 +676,47 @@ public:
 		str += "Board mem:   " + to_str(game.getboard().memsize()) + "\n";
 
 		return GTPResponse(true, str);
+	}
+
+	GTPResponse gtp_dists(vecstr args){
+		Board board = game.getboard();
+		LBDists dists(&board);
+
+		int size = board.get_size();
+		int size_d = board.get_size_d();
+
+		string s;
+		s += string(size + 4, ' ');
+		for(int i = 0; i < size; i++){
+			s += to_str(i+1);
+			s += " ";
+		}
+		s += "\n";
+
+		for(int y = 0; y < size_d; y++){
+			s += string(abs(size-1 - y) + 2, ' ');
+			s += char('A' + y);
+			s += " ";
+			for(int x = board.linestart(y); x < board.lineend(y); x++){
+				int p = board.get(x, y);
+				if(p == 0){
+					int d = dists.get(Move(x, y));
+					if(d < 10)
+						s += to_str(d);
+					else
+						s += '.';
+				}else if(p == 1){
+					s += 'W';
+				}else if(p == 2){
+					s += 'B';
+				}
+				s += ' ';
+			}
+			if(y < size-1)
+				s += to_str(1 + size + y);
+			s += '\n';
+		}
+		return GTPResponse(true, s);
 	}
 };
 

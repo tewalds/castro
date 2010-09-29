@@ -88,6 +88,9 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 
 	temp.alloc(board.movesremain());
 
+	if(player->dists)
+		dists.run(&board);
+
 	int losses = 0;
 
 	Node * child = temp.begin(),
@@ -253,6 +256,9 @@ void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
 
 	if(player->bridge && test_bridge_probe(board, node->move, child->move)) //boost for maintaining a virtual connection
 		child->know += player->bridge;
+
+	if(player->dists)
+		child->know += player->dists * max(0, board.get_size() - dists.get(node->move));
 }
 
 //test whether this move is a forced reply to the opponent probing your virtual connections
@@ -329,7 +335,7 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 
 		while(m != mend && child != childend){
 			if(*m == child->move){
-				wtree.set_weight_fast(m - moves, max(0.1f, child->rave.avg()));
+				wtree.set_weight_fast(m - moves, max(0.1f, child->rave.avg() + (player->weightedknow * child->know / 100.f)));
 				m++;
 				child++;
 			}else if(*m > child->move){

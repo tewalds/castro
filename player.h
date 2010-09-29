@@ -13,6 +13,7 @@
 #include "thread.h"
 #include "mtrand.h"
 #include "weightedrandtree.h"
+#include "lbdist.h"
 
 class Player {
 public:
@@ -318,6 +319,7 @@ public:
 		bool use_explore; //whether to use exploration for this simulation
 		int  rollout_pattern_offset; //where to start the rollout pattern
 		WeightedRandTree wtree; //struct to hold the valued for weighted random values
+		LBDists dists;    //holds the distances to the various non-ring wins as a heuristic for the minimum moves needed to win
 
 	public:
 		PlayerUCT(Player * p) {
@@ -441,8 +443,10 @@ public:
 	int   locality;   //boost for playing near previous stones
 	int   connect;    //boost for having connections to edges and corners
 	int   bridge;     //boost replying to a probe at a bridge
+	int   dists;      //boost based on minimum number of stones needed to finish a non-ring win
 //rollout
 	bool  weightedrandom; //use a weighted shuffle for move ordering, based on the rave results
+	bool  weightedknow;   //use knowledge in the weighted random values
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 	int   lastgoodreply;  //use the last-good-reply rollout heuristic
 	int   instantwin;     //look for instant wins in rollouts
@@ -486,8 +490,10 @@ public:
 		locality    = 0;
 		connect     = 20;
 		bridge      = 25;
+		dists       = 0;
 
 		weightedrandom = false;
+		weightedknow   = false;
 		rolloutpattern = false;
 		lastgoodreply  = false;
 		instantwin     = 0;
