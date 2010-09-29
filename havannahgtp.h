@@ -685,7 +685,7 @@ public:
 		int size = board.get_size();
 		int size_d = board.get_size_d();
 
-		string s;
+		string s = "\n";
 		s += string(size + 4, ' ');
 		for(int i = 0; i < size; i++){
 			s += to_str(i+1);
