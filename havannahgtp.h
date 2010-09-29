@@ -498,7 +498,7 @@ public:
 				"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
 				"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
 				"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
-				"  -D --dists       Give a bonus to low minimum distance to win       [" + to_str(player.dists) + "]\n" +
+				"  -D --distance    Give a bonus to low minimum distance to win       [" + to_str(player.dists) + "]\n" +
 				"Rollout policy:\n" +
 				"  -h --weightrand  Weight the moves by the rave values at the root   [" + to_str(player.weightedrandom) + "]\n" +
 				"  -K --weightknow  Use knowledge in the weighted random values       [" + to_str(player.weightedknow) + "]\n" +
@@ -555,7 +555,7 @@ public:
 				player.connect = from_str<int>(args[++i]);
 			}else if((arg == "-b" || arg == "--bridge") && i+1 < args.size()){
 				player.bridge = from_str<int>(args[++i]);
-			}else if((arg == "-D" || arg == "--dists") && i+1 < args.size()){
+			}else if((arg == "-D" || arg == "--distance") && i+1 < args.size()){
 				player.dists = from_str<int>(args[++i]);
 			}else if((arg == "-h" || arg == "--weightrand") && i+1 < args.size()){
 				player.weightedrandom = from_str<bool>(args[++i]);
