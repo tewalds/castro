@@ -110,11 +110,11 @@ public:
 			int colour = board->get(cur.pos);
 
 			for(int i = 0; i < 6; i++){
-				MoveDist next(cur.pos + neighbours[i], cur.dist+1);
+				MoveDist next(cur.pos + neighbours[i], cur.dist);
 
 				if(board->onboard(next.pos) && board->get(next.pos) != otherplayer){
-					if(colour == player && board->get(next.pos) == player)
-						next.dist--;
+					if(board->get(next.pos) == 0)
+						next.dist++;
 					
 					if( dist(edge, player, next.pos) > next.dist){
 						dist(edge, player, next.pos) = next.dist;
