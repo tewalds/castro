@@ -81,6 +81,7 @@ public:
 		newcallback("print",           bind(&HavannahGTP::gtp_print,         this, _1), "Alias for showboard");
 		newcallback("dists",           bind(&HavannahGTP::gtp_dists,         this, _1), "Similar to print, but shows minimum win distances");
 		newcallback("clear_board",     bind(&HavannahGTP::gtp_clearboard,    this, _1), "Clear the board, but keep the size");
+		newcallback("clear",           bind(&HavannahGTP::gtp_clearboard,    this, _1), "Alias for clear_board");
 		newcallback("boardsize",       bind(&HavannahGTP::gtp_boardsize,     this, _1), "Clear the board, set the board size");
 		newcallback("swap",            bind(&HavannahGTP::gtp_swap,          this, _1), "Enable/disable swap: swap <0|1>");
 		newcallback("play",            bind(&HavannahGTP::gtp_play,          this, _1), "Place a stone: play <color> <location>");
