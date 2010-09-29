@@ -41,9 +41,10 @@ class LBDists {
 	int & dist(int edge, int player, int x, int y)   { return dist(edge, player, board->xy(x, y)); }
 
 	void init(int x, int y, int edge, int player){
-		if(board->get(x, y) != 3 - player){
-			Q.push(MoveDist(x, y, 0));
-			dist(edge, player, x, y) = 0;
+		int val = board->get(x, y);
+		if(val != 3 - player){
+			Q.push(MoveDist(x, y, (val == 0)));
+			dist(edge, player, x, y) = (val == 0);
 		}
 	}
 
@@ -131,12 +132,12 @@ public:
 		for(int i = 0; i < 6; i++)
 			list[i] = dist(i, player, pos);
 		partialsort(list, 2);
-		int corners = list[0] + list[1];
+		int corners = list[0] + list[1] - 1;
 
 		for(int i = 6; i < 12; i++)
 			list[i-6] = dist(i, player, pos);
 		partialsort(list, 3);
-		int edges = list[0] + list[1] + list[2];
+		int edges = list[0] + list[1] + list[2] - 2;
 
 		return min(corners, edges);
 	}
