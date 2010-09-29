@@ -3,11 +3,12 @@
 #define _WEIGHTED_RAND_TREE_H_
 
 #include <cstdlib>
-#include "rand.h"
+#include "mtrand.h"
 
 //rounds to power of 2 sizes, completely arbitrary weights
 // O(log n) updates, O(log n) choose
 class WeightedRandTree {
+	mutable MTRand unitrand;
 	unsigned int size;
 	float * weights;
 public:
@@ -34,14 +35,16 @@ public:
 
 	//resize and clear the tree
 	void resize(unsigned int s){
-		if(weights)
-			delete[] weights;
-
 		if(s < 2) s = 2;
 		s = roundup(s);
 
-		size = s;
-		weights = new float[size*2];
+		if(s != size){
+			if(weights)
+				delete[] weights;
+
+			size = s;
+			weights = new float[size*2];
+		}
 
 		clear();
 	}
