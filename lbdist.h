@@ -32,8 +32,49 @@ class LBDists {
 		}
 	};
 
+	//a specialized priority queue
+	//inserted distances must be no more than maxvals larger than the current value
+	//new values must be the same as current or larger, never smaller
+	class IntPQueue {
+		static const int maxvals = 4; //maximum number of distinct values that can be stored
+		MoveDist vals[maxvals][361];
+		int counts[maxvals];
+		int current; //which vector
+		int num; //int num elements total
+	public:
+		IntPQueue(){
+			reset();
+		}
+		void reset(){
+			current = 0;
+			num = 0;
+			for(int i = 0; i < maxvals; i++)
+				counts[i] = 0;
+		}
+		void push(const MoveDist & v){
+			int i = v.dist % maxvals;
+			vals[i][counts[i]++] = v;
+			num++;
+		}
+		bool pop(MoveDist & ret){
+			if(num == 0){
+				current = 0;
+				return false;
+			}
+
+			while(counts[current] == 0)
+				current = (current+1) % maxvals;
+
+			ret = vals[current][--counts[current]];
+			num--;
+
+			return true;
+		}
+	};
+
 	int dists[12][2][361]; //[edge/corner][player][cell]
-	priority_queue<MoveDist> Q;
+//	priority_queue<MoveDist> Q;
+	IntPQueue Q;
 	Board * board;
 
 	int & dist(int edge, int player, int i)          { return dists[edge][player-1][i]; }
@@ -105,9 +146,11 @@ public:
 	void flood(int edge, int player){
 		int otherplayer = 3 - player;
 
-		while(!Q.empty()){
-			MoveDist cur = Q.top(); Q.pop();
+//		while(!Q.empty()){
+//			MoveDist cur = Q.top(); Q.pop();
 
+		MoveDist cur;
+		while(Q.pop(cur)){
 			for(int i = 0; i < 6; i++){
 				MoveDist next(cur.pos + neighbours[i], cur.dist);
 
