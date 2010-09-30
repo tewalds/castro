@@ -340,6 +340,21 @@ public:
 		return testcell.numcorners() + testcell.numedges();
 	}
 
+	int test_size(const Move & pos) const {
+		char turn = toplay();
+
+		int size = 1;
+		for(int i = 0; i < 6; i++){
+			Move loc = pos + neighbours[i];
+
+			if(onboard(loc) && turn == get(loc)){
+				size += cells[find_group(loc)].size;
+				i++; //skip the next one
+			}
+		}
+		return size;
+	}
+
 	// recursively follow a ring
 	bool detectring(const Move & pos, char turn) const {
 		for(int i = 0; i < 4; i++){ //4 instead of 6 since any ring must have its first endpoint in the first 4

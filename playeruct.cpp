@@ -254,6 +254,9 @@ void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
 	if(player->connect) //boost for moves that connect to edges/corners
 		child->know += player->connect*board.test_connectivity(child->move);
 
+	if(player->size) //boost for size of the group
+		child->know += player->size*board.test_size(child->move);
+
 	if(player->bridge && test_bridge_probe(board, node->move, child->move)) //boost for maintaining a virtual connection
 		child->know += player->bridge;
 

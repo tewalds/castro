@@ -442,6 +442,7 @@ public:
 	int   localreply; //boost for a local reply, ie a move near the previous move
 	int   locality;   //boost for playing near previous stones
 	int   connect;    //boost for having connections to edges and corners
+	int   size;       //boost for large groups
 	int   bridge;     //boost replying to a probe at a bridge
 	int   dists;      //boost based on minimum number of stones needed to finish a non-ring win
 //rollout
@@ -489,6 +490,7 @@ public:
 		localreply  = 0;
 		locality    = 0;
 		connect     = 20;
+		size        = 0;
 		bridge      = 25;
 		dists       = 0;
 

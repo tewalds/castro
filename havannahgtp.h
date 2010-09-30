@@ -498,6 +498,7 @@ public:
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
 				"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
 				"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
+				"  -S --size        Give a bonus based on the size of the group       [" + to_str(player.size) + "]\n" +
 				"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
 				"  -D --distance    Give a bonus to low minimum distance to win       [" + to_str(player.dists) + "]\n" +
 				"Rollout policy:\n" +
@@ -554,6 +555,8 @@ public:
 				player.locality = from_str<int>(args[++i]);
 			}else if((arg == "-c" || arg == "--connect") && i+1 < args.size()){
 				player.connect = from_str<int>(args[++i]);
+			}else if((arg == "-S" || arg == "--size") && i+1 < args.size()){
+				player.size = from_str<int>(args[++i]);
 			}else if((arg == "-b" || arg == "--bridge") && i+1 < args.size()){
 				player.bridge = from_str<int>(args[++i]);
 			}else if((arg == "-D" || arg == "--distance") && i+1 < args.size()){
