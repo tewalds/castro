@@ -452,6 +452,7 @@ public:
 //rollout
 	bool  weightedrandom; //use a weighted shuffle for move ordering, based on the rave results
 	bool  weightedknow;   //use knowledge in the weighted random values
+	float userings;       //how often to allow rings as a win condition in a rollout
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 	int   lastgoodreply;  //use the last-good-reply rollout heuristic
 	int   instantwin;     //look for instant wins in rollouts
@@ -500,6 +501,7 @@ public:
 
 		weightedrandom = false;
 		weightedknow   = false;
+		userings       = 1.0;
 		rolloutpattern = false;
 		lastgoodreply  = false;
 		instantwin     = 0;

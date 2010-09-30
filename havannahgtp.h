@@ -504,6 +504,7 @@ public:
 				"Rollout policy:\n" +
 				"  -h --weightrand  Weight the moves by the rave values at the root   [" + to_str(player.weightedrandom) + "]\n" +
 				"  -K --weightknow  Use knowledge in the weighted random values       [" + to_str(player.weightedknow) + "]\n" +
+				"  -R --userings    Check for rings only this often in rollouts       [" + to_str(player.userings) + "]\n" +
 				"  -p --pattern     Maintain the virtual connection pattern           [" + to_str(player.rolloutpattern) + "]\n" +
 				"  -g --goodreply   Reuse the last good reply (1), remove losses (2)  [" + to_str(player.lastgoodreply) + "]\n" +
 				"  -w --instantwin  Look for instant wins (1) and forced replies (2)  [" + to_str(player.instantwin) + "]\n" +
@@ -565,6 +566,8 @@ public:
 				player.weightedrandom = from_str<bool>(args[++i]);
 			}else if((arg == "-K" || arg == "--weightknow") && i+1 < args.size()){
 				player.weightedknow = from_str<bool>(args[++i]);
+			}else if((arg == "-R" || arg == "--userings") && i+1 < args.size()){
+				player.userings = from_str<float>(args[++i]);
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);
 			}else if((arg == "-g" || arg == "--goodreply") && i+1 < args.size()){
