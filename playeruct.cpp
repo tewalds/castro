@@ -182,7 +182,7 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 		return false;
 
 	if(backup->outcome != toplay){
-		int val, maxval = -1000000000;
+		int val = 0, maxval = -1000000000;
 		backup = NULL;
 
 		Node * child = node->children.begin(),
@@ -274,7 +274,7 @@ bool Player::PlayerUCT::test_bridge_probe(const Board & board, const Move & move
 		Move cur = move + neighbours[i % 6];
 
 		bool on = board.onboard(cur);
-		int v;
+		int v = 0;
 		if(on)
 			v = board.get(cur);
 
@@ -471,7 +471,7 @@ Move Player::PlayerUCT::rollout_pattern(const Board & board, const Move & move){
 		Move cur = move + neighbours[(i+a)%6];
 
 		bool on = board.onboard(cur);
-		int v;
+		int v = 0;
 		if(on)
 			v = board.get(cur);
 
