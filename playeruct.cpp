@@ -6,7 +6,6 @@
 
 void Player::PlayerUCT::run(){
 	RaveMoveList movelist;
-	MTRand unitrand;
 //	fprintf(stderr, "Runner start\n");
 	while(!cancelled){
 		player->sync.rdlock(); //wait for the write lock to come off

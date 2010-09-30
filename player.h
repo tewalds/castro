@@ -300,12 +300,14 @@ public:
 	protected:
 	public:
 		mutable MTRand_int32 rand32;
+		mutable MTRand unitrand;
 		Thread thread;
 		Player * player;
 		bool cancelled;
 	public:
 		int runs, maxruns;
 		DepthStats treelen, gamelen;
+		int wintypes[2][4]; //player,wintype
 
 		PlayerThread() : cancelled(false), runs(0), maxruns(0) {}
 		virtual void reset() { }
@@ -341,6 +343,8 @@ public:
 			use_rave = false;
 			use_explore = false;
 			rollout_pattern_offset = 0;
+			wintypes[0][0] = wintypes[0][1] = wintypes[0][2] = wintypes[0][3] = 0;
+			wintypes[1][0] = wintypes[1][1] = wintypes[1][2] = wintypes[1][3] = 0;
 		}
 
 	private:
