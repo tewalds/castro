@@ -28,7 +28,7 @@ void rtrim(string & str){
 
 vecstr explode(const string & str, const string & sep){
 	vecstr ret;
-	int old = 0, pos = 0;
+	size_t old = 0, pos = 0;
 	while((pos = str.find_first_of(sep, old)) != string::npos){
 		ret.push_back(str.substr(old, pos - old));
 		old = pos + sep.length();
