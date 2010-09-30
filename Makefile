@@ -6,7 +6,7 @@ OBJECTS		= castro.o mtrand.o string.o solverab.o solverpns.o solverpns_heap.o so
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall
 else
-	CPPFLAGS	+= -O3 -funroll-loops
+	CPPFLAGS	+= -O3 -funroll-loops -Wall
 endif
 
 all: castro
