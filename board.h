@@ -110,6 +110,7 @@ private:
 	short unique_depth; //update and test rotations/symmetry with less than this many pieces on the board
 	char toPlay;
 	char outcome; //-1 = unknown, 0 = tie, 1,2 = player win
+	char wintype; //0 no win, 1 = edge, 2 = corner, 3 = ring
 	bool allowswap;
 
 	vector<Cell> cells;
@@ -127,6 +128,7 @@ public:
 		unique_depth = 5;
 		toPlay = 1;
 		outcome = -1;
+		wintype = 0;
 		allowswap = false;
 
 		cells.resize(vecsize());
@@ -267,6 +269,8 @@ public:
 			return 0;
 		return (outcome == toplay() ? 1 : -1);
 	}
+
+	char getwintype() const { return wintype; }
 
 	char toplay() const {
 		return toPlay;
@@ -433,7 +437,7 @@ public:
 		return m;
 	}
 
-	bool move(const Move & pos, bool checkwin = true, bool locality = false){
+	bool move(const Move & pos, bool checkwin = true, bool locality = false, bool checkrings = true){
 		if(!valid_move(pos))
 			return false;
 
@@ -473,8 +477,15 @@ public:
 
 		if(checkwin){
 			Cell * g = & cells[find_group(pos)];
-			if(g->numcorners() >= 2 || g->numedges() >= 3 || (alreadyjoined && g->size >= 6 && detectring(pos, turn))){
+			if(g->numedges() >= 3){
 				outcome = turn;
+				wintype = 1;
+			}else if(g->numcorners() >= 2){
+				outcome = turn;
+				wintype = 2;
+			}else if(checkrings && alreadyjoined && g->size >= 6 && detectring(pos, turn)){
+				outcome = turn;
+				wintype = 3;
 			}else if(nummoves == numcells()){
 				outcome = 0;
 			}

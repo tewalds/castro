@@ -399,6 +399,9 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 
 	gamelen.add(depth);
 
+	if(won > 0)
+		wintypes[won-1][(int)board.getwintype()]++;
+
 	//update the last good reply table
 	if(player->lastgoodreply && won > 0){
 		RaveMoveList::iterator rave = movelist.begin(), raveend = movelist.end();

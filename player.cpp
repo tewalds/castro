@@ -47,10 +47,16 @@ Move Player::genmove(double time, int maxruns){
 
 	DepthStats gamelen, treelen;
 	runs = 0;
+	int wintypes[2][4] = {{0}};
 	for(unsigned int i = 0; i < threads.size(); i++){
 		gamelen += threads[i]->gamelen;
 		treelen += threads[i]->treelen;
 		runs += threads[i]->runs;
+
+		for(int a = 0; a < 2; a++)
+			for(int b = 0; b < 4; b++)
+				wintypes[a][b] += threads[i]->wintypes[a][b];
+
 		threads[i]->reset();
 	}
 
@@ -58,6 +64,10 @@ Move Player::genmove(double time, int maxruns){
 	if(runs > 0){
 		stats += "Game length: " + gamelen.to_s() + "\n";
 		stats += "Tree depth:  " + treelen.to_s() + "\n";
+		stats += "Win Types:   ";
+		stats += "P1: " + to_str(wintypes[0][1]) + ", " + to_str(wintypes[0][2]) + ", " + to_str(wintypes[0][3]) + "; ";
+		stats += "P2: " + to_str(wintypes[1][1]) + ", " + to_str(wintypes[1][2]) + ", " + to_str(wintypes[1][3]) + "; ";
+		stats += "forks, bridges, rings\n";
 	}
 	if(ret)
 		stats += "Move Score:  " + to_str(ret->exp.avg()) + "\n";
