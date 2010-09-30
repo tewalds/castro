@@ -125,8 +125,6 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 				Board next = board;
 				next.move(*move, false, false);
 
-				uint64_t prevnodes = nodes_seen;
-
 				SolverAB solveab(false);
 				abval = -solveab.negamax(next, ab, -2, 2);
 				pd = 1;
