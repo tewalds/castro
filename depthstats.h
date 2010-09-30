@@ -45,17 +45,17 @@ struct DepthStats {
 		sumdepthsq += depth*depth;
 	}
 
-	unsigned int avg() const {
-		if(num == 0) return 0;
-		return sumdepth/num;
+	double avg() const {
+		if(num == 0) return 0.0;
+		return (double)sumdepth/num;
 	}
 	double std_dev() const {
-		if(num == 0) return 0;
+		if(num == 0) return 0.0;
 		return sqrt((double)sumdepthsq/num - ((double)sumdepth/num)*((double)sumdepth/num));
 	}
 	string to_s() const {
 		if(num == 0) return "num=0";
-		return to_str(avg()) +", dev=" + to_str(std_dev()) + ", min=" + to_str(mindepth) + ", max=" + to_str(maxdepth) + ", num=" + to_str(num);
+		return to_str(avg(), 4) +", dev=" + to_str(std_dev(), 4) + ", min=" + to_str(mindepth) + ", max=" + to_str(maxdepth) + ", num=" + to_str(num);
 	}
 };
 
