@@ -24,12 +24,9 @@ class LBDists {
 		int dist;
 
 		MoveDist() { }
-		MoveDist(Move p, char d) : pos(p), dist(d) { }
+		MoveDist(Move p, int d) : pos(p), dist(d) { }
 		MoveDist(int x, int y, int d) : pos(Move(x,y)) , dist(d) { }
-		bool operator < (const MoveDist & other) const { return dist > other.dist; }
-		void print() const {
-			printf("%i,%i: %i\n", pos.x, pos.y, dist);
-		}
+		void print() const { printf("%i,%i: %i\n", pos.x, pos.y, dist); }
 	};
 
 	//a specialized priority queue
@@ -73,7 +70,6 @@ class LBDists {
 	};
 
 	int dists[12][2][361]; //[edge/corner][player][cell]
-//	priority_queue<MoveDist> Q;
 	IntPQueue Q;
 	Board * board;
 
@@ -146,21 +142,25 @@ public:
 	void flood(int edge, int player){
 		int otherplayer = 3 - player;
 
-//		while(!Q.empty()){
-//			MoveDist cur = Q.top(); Q.pop();
-
 		MoveDist cur;
 		while(Q.pop(cur)){
 			for(int i = 0; i < 6; i++){
 				MoveDist next(cur.pos + neighbours[i], cur.dist);
 
-				if(board->onboard(next.pos) && board->get(next.pos) != otherplayer){
-					if(board->get(next.pos) == 0)
+				if(board->onboard(next.pos)){
+					int pos = board->xy(next.pos);
+					int colour = board->get(pos);
+
+					if(colour == otherplayer)
+						continue;
+
+					if(colour == 0)
 						next.dist++;
 					
-					if( dist(edge, player, next.pos) > next.dist){
-						dist(edge, player, next.pos) = next.dist;
-						Q.push(next);
+					if( dist(edge, player, pos) > next.dist){
+						dist(edge, player, pos) = next.dist;
+						if(next.dist < board->get_size())
+							Q.push(next);
 					}
 				}
 			}
