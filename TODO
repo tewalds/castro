@@ -5,8 +5,9 @@ worker stuff
 
 
 progressive widening
-- add an extra move after 1.5x as many rollouts
 - start at one child
+- add an extra move after 1.5x as many rollouts
+- implement as looking at the first log(children)/log(1.5) of the children
 
 
 multiple rollouts per simulation
