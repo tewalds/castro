@@ -307,7 +307,7 @@ public:
 	public:
 		int runs, maxruns;
 		DepthStats treelen, gamelen;
-		int wintypes[2][4]; //player,wintype
+		DepthStats wintypes[2][4]; //player,wintype
 
 		PlayerThread() : cancelled(false), runs(0), maxruns(0) {}
 		virtual void reset() { }
@@ -343,8 +343,10 @@ public:
 			use_rave = false;
 			use_explore = false;
 			rollout_pattern_offset = 0;
-			wintypes[0][0] = wintypes[0][1] = wintypes[0][2] = wintypes[0][3] = 0;
-			wintypes[1][0] = wintypes[1][1] = wintypes[1][2] = wintypes[1][3] = 0;
+
+			for(int a = 0; a < 2; a++)
+				for(int b = 0; b < 4; b++)
+					wintypes[a][b].reset();
 		}
 
 	private:
@@ -453,7 +455,7 @@ public:
 	bool  weightedrandom; //use a weighted shuffle for move ordering, based on the rave results
 	bool  weightedknow;   //use knowledge in the weighted random values
 	float checkrings;     //how often to allow rings as a win condition in a rollout
-	int   checkringdepth; //how deep to allow rings as a win condition in a rollout
+	float checkringdepth; //how deep to allow rings as a win condition in a rollout
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 	int   lastgoodreply;  //use the last-good-reply rollout heuristic
 	int   instantwin;     //look for instant wins in rollouts

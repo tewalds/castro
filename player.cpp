@@ -47,7 +47,7 @@ Move Player::genmove(double time, int maxruns){
 
 	DepthStats gamelen, treelen;
 	runs = 0;
-	int wintypes[2][4] = {{0}};
+	DepthStats wintypes[2][4];
 	for(unsigned int i = 0; i < threads.size(); i++){
 		gamelen += threads[i]->gamelen;
 		treelen += threads[i]->treelen;
@@ -65,9 +65,16 @@ Move Player::genmove(double time, int maxruns){
 		stats += "Game length: " + gamelen.to_s() + "\n";
 		stats += "Tree depth:  " + treelen.to_s() + "\n";
 		stats += "Win Types:   ";
-		stats += "P1: " + to_str(wintypes[0][1]) + ", " + to_str(wintypes[0][2]) + ", " + to_str(wintypes[0][3]) + "; ";
-		stats += "P2: " + to_str(wintypes[1][1]) + ", " + to_str(wintypes[1][2]) + ", " + to_str(wintypes[1][3]) + "; ";
-		stats += "forks, bridges, rings\n";
+		stats += "P1: f " + to_str(wintypes[0][1].num) + ", b " + to_str(wintypes[0][2].num) + ", r " + to_str(wintypes[0][3].num) + "; ";
+		stats += "P2: f " + to_str(wintypes[1][1].num) + ", b " + to_str(wintypes[1][2].num) + ", r " + to_str(wintypes[1][3].num) + "\n";
+
+// show in verbose mode? stats are reset before getting back to the gtp command...
+//		stats += "P1 fork:     " + wintypes[0][1].to_s() + "\n";
+//		stats += "P1 bridge:   " + wintypes[0][2].to_s() + "\n";
+//		stats += "P1 ring:     " + wintypes[0][3].to_s() + "\n";
+//		stats += "P2 fork:     " + wintypes[1][1].to_s() + "\n";
+//		stats += "P2 bridge:   " + wintypes[1][2].to_s() + "\n";
+//		stats += "P2 ring:     " + wintypes[1][3].to_s() + "\n";
 	}
 	if(ret)
 		stats += "Move Score:  " + to_str(ret->exp.avg()) + "\n";

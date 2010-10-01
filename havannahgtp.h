@@ -570,7 +570,7 @@ public:
 			}else if((arg == "-C" || arg == "--checkrings") && i+1 < args.size()){
 				player.checkrings = from_str<float>(args[++i]);
 			}else if((arg == "-R" || arg == "--ringdepth") && i+1 < args.size()){
-				player.checkringdepth = from_str<int>(args[++i]);
+				player.checkringdepth = from_str<float>(args[++i]);
 			}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 				player.rolloutpattern = from_str<bool>(args[++i]);
 			}else if((arg == "-g" || arg == "--goodreply") && i+1 < args.size()){

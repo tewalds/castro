@@ -375,6 +375,9 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 		doinstwin *= - board.get_size();
 
 	bool checkrings = (unitrand() < player->checkrings);
+	int  checkdepth = player->checkringdepth;
+	if(player->checkringdepth < 0)
+		checkdepth = (gamelen.num <= 100 ? 1000 : gamelen.avg() + player->checkringdepth*gamelen.std_dev());
 
 	while((won = board.won()) < 0){
 		//do a complex choice
@@ -395,14 +398,14 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 		}
 
 		movelist.add(move, board.toplay());
-		board.move(move, true, false, (checkrings && depth < player->checkringdepth));
+		board.move(move, true, false, (checkrings && depth < checkdepth));
 		depth++;
 	}
 
 	gamelen.add(depth);
 
 	if(won > 0)
-		wintypes[won-1][(int)board.getwintype()]++;
+		wintypes[won-1][(int)board.getwintype()].add(depth);
 
 	//update the last good reply table
 	if(player->lastgoodreply && won > 0){
