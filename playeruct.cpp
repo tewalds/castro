@@ -374,7 +374,7 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 	if(doinstwin < 0)
 		doinstwin *= - board.get_size();
 
-	bool checkrings = (unitrand() < player->userings);
+	bool checkrings = (unitrand() < player->checkrings);
 
 	while((won = board.won()) < 0){
 		//do a complex choice
@@ -395,7 +395,7 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 		}
 
 		movelist.add(move, board.toplay());
-		board.move(move, true, false, checkrings);
+		board.move(move, true, false, (checkrings && depth < player->checkringdepth));
 		depth++;
 	}
 
