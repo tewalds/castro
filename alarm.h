@@ -9,18 +9,17 @@
 
 using namespace std;
 using namespace tr1;
-using namespace placeholders; //for bind
 
+//used as Alarm->set(1.5, timeout_func);
 
 class Alarm {
 public:
 	class Ctrl {
 		int id;
-		Alarm & alarm;
 	public:
-		Ctrl(int i, Alarm & a) : id(i), alarm(a) { }
+		Ctrl(int i) : id(i) { }
 		~Ctrl(){ cancel(); }
-		void cancel(){ alarm.cancel(id); }
+		void cancel(){ Alarm->cancel(id); }
 	};
 private:
 	typedef function<void()> callback_t;
@@ -34,8 +33,19 @@ private:
 
 	int nextid;
 	vector<Entry> alarms;
-	
+	static Alarm * alarm = NULL;
+
+	Alarm() : nextid(0) {
+		signal(SIGALRM, bind(&Alarm::reset, this));
+	}
+
 public:
+
+	static Alarm * operator*(){
+		if(!alarm)
+			alarm = new Alarm;
+		return alarm;
+	}
 	
 	Ctrl set(double len, callback_t fn){
 		Entry entry(nextid++, fn, Time() + len);
@@ -43,7 +53,7 @@ public:
 
 		reset();
 
-		return Ctrl(entry.id, *this);
+		return Ctrl(entry.id);
 	}
 
 	void cancel(int id){
