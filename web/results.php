@@ -5,7 +5,7 @@ function askresults($input){
 	global $db;
 	
 	$baselines  = $db->query("SELECT baseline, CONCAT(name, ' (', params, ')') FROM baselines ORDER BY name")->fetchfieldset();
-	$timelimits = $db->query("SELECT time,     CONCAT(name, ' (', params, ')') FROM times     ORDER BY time")->fetchfieldset();
+	$timelimits = $db->query("SELECT time,     CONCAT(name, ' (', params, ')') FROM times     ORDER BY name")->fetchfieldset();
 	$players    = $db->query("SELECT player,   CONCAT(name, ' (', params, ')') FROM players   ORDER BY name")->fetchfieldset();
 	$numgames   = $db->query("SELECT count(*) FROM games")->fetchfield();
 
@@ -14,7 +14,7 @@ function askresults($input){
 		<tr>
 			<td valign=top>
 				Players:<br>
-				<select name=players[] multiple=multiple size=15 style='width: 375px'><?= make_select_list_multiple_key($players, $input['players']) ?></select>
+				<select name=players[] multiple=multiple size=20 style='width: 375px'><?= make_select_list_multiple_key($players, $input['players']) ?></select>
 			</td>
 			<td valign=top>
 				Baselines:<br>
@@ -141,6 +141,7 @@ function showresults($input){
 	$chco = implode(",", array_slice($colors, 0, $num));
 
 	if(count($input['players']) <= 9){
+		echo "<a name=scroll href=#scroll>Scroll graph to top</a><br>\n";
 		echo "<table><tr><td>";
 		echo "<img src=\"http://chart.apis.google.com/chart?" .
 	//			"chs=750x400" . //size
