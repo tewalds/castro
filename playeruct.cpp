@@ -83,7 +83,7 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	if(!node->children.lock())
 		return false;
 
-	Node::Children temp;
+	Children<Node> temp;
 
 	temp.alloc(board.movesremain());
 
