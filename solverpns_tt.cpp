@@ -9,24 +9,24 @@
  * L W L  L   from the perspective of toplay
  * U W LT U
  */
-void SolverPNSTT::solve(Board board, double time, uint64_t memlimit){
+void SolverPNSTT::solve(double time){
 	reset();
 
-	if(board.won() >= 0){
-		outcome = board.won();
+	if(rootboard.won() >= 0){
+		outcome = rootboard.won();
 		return;
 	}
-	board.setswap(false);
+	rootboard.setswap(false);
 
 	Timer timer(time, bind(&SolverPNSTT::timedout, this));
 	int starttime = time_msec();
 
-	int turn = board.toplay();
+	int turn = rootboard.toplay();
 	int otherturn = 3 - turn;
 
 	if(ties == 3){ //do both
 		assignties = otherturn;
-		int ret1 = run_pns(board, memlimit);
+		int ret1 = run_pns();
 
 		if(ret1 == turn){ //win
 			outcome = turn;
@@ -34,7 +34,7 @@ void SolverPNSTT::solve(Board board, double time, uint64_t memlimit){
 			int ret2 = -3;
 			assignties = turn;
 			if(!timeout)
-				ret2 = run_pns(board, memlimit);
+				ret2 = run_pns();
 
 			if(ret2 == otherturn){
 				outcome = otherturn; //loss
@@ -47,25 +47,23 @@ void SolverPNSTT::solve(Board board, double time, uint64_t memlimit){
 		}
 	}else{
 		assignties = ties; //could be 0, 1 or 2
-		outcome = run_pns(board, memlimit);
+		outcome = run_pns();
 	}
 
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-int SolverPNSTT::run_pns(const Board & board, uint64_t memlimit){
-	maxnodes = memlimit*1024*1024/sizeof(PNSNode);
-
+int SolverPNSTT::run_pns(){
 	if(TT) delete[] TT;
 	TT = new PNSNode[maxnodes];
 
 	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
 
-	hash_t basehash = board.gethash();
+	hash_t basehash = rootboard.gethash();
 
 	PNSNode root = PNSNode(basehash, 1);
 	while(!timeout && root.phi != 0 && root.delta != 0)
-		pns(board, &root, 0, INF32/2, INF32/2);
+		pns(rootboard, &root, 0, INF32/2, INF32/2);
 
 
 //	printf("DRAW: %u, LOSS: %u\n", DRAW, LOSS);
@@ -75,19 +73,19 @@ int SolverPNSTT::run_pns(const Board & board, uint64_t memlimit){
 
 	if(root.phi == 0 && root.delta == LOSS){ //look for the winning move
 		PNSNode * i = NULL;
-		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
-			i = tt(board, *move);
+		for(Board::MoveIterator move = rootboard.moveit(true); !move.done(); ++move){
+			i = tt(rootboard, *move);
 			if(i->delta == 0){
 				bestmove = *move;
 				break;
 			}
 		}
-		return board.toplay();
+		return rootboard.toplay();
 	}
 	if(root.phi == 0 && root.delta == DRAW){ //look for the move to tie
 		PNSNode * i = NULL;
-		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
-			i = tt(board, *move);
+		for(Board::MoveIterator move = rootboard.moveit(true); !move.done(); ++move){
+			i = tt(rootboard, *move);
 			if(i->delta == DRAW){
 				bestmove = *move;
 				break;
@@ -98,7 +96,7 @@ int SolverPNSTT::run_pns(const Board & board, uint64_t memlimit){
 
 	if(root.delta == 0){ //loss
 		bestmove = M_NONE;
-		return 3 - board.toplay();
+		return 3 - rootboard.toplay();
 	}
 
 	bestmove = M_UNKNOWN;

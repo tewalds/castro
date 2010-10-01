@@ -141,7 +141,8 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 		node->bestmove = ret->move;
 	}else if(node->bestmove == M_UNKNOWN){
 		SolverAB solver;
-		solver.solve(rootboard, 1, 2);
+		solver.set_board(rootboard);
+		solver.solve(0.1);
 		node->bestmove = solver.bestmove;
 	}
 

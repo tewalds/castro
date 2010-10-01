@@ -1,28 +1,28 @@
 
 #include "solverab.h"
 
-void SolverAB::solve(Board board, double time, int mdepth){
+void SolverAB::solve(double time){
 	reset();
-	if(board.won() >= 0){
-		outcome = board.won();
+	if(rootboard.won() >= 0){
+		outcome = rootboard.won();
 		return;
 	}
-	board.setswap(false);
+	rootboard.setswap(false);
 
 	Timer timer(time, bind(&SolverAB::timedout, this));
 	int starttime = time_msec();
 
-	int turn = board.toplay();
+	int turn = rootboard.toplay();
 
-	for(maxdepth = 2; !timeout && maxdepth <= mdepth; maxdepth++){
+	for(maxdepth = 2; !timeout; maxdepth++){
 		fprintf(stderr, "Starting depth %d\n", maxdepth);
 
 		//the first depth of negamax
 		int ret, alpha = -2, beta = 2;
-		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
+		for(Board::MoveIterator move = rootboard.moveit(true); !move.done(); ++move){
 			nodes_seen++;
 
-			Board next = board;
+			Board next = rootboard;
 			next.move(*move, true, false);
 
 			int value = -negamax(next, maxdepth - 1, -beta, -alpha);

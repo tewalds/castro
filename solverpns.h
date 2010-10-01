@@ -67,7 +67,7 @@ public:
 
 
 //memory management for PNS which uses a tree to store the nodes
-	uint64_t nodes, maxnodes;
+	uint64_t nodes, maxnodes, memlimit;
 	int assignties; //which player to assign a tie to
 
 	int   ab; // how deep of an alpha-beta search to run at each leaf node
@@ -85,6 +85,8 @@ public:
 		epsilon = eps;
 		ties = 0;
 
+		set_memlimit(1000);
+
 		root = NULL;
 		reset();
 	}
@@ -99,20 +101,33 @@ public:
 		nodes_seen = 0;
 		bestmove = Move(M_UNKNOWN);
 
-		timeout = false;
 		nodes = 0;
-		maxnodes = 0;
 
+		timeout = false;
 		if(root){
 			delete root;
 			root = NULL;
 		}
 	}
 
-	void solve(Board board, double time, uint64_t memlimit);
+	void set_board(const Board & board){
+		rootboard = board;
+		reset();
+	}
+	void move(const Move & m){
+		rootboard.move(m, true, true);
+		reset();
+	}
+
+	void set_memlimit(uint64_t lim){
+		memlimit = lim;
+		maxnodes = memlimit*1024*1024/sizeof(PNSNode);
+	}
+
+	void solve(double time);
 
 //basic proof number search building a tree
-	int run_pns(const Board & board, uint64_t memlimit); //-3 = unknown, 0 = tie, 1 = p1, 2 = p2
+	int run_pns(); //-3 = unknown, 0 = tie, 1 = p1, 2 = p2
 	bool pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
 
 //update the phi and delta for the node

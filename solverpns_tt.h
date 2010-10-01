@@ -41,7 +41,7 @@ public:
 
 
 	PNSNode * TT;
-	uint64_t maxnodes;
+	uint64_t maxnodes, memlimit;
 
 	int assignties; //which player to assign a tie to
 
@@ -72,18 +72,28 @@ public:
 
 		timeout = false;
 
-		maxnodes = 0;
-
 		if(TT){
 			delete[] TT;
 			TT = NULL;
 		}
 	}
+	void set_board(const Board & board){
+		rootboard = board;
+		reset();
+	}
+	void move(const Move & m){
+		 rootboard.move(m);
+		 reset();
+	}
+	void set_memlimit(uint64_t lim){
+		memlimit = lim;
+		maxnodes = memlimit*1024*1024/sizeof(PNSNode);
+	}
 
-	void solve(Board board, double time, uint64_t memlimit);
+	void solve(double time);
 
 //basic proof number search building a tree
-	int run_pns(const Board & board, uint64_t memlimit); //-3 = unknown, 0 = tie, 1 = p1, 2 = p2
+	int run_pns(); //-3 = unknown, 0 = tie, 1 = p1, 2 = p2
 	void pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
 
 //update the phi and delta for the node

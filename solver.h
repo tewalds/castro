@@ -13,10 +13,18 @@ public:
 	Move bestmove;
 
 	Solver() : outcome(-3), maxdepth(0), nodes_seen(0) { }
+	virtual ~Solver() { }
+
+	virtual void solve(double time) { }
+	virtual void set_board(const Board & board) { }
+	virtual void move(const Move & m) { }
+	virtual void set_memlimit(uint64_t lim) { }
 
 protected:
 	volatile bool timeout;
 	void timedout(){ timeout = true; }
+	Board rootboard;
+
 };
 
 #endif

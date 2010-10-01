@@ -9,24 +9,24 @@
  * L W L  L   from the perspective of toplay
  * U W LT U
  */
-void SolverPNS::solve(Board board, double time, uint64_t memlimit){
+void SolverPNS::solve(double time){
 	reset();
 
-	if(board.won() >= 0){
-		outcome = board.won();
+	if(rootboard.won() >= 0){
+		outcome = rootboard.won();
 		return;
 	}
-	board.setswap(false);
+	rootboard.setswap(false);
 
 	Timer timer(time, bind(&SolverPNS::timedout, this));
 	int starttime = time_msec();
 
-	int turn = board.toplay();
+	int turn = rootboard.toplay();
 	int otherturn = 3 - turn;
 
 	if(ties == 3){ //do both
 		assignties = otherturn;
-		int ret1 = run_pns(board, memlimit);
+		int ret1 = run_pns();
 
 		if(ret1 == turn){ //win
 			outcome = turn;
@@ -34,7 +34,7 @@ void SolverPNS::solve(Board board, double time, uint64_t memlimit){
 			int ret2 = -3;
 			assignties = turn;
 			if(!timeout)
-				ret2 = run_pns(board, memlimit);
+				ret2 = run_pns();
 
 			if(ret2 == otherturn){
 				outcome = otherturn; //loss
@@ -47,14 +47,13 @@ void SolverPNS::solve(Board board, double time, uint64_t memlimit){
 		}
 	}else{
 		assignties = ties; //could be 0, 1 or 2
-		outcome = run_pns(board, memlimit);
+		outcome = run_pns();
 	}
 
 	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
 }
 
-int SolverPNS::run_pns(const Board & board, uint64_t memlimit){ //1 = win, 0 = unknown, -1 = loss
-	maxnodes = memlimit*1024*1024/sizeof(PNSNode);
+int SolverPNS::run_pns(){
 	nodes = 0;
 
 	if(root) delete root;
@@ -63,7 +62,7 @@ int SolverPNS::run_pns(const Board & board, uint64_t memlimit){ //1 = win, 0 = u
 	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
 
 	while(!timeout && root->phi != 0 && root->delta != 0){
-		if(!pns(board, root, 0, INF32/2, INF32/2)){
+		if(!pns(rootboard, root, 0, INF32/2, INF32/2)){
 			int64_t before = nodes;
 			garbage_collect(root);
 			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
@@ -84,7 +83,7 @@ int SolverPNS::run_pns(const Board & board, uint64_t memlimit){ //1 = win, 0 = u
 				break;
 			}
 		}
-		return board.toplay();
+		return rootboard.toplay();
 	}
 	if(root->phi == 0 && root->delta == DRAW){ //look for the move to tie
 		for(int i = 0; i < root->numchildren; i++){
@@ -98,7 +97,7 @@ int SolverPNS::run_pns(const Board & board, uint64_t memlimit){ //1 = win, 0 = u
 
 	if(root->delta == 0){ //loss
 		bestmove = M_NONE;
-		return 3 - board.toplay();
+		return 3 - rootboard.toplay();
 	}
 
 	bestmove = M_UNKNOWN;

@@ -8,7 +8,6 @@
 #include "solver.h"
 #include "solverab.h"
 #include "solverpns.h"
-#include "solverpns_heap.h"
 #include "solverpns_tt.h"
 #include "player.h"
 #include "board.h"
@@ -104,10 +103,6 @@ public:
 		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pns,     this, _1, 1, false), "Solve with proof number search, with one ply of alpha-beta");
 		newcallback("solve_dfpns",     bind(&HavannahGTP::gtp_solve_pns,     this, _1, 0, true),  "Solve with proof number search, with a depth-first optimization");
 		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_pns,     this, _1, 1, true),  "Solve with proof number search, with a depth-first optimization and one ply of alpha-beta");
-		newcallback("solve_hpns",      bind(&HavannahGTP::gtp_solve_hpns,    this, _1, 0, false), "Solve with basic proof number search");
-		newcallback("solve_hpnsab",    bind(&HavannahGTP::gtp_solve_hpns,    this, _1, 1, false), "Solve with proof number search, with one ply of alpha-beta");
-		newcallback("solve_hdfpns",    bind(&HavannahGTP::gtp_solve_hpns,    this, _1, 0, true),  "Solve with proof number search, with a depth-first optimization");
-		newcallback("solve_hdfpnsab",  bind(&HavannahGTP::gtp_solve_hpns,    this, _1, 1, true),  "Solve with proof number search, with a depth-first optimization and one ply of alpha-beta");
 		newcallback("solve_ttpns",     bind(&HavannahGTP::gtp_solve_pnstt,   this, _1, 0, false), "Solve with basic proof number search");
 		newcallback("solve_ttpnsab",   bind(&HavannahGTP::gtp_solve_pnstt,   this, _1, 1, false), "Solve with proof number search, with one ply of alpha-beta");
 		newcallback("solve_ttdfpns",   bind(&HavannahGTP::gtp_solve_pnstt,   this, _1, 0, true),  "Solve with proof number search, with a depth-first optimization");
@@ -212,7 +207,8 @@ public:
 			time = from_str<double>(args[0]);
 
 		SolverAB solve(false);
-		solve.solve(game.getboard(), time);
+		solve.set_board(game.getboard());
+		solve.solve(time);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -224,7 +220,8 @@ public:
 			time = from_str<double>(args[0]);
 
 		SolverAB solve(true);
-		solve.solve(game.getboard(), time);
+		solve.set_board(game.getboard());
+		solve.solve(time);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -240,23 +237,9 @@ public:
 			mem = from_str<int>(args[1]);
 
 		SolverPNS solve(ab, df);
-		solve.solve(game.getboard(), time, mem);
-
-		return GTPResponse(true, solve_str(solve));
-	}
-
-	GTPResponse gtp_solve_hpns(vecstr args, int ab, bool df){
-		double time = 60;
-		int mem = mem_allowed;
-
-		if(args.size() >= 1)
-			time = from_str<double>(args[0]);
-
-		if(args.size() >= 2)
-			mem = from_str<int>(args[1]);
-
-		SolverPNSHeap solve(ab, df);
-		solve.solve(game.getboard(), time, mem);
+		solve.set_board(game.getboard());
+		solve.set_memlimit(mem);
+		solve.solve(time);
 
 		return GTPResponse(true, solve_str(solve));
 	}
@@ -272,7 +255,9 @@ public:
 			mem = from_str<int>(args[1]);
 
 		SolverPNSTT solve(ab, df);
-		solve.solve(game.getboard(), time, mem);
+		solve.set_board(game.getboard());
+		solve.set_memlimit(mem);
+		solve.solve(time);
 
 		return GTPResponse(true, solve_str(solve));
 	}
