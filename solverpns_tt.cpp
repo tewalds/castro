@@ -1,75 +1,20 @@
 
 #include "solverpns_tt.h"
 #include "solverab.h"
+#include "time.h"
 
-/* three possible outcomes from run_pns: Win, Loss, Unknown (ran out of time/memory)
- * Ties are grouped with loss first, win second, forcing two runs:
- *   W L  U   Run 1: W | TL
- * W W T  WT  Run 2: WT | L
- * L W L  L   from the perspective of toplay
- * U W LT U
- */
 void SolverPNSTT::solve(double time){
-	reset();
-
 	if(rootboard.won() >= 0){
 		outcome = rootboard.won();
 		return;
 	}
-	rootboard.setswap(false);
 
 	Timer timer(time, bind(&SolverPNSTT::timedout, this));
-	int starttime = time_msec();
+	Time start;
 
-	int turn = rootboard.toplay();
-	int otherturn = 3 - turn;
+	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, memlimit);
 
-	if(ties == 3){ //do both
-		assignties = otherturn;
-		int ret1 = run_pns();
-
-		if(ret1 == turn){ //win
-			outcome = turn;
-		}else{
-			int ret2 = -3;
-			assignties = turn;
-			if(!timeout)
-				ret2 = run_pns();
-
-			if(ret2 == otherturn){
-				outcome = otherturn; //loss
-			}else{
-				if(ret1 == otherturn && ret2 == turn) outcome = 0;          //tie
-				if(ret1 == otherturn && ret2 == -3  ) outcome = -otherturn; //loss or tie
-				if(ret1 == -3        && ret2 == turn) outcome = -turn;      //win or tie
-				if(ret1 == -3        && ret2 == -3  ) outcome = -3;         //unknown
-			}
-		}
-	}else{
-		assignties = ties; //could be 0, 1 or 2
-		outcome = run_pns();
-	}
-
-	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
-}
-
-int SolverPNSTT::run_pns(){
-	if(TT) delete[] TT;
-	TT = new PNSNode[maxnodes];
-
-	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
-
-	hash_t basehash = rootboard.gethash();
-
-	PNSNode root = PNSNode(basehash, 1);
-	while(!timeout && root.phi != 0 && root.delta != 0)
-		pns(rootboard, &root, 0, INF32/2, INF32/2);
-
-
-//	printf("DRAW: %u, LOSS: %u\n", DRAW, LOSS);
-//	printf("root : %u, %u\n", root->phi, root->delta);
-//	for(PNSNode * i = root->children; i != root->children + root->numchildren; i++)
-//		printf("%i,%i : %u, %u\n", i->move.x, i->move.y, i->phi, i->delta);
+	run_pns();
 
 	if(root.phi == 0 && root.delta == LOSS){ //look for the winning move
 		PNSNode * i = NULL;
@@ -80,9 +25,8 @@ int SolverPNSTT::run_pns(){
 				break;
 			}
 		}
-		return rootboard.toplay();
-	}
-	if(root.phi == 0 && root.delta == DRAW){ //look for the move to tie
+		outcome = rootboard.toplay();
+	}else if(root.phi == 0 && root.delta == DRAW){ //look for the move to tie
 		PNSNode * i = NULL;
 		for(Board::MoveIterator move = rootboard.moveit(true); !move.done(); ++move){
 			i = tt(rootboard, *move);
@@ -91,16 +35,24 @@ int SolverPNSTT::run_pns(){
 				break;
 			}
 		}
-		return 0;
-	}
-
-	if(root.delta == 0){ //loss
+		outcome = 0;
+	}else if(root.delta == 0){ //loss
 		bestmove = M_NONE;
-		return 3 - rootboard.toplay();
+		outcome = 3 - rootboard.toplay();
+	}else{ //unknown
+		bestmove = M_UNKNOWN;
+		outcome = -3;
 	}
 
-	bestmove = M_UNKNOWN;
-	return -3;
+	fprintf(stderr, "Finished in %.0f msec\n", (Time() - start)*1000);
+}
+
+void SolverPNSTT::run_pns(){
+	if(TT == NULL)
+		TT = new PNSNode[maxnodes];
+
+	while(!timeout && root.phi != 0 && root.delta != 0)
+		pns(rootboard, &root, 0, INF32/2, INF32/2);
 }
 
 void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td){
@@ -206,7 +158,7 @@ SolverPNSTT::PNSNode * SolverPNSTT::tt(const Board & board, Move move){
 			pd = 1; // phi & delta value
 		}
 
-		*node = PNSNode(hash).abval(abval, board.toplay(), assignties, pd);
+		*node = PNSNode(hash).abval(abval, board.toplay(), ties, pd);
 		nodes_seen++;
 	}
 

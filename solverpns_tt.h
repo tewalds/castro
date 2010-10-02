@@ -39,16 +39,14 @@ public:
 		}
 	};
 
-
+	PNSNode root;
 	PNSNode * TT;
 	uint64_t maxnodes, memlimit;
-
-	int assignties; //which player to assign a tie to
 
 	int   ab; // how deep of an alpha-beta search to run at each leaf node
 	bool  df; // go depth first?
 	float epsilon; //if depth first, how wide should the threshold be?
-	int   ties;    //0 handle ties, 1 assign p1, 2 assign p2, 3 do two searches, once assigned to each
+	int   ties;    //which player to assign ties to: 0 handle ties, 1 assign p1, 2 assign p2
 
 	SolverPNSTT(int AB = 0, bool DF = true, float eps = 0.25) {
 		ab = AB;
@@ -58,12 +56,17 @@ public:
 
 		TT = NULL;
 		reset();
+
+		set_memlimit(1000);
 	}
+
 	~SolverPNSTT(){
-		if(TT)
+		if(TT){
 			delete[] TT;
-		TT = NULL;
+			TT = NULL;
+		}
 	}
+
 	void reset(){
 		outcome = -3;
 		maxdepth = 0;
@@ -72,28 +75,32 @@ public:
 
 		timeout = false;
 
+		root = PNSNode(rootboard.gethash(), 1);
+	}
+
+	void set_board(const Board & board){
+		rootboard = board;
+		rootboard.setswap(false);
+		reset();
+	}
+	void move(const Move & m){
+		rootboard.move(m, true, true);
+		reset();
+	}
+	void set_memlimit(uint64_t lim){
+		memlimit = lim;
+		maxnodes = memlimit*1024*1024/sizeof(PNSNode);
+
 		if(TT){
 			delete[] TT;
 			TT = NULL;
 		}
 	}
-	void set_board(const Board & board){
-		rootboard = board;
-		reset();
-	}
-	void move(const Move & m){
-		 rootboard.move(m);
-		 reset();
-	}
-	void set_memlimit(uint64_t lim){
-		memlimit = lim;
-		maxnodes = memlimit*1024*1024/sizeof(PNSNode);
-	}
 
 	void solve(double time);
 
 //basic proof number search building a tree
-	int run_pns(); //-3 = unknown, 0 = tie, 1 = p1, 2 = p2
+	void run_pns();
 	void pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
 
 //update the phi and delta for the node

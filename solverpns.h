@@ -102,10 +102,11 @@ public:
 		epsilon = eps;
 		ties = 0;
 
-		set_memlimit(1000);
-
 		reset();
+
+		set_memlimit(1000);
 	}
+
 	~SolverPNS(){
 		root.dealloc();
 	}
