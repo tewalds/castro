@@ -67,6 +67,10 @@ public:
 			return num;
 		}
 
+		void swap_tree(PNSNode & n){
+			children.swap(n.children);
+		}
+
 		unsigned int alloc(unsigned int num){
 			return children.alloc(num);
 		}
@@ -112,21 +116,43 @@ public:
 		nodes_seen = 0;
 		bestmove = Move(M_UNKNOWN);
 
-		nodes = 0;
-
 		timeout = false;
-		root.dealloc();
-		root = PNSNode(0, 0, 1);
 	}
 
 	void set_board(const Board & board){
 		rootboard = board;
 		rootboard.setswap(false);
 		reset();
+
+		root.dealloc();
+		root = PNSNode(0, 0, 1);
+		nodes = 0;
 	}
 	void move(const Move & m){
 		rootboard.move(m, true, true);
 		reset();
+
+
+		uint64_t nodesbefore = nodes;
+
+		PNSNode child;
+
+		for(PNSNode * i = root.children.begin(); i != root.children.end(); i++){
+			if(i->move == m){
+				child = *i;          //copy the child experience to temp
+				child.swap_tree(*i); //move the child tree to temp
+				break;
+			}
+		}
+
+		nodes -= root.dealloc();
+		root = child;
+		root.swap_tree(child);
+
+		if(nodesbefore > 0)
+			fprintf(stderr, "PNS Nodes before: %llu, after: %llu, saved %.1f%% of the tree\n", nodesbefore, nodes, 100.0*nodes/nodesbefore);
+
+		assert(nodes == root.size());
 	}
 
 	void set_memlimit(uint64_t lim){
