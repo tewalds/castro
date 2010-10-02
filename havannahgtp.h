@@ -95,8 +95,8 @@ public:
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,     this, _1), "List all legal moves");
 		newcallback("history",         bind(&HavannahGTP::gtp_history,       this, _1), "List of played moves");
 		newcallback("playgame",        bind(&HavannahGTP::gtp_playgame,      this, _1), "Play a list of moves");
-		newcallback("havannah_winner", bind(&HavannahGTP::gtp_winner,        this, _1), "Check the winner of the game");
-		newcallback("havannah_solve",  bind(&HavannahGTP::gtp_solve,         this, _1), "Use the default solver: havannah_solve [time] [memory]");
+		newcallback("winner",          bind(&HavannahGTP::gtp_winner,        this, _1), "Check the winner of the game");
+		newcallback("havannah_winner", bind(&HavannahGTP::gtp_winner,        this, _1), "Alias for winner");
 		newcallback("solve_ab",        bind(&HavannahGTP::gtp_solve_ab,      this, _1), "Solve with negamax");
 		newcallback("solve_scout",     bind(&HavannahGTP::gtp_solve_scout,   this, _1), "Solve with negascout");
 		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,     this, _1, 0, false), "Solve with basic proof number search");
@@ -192,12 +192,6 @@ public:
 			return GTPResponse(true, "\n" + game.getboard().to_s());
 		else
 			return GTPResponse(true);
-	}
-
-	GTPResponse gtp_solve(vecstr args){
-		log("havannah_solve " + implode(args, " "));
-
-		return gtp_solve_pns(args, 1, true);
 	}
 
 	GTPResponse gtp_solve_ab(vecstr args){
