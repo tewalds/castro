@@ -415,7 +415,7 @@ public:
 	}
 
 	hash_t test_hash(const Move & pos, int turn) const {
-		if(nummoves > unique_depth) //simple test, no rotations/symmetry
+		if(nummoves >= unique_depth) //simple test, no rotations/symmetry
 			return hash.test(0, 3*xy(pos) + turn);
 
 		int x = pos.x - size+1,
@@ -449,7 +449,7 @@ public:
 		char turn = toplay();
 
 		set(pos, turn);
-		update_hash(pos, turn);
+		update_hash(pos, turn); //must be after set to have the correct nummoves
 
 		if(locality){
 			for(int i = 6; i < 18; i++){
