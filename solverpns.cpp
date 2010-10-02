@@ -1,101 +1,55 @@
 
 #include "solverpns.h"
 #include "solverab.h"
+#include "time.h"
 
-/* three possible outcomes from run_pns: Win, Loss, Unknown (ran out of time/memory)
- * Ties are grouped with loss first, win second, forcing two runs:
- *   W L  U   Run 1: W | TL
- * W W T  WT  Run 2: WT | L
- * L W L  L   from the perspective of toplay
- * U W LT U
- */
 void SolverPNS::solve(double time){
-	reset();
-
 	if(rootboard.won() >= 0){
 		outcome = rootboard.won();
 		return;
 	}
-	rootboard.setswap(false);
 
 	Timer timer(time, bind(&SolverPNS::timedout, this));
-	int starttime = time_msec();
+	Time start;
 
-	int turn = rootboard.toplay();
-	int otherturn = 3 - turn;
+	outcome = run_pns();
 
-	if(ties == 3){ //do both
-		assignties = otherturn;
-		int ret1 = run_pns();
-
-		if(ret1 == turn){ //win
-			outcome = turn;
-		}else{
-			int ret2 = -3;
-			assignties = turn;
-			if(!timeout)
-				ret2 = run_pns();
-
-			if(ret2 == otherturn){
-				outcome = otherturn; //loss
-			}else{
-				if(ret1 == otherturn && ret2 == turn) outcome = 0;          //tie
-				if(ret1 == otherturn && ret2 == -3  ) outcome = -otherturn; //loss or tie
-				if(ret1 == -3        && ret2 == turn) outcome = -turn;      //win or tie
-				if(ret1 == -3        && ret2 == -3  ) outcome = -3;         //unknown
-			}
-		}
-	}else{
-		assignties = ties; //could be 0, 1 or 2
-		outcome = run_pns();
-	}
-
-	fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
+	fprintf(stderr, "Finished in %.0f msec\n", (Time() - start)*1000);
 }
 
 int SolverPNS::run_pns(){
-	nodes = 0;
+	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, memlimit);
 
-	if(root) delete root;
-	root = new PNSNode(0, 0, 1);
-
-	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, maxnodes*sizeof(PNSNode)/1024/1024);
-
-	while(!timeout && root->phi != 0 && root->delta != 0){
-		if(!pns(rootboard, root, 0, INF32/2, INF32/2)){
+	while(!timeout && root.phi != 0 && root.delta != 0){
+		if(!pns(rootboard, &root, 0, INF32/2, INF32/2)){
 			int64_t before = nodes;
-			garbage_collect(root);
+			garbage_collect(&root);
 			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
 			if(maxnodes - nodes < maxnodes/100)
 				break;
 		}
 	}
 
-//	printf("DRAW: %u, LOSS: %u\n", DRAW, LOSS);
-//	printf("root : %u, %u\n", root->phi, root->delta);
-//	for(PNSNode * i = root->children; i != root->children + root->numchildren; i++)
-//		printf("%i,%i : %u, %u\n", i->move.x, i->move.y, i->phi, i->delta);
-
-	if(root->phi == 0 && root->delta == LOSS){ //look for the winning move
-		for(int i = 0; i < root->numchildren; i++){
-			if(root->children[i].delta == 0){
-				bestmove = root->children[i].move;
+	if(root.phi == 0 && root.delta == LOSS){ //look for the winning move
+		for(PNSNode * i = root.children.begin() ; i != root.children.end(); i++){
+			if(i->delta == 0){
+				bestmove = i->move;
 				break;
 			}
 		}
 		return rootboard.toplay();
 	}
-	if(root->phi == 0 && root->delta == DRAW){ //look for the move to tie
-		for(int i = 0; i < root->numchildren; i++){
-			if(root->children[i].delta == DRAW){
-				bestmove = root->children[i].move;
+	if(root.phi == 0 && root.delta == DRAW){ //look for the move to tie
+		for(PNSNode * i = root.children.begin() ; i != root.children.end(); i++){
+			if(i->delta == DRAW){
+				bestmove = i->move;
 				break;
 			}
 		}
 		return 0;
 	}
 
-	if(root->delta == 0){ //loss
+	if(root.delta == 0){ //loss
 		bestmove = M_NONE;
 		return 3 - rootboard.toplay();
 	}
@@ -108,7 +62,7 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 	if(depth > maxdepth)
 		maxdepth = depth;
 
-	if(node->numchildren == 0){
+	if(node->children.empty()){
 		if(nodes >= maxnodes)
 			return false;
 
@@ -134,7 +88,7 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 				pd = 1; // phi & delta value
 			}
 
-			node->children[i] = PNSNode(*move).abval(abval, board.toplay(), assignties, pd);
+			node->children[i] = PNSNode(*move).abval(abval, board.toplay(), ties, pd);
 
 			i++;
 		}
@@ -148,14 +102,14 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 	
 	bool mem;
 	do{
-		PNSNode * child = node->children,
-		        * child2 = node->children,
-		        * childend = node->children + node->numchildren;
+		PNSNode * child = node->children.begin(),
+		        * child2 = node->children.begin(),
+		        * childend = node->children.end();
 
 		uint32_t tpc, tdc;
 
 		if(df){
-			for(PNSNode * i = node->children; i != childend; i++){
+			for(PNSNode * i = node->children.begin(); i != childend; i++){
 				if(i->delta <= child->delta){
 					child2 = child;
 					child = i;
@@ -186,8 +140,8 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 }
 
 bool SolverPNS::updatePDnum(PNSNode * node){
-	PNSNode * i = node->children;
-	PNSNode * end = node->children + node->numchildren;
+	PNSNode * i = node->children.begin();
+	PNSNode * end = node->children.end();
 
 	uint32_t min = i->delta;
 	uint64_t sum = 0;
@@ -221,11 +175,11 @@ bool SolverPNS::updatePDnum(PNSNode * node){
 
 //removes the children of any node whos children are all unproven and have no children
 bool SolverPNS::garbage_collect(PNSNode * node){
-	if(node->numchildren == 0)
+	if(node->children.empty())
 		return (node->phi != 0 && node->delta != 0);
 
-	PNSNode * i = node->children;
-	PNSNode * end = node->children + node->numchildren;
+	PNSNode * i = node->children.begin();
+	PNSNode * end = node->children.end();
 
 	bool collect = true;
 	for( ; i != end; i++)

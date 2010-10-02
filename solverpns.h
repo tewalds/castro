@@ -10,6 +10,7 @@
 #include "move.h"
 
 #include "solver.h"
+#include "children.h"
 
 
 class SolverPNS : public Solver {
@@ -21,21 +22,31 @@ public:
 	struct PNSNode {
 		uint32_t phi, delta;
 		Move move;
-		uint16_t numchildren;
-		PNSNode * children;
+		Children<PNSNode> children;
 
 		PNSNode() { }
-		PNSNode(int x, int y,   int v = 1)     : phi(v), delta(v), move(Move(x,y)), numchildren(0), children(NULL) { }
-		PNSNode(const Move & m, int v = 1)     : phi(v), delta(v), move(m),         numchildren(0), children(NULL) { }
-		PNSNode(int x, int y,   int p, int d)  : phi(p), delta(d), move(Move(x,y)), numchildren(0), children(NULL) { }
-		PNSNode(const Move & m, int p, int d)  : phi(p), delta(d), move(m),         numchildren(0), children(NULL) { }
+		PNSNode(int x, int y,   int v = 1)     : phi(v), delta(v), move(Move(x,y)) { }
+		PNSNode(const Move & m, int v = 1)     : phi(v), delta(v), move(m)         { }
+		PNSNode(int x, int y,   int p, int d)  : phi(p), delta(d), move(Move(x,y)) { }
+		PNSNode(const Move & m, int p, int d)  : phi(p), delta(d), move(m)         { }
+
+		PNSNode(const PNSNode & n) { *this = n; }
+		PNSNode & operator = (const PNSNode & n){
+			if(this != & n){ //don't copy to self
+				//don't copy to a node that already has children
+				assert(children.empty());
+
+				phi = n.phi;
+				delta = n.delta;
+				move = n.move;
+			}
+			return *this;
+		}
 
 		~PNSNode(){
-			if(children)
-				delete[] children;
-			children = NULL;
-			numchildren = 0;
+			assert(children.empty());
 		}
+
 		PNSNode & abval(int outcome, int toplay, int assign, int value = 1){
 			if(assign && (outcome == 1 || outcome == -1))
 				outcome = (toplay == assign ? 2 : -2);
@@ -46,38 +57,40 @@ public:
 			else /*(outcome 1||-1)*/ { phi = 0;     delta = DRAW; }
 			return *this;
 		}
-		
-		int alloc(int num){
-			numchildren = num;
-			children = new PNSNode[num];
+
+		unsigned int size() const {
+			unsigned int num = children.num();
+
+			for(PNSNode * i = children.begin(); i != children.end(); i++)
+				num += i->size();
+
 			return num;
 		}
-		int dealloc(){
-			int s = numchildren;
-			if(numchildren){
-				for(int i = 0; i < numchildren; i++)
-					s += children[i].dealloc();
-				numchildren = 0;
-				delete[] children;
-				children = NULL;
-			}
-			return s;
+
+		unsigned int alloc(unsigned int num){
+			return children.alloc(num);
+		}
+		unsigned int dealloc(){
+			unsigned int num = 0;
+
+			for(PNSNode * i = children.begin(); i != children.end(); i++)
+				num += i->dealloc();
+			num += children.dealloc();
+
+			return num;
 		}
 	};
 
 
 //memory management for PNS which uses a tree to store the nodes
 	uint64_t nodes, maxnodes, memlimit;
-	int assignties; //which player to assign a tie to
 
 	int   ab; // how deep of an alpha-beta search to run at each leaf node
 	bool  df; // go depth first?
 	float epsilon; //if depth first, how wide should the threshold be?
-	int   ties;    //0 handle ties, 1 assign p1, 2 assign p2, 3 do two searches, once assigned to each
+	int   ties;    //which player to assign ties to: 0 handle ties, 1 assign p1, 2 assign p2
 
-	bool timeout;
-
-	PNSNode * root;
+	PNSNode root;
 
 	SolverPNS(int AB = 0, bool DF = true, float eps = 0.25) {
 		ab = AB;
@@ -87,14 +100,12 @@ public:
 
 		set_memlimit(1000);
 
-		root = NULL;
 		reset();
 	}
 	~SolverPNS(){
-		if(root)
-			delete root;
-		root = NULL;
+		root.dealloc();
 	}
+
 	void reset(){
 		outcome = -3;
 		maxdepth = 0;
@@ -104,14 +115,13 @@ public:
 		nodes = 0;
 
 		timeout = false;
-		if(root){
-			delete root;
-			root = NULL;
-		}
+		root.dealloc();
+		root = PNSNode(0, 0, 1);
 	}
 
 	void set_board(const Board & board){
 		rootboard = board;
+		rootboard.setswap(false);
 		reset();
 	}
 	void move(const Move & m){
