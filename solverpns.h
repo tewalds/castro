@@ -137,7 +137,7 @@ public:
 	void solve(double time);
 
 //basic proof number search building a tree
-	int run_pns(); //-3 = unknown, 0 = tie, 1 = p1, 2 = p2
+	void run_pns();
 	bool pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td);
 
 //update the phi and delta for the node

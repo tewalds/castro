@@ -12,14 +12,38 @@ void SolverPNS::solve(double time){
 	Timer timer(time, bind(&SolverPNS::timedout, this));
 	Time start;
 
-	outcome = run_pns();
+	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, memlimit);
+
+	run_pns();
+
+	if(root.phi == 0 && root.delta == LOSS){ //look for the winning move
+		for(PNSNode * i = root.children.begin() ; i != root.children.end(); i++){
+			if(i->delta == 0){
+				bestmove = i->move;
+				break;
+			}
+		}
+		outcome = rootboard.toplay();
+	}else if(root.phi == 0 && root.delta == DRAW){ //look for the move to tie
+		for(PNSNode * i = root.children.begin() ; i != root.children.end(); i++){
+			if(i->delta == DRAW){
+				bestmove = i->move;
+				break;
+			}
+		}
+		outcome = 0;
+	}else if(root.delta == 0){ //loss
+		bestmove = M_NONE;
+		outcome = 3 - rootboard.toplay();
+	}else{ //unknown
+		bestmove = M_UNKNOWN;
+		outcome = -3;
+	}
 
 	fprintf(stderr, "Finished in %.0f msec\n", (Time() - start)*1000);
 }
 
-int SolverPNS::run_pns(){
-	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, memlimit);
-
+void SolverPNS::run_pns(){
 	while(!timeout && root.phi != 0 && root.delta != 0){
 		if(!pns(rootboard, &root, 0, INF32/2, INF32/2)){
 			int64_t before = nodes;
@@ -29,33 +53,6 @@ int SolverPNS::run_pns(){
 				break;
 		}
 	}
-
-	if(root.phi == 0 && root.delta == LOSS){ //look for the winning move
-		for(PNSNode * i = root.children.begin() ; i != root.children.end(); i++){
-			if(i->delta == 0){
-				bestmove = i->move;
-				break;
-			}
-		}
-		return rootboard.toplay();
-	}
-	if(root.phi == 0 && root.delta == DRAW){ //look for the move to tie
-		for(PNSNode * i = root.children.begin() ; i != root.children.end(); i++){
-			if(i->delta == DRAW){
-				bestmove = i->move;
-				break;
-			}
-		}
-		return 0;
-	}
-
-	if(root.delta == 0){ //loss
-		bestmove = M_NONE;
-		return 3 - rootboard.toplay();
-	}
-
-	bestmove = M_UNKNOWN;
-	return -3;
 }
 
 bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td){
