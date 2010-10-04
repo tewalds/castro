@@ -72,7 +72,7 @@ class LBDists {
 
 	int dists[12][2][361]; //[edge/corner][player][cell]
 	IntPQueue Q;
-	Board * board;
+	const Board * board;
 
 	int & dist(int edge, int player, int i)          { return dists[edge][player-1][i]; }
 	int & dist(int edge, int player, const Move & m) { return dist(edge, player, board->xy(m)); }
@@ -89,9 +89,9 @@ class LBDists {
 public:
 
 	LBDists() : board(NULL) {}
-	LBDists(Board * b) { run(b); }
+	LBDists(const Board * b) { run(b); }
 
-	void run(Board * b) {
+	void run(const Board * b) {
 		board = b;
 
 		for(int i = 0; i < 12; i++)
