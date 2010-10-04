@@ -11,6 +11,7 @@
 
 #include "solver.h"
 #include "children.h"
+#include "lbdist.h"
 
 
 class SolverPNS : public Solver {
@@ -93,14 +94,17 @@ public:
 	bool  df; // go depth first?
 	float epsilon; //if depth first, how wide should the threshold be?
 	int   ties;    //which player to assign ties to: 0 handle ties, 1 assign p1, 2 assign p2
+	bool  lbdist;
 
 	PNSNode root;
+	LBDists dists;
 
 	SolverPNS(int AB = 0, bool DF = true, float eps = 0.25) {
 		ab = AB;
 		df = DF;
 		epsilon = eps;
 		ties = 0;
+		lbdist = false;
 
 		reset();
 
