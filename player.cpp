@@ -23,7 +23,7 @@ void Player::PlayerThread::run(){
 		}else if(player->nodes >= player->maxnodes){ //garbage collect
 			player->lock.wrlock();
 			if(player->nodes >= player->maxnodes){
-				int limit = 8;
+				int limit = 16;
 				while(player->nodes >= player->maxnodes/2){
 					fprintf(stderr, "Starting player GC with limit %i ... ", limit);
 					player->garbage_collect(& player->root, limit);
