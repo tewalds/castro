@@ -299,7 +299,7 @@ public:
 
 	int find_group(const Move & m) const { return find_group(xy(m)); }
 	int find_group(int x, int y)   const { return find_group(xy(x, y)); }
-	int find_group(int i) const {
+	int find_group(unsigned int i) const {
 		if(cells[i].parent != i)
 			cells[i].parent = find_group(cells[i].parent);
 		return cells[i].parent;

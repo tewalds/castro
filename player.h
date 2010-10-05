@@ -236,6 +236,7 @@ public:
 		DepthStats wintypes[2][4]; //player,wintype
 
 		PlayerThread() : cancelled(false), runs(0), maxruns(0) {}
+		virtual ~PlayerThread() { }
 		virtual void reset() { }
 		void cancel(){ cancelled = true; }
 		int join(){ return thread.join(); }
