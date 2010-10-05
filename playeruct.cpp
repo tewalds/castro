@@ -4,25 +4,13 @@
 #include <string>
 #include "string.h"
 
-void Player::PlayerUCT::run(){
+void Player::PlayerUCT::iterate(){
 	RaveMoveList movelist;
-//	fprintf(stderr, "Runner start\n");
-	while(!cancelled){
-		player->sync.rdlock(); //wait for the write lock to come off
-
-		while(!cancelled && player->sync.relock() && player->root.outcome == -1 && (maxruns == 0 || runs < maxruns)){ //has the lock and not solved yet
-			runs++;
-			player->root.exp.addvloss();
-			Board copy = player->rootboard;
-			movelist.clear();
-			use_rave    = (unitrand() < player->userave);
-			use_explore = (unitrand() < player->useexplore);
-			walk_tree(copy, & player->root, movelist, 0);
-		}
-		player->sync.done(); //let the main thread know in case it was solved early
-		player->sync.unlock();
-	}
-//	fprintf(stderr, "Runner exit\n");
+	player->root.exp.addvloss();
+	Board copy = player->rootboard;
+	use_rave    = (unitrand() < player->userave);
+	use_explore = (unitrand() < player->useexplore);
+	walk_tree(copy, & player->root, movelist, 0);
 }
 
 //return the winner of the simulation
@@ -58,7 +46,7 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 	int won = (player->minimax ? node->outcome : board.won());
 
 	//create children if valid
-	if(won == -1 && node->exp.num() >= player->visitexpand+1 && player->nodes < player->maxnodes)
+	if(won == -1 && node->exp.num() >= player->visitexpand+1)
 		if(create_children(board, node, toplay))
 			return walk_tree(board, node, movelist, depth);
 

@@ -239,6 +239,8 @@ public:
 		virtual void reset() { }
 		void cancel(){ cancelled = true; }
 		int join(){ return thread.join(); }
+		void run(); //thread runner, calls iterate on each iteration
+		virtual void iterate() { } //handles each iteration
 	};
 
 	class PlayerUCT : public PlayerThread {
@@ -276,7 +278,7 @@ public:
 		}
 
 	private:
-		void run();
+		void iterate();
 		int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
 		int create_children(Board & board, Node * node, int toplay);
 		void add_knowledge(Board & board, Node * node, Node * child);
@@ -290,62 +292,6 @@ public:
 		Move rollout_pattern(const Board & board, const Move & move);
 	};
 
-	class Sync {
-		RWLock  lock; // stop the thread runners from doing work
-		CondVar cond; // tell the master thread that the threads are done
-		volatile bool stop; // write lock asked
-		volatile bool writelock; //is the write lock
-
-	public:
-		Sync() : stop(false), writelock(false) { }
-
-		bool is_wrlocked(){ return writelock; }
-		int wrlock(){ //aquire the write lock, set stop, blocks
-			assert(writelock == false);
-
-//			fprintf(stderr, "ask write lock\n");
-
-			CAS(stop, false, true);
-			int r = lock.wrlock();
-			writelock = true;
-			CAS(stop, true, false);
-//			fprintf(stderr, "got write lock\n");
-			return r;
-		}
-		int rdlock(){ //aquire the read lock, blocks
-//			fprintf(stderr, "Ask for read lock\n");
-			if(stop){ //spin on the read lock so that the write lock isn't starved
-//				fprintf(stderr, "Spinning on read lock\n");
-				while(stop)
-					continue;
-//				fprintf(stderr, "Done spinning on read lock\n");
-			}
-			int ret = lock.rdlock();
-//			fprintf(stderr, "Got a read lock\n");
-			return ret;
-		}
-		int relock(){ //succeeds if stop isn't requested
-			return (stop == false);
-		}
-		int unlock(){ //unlocks the lock
-			if(writelock){
-//				fprintf(stderr, "unlock read lock\n");
-			}else{
-//				fprintf(stderr, "unlock write lock\n");
-			}
-			writelock = false;
-			return lock.unlock();
-		}
-		int done(){   //signals that the timeout happened or solved
-			return cond.broadcast();
-		}
-		int wait(){   //waits for the signal
-			cond.lock(); //lock the signal that defines the end condition
-			int ret = cond.wait(); //wait a signal to end (could be from the timer)
-			cond.unlock();
-			return ret;
-		}
-	};
 
 public:
 
@@ -392,7 +338,9 @@ public:
 	uword nodes, maxnodes;
 
 	vector<PlayerThread *> threads;
-	Sync sync;
+	CondVar runners, done;
+	RWLock  lock;
+	volatile bool running; //whether the write lock is held by the master thread
 
 	double time_used;
 
@@ -441,16 +389,20 @@ public:
 		set_maxmem(maxmem);
 
 		//no threads started until a board is set
-
-		if(!ponder)
-			sync.wrlock();
+		lock.wrlock();
+		running = false;
 	}
 	~Player(){
-		if(!sync.is_wrlocked())
-			sync.wrlock();
+		if(running){
+			lock.wrlock();
+			running = false;
+		}
+		numthreads = 0;
+		reset_threads(); //shut down the theads properly
+
 		root.dealloc();
 	}
-	void timedout() { sync.done(); }
+	void timedout() { done.broadcast(); }
 
 	void set_maxmem(u64 m){
 		maxmem = m;
@@ -458,11 +410,15 @@ public:
 	}
 
 	void reset_threads(){ //better have the write lock before calling this
+		assert(running == false);
+
 	//kill all the threads
 		for(unsigned int i = 0; i < threads.size(); i++)
 			threads[i]->cancel();
 
-		sync.unlock(); //let the runners run and exit since rdlock is not a cancellation point
+		lock.unlock(); //let the runners run and exit since rdlock is not a cancellation point
+		runners.broadcast();
+		running = true;
 
 	//make sure they exited cleanly
 		for(unsigned int i = 0; i < threads.size(); i++)
@@ -470,7 +426,8 @@ public:
 
 		threads.clear();
 
-		sync.wrlock(); //lock so the new threads don't run
+		lock.wrlock(); //lock so the new threads don't run
+		running = false;
 
 	//start new threads
 		for(int i = 0; i < numthreads; i++)
@@ -479,15 +436,27 @@ public:
 
 	void set_ponder(bool p){
 		if(ponder != p){
-			if(p) sync.unlock();
-			else  sync.wrlock();
 			ponder = p;
+			if(ponder){
+				if(!running){
+					lock.unlock();
+					runners.broadcast();
+					running = true;
+				}
+			}else{
+				if(running){
+					lock.wrlock();
+					running = false;
+				}
+			}
 		}
 	}
 
 	void set_board(const Board & board){
-		if(!sync.is_wrlocked())
-			sync.wrlock();
+		if(running){
+			lock.wrlock();
+			running = false;
+		}
 
 		rootboard = board;
 		nodes -= root.dealloc();
@@ -495,12 +464,17 @@ public:
 
 		reset_threads();
 
-		if(ponder)
-			sync.unlock();
+		if(ponder){
+			lock.unlock();
+			runners.broadcast();
+			running = true;
+		}
 	}
 	void move(const Move & m){
-		if(!sync.is_wrlocked())
-			sync.wrlock();
+		if(running){
+			lock.wrlock();
+			running = false;
+		}
 
 		rootboard.move(m, true, true);
 
@@ -534,8 +508,11 @@ public:
 		if(rootboard.won() == -1)
 			root.outcome = -1;
 
-		if(ponder && root.outcome == -1)
-			sync.unlock();
+		if(ponder){
+			lock.unlock();
+			runners.broadcast();
+			running = true;
+		}
 	}
 
 	double gamelen(){
@@ -547,6 +524,7 @@ public:
 
 	Move genmove(double time, int maxruns);
 	vector<Move> get_pv();
+	void garbage_collect(Node * node, unsigned int limit);
 
 protected:
 	Node * return_move(Node * node, int toplay) const;

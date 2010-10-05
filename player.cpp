@@ -7,6 +7,41 @@
 #include "solverab.h"
 #include "timer.h"
 
+void Player::PlayerThread::run(){
+	player->runners.lock();
+	player->runners.wait(); //wait for the broadcast to start
+	player->runners.unlock();
+	while(!cancelled){
+		while(!cancelled && player->nodes < player->maxnodes && player->root.outcome == -1 && (maxruns == 0 || runs < maxruns) && player->lock.tryrdlock() == 0){ //not solved yet, has the lock, lock is last so it won't be holding the lock for gc
+			runs++;
+			iterate();
+			player->lock.unlock();
+		}
+
+		if(player->root.outcome != -1 || !(maxruns == 0 || runs < maxruns)){ //let the main thread know in case it was solved early
+			player->done.broadcast();
+		}else if(player->nodes >= player->maxnodes){ //garbage collect
+			player->lock.wrlock();
+			if(player->nodes >= player->maxnodes){
+				int limit = 8;
+				while(player->nodes >= player->maxnodes/2){
+					fprintf(stderr, "Starting player GC with limit %i ... ", limit);
+					player->garbage_collect(& player->root, limit);
+					fprintf(stderr, "%.1f %% of tree remains\n", 100.0*player->nodes/player->maxnodes);
+					limit *= 2;
+				}
+			}
+			player->lock.unlock();
+			player->runners.broadcast();
+			continue; //skip the wait below, can't broadcast to self
+		}
+		player->runners.lock();
+		player->runners.wait(); //wait for the broadcast to start
+		player->runners.unlock();
+	}
+}
+
+
 Move Player::genmove(double time, int maxruns){
 	time_used = 0;
 	int toplay = rootboard.toplay();
@@ -31,13 +66,20 @@ Move Player::genmove(double time, int maxruns){
 		fprintf(stderr, "Pondered %i runs\n", runs);
 
 	//let them run!
-	if(sync.is_wrlocked())
-		sync.unlock(); //remove the write lock
+	if(!running){
+		lock.unlock(); //remove the write lock
+		runners.broadcast();
+		running = true;
+	}
 
-	sync.wait(); //wait for the timer or solved
+	done.lock();
+	done.wait(); //wait for the timer or solved
+	done.unlock();
 
-	if(!ponder || root.outcome != -1)
-		sync.wrlock(); //stop the runners
+	if(!ponder || root.outcome != -1){
+		lock.wrlock(); //stop the runners
+		running = false;
+	}
 
 
 //return the best one
@@ -149,5 +191,17 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 	assert(node->bestmove != M_UNKNOWN);
 
 	return ret;
+}
+
+void Player::garbage_collect(Node * node, unsigned int limit){
+	Node * child = node->children.begin(),
+		 * end = node->children.end();
+
+	for( ; child != end; child++){
+		if(child->exp.num() < limit)
+			nodes -= child->dealloc();
+		else
+			garbage_collect(child, limit);
+	}
 }
 
