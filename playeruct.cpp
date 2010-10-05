@@ -83,7 +83,7 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	Node * child = temp.begin(),
 	     * end   = temp.end(),
 	     * loss  = NULL;
-	Board::MoveIterator move = board.moveit();
+	Board::MoveIterator move = board.moveit(player->prunesymmetry);
 	for(; !move.done() && child != end; ++move, ++child){
 		*child = Node(*move);
 
@@ -106,6 +106,11 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 
 		add_knowledge(board, node, child);
 	}
+
+	if(player->prunesymmetry)
+		for(; child != end; ++child) //add losses to the end so they aren't considered
+			*child = Node(M_NONE, 3 - toplay);
+
 	//both end conditions should happen in parallel, so either both happen or neither do
 	assert(move.done() == (child == end));
 

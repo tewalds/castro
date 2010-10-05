@@ -395,6 +395,9 @@ public:
 		Player::Node * child = player.root.children.begin(),
 		             * childend = player.root.children.end();
 		for( ; child != childend; child++){
+			if(child->move == M_NONE)
+				continue;
+
 			s += move_str(child->move, true);
 			s += "," + to_str(child->exp.avg(), 2) + "," + to_str(child->exp.num());
 			s += "," + to_str(child->rave.avg(), 2) + "," + to_str(child->rave.num());
@@ -473,6 +476,7 @@ public:
 				"  -k --keeptree    Keep the tree from the previous move              [" + to_str(player.keeptree) + "]\n" +
 				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
 				"  -x --visitexpand Number of visits before expanding a node          [" + to_str(player.visitexpand) + "]\n" +
+				"  -P --symmetry    Prune symmetric moves, good for proof, not play   [" + to_str(player.prunesymmetry) + "]\n" +
 				"Node initialization knowledge:\n" +
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
 				"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
@@ -522,6 +526,8 @@ public:
 				player.keeptree = from_str<bool>(args[++i]);
 			}else if((arg == "-m" || arg == "--minimax") && i+1 < args.size()){
 				player.minimax = from_str<int>(args[++i]);
+			}else if((arg == "-P" || arg == "--symmetry") && i+1 < args.size()){
+				player.prunesymmetry = from_str<bool>(args[++i]);
 			}else if((arg == "-r" || arg == "--userave") && i+1 < args.size()){
 				player.userave = from_str<float>(args[++i]);
 			}else if((arg == "-X" || arg == "--useexplore") && i+1 < args.size()){

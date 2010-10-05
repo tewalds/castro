@@ -317,6 +317,7 @@ public:
 	bool  keeptree;   //reuse the tree from the previous move
 	int   minimax;    //solve the minimax tree within the uct tree
 	uint  visitexpand;//number of visits before expanding a node
+	bool  prunesymmetry; //prune symmetric children from the move list, useful for proving but likely not for playing
 //knowledge
 	int   localreply; //boost for a local reply, ie a move near the previous move
 	int   locality;   //boost for playing near previous stones
@@ -369,6 +370,7 @@ public:
 		keeptree    = true;
 		minimax     = 2;
 		visitexpand = 1;
+		prunesymmetry = false;
 
 		localreply  = 0;
 		locality    = 0;
