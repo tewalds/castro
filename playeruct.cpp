@@ -21,7 +21,8 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 	//choose a child and recurse
 		Node * child;
 		do{
-			child = choose_move(node, toplay, board.movesremain());
+			int remain = board.movesremain();
+			child = choose_move(node, toplay, remain);
 
 			if(child->outcome == -1){
 				movelist.add(child->move, toplay);
@@ -35,7 +36,10 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 				else if(won == 0) child->exp.addvtie();
 				//else loss is already added
 
-				if(!do_backup(node, child, toplay) && player->ravefactor > min_rave && node->children.num() > 1) //update the rave scores
+				if(!do_backup(node, child, toplay) && //not solved
+					player->ravefactor > min_rave &&  //using rave
+					node->children.num() > 1 &&       //not a macro move
+					50*remain*(player->ravefactor + player->decrrave*remain) > node->exp.num()) //rave is still significant
 					update_rave(node, movelist, won, toplay);
 
 				return won;
