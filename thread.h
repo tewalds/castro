@@ -116,7 +116,17 @@ class RWLock {
 	pthread_rwlock_t rwlock;
 
 public:
-	RWLock(){ pthread_rwlock_init(&rwlock, NULL); }
+	RWLock(bool preferwriter = true){
+		pthread_rwlockattr_t attr;
+		pthread_rwlockattr_init(&attr);
+
+		if(preferwriter)
+			pthread_rwlockattr_setkind_np(&attr, PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP);
+
+		pthread_rwlock_init(&rwlock, &attr);
+
+		pthread_rwlockattr_destroy(&attr);
+	}
 	~RWLock(){ pthread_rwlock_destroy(&rwlock); }
 
 	int rdlock()    { return pthread_rwlock_rdlock(&rwlock); }
@@ -127,56 +137,6 @@ public:
 
 	int unlock()    { return pthread_rwlock_unlock(&rwlock); }
 };
-
-//similar to RWLock, but gives priority to writers
-class RWLock2 {
-	RWLock  lock; // stop the thread runners from doing work
-	volatile int stop; // write lock asked
-	volatile bool writelock; //is the write lock
-
-public:
-	RWLock2() : stop(0), writelock(false) { }
-
-	bool is_wrlocked(){ return writelock; }
-	int wrlock(){ //aquire the write lock, set stop, blocks
-//		fprintf(stderr, "ask write lock\n");
-
-		stop = true;
-		int r = lock.wrlock();
-		writelock = true;
-		stop = false;
-
-//		fprintf(stderr, "got write lock\n");
-
-		return r;
-	}
-	int rdlock(){ //aquire the read lock, blocks
-//		fprintf(stderr, "Ask for read lock\n");
-		if(stop){ //spin on the read lock so that the write lock isn't starved
-//			fprintf(stderr, "Spinning on read lock\n");
-			while(stop)
-				sleep(0);
-//			fprintf(stderr, "Done spinning on read lock\n");
-		}
-		int ret = lock.rdlock();
-//		fprintf(stderr, "Got a read lock\n");
-		return ret;
-	}
-	int tryrdlock(){
-		return lock.tryrdlock();
-	}
-	int relock(){ //succeeds if stop isn't requested
-		return (stop == false);
-	}
-	int unlock(){ //unlocks the lock
-//		if(writelock) fprintf(stderr, "unlock write lock\n");
-//		else          fprintf(stderr, "unlock read lock\n");
-
-		writelock = false;
-		return lock.unlock();
-	}
-};
-
 
 class Mutex {
 protected:
