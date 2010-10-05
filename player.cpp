@@ -8,9 +8,9 @@
 #include "timer.h"
 
 void Player::PlayerThread::run(){
-	player->runners.lock();
-	player->runners.wait(); //wait for the broadcast to start
-	player->runners.unlock();
+//	player->runners.lock();
+//	player->runners.wait(); //wait for the broadcast to start
+//	player->runners.unlock();
 	while(!cancelled){
 		while(!cancelled && player->nodes < player->maxnodes && player->root.outcome == -1 && (maxruns == 0 || runs < maxruns) && player->lock.tryrdlock() == 0){ //not solved yet, has the lock, lock is last so it won't be holding the lock for gc
 			runs++;
@@ -23,13 +23,14 @@ void Player::PlayerThread::run(){
 		}else if(player->nodes >= player->maxnodes){ //garbage collect
 			player->lock.wrlock();
 			if(player->nodes >= player->maxnodes){
-				int limit = 16;
+				player->gclimit *= 0.8; //start with 80% of last time
 				while(player->nodes >= player->maxnodes/2){
-					fprintf(stderr, "Starting player GC with limit %i ... ", limit);
-					player->garbage_collect(& player->root, limit);
+					fprintf(stderr, "Starting player GC with limit %i ... ", player->gclimit);
+					player->garbage_collect(& player->root, player->gclimit);
 					fprintf(stderr, "%.1f %% of tree remains\n", 100.0*player->nodes/player->maxnodes);
-					limit *= 2;
+					player->gclimit *= 2;
 				}
+				player->gclimit /= 2; //undo the last doubling above
 			}
 			player->lock.unlock();
 			player->runners.broadcast();

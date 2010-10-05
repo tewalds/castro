@@ -338,6 +338,7 @@ public:
 	Board rootboard;
 	Node  root;
 	uword nodes, maxnodes;
+	int   gclimit; //the minimum experience needed to not be garbage collected
 
 	vector<PlayerThread *> threads;
 	CondVar runners, done;
@@ -348,6 +349,7 @@ public:
 
 	Player() {
 		nodes = 0;
+		gclimit = 10;
 		time_used = 0;
 
 		ponder      = false;
