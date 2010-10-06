@@ -23,22 +23,22 @@ void Player::PlayerThread::run(){
 		}else if(player->nodes >= player->maxnodes){ //garbage collect
 			player->lock.wrlock();
 			if(player->nodes >= player->maxnodes){
-				player->gclimit *= 0.8; //start with 80% of last time
-				while(player->nodes >= player->maxnodes/2){
-					fprintf(stderr, "Starting player GC with limit %i ... ", player->gclimit);
-					player->garbage_collect(& player->root, player->gclimit);
-					fprintf(stderr, "%.1f %% of tree remains\n", 100.0*player->nodes/player->maxnodes);
-					player->gclimit *= 2;
-				}
-				player->gclimit /= 2; //undo the last doubling above
+				fprintf(stderr, "Starting player GC with limit %i ... ", player->gclimit);
+				player->garbage_collect(& player->root, player->gclimit);
+				fprintf(stderr, "%.1f %% of tree remains\n", 100.0*player->nodes/player->maxnodes);
+
+				if(player->nodes >= player->maxnodes/2)
+					player->gclimit *= 1.3;
+				else
+					player->gclimit *= 0.9; //slowly decay
 			}
 			player->lock.unlock();
 			player->runners.broadcast();
-			continue; //skip the wait below, can't broadcast to self
+		}else{
+			player->runners.lock();
+			player->runners.wait(); //wait for the broadcast to start
+			player->runners.unlock();
 		}
-		player->runners.lock();
-		player->runners.wait(); //wait for the broadcast to start
-		player->runners.unlock();
 	}
 }
 
