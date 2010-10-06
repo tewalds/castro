@@ -21,8 +21,7 @@ void Player::PlayerThread::run(){
 		if(player->root.outcome != -1 || !(maxruns == 0 || runs < maxruns)){ //let the main thread know in case it was solved early
 			player->done.broadcast();
 		}else if(player->nodes >= player->maxnodes){ //garbage collect
-			player->lock.wrlock();
-			if(player->nodes >= player->maxnodes){
+			if(player->gcbarrier.wait()){
 				fprintf(stderr, "Starting player GC with limit %i ... ", player->gclimit);
 				player->garbage_collect(& player->root, player->gclimit);
 				fprintf(stderr, "%.1f %% of tree remains\n", 100.0*player->nodes/player->maxnodes);
@@ -32,8 +31,7 @@ void Player::PlayerThread::run(){
 				else
 					player->gclimit *= 0.9; //slowly decay
 			}
-			player->lock.unlock();
-			player->runners.broadcast();
+			player->gcbarrier.wait();
 		}else{
 			player->runners.lock();
 			player->runners.wait(); //wait for the broadcast to start

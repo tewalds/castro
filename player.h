@@ -339,6 +339,7 @@ public:
 	Node  root;
 	uword nodes, maxnodes;
 	int   gclimit; //the minimum experience needed to not be garbage collected
+	Barrier gcbarrier;
 
 	vector<PlayerThread *> threads;
 	CondVar runners, done;
@@ -433,6 +434,7 @@ public:
 
 		lock.wrlock(); //lock so the new threads don't run
 		running = false;
+		gcbarrier.reset(numthreads);
 
 	//start new threads
 		for(int i = 0; i < numthreads; i++)
