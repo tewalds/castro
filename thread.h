@@ -174,25 +174,31 @@ public:
 class Barrier {
 private:
 	CondVar cond;
-	volatile int count,   //number of threads to wait for
-	             waiting; //number of threads waiting
+	volatile uint64_t numthreads, //number of threads
+	                  counter,    //counter for iterations
+	                  release;    //release the threads once the counter gets here
 
 //not copyable
 	Barrier(const Barrier & b) { }
-	Barrier operator=(const Barrier & b) { return Barrier(count); }
+	Barrier operator=(const Barrier & b);
 
 public:
-	Barrier(int n) : count(n), waiting(0) { }
+	Barrier(int n = 1){ reset(n); }
+	void reset(int n){
+		counter = 0;
+		release = numthreads = n;
+	}
 
 	bool wait(){
 		cond.lock();
-		bool flip = (++waiting == count);
+		bool flip = (++counter == release);
 
 		if(flip){
-			waiting = 0;
+			release += numthreads;
 			cond.broadcast();
 		}else{
-			while(waiting < count)
+			uint64_t myrelease = release;
+			while(counter < myrelease)
 				cond.wait();
 		}
 		cond.unlock();
