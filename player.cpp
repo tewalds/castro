@@ -31,6 +31,7 @@ void Player::PlayerThread::run(){
 					player->gclimit *= 1.3;
 				else
 					player->gclimit *= 0.9; //slowly decay
+				player->gclimit++; //make sure it doesn't get too small
 			}
 			player->gcbarrier.wait();
 		}else{
