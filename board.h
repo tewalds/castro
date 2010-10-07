@@ -280,11 +280,20 @@ public:
 		return MoveIterator(*this, (unique ? nummoves <= unique_depth : false), (swap == -1 ? allowswap : swap));
 	}
 
-	void set(const Move & m, int v){
-		cells[xy(m)].piece = v;
+	void set(const Move & m){
+		cells[xy(m)].piece = toPlay;
 		nummoves++;
+		update_hash(m, toPlay); //depends on nummoves
 		toPlay = 3 - toPlay;
 	}
+
+	void unset(const Move & m){ //break win checks, but is a poor mans undo if all you care about is the hash
+		toPlay = 3 - toPlay;
+		update_hash(m, toPlay);
+		nummoves--;
+		cells[xy(m)].piece = 0;
+	}
+
 	void doswap(){
 		for(int y = 0; y < size_d; y++){
 			for(int x = linestart(y); x < lineend(y); x++){
@@ -448,8 +457,7 @@ public:
 
 		char turn = toplay();
 
-		set(pos, turn);
-		update_hash(pos, turn); //must be after set to have the correct nummoves
+		set(pos);
 
 		if(locality){
 			for(int i = 6; i < 18; i++){
