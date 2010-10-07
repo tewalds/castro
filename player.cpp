@@ -198,16 +198,16 @@ void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
 		 * end = node->children.end();
 
 	for( ; child != end; child++){
-		if(child->exp.num() < limit){ //low exp, ignore solvedness since it's trivial to re-solve
-			nodes -= child->dealloc();
-		}else if(child->outcome >= 0){ //solved heavy node, log it
-			if(logfile){
+		if(child->outcome >= 0){ //solved
+			if(logfile && child->exp.num() > 1000){ //log heavy solved nodes
 				board.set(child->move);
 				if(child->children.num() > 0)
 					garbage_collect(board, child, limit);
 				logsolved(board.gethash(), child);
 				board.unset(child->move);
 			}
+			nodes -= child->dealloc();
+		}else if(child->exp.num() < limit){ //low exp, ignore solvedness since it's trivial to re-solve
 			nodes -= child->dealloc();
 		}else if(node->children.num() > 0){
 			board.set(child->move);
