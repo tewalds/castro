@@ -341,6 +341,9 @@ public:
 	int   gclimit; //the minimum experience needed to not be garbage collected
 	Barrier gcbarrier;
 
+	string logname;
+	FILE * logfile;
+
 	vector<PlayerThread *> threads;
 	CondVar runners, done;
 	RWLock  lock;
@@ -352,6 +355,8 @@ public:
 		nodes = 0;
 		gclimit = 10;
 		time_used = 0;
+
+		logfile = NULL;
 
 		ponder      = false;
 //#ifdef SINGLE_THREAD ... make sure only 1 thread
@@ -406,7 +411,14 @@ public:
 		numthreads = 0;
 		reset_threads(); //shut down the theads properly
 
+		if(logfile){
+			Board copy = rootboard;
+			garbage_collect(copy, & root, 0);
+			fclose(logfile);
+		}
+
 		root.dealloc();
+
 	}
 	void timedout() { done.broadcast(); }
 
@@ -465,6 +477,11 @@ public:
 			running = false;
 		}
 
+		if(logfile){
+			Board copy = rootboard;
+			garbage_collect(copy, & root, 0);
+		}
+
 		rootboard = board;
 		nodes -= root.dealloc();
 		root = Node();
@@ -481,6 +498,11 @@ public:
 		if(running){
 			lock.wrlock();
 			running = false;
+		}
+
+		if(logfile){
+			Board copy = rootboard;
+			garbage_collect(copy, & root, 0);
 		}
 
 		rootboard.move(m, true, true);
@@ -529,9 +551,39 @@ public:
 		return len.avg();
 	}
 
+	bool setlogfile(string name){
+		if(logfile)
+			fclose(logfile);
+
+		logfile = fopen(name.c_str(), "a");
+
+		if(logfile)
+			logname = name;
+		else
+			logname = "";
+
+		return logfile;
+	}
+
+	void u64buf(char * buf, uint64_t val){
+		static const char hexlookup[] = "0123456789abcdef";
+		for(int i = 15; i >= 0; i--){
+			buf[i] = hexlookup[val & 15];
+			val >>= 4;
+		}
+		buf[16] = '\0';
+	}
+
+	void logsolved(hash_t hash, const Node * node){
+		char hashbuf[17];
+		u64buf(hashbuf, hash);
+
+		fprintf(logfile, "0x%s,%u,%i\n", hashbuf, node->exp.num(), node->outcome);
+	}
+
 	Move genmove(double time, int maxruns);
 	vector<Move> get_pv();
-	void garbage_collect(Node * node, unsigned int limit);
+	void garbage_collect(Board & board, Node * node, unsigned int limit); //destroys the board, so pass in a copy
 
 protected:
 	Node * return_move(Node * node, int toplay) const;

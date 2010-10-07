@@ -477,6 +477,7 @@ public:
 				"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
 				"  -x --visitexpand Number of visits before expanding a node          [" + to_str(player.visitexpand) + "]\n" +
 				"  -P --symmetry    Prune symmetric moves, good for proof, not play   [" + to_str(player.prunesymmetry) + "]\n" +
+				"  -L --logproof    Log proven nodes hashes and outcomes to this file [" + player.logname + "]\n" +
 				"Node initialization knowledge:\n" +
 				"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
 				"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
@@ -528,6 +529,8 @@ public:
 				player.minimax = from_str<int>(args[++i]);
 			}else if((arg == "-P" || arg == "--symmetry") && i+1 < args.size()){
 				player.prunesymmetry = from_str<bool>(args[++i]);
+			}else if((arg == "-L" || arg == "--logproof") && i+1 < args.size()){
+				player.setlogfile(args[++i]);
 			}else if((arg == "-r" || arg == "--userave") && i+1 < args.size()){
 				player.userave = from_str<float>(args[++i]);
 			}else if((arg == "-X" || arg == "--useexplore") && i+1 < args.size()){

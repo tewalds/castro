@@ -23,7 +23,8 @@ void Player::PlayerThread::run(){
 		}else if(player->nodes >= player->maxnodes){ //garbage collect
 			if(player->gcbarrier.wait()){
 				fprintf(stderr, "Starting player GC with limit %i ... ", player->gclimit);
-				player->garbage_collect(& player->root, player->gclimit);
+				Board copy = player->rootboard;
+				player->garbage_collect(copy, & player->root, player->gclimit);
 				fprintf(stderr, "%.1f %% of tree remains\n", 100.0*player->nodes/player->maxnodes);
 
 				if(player->nodes >= player->maxnodes/2)
@@ -192,15 +193,27 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 	return ret;
 }
 
-void Player::garbage_collect(Node * node, unsigned int limit){
+void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
 	Node * child = node->children.begin(),
 		 * end = node->children.end();
 
 	for( ; child != end; child++){
-		if(child->exp.num() < limit)
+		if(child->exp.num() < limit){ //low exp, ignore solvedness since it's trivial to re-solve
 			nodes -= child->dealloc();
-		else
-			garbage_collect(child, limit);
+		}else if(child->outcome >= 0){ //solved heavy node, log it
+			if(logfile){
+				board.set(child->move);
+				if(child->children.num() > 0)
+					garbage_collect(board, child, limit);
+				logsolved(board.gethash(), child);
+				board.unset(child->move);
+			}
+			nodes -= child->dealloc();
+		}else if(node->children.num() > 0){
+			board.set(child->move);
+			garbage_collect(board, child, limit);
+			board.unset(child->move);
+		}
 	}
 }
 
