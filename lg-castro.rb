@@ -38,7 +38,7 @@ class Castro < LittleGolemInterface
 			when 9 then gtp.cmd('player_params -R 100 -p 1')
 			when 10 then gtp.cmd('player_params -R 130 -p 1')
 		end
-		gtp.cmd('time -r 0 -g 0 -m 10 -f 0')
+		gtp.cmd('time -r 0 -g 0 -m 90 -f 0')
 		gtp.cmd("playgame " + moves.join(' '))
 		response = gtp.cmd('genmove')
 		gtp.cmd('quit')

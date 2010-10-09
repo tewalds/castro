@@ -120,26 +120,27 @@ class LittleGolemInterface
 		if (gamesheet = get_gamesheet)
 			#check invitations
 			if gamesheet =~ /New invitations:/
-				self.log('new invitation!'.green)
-				if self.get_invitations
-					#a = gamesheet.slice(/Your decision.*?Confirm selection/m).scan(/<td>(.*?)<\/td>/m).flatten
-					a = gamesheet.slice(/Your decision.*?table>/m).scan(/<td>(.*?)<\/td>/m).flatten
-					gametype=a[2]
+				if invites = get_invitations
+					#a = invites.slice(/Your decision.*?Confirm selection/m).scan(/<td>(.*?)<\/td>/m).flatten
+					a = invites.slice(/Your decision.*?table>/m).scan(/<td>(.*?)<\/td>/m).flatten
+					opponent = a[1]
+					gametype = a[2]
 					if gametype =~ @supported_gametypes
 						answer='accept'
 					else
 						answer='refuse'
 					end
-					self.send_message(@boss_id,"New invitation","#{gametype} #{answer}")
+					self.send_message(@boss_id,"New invitation","#{answer} #{gametype} from #{opponent}")
+					self.log("#{answer} #{gametype} from #{opponent}".green)
 					inv_id = a[5].scan(/invid=(\d*)?/m)[0]
-					self.reply_invitation(inv_id,answer)
+					reply_invitation(inv_id, answer)
 				end
 			end
 
 			#play a move
 			if !(gamesheet =~  /Games where it is your turn \[0\]/)
 				gameids=gamesheet.slice(/your turn.*your opponent/m).scan(/gid=(\d+)?/).flatten
-				self.parse_make_moves(gameids)
+				parse_make_moves(gameids)
 				return true;
 			else
 				self.log("No games found where it's my turn, sleep")
