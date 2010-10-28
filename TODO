@@ -3,36 +3,53 @@ worker stuff
 - PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 - cd /tmp; wget -N --no-check-certificate https://dropbox.ewalds.ca/worker.sh; screen -d -m sh worker.sh; logout
 
+player solver size 4:
+- LD_PRELOAD="/usr/lib/libtcmalloc.so"
+- boardsize 4
+- player_params -g 1 -P 1 -t 12 -M 15000 -o 1
+
+
+switch to 64 bit exp values?
+log, then prune solved nodes
+solver threads should use a TT instead of using the tree?
 
 progressive widening
 - start at one child
 - add an extra move after 1.5x as many rollouts
 - implement as looking at the first log(children)/log(1.5) of the children
 
+if not keeptree, and the number of non-losing moves at the root is 1, just make that move
+
+any ideas to handle ladders?
+- always generate threats?
+
+Test the accuracy of the rollouts
+- do a tree search to get a value of a position
+- run 1000 rollouts without a tree search to get the value of the position
+- compare the two for many positions
+- compare at various stages in a game
+- test different rollout policies to minimize error
 
 multiple rollouts per simulation
 - combine rave updates, lower contention
 - also allow children to be stored out of order so progressive widening will work
 - GPU rollouts for those that don't care about rings?
 
-solvers need knowledge for move ordering
-
 
 fix crash after last move
 
 batch update for the first couple moves to speed up backups
+- don't bother updating rave at all if the num experience > something big
+
 
 move ordering by knowledge
 - lower bound on distance to edges/corners
 - maybe based on number of paths? handles virtual connections
 
 
-
 reimplement O(1) ring detection
 - pattern for the normal case
 - only search for a 6 ring for the blob case
-
-garbage collect the player
 
 rework swap
 - rave doesn't give swap any time, so useless as a searchable move
@@ -43,16 +60,6 @@ rework swap
   - only handle in the opening book?
   - maximize over min(exp, 1-exp) on empty board
   - swap if exp < 0.5 after first move
-
-should the PNSTT solver use a LRU hash table?
-
-Merge the solvers
-- alpha-beta would benefit from the transposition table
-- Two node types: NodeTree, NodeTT
-- any point in keeping the heap based version?
-- needs a way of running in the background
-- run in parallel to player
-
 
 do proven nodes need
 - rave updates?
@@ -128,5 +135,56 @@ Time control
 - quiecense search - if the highest winrate != most played, keep simulating until it is
 - if only one move doesn't lose, stop simulating and just make that move
   - good idea with total time per game, but not per move
+
+
+
+Pros of MCTS:
+- very general heuristic
+- doesn't get lost
+- uses previous experience
+- easy parallelization
+
+Cons of MCTS:
+- slow
+- memory heavy
+- magic and witchcraft relates to both the exploration factor, as well as developing good simulation policies/patterns.
+
+Pros of PNS:
+- game independent
+- works well when branching factor is important
+- independent of position in the tree, so fast
+- different
+
+Cons of PNS:
+- linear decay instead of exponential decay
+- gets lost since branching factor is very short sighted
+- doesn't use much knowledge or past experience
+
+
+PNS based:
+- Add heuristic knowledge:
+  - random rollouts as knowledge?
+- Keep knowledge for future move selection
+- expected win value of a node, then minimize (delta*(1-value))
+- take amount of work into account in move selection
+- maximize the expected increase of: 1/p2 + 1/d2
+
+MCTS based:
+- maintain phi/delta, and add them as an exploration criteria to the UCT formula
+- Add thresholds so updates don't need to go all the way to the root
+- change updates so it's not a complete weighted average
+  - do minimax backup
+  - weighted average ignoring solved nodes
+  - weighted average over the best 50% of work
+
+Hybrid:
+- have a few threads start with MCTS, then switch to PNS at some point:
+  - once the branching factor is not uniform amoung siblings
+  - once the node has fewer than some amount of simulations
+  - once valuation is polarized (ie 60%+ or 40%-)
+- have a few threads watching a work queue
+- share a tree
+  - some threads doing each, both expanding and proving nodes
+  - threads switch between proof and player based on success
 
 
