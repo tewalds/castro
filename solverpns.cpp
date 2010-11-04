@@ -1,7 +1,9 @@
 
 #include "solverpns.h"
 #include "solverab.h"
+
 #include "time.h"
+#include "timer.h"
 
 void SolverPNS::solve(double time){
 	if(rootboard.won() >= 0){

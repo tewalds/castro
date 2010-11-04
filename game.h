@@ -5,7 +5,6 @@
 #include "board.h"
 #include "move.h"
 #include "string.h"
-#include <cctype>
 
 class HavannahGame {
 	vector<Move> hist;

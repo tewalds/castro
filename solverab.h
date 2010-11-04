@@ -3,14 +3,8 @@
 #define _SOLVERAB_H_
 
 #include <stdint.h>
-#include "time.h"
-#include "timer.h"
-
-#include "board.h"
-#include "move.h"
 
 #include "solver.h"
-
 
 class SolverAB : public Solver {
 public:

@@ -2,6 +2,7 @@
 #include "solverpns_tt.h"
 #include "solverab.h"
 #include "time.h"
+#include "timer.h"
 
 void SolverPNSTT::solve(double time){
 	if(rootboard.won() >= 0){

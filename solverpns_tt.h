@@ -3,11 +3,6 @@
 #define _SOLVERPNS_TT_H_
 
 #include <stdint.h>
-#include "time.h"
-#include "timer.h"
-
-#include "board.h"
-#include "move.h"
 
 #include "solver.h"
 #include "zobrist.h"

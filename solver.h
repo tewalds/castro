@@ -3,7 +3,7 @@
 #define _SOLVER_H_
 
 #include <stdint.h>
-#include "move.h"
+#include "board.h"
 
 class Solver {
 public:

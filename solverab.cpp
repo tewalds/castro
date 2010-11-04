@@ -1,5 +1,7 @@
 
 #include "solverab.h"
+#include "time.h"
+#include "timer.h"
 
 void SolverAB::solve(double time){
 	reset();
