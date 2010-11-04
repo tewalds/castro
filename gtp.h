@@ -52,6 +52,7 @@ class GTPclient {
 	bool servermode;
 	vector<GTPCallback> callbacks;
 	unsigned int longest_cmd;
+	bool running;
 
 public:
 
@@ -61,6 +62,7 @@ public:
 		logfile = l;
 		servermode = false;
 		longest_cmd = 0;
+		running = false;
 
 		newcallback("list_commands",    bind(&GTPclient::gtp_list_commands,    this, _1, false), "List the commands");
 		newcallback("help",             bind(&GTPclient::gtp_list_commands,    this, _1, true),  "List the commands, with descriptions");
@@ -146,9 +148,10 @@ public:
 	}
 
 	void run(){
+		running = true;
 		char buf[1001];
 
-		while(fgets(buf, 1000, in)){
+		while(running && fgets(buf, 1000, in)){
 			string line(buf);
 
 			trim(line);
@@ -165,6 +168,7 @@ public:
 				fflush(out);
 			}
 		}
+		running = false;
 	}
 
 	GTPResponse gtp_logfile(vecstr args){
@@ -204,7 +208,8 @@ public:
 	}
 
 	GTPResponse gtp_quit(vecstr args){
-		exit(0);
+		running = false;
+		return true;
 	}
 	
 	GTPResponse gtp_list_commands(vecstr args, bool showdesc){
