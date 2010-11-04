@@ -85,6 +85,10 @@ public:
 		in = i;
 	}
 
+	void setoutfile(FILE * o){
+		out = o;
+	}
+
 	void setlogfile(FILE * l){
 		if(logfile)
 			fclose(logfile);
@@ -154,10 +158,12 @@ public:
 
 			GTPResponse response = cmd(line);
 
-			string output = response.to_s();
+			if(out){
+				string output = response.to_s();
 
-			fwrite(output.c_str(), 1, output.length(), out);
-			fflush(out);
+				fwrite(output.c_str(), 1, output.length(), out);
+				fflush(out);
+			}
 		}
 	}
 

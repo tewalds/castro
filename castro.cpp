@@ -33,6 +33,7 @@ int main(int argc, char **argv){
 			if(ptr == NULL){ printf("Missing a file to run\n"); exit(255); }
 			FILE * fd = fopen(ptr, "r");
 			gtp.setinfile(fd);
+			gtp.setoutfile(NULL);
 			gtp.run();
 			fclose(fd);
 		}else if(arg == "-l" || arg == "--logfile"){
@@ -50,6 +51,7 @@ int main(int argc, char **argv){
 	}
 
 	gtp.setinfile(stdin);
+	gtp.setoutfile(stdout);
 	gtp.run();
 }
 
