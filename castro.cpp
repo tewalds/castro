@@ -4,13 +4,18 @@
 #include <string>
 using namespace std;
 
+void die(int code, const string & str){
+	printf("%s\n", str.c_str());
+	exit(code);
+}
+
 int main(int argc, char **argv){
 	HavannahGTP gtp;
 
 	for(int i = 1; i < argc; i++) {
 		string arg = argv[i];
 		if(arg == "--help"){
-			printf("Usage:\n"
+			die(255, "Usage:\n"
 				"\t   --help     Show this help\n"
 				"\t-v --verbose  Give more output over gtp\n"
 				"\t-g --coords   Use the H-Gui coordinate system\n"
@@ -19,18 +24,17 @@ int main(int argc, char **argv){
 				"\t-l --logfile  Log the gtp commands in standard format to this file\n"
 				"\t-s --server   Run in server mode\n"
 				);
-			exit(255);
 		}else if(arg == "-v" || arg == "--verbose"){
 			gtp.verbose = true;
 		}else if(arg == "-g" || arg == "--coords"){
 			gtp.hguicoords = true;
 		}else if(arg == "-c" || arg == "--cmd"){
 			char * ptr = argv[++i];
-			if(ptr == NULL){ printf("Missing a command\n"); exit(255); }
+			if(ptr == NULL) die(255, "Missing a command");
 			gtp.cmd(ptr);
 		}else if(arg == "-f" || arg == "--file"){
 			char * ptr = argv[++i];
-			if(ptr == NULL){ printf("Missing a file to run\n"); exit(255); }
+			if(ptr == NULL) die(255, "Missing a file to run");
 			FILE * fd = fopen(ptr, "r");
 			gtp.setinfile(fd);
 			gtp.setoutfile(NULL);
@@ -38,15 +42,14 @@ int main(int argc, char **argv){
 			fclose(fd);
 		}else if(arg == "-l" || arg == "--logfile"){
 			char * ptr = argv[++i];
-			if(ptr == NULL){ printf("Missing a filename to log to\n"); exit(255); }
+			if(ptr == NULL) die(255, "Missing a filename to log to");
 			FILE * fd = fopen(ptr, "w");
-			if(!fd) { printf("Failed to open file %s\n", ptr); exit(255); }
+			if(!fd) die(255, string("Failed to open file: ") + ptr);
 			gtp.setlogfile(fd);
 		}else if(arg == "-s" || arg == "--server"){
 			gtp.setservermode(true);
 		}else{
-			printf("Unknown argument: %s\n", argv[i]);
-			exit(255);
+			die(255, "Unknown argument: " + arg);
 		}
 	}
 
