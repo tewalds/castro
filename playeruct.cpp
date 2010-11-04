@@ -178,33 +178,38 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 		return false;
 
 	if(backup->outcome != toplay){
-		int val = 0, maxval = -1000000000;
+		uint32_t sims = 0, maxsims = 0, outcome = 0, bestoutcome = 0;
 		backup = NULL;
 
 		Node * child = node->children.begin(),
 			 * end = node->children.end();
 
 		for( ; child != end; child++){
-
-			if(child->outcome == toplay){
+			if(child->outcome == toplay){ //win
 				backup = child;
-				val = 3;
+				outcome = 3;
 				break;
+			}else if(child->outcome == -1){ //unknown
+				outcome = 2;
+			}else if(child->outcome == 0){ //draw
+				outcome = 1;
+				sims = child->exp.num();
+			}else{ //loss
+				outcome = 0;
+				sims = child->exp.num();
 			}
-			else if(child->outcome == -1)
-				val = 2;
-			else if(child->outcome == 0)
-				val = 1;
-			else
-				val = 0;
 
-			if(maxval < val){
-				maxval = val;
+			if(bestoutcome < outcome){
+				bestoutcome = outcome;
+				maxsims = sims;
+				backup = child;
+			}else if(bestoutcome == outcome && maxsims < sims){
+				maxsims = sims;
 				backup = child;
 			}
 		}
 
-		if(val == 2) //no win, but found an unknown
+		if(bestoutcome == 2) //no win, but found an unknown
 			return false;
 	}
 
