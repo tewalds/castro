@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <cstdlib>
+#include "string.h"
 
 enum MoveSpecial {
 	M_SWAP    = -1, //-1 so that adding 1 makes it into a valid move
@@ -18,6 +19,32 @@ struct Move {
 	Move() : y(M_UNKNOWN), x(110) { }
 	Move(MoveSpecial a) : y(a), x(120) { } //big x so it will always wrap to y=0 with swap
 	Move(int X, int Y) : y(Y), x(X) { }
+
+	Move(const std::string & str, int size = 0){
+		if(     str == "swap"   ){ y = M_SWAP;    x = 121; }
+		else if(str == "resign" ){ y = M_RESIGN;  x = 122; }
+		else if(str == "none"   ){ y = M_NONE;    x = 123; }
+		else if(str == "unknown"){ y = M_UNKNOWN; x = 124; }
+		else{
+			y = tolower(str[0]) - 'a';
+			x = atoi(str.c_str() + 1) - 1;
+
+			if(size && y >= size)
+				x += y + 1 - size;
+		}
+	}
+
+	std::string to_s(int size = 0){
+		if(y == M_UNKNOWN) return "unknown";
+		if(y == M_NONE)    return "none";
+		if(y == M_SWAP)    return "swap";
+		if(y == M_RESIGN)  return "resign";
+
+		if(size && y >= size)
+			return std::string() + char(y + 'a') + to_str(x - y + size);
+		else
+			return std::string() + char(y + 'a') + to_str(x + 1);
+	}
 
 	bool operator< (const Move & b) const { return (y == b.y ? x <  b.x : y <  b.y); }
 	bool operator<=(const Move & b) const { return (y == b.y ? x <= b.x : y <= b.y); }
