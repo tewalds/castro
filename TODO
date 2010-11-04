@@ -23,6 +23,11 @@ if not keeptree, and the number of non-losing moves at the root is 1, just make 
 any ideas to handle ladders?
 - always generate threats?
 
+reuse (partial?) proof trees
+- if a move is backed up as a win, it is likely a win under its siblings too
+- give it a bonus to its equivalent cousins
+- can we try to prove siblings by reusing the proof tree?
+
 Test the accuracy of the rollouts
 - do a tree search to get a value of a position
 - run 1000 rollouts without a tree search to get the value of the position
