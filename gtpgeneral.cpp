@@ -79,17 +79,7 @@ GTPResponse HavannahGTP::gtp_undo(vecstr args){
 }
 
 Move HavannahGTP::parse_move(const string & str){
-	if(str == "swap")
-		return Move(M_SWAP);
-
-	Move m;
-	m.y = tolower(str[0]) - 'a';
-	m.x = atoi(str.c_str() + 1) - 1;
-
-	if(!hguicoords && m.y >= game.getsize())
-		m.x += m.y + 1 - game.getsize();
-
-	return m;
+	return Move(str, !hguicoords * game.getsize());
 }
 
 string HavannahGTP::move_str(int x, int y, int hguic){
@@ -100,15 +90,7 @@ string HavannahGTP::move_str(Move m, int hguic){
 	if(hguic == -1)
 		hguic = hguicoords;
 
-	if(m == M_UNKNOWN) return "unknown";
-	if(m == M_NONE)    return "none";
-	if(m == M_SWAP)    return "swap";
-	if(m == M_RESIGN)  return "resign";
-
-	if(!hguic && m.y >= game.getsize())
-		m.x -= m.y + 1 - game.getsize();
-
-	return string() + char(m.y + 'a') + to_str(m.x + 1);
+	return m.to_s(!hguic * game.getsize());
 }
 
 GTPResponse HavannahGTP::gtp_all_legal(vecstr args){
