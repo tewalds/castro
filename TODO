@@ -44,7 +44,6 @@ multiple rollouts per simulation
 fix crash after last move
 
 batch update for the first couple moves to speed up backups
-- don't bother updating rave at all if the num experience > something big
 
 
 move ordering by knowledge
