@@ -200,7 +200,7 @@ void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
 
 	for( ; child != end; child++){
 		if(child->outcome >= 0){ //solved
-			if(logfile && child->exp.num() > 1000){ //log heavy solved nodes
+			if(solved_logfile && child->exp.num() > 1000){ //log heavy solved nodes
 				board.set(child->move);
 				if(child->children.num() > 0)
 					garbage_collect(board, child, limit);

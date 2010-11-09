@@ -341,8 +341,8 @@ public:
 	int   gclimit; //the minimum experience needed to not be garbage collected
 	Barrier gcbarrier;
 
-	string logname;
-	FILE * logfile;
+	string solved_logname;
+	FILE * solved_logfile;
 
 	vector<PlayerThread *> threads;
 	CondVar runners, done;
@@ -356,7 +356,7 @@ public:
 		gclimit = 10;
 		time_used = 0;
 
-		logfile = NULL;
+		solved_logfile = NULL;
 
 		ponder      = false;
 //#ifdef SINGLE_THREAD ... make sure only 1 thread
@@ -411,10 +411,10 @@ public:
 		numthreads = 0;
 		reset_threads(); //shut down the theads properly
 
-		if(logfile){
+		if(solved_logfile){
 			Board copy = rootboard;
 			garbage_collect(copy, & root, 0);
-			fclose(logfile);
+			fclose(solved_logfile);
 		}
 
 		root.dealloc();
@@ -477,7 +477,7 @@ public:
 			running = false;
 		}
 
-		if(logfile){
+		if(solved_logfile){
 			Board copy = rootboard;
 			garbage_collect(copy, & root, 0);
 		}
@@ -500,7 +500,7 @@ public:
 			running = false;
 		}
 
-		if(logfile){
+		if(solved_logfile){
 			Board copy = rootboard;
 			garbage_collect(copy, & root, 0);
 		}
@@ -552,17 +552,17 @@ public:
 	}
 
 	bool setlogfile(string name){
-		if(logfile)
-			fclose(logfile);
+		if(solved_logfile)
+			fclose(solved_logfile);
 
-		logfile = fopen(name.c_str(), "a");
+		solved_logfile = fopen(name.c_str(), "a");
 
-		if(logfile)
-			logname = name;
+		if(solved_logfile)
+			solved_logname = name;
 		else
-			logname = "";
+			solved_logname = "";
 
-		return logfile;
+		return solved_logfile;
 	}
 
 	void u64buf(char * buf, uint64_t val){
@@ -578,7 +578,7 @@ public:
 		char hashbuf[17];
 		u64buf(hashbuf, hash);
 
-		fprintf(logfile, "0x%s,%u,%i\n", hashbuf, node->exp.num(), node->outcome);
+		fprintf(solved_logfile, "0x%s,%u,%i\n", hashbuf, node->exp.num(), node->outcome);
 	}
 
 	Move genmove(double time, int maxruns);

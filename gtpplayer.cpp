@@ -167,7 +167,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
 			"  -x --visitexpand Number of visits before expanding a node          [" + to_str(player.visitexpand) + "]\n" +
 			"  -P --symmetry    Prune symmetric moves, good for proof, not play   [" + to_str(player.prunesymmetry) + "]\n" +
-			"  -L --logproof    Log proven nodes hashes and outcomes to this file [" + player.logname + "]\n" +
+			"  -L --logproof    Log proven nodes hashes and outcomes to this file [" + player.solved_logname + "]\n" +
 			"Node initialization knowledge:\n" +
 			"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
 			"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
