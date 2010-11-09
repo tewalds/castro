@@ -10,6 +10,7 @@ void SolverPNSTT::solve(double time){
 		return;
 	}
 
+	timeout = false;
 	Timer timer(time, bind(&SolverPNSTT::timedout, this));
 	Time start;
 

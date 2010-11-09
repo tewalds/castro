@@ -11,6 +11,7 @@ void SolverPNS::solve(double time){
 		return;
 	}
 
+	timeout = false;
 	Timer timer(time, bind(&SolverPNS::timedout, this));
 	Time start;
 
