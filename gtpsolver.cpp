@@ -100,8 +100,18 @@ GTPResponse HavannahGTP::gtp_solve_pns_params(vecstr args){
 }
 
 GTPResponse HavannahGTP::gtp_solve_pns_stats(vecstr args){
-	return true;
+	string s = "";
+	SolverPNS::PNSNode * child = solverpns.root.children.begin(),
+	                   * childend = solverpns.root.children.end();
+	for( ; child != childend; child++){
+		if(child->move == M_NONE)
+			continue;
+
+		s += child->move.to_s() + "," + to_str(child->phi) + "," + to_str(child->delta) + "\n";
+	}
+	return GTPResponse(true, s);
 }
+
 GTPResponse HavannahGTP::gtp_solve_pns_clear(vecstr args){
 	solverpns.clear_mem();
 	return true;
@@ -159,7 +169,16 @@ GTPResponse HavannahGTP::gtp_solve_pnstt_params(vecstr args){
 }
 
 GTPResponse HavannahGTP::gtp_solve_pnstt_stats(vecstr args){
-	return true;
+	string s = "";
+
+	Board board = game.getboard();
+	SolverPNSTT::PNSNode * child = NULL;
+	for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
+		child = solverpnstt.tt(board, *move);
+
+		s += move->to_s() + "," + to_str(child->phi) + "," + to_str(child->delta) + "\n";
+	}
+	return GTPResponse(true, s);
 }
 
 GTPResponse HavannahGTP::gtp_solve_pnstt_clear(vecstr args){
