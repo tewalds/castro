@@ -159,6 +159,7 @@ public:
 	}
 
 	void clear_mem(){
+		reset();
 		root.dealloc();
 		root = PNSNode(0, 0, 1);
 		nodes = 0;

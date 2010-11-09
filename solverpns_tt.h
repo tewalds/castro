@@ -91,6 +91,7 @@ public:
 	}
 
 	void clear_mem(){
+		reset();
 		if(TT){
 			delete[] TT;
 			TT = NULL;
