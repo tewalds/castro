@@ -151,6 +151,9 @@ public:
 			fprintf(stderr, "PNS Nodes before: %llu, after: %llu, saved %.1f%% of the tree\n", nodesbefore, nodes, 100.0*nodes/nodesbefore);
 
 		assert(nodes == root.size());
+		
+		if(nodes == 0)
+			clear_mem();
 	}
 
 	void set_memlimit(uint64_t lim){

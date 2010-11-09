@@ -131,8 +131,11 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(verbose && !player.root.children.empty())
 		fprintf(stderr, "Exp-Rave:\n%s\n", gtp_move_stats(vecstr()).response.c_str());
 
-	player.move(best);
 	game.move(best);
+	player.move(best);
+	solverab.move(best);
+	solverpns.move(best);
+	solverpnstt.move(best);
 
 	return GTPResponse(true, move_str(best));
 }

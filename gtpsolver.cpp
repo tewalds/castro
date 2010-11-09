@@ -54,7 +54,6 @@ GTPResponse HavannahGTP::gtp_solve_pns(vecstr args){
 	if(args.size() >= 1)
 		time = from_str<double>(args[0]);
 
-	solverpns.set_board(game.getboard());
 	solverpns.solve(time);
 
 	return GTPResponse(true, solve_str(solverpns));
@@ -78,7 +77,9 @@ GTPResponse HavannahGTP::gtp_solve_pns_params(vecstr args){
 		string arg = args[i];
 
 		if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
-			solverpns.set_memlimit(from_str<int>(args[++i]));
+			int mem = from_str<int>(args[++i]);
+			if(mem < 1) return GTPResponse(false, "Memory can't be less than 1mb");
+			solverpns.set_memlimit(mem);
 		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
 			solverpns.ties = from_str<int>(args[++i]);
 			solverpns.clear_mem();
@@ -112,7 +113,6 @@ GTPResponse HavannahGTP::gtp_solve_pnstt(vecstr args){
 	if(args.size() >= 1)
 		time = from_str<double>(args[0]);
 
-	solverpnstt.set_board(game.getboard());
 	solverpnstt.solve(time);
 
 	return GTPResponse(true, solve_str(solverpnstt));
@@ -136,7 +136,9 @@ GTPResponse HavannahGTP::gtp_solve_pnstt_params(vecstr args){
 		string arg = args[i];
 
 		if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
-			solverpnstt.set_memlimit(from_str<int>(args[++i]));
+			int mem = from_str<int>(args[++i]);
+			if(mem < 1) return GTPResponse(false, "Memory can't be less than 1mb");
+			solverpnstt.set_memlimit(mem);
 		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
 			solverpnstt.ties = from_str<int>(args[++i]);
 			solverpnstt.clear_mem();
