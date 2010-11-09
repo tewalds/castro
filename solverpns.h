@@ -94,10 +94,10 @@ public:
 	PNSNode root;
 	LBDists dists;
 
-	SolverPNS(int AB = 0, bool DF = true, float eps = 0.25) {
-		ab = AB;
-		df = DF;
-		epsilon = eps;
+	SolverPNS() {
+		ab = 1;
+		df = true;
+		epsilon = 0.25;
 		ties = 0;
 		lbdist = false;
 

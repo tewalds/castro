@@ -48,39 +48,120 @@ GTPResponse HavannahGTP::gtp_solve_scout(vecstr args){
 	return GTPResponse(true, solve_str(solve));
 }
 
-GTPResponse HavannahGTP::gtp_solve_pns(vecstr args, int ab, bool df){
+GTPResponse HavannahGTP::gtp_solve_pns(vecstr args){
 	double time = 60;
-	int mem = mem_allowed;
 
 	if(args.size() >= 1)
 		time = from_str<double>(args[0]);
 
-	if(args.size() >= 2)
-		mem = from_str<int>(args[1]);
+	solverpns.set_board(game.getboard());
+	solverpns.solve(time);
 
-	SolverPNS solve(ab, df);
-	solve.set_board(game.getboard());
-	solve.set_memlimit(mem);
-	solve.solve(time);
-
-	return GTPResponse(true, solve_str(solve));
+	return GTPResponse(true, solve_str(solverpns));
 }
 
-GTPResponse HavannahGTP::gtp_solve_pnstt(vecstr args, int ab, bool df){
+GTPResponse HavannahGTP::gtp_solve_pns_params(vecstr args){
+	if(args.size() == 0)
+		return GTPResponse(true, string("\n") +
+			"Update the pns solver settings, eg: pns_params -m 100 -s 0 -d 1 -e 0.25 -a 2 -l 0\n"
+			"  -m --memory   Memory limit in Mb                                       [" + to_str(solverpns.memlimit) + "]\n"
+			"  -s --ties     Which side to assign ties to, 0 = handle, 1 = p1, 2 = p2 [" + to_str(solverpns.ties) + "]\n"
+//			"  -t --threads  How many threads to run
+//			"  -o --ponder   Ponder in the background
+			"  -d --df       Use depth-first thresholds                               [" + to_str(solverpns.df) + "]\n"
+			"  -e --epsilon  How big should the threshold be                          [" + to_str(solverpns.epsilon) + "]\n"
+			"  -a --abdepth  Run an alpha-beta search of this size at each leaf       [" + to_str(solverpns.ab) + "]\n"
+			"  -l --lbdist   Initialize with the lower bound on distance to win       [" + to_str(solverpns.lbdist) + "]\n"
+			);
+
+	for(unsigned int i = 0; i < args.size(); i++) {
+		string arg = args[i];
+
+		if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
+			solverpns.set_memlimit(from_str<int>(args[++i]));
+		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
+			solverpns.ties = from_str<int>(args[++i]);
+			solverpns.clear_mem();
+		}else if((arg == "-d" || arg == "--df") && i+1 < args.size()){
+			solverpns.df = from_str<bool>(args[++i]);
+		}else if((arg == "-e" || arg == "--epsilon") && i+1 < args.size()){
+			solverpns.epsilon = from_str<float>(args[++i]);
+		}else if((arg == "-a" || arg == "--abdepth") && i+1 < args.size()){
+			solverpns.ab = from_str<int>(args[++i]);
+		}else if((arg == "-l" || arg == "--lbdist") && i+1 < args.size()){
+			solverpns.lbdist = from_str<bool>(args[++i]);
+		}else{
+			return GTPResponse(false, "Missing or unknown parameter");
+		}
+	}
+
+	return true;
+}
+
+GTPResponse HavannahGTP::gtp_solve_pns_stats(vecstr args){
+	return true;
+}
+GTPResponse HavannahGTP::gtp_solve_pns_clear(vecstr args){
+	solverpns.clear_mem();
+	return true;
+}
+
+GTPResponse HavannahGTP::gtp_solve_pnstt(vecstr args){
 	double time = 60;
-	int mem = mem_allowed;
 
 	if(args.size() >= 1)
 		time = from_str<double>(args[0]);
 
-	if(args.size() >= 2)
-		mem = from_str<int>(args[1]);
+	solverpnstt.set_board(game.getboard());
+	solverpnstt.solve(time);
 
-	SolverPNSTT solve(ab, df);
-	solve.set_board(game.getboard());
-	solve.set_memlimit(mem);
-	solve.solve(time);
+	return GTPResponse(true, solve_str(solverpnstt));
+}
 
-	return GTPResponse(true, solve_str(solve));
+GTPResponse HavannahGTP::gtp_solve_pnstt_params(vecstr args){
+	if(args.size() == 0)
+		return GTPResponse(true, string("\n") +
+			"Update the pnstt solver settings, eg: pnstt_params -m 100 -s 0 -d 1 -e 0.25 -a 2 -l 0\n"
+			"  -m --memory   Memory limit in Mb                                       [" + to_str(solverpnstt.memlimit) + "]\n"
+			"  -s --ties     Which side to assign ties to, 0 = handle, 1 = p1, 2 = p2 [" + to_str(solverpnstt.ties) + "]\n"
+//			"  -t --threads  How many threads to run
+//			"  -o --ponder   Ponder in the background
+			"  -d --df       Use depth-first thresholds                               [" + to_str(solverpnstt.df) + "]\n"
+			"  -e --epsilon  How big should the threshold be                          [" + to_str(solverpnstt.epsilon) + "]\n"
+			"  -a --abdepth  Run an alpha-beta search of this size at each leaf       [" + to_str(solverpnstt.ab) + "]\n"
+//			"  -l --lbdist   Initialize with the lower bound on distance to win       [" + to_str(solverpnstt.lbdist) + "]\n"
+			);
+
+	for(unsigned int i = 0; i < args.size(); i++) {
+		string arg = args[i];
+
+		if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
+			solverpnstt.set_memlimit(from_str<int>(args[++i]));
+		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
+			solverpnstt.ties = from_str<int>(args[++i]);
+			solverpnstt.clear_mem();
+		}else if((arg == "-d" || arg == "--df") && i+1 < args.size()){
+			solverpnstt.df = from_str<bool>(args[++i]);
+		}else if((arg == "-e" || arg == "--epsilon") && i+1 < args.size()){
+			solverpnstt.epsilon = from_str<float>(args[++i]);
+		}else if((arg == "-a" || arg == "--abdepth") && i+1 < args.size()){
+			solverpnstt.ab = from_str<int>(args[++i]);
+//		}else if((arg == "-l" || arg == "--lbdist") && i+1 < args.size()){
+//			solverpnstt.lbdist = from_str<bool>(args[++i]);
+		}else{
+			return GTPResponse(false, "Missing or unknown parameter");
+		}
+	}
+
+	return true;
+}
+
+GTPResponse HavannahGTP::gtp_solve_pnstt_stats(vecstr args){
+	return true;
+}
+
+GTPResponse HavannahGTP::gtp_solve_pnstt_clear(vecstr args){
+	solverpnstt.clear_mem();
+	return true;
 }
 

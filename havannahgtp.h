@@ -56,6 +56,10 @@ public:
 
 	Player player;
 
+	SolverAB    solverab;
+	SolverPNS   solverpns;
+	SolverPNSTT solverpnstt;
+
 	HavannahGTP(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
 		GTPclient(i, o, l);
 
@@ -98,39 +102,29 @@ public:
 		newcallback("havannah_winner", bind(&HavannahGTP::gtp_winner,        this, _1), "Alias for winner");
 		newcallback("solve_ab",        bind(&HavannahGTP::gtp_solve_ab,      this, _1), "Solve with negamax");
 		newcallback("solve_scout",     bind(&HavannahGTP::gtp_solve_scout,   this, _1), "Solve with negascout");
-		newcallback("solve_pns",       bind(&HavannahGTP::gtp_solve_pns,     this, _1, 0, false), "Solve with basic proof number search");
-		newcallback("solve_pnsab",     bind(&HavannahGTP::gtp_solve_pns,     this, _1, 1, false), "Solve with proof number search, with one ply of alpha-beta");
-		newcallback("solve_dfpns",     bind(&HavannahGTP::gtp_solve_pns,     this, _1, 0, true),  "Solve with proof number search, with a depth-first optimization");
-		newcallback("solve_dfpnsab",   bind(&HavannahGTP::gtp_solve_pns,     this, _1, 1, true),  "Solve with proof number search, with a depth-first optimization and one ply of alpha-beta");
-		newcallback("solve_ttpns",     bind(&HavannahGTP::gtp_solve_pnstt,   this, _1, 0, false), "Solve with basic proof number search");
-		newcallback("solve_ttpnsab",   bind(&HavannahGTP::gtp_solve_pnstt,   this, _1, 1, false), "Solve with proof number search, with one ply of alpha-beta");
-		newcallback("solve_ttdfpns",   bind(&HavannahGTP::gtp_solve_pnstt,   this, _1, 0, true),  "Solve with proof number search, with a depth-first optimization");
-		newcallback("solve_ttdfpnsab", bind(&HavannahGTP::gtp_solve_pnstt,   this, _1, 1, true),  "Solve with proof number search, with a depth-first optimization and one ply of alpha-beta");
+
+		newcallback("pns_solve",       bind(&HavannahGTP::gtp_solve_pns,        this, _1),  "Solve with proof number search and an explicit tree");
+		newcallback("pns_params",      bind(&HavannahGTP::gtp_solve_pns_params, this, _1),  "Set Parameters for PNS");
+		newcallback("pns_stats",       bind(&HavannahGTP::gtp_solve_pns_stats,  this, _1),  "Output the stats for the PNS solver");
+		newcallback("pns_clear",       bind(&HavannahGTP::gtp_solve_pns_clear,  this, _1),  "Stop the solver and release the memory");
+
+		newcallback("pnstt_solve",     bind(&HavannahGTP::gtp_solve_pnstt,        this, _1),  "Solve with proof number search and a transposition table of fixed size");
+		newcallback("pnstt_params",    bind(&HavannahGTP::gtp_solve_pnstt_params, this, _1),  "Set Parameters for PNSTT");
+		newcallback("pnstt_stats",     bind(&HavannahGTP::gtp_solve_pnstt_stats,  this, _1),  "Outupt the stats for the PNSTT solver");
+		newcallback("pnstt_clear",     bind(&HavannahGTP::gtp_solve_pnstt_clear,  this, _1),  "Stop the solver and release the memory");
 	}
 
 	GTPResponse gtp_print(vecstr args);
 	string won_str(int outcome) const;
-	string solve_str(int outcome) const;
 	GTPResponse gtp_swap(vecstr args);
 	GTPResponse gtp_boardsize(vecstr args);
 	GTPResponse gtp_clearboard(vecstr args);
 	GTPResponse gtp_undo(vecstr args);
-	GTPResponse gtp_solve_ab(vecstr args);
-	GTPResponse gtp_solve_scout(vecstr args);
-	GTPResponse gtp_solve_pns(vecstr args, int ab, bool df);
-	GTPResponse gtp_solve_pnstt(vecstr args, int ab, bool df);
-	string solve_str(const Solver & solve);
 	Move parse_move(const string & str);
 	string move_str(int x, int y, int hguic = -1);
 	string move_str(Move m, int hguic = -1);
 	GTPResponse gtp_all_legal(vecstr args);
 	GTPResponse gtp_history(vecstr args);
-	GTPResponse gtp_time(vecstr args);
-	double get_time();
-	GTPResponse gtp_move_stats(vecstr args);
-	GTPResponse gtp_pv(vecstr args);
-	GTPResponse gtp_genmove(vecstr args);
-	GTPResponse gtp_player_params(vecstr args);
 	GTPResponse play(const string & pos, int toplay);
 	GTPResponse gtp_playgame(vecstr args);
 	GTPResponse gtp_play(vecstr args);
@@ -144,6 +138,28 @@ public:
 	GTPResponse gtp_gridcoords(vecstr args);
 	GTPResponse gtp_debug(vecstr args);
 	GTPResponse gtp_dists(vecstr args);
+
+	GTPResponse gtp_time(vecstr args);
+	double get_time();
+	GTPResponse gtp_move_stats(vecstr args);
+	GTPResponse gtp_pv(vecstr args);
+	GTPResponse gtp_genmove(vecstr args);
+	GTPResponse gtp_player_params(vecstr args);
+
+	string solve_str(int outcome) const;
+	string solve_str(const Solver & solve);
+	GTPResponse gtp_solve_ab(vecstr args);
+	GTPResponse gtp_solve_scout(vecstr args);
+
+	GTPResponse gtp_solve_pns(vecstr args);
+	GTPResponse gtp_solve_pns_params(vecstr args);
+	GTPResponse gtp_solve_pns_stats(vecstr args);
+	GTPResponse gtp_solve_pns_clear(vecstr args);
+
+	GTPResponse gtp_solve_pnstt(vecstr args);
+	GTPResponse gtp_solve_pnstt_params(vecstr args);
+	GTPResponse gtp_solve_pnstt_stats(vecstr args);
+	GTPResponse gtp_solve_pnstt_clear(vecstr args);
 };
 
 #endif
