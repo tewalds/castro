@@ -147,7 +147,7 @@ public:
 		return response;
 	}
 
-	void run(){
+	bool run(){
 		running = true;
 		char buf[1001];
 
@@ -168,7 +168,7 @@ public:
 				fflush(out);
 			}
 		}
-		running = false;
+		return running;
 	}
 
 	GTPResponse gtp_logfile(vecstr args){

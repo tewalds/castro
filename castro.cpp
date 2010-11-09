@@ -38,7 +38,8 @@ int main(int argc, char **argv){
 			FILE * fd = fopen(ptr, "r");
 			gtp.setinfile(fd);
 			gtp.setoutfile(NULL);
-			gtp.run();
+			if(!gtp.run())
+				return 0;
 			fclose(fd);
 		}else if(arg == "-l" || arg == "--logfile"){
 			char * ptr = argv[++i];
@@ -56,5 +57,6 @@ int main(int argc, char **argv){
 	gtp.setinfile(stdin);
 	gtp.setoutfile(stdout);
 	gtp.run();
+	return 0;
 }
 
