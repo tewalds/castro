@@ -34,7 +34,7 @@ struct Move {
 		}
 	}
 
-	std::string to_s(int size = 0){
+	std::string to_s(int size = 0) const {
 		if(y == M_UNKNOWN) return "unknown";
 		if(y == M_NONE)    return "none";
 		if(y == M_SWAP)    return "swap";
