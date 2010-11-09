@@ -119,14 +119,12 @@ public:
 		timeout = false;
 	}
 
-	void set_board(const Board & board){
+	void set_board(const Board & board, bool clear = true){
 		rootboard = board;
 		rootboard.setswap(false);
 		reset();
-
-		root.dealloc();
-		root = PNSNode(0, 0, 1);
-		nodes = 0;
+		if(clear)
+			clear_mem();
 	}
 	void move(const Move & m){
 		rootboard.move(m, true, true);
@@ -158,6 +156,12 @@ public:
 	void set_memlimit(uint64_t lim){
 		memlimit = lim;
 		maxnodes = memlimit*1024*1024/sizeof(PNSNode);
+	}
+
+	void clear_mem(){
+		root.dealloc();
+		root = PNSNode(0, 0, 1);
+		nodes = 0;
 	}
 
 	void solve(double time);

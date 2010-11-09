@@ -73,10 +73,12 @@ public:
 		root = PNSNode(rootboard.gethash(), 1);
 	}
 
-	void set_board(const Board & board){
+	void set_board(const Board & board, bool clear = true){
 		rootboard = board;
 		rootboard.setswap(false);
 		reset();
+		if(clear)
+			clear_mem();
 	}
 	void move(const Move & m){
 		rootboard.move(m, true, true);
@@ -85,7 +87,10 @@ public:
 	void set_memlimit(uint64_t lim){
 		memlimit = lim;
 		maxnodes = memlimit*1024*1024/sizeof(PNSNode);
+		clear_mem();
+	}
 
+	void clear_mem(){
 		if(TT){
 			delete[] TT;
 			TT = NULL;

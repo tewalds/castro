@@ -16,9 +16,10 @@ public:
 	virtual ~Solver() { }
 
 	virtual void solve(double time) { }
-	virtual void set_board(const Board & board) { }
+	virtual void set_board(const Board & board, bool clear = true) { }
 	virtual void move(const Move & m) { }
 	virtual void set_memlimit(uint64_t lim) { }
+	virtual void clear_mem() { }
 
 protected:
 	volatile bool timeout;

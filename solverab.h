@@ -16,7 +16,7 @@ public:
 	}
 	~SolverAB() { }
 
-	void set_board(const Board & board){
+	void set_board(const Board & board, bool clear = true){
 		rootboard = board;
 		reset();
 	}
