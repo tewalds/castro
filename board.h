@@ -61,14 +61,15 @@ public:
 		HashSet hashes;
 	public:
 		MoveIterator(const Board & b, bool Unique, bool allowswap) : board(b), lineend(0), move(Move(M_SWAP)), unique(Unique) {
-			if(unique){
-				hashes.init(board.movesremain());
-				hashes.add(board.test_hash(move, board.toplay()));
-			}
-			if(board.outcome != -1)
+			if(board.outcome != -1){
 				move = Move(0, board.size_d); //already done
-			else if(!allowswap || !board.valid_move(move)) //check if swap is valid
+			}else if(!allowswap || !board.valid_move(move)){ //check if swap is valid
+				if(unique){
+					hashes.init(board.movesremain());
+					hashes.add(board.test_hash(move, board.toplay()));
+				}
 				++(*this); //find the first valid move
+			}
 		}
 
 		const Move & operator * ()  const { return move; }
