@@ -55,7 +55,7 @@ void SolverAB::solve(double time){
 }
 
 
-int SolverAB::negamax(Board & board, const int depth, int alpha, int beta){
+int SolverAB::negamax(const Board & board, const int depth, int alpha, int beta){
 	if(board.won() >= 0)
 		return (board.won() ? -2 : -1);
 

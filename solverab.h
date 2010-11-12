@@ -38,7 +38,7 @@ public:
 	void solve(double time);
 
 //return -2 for loss, -1,1 for tie, 0 for unknown, 2 for win, all from toplay's perspective
-	int negamax(Board & board, const int depth, int alpha, int beta);
+	int negamax(const Board & board, const int depth, int alpha, int beta);
 };
 
 #endif
