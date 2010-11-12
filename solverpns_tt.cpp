@@ -92,8 +92,23 @@ void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t t
 			}
 
 			Board next = board;
-			next.move(move1, false, false);
+			next.move(move1);//, false, false);
 			pns(next, child, depth + 1, tpc, tdc);
+
+			//just found a loss, try to copy proof to siblings
+			if(child->delta == LOSS){
+//				fprintf(stderr, "!%s ", move1.to_s().c_str());
+				int count = copyproof;
+				for(Board::MoveIterator move = board.moveit(true); count-- && !move.done(); ++move){
+					if(!tt(board, *move)->terminal()){
+//						fprintf(stderr, "?%s ", move->to_s().c_str());
+						Board sibling = board;
+						sibling.move(*move);
+						copy_proof(next, sibling, move1, *move);
+						updatePDnum(sibling, tt(sibling));
+					}
+				}
+			}
 		}
 
 		if(updatePDnum(board, node) && !df)
@@ -138,6 +153,99 @@ bool SolverPNSTT::updatePDnum(const Board & board, PNSNode * node){
 	}
 }
 
+//source is a move that is a proven loss, and dest is an unproven sibling
+//each has one move that the other doesn't, which are stored in smove and dmove
+//if either move is used but only available in one board, the other is substituted
+void SolverPNSTT::copy_proof(const Board & source, const Board & dest, Move smove, Move dmove){
+	if(tt(source)->delta != LOSS || tt(dest)->terminal())
+		return;
+
+	//find winning move from the source tree
+	Move bestmove = M_UNKNOWN;
+	for(Board::MoveIterator move = source.moveit(true); !move.done(); ++move){
+		if(tt(source, *move)->phi == LOSS){
+			bestmove = *move;
+			break;
+		}
+	}
+
+	if(bestmove == M_UNKNOWN) //due to transposition table collision
+		return;
+
+	Board dest2 = dest;
+
+	if(bestmove == dmove){
+		assert(dest2.move(smove));
+		smove = dmove = M_UNKNOWN;
+	}else{
+		assert(dest2.move(bestmove));
+		if(bestmove == smove)
+			smove = dmove = M_UNKNOWN;
+	}
+
+	if(tt(dest2)->terminal())
+		return;
+
+	Board source2 = source;
+	assert(source2.move(bestmove));
+
+	if(source2.won() >= 0)
+		return;
+
+	//test all responses
+	for(Board::MoveIterator move = dest2.moveit(true); !move.done(); ++move){
+		if(tt(dest2, *move)->terminal())
+			continue;
+
+		Move csmove = smove, cdmove = dmove;
+
+		Board source3 = source2, dest3 = dest2;
+
+		if(*move == csmove){
+			assert(source3.move(cdmove));
+			csmove = cdmove = M_UNKNOWN;
+		}else{
+			assert(source3.move(*move));
+			if(*move == csmove)
+				csmove = cdmove = M_UNKNOWN;
+		}
+
+		assert(dest3.move(*move));
+
+		copy_proof(source3, dest3, csmove, cdmove);
+
+		updatePDnum(dest3, tt(dest3));
+	}
+
+	updatePDnum(dest2, tt(dest2));
+}
+
+SolverPNSTT::PNSNode * SolverPNSTT::tt(const Board & board){
+	hash_t hash = board.gethash();
+
+	PNSNode * node = TT + (hash % maxnodes);
+
+	if(node->hash != hash){
+		int abval, pd = 1; // alpha-beta value, phi & delta value
+
+		if(ab){
+			SolverAB solveab(false);
+			abval = -solveab.negamax(board, ab, -2, 2);
+			pd = 1 + solveab.nodes_seen;
+			nodes_seen += solveab.nodes_seen;
+		}else{
+			int won = board.won();
+			abval = (won > 0) + (won >= 0);
+			pd = 1; // phi & delta value
+		}
+
+		*node = PNSNode(hash).abval(abval, board.toplay(), ties, pd);
+		nodes_seen++;
+	}
+
+	return node;
+}
+
 SolverPNSTT::PNSNode * SolverPNSTT::tt(const Board & board, Move move){
 	hash_t hash = board.test_hash(move, board.toplay());
 
@@ -148,7 +256,7 @@ SolverPNSTT::PNSNode * SolverPNSTT::tt(const Board & board, Move move){
 
 		if(ab){
 			Board next = board;
-			next.move(move, false, false);
+			next.move(move);//, false, false);
 
 			SolverAB solveab(false);
 			abval = -solveab.negamax(next, ab, -2, 2);

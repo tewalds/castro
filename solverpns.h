@@ -54,6 +54,8 @@ public:
 			return *this;
 		}
 
+		bool terminal(){ return (phi == 0 || delta == 0); }
+
 		unsigned int size() const {
 			unsigned int num = children.num();
 
