@@ -105,19 +105,24 @@ void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t t
 						Board sibling = board;
 						sibling.move(*move);
 						copy_proof(next, sibling, move1, *move);
-						updatePDnum(sibling, tt(sibling));
+						updatePDnum(sibling);
 					}
 				}
 			}
 		}
 
-		if(updatePDnum(board, node) && !df)
+		if(updatePDnum(board, node) && !df) //must pass node to updatePDnum since it may refer to the root which isn't in the TT
 			break;
 
 	}while(!timeout && node->phi && node->delta && (!df || (node->phi < tp && node->delta < td)));
 }
 
 bool SolverPNSTT::updatePDnum(const Board & board, PNSNode * node){
+	hash_t hash = board.gethash();
+
+	if(node == NULL)
+		node = TT + (hash % maxnodes);
+
 	uint32_t min = LOSS;
 	uint64_t sum = 0;
 
@@ -137,7 +142,6 @@ bool SolverPNSTT::updatePDnum(const Board & board, PNSNode * node){
 	else if(sum >= INF32)
 		sum = INF32;
 
-	hash_t hash = board.gethash();
 	if(hash == node->hash && min == node->phi && sum == node->delta){
 		return false;
 	}else{
@@ -214,10 +218,10 @@ void SolverPNSTT::copy_proof(const Board & source, const Board & dest, Move smov
 
 		copy_proof(source3, dest3, csmove, cdmove);
 
-		updatePDnum(dest3, tt(dest3));
+		updatePDnum(dest3);
 	}
 
-	updatePDnum(dest2, tt(dest2));
+	updatePDnum(dest2);
 }
 
 SolverPNSTT::PNSNode * SolverPNSTT::tt(const Board & board){

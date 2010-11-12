@@ -112,7 +112,7 @@ public:
 	void copy_proof(const Board & source, const Board & dest, Move smove, Move dmove);
 
 //update the phi and delta for the node
-	bool updatePDnum(const Board & board, PNSNode * node);
+	bool updatePDnum(const Board & board, PNSNode * node = NULL);
 
 	PNSNode * tt(const Board & board);
 	PNSNode * tt(const Board & board, Move move);
