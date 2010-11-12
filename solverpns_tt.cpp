@@ -96,7 +96,7 @@ void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t t
 			pns(next, child, depth + 1, tpc, tdc);
 
 			//just found a loss, try to copy proof to siblings
-			if(child->delta == LOSS){
+			if(copyproof && child->delta == LOSS){
 //				fprintf(stderr, "!%s ", move1.to_s().c_str());
 				int count = copyproof;
 				for(Board::MoveIterator move = board.moveit(true); count-- && !move.done(); ++move){
