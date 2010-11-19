@@ -139,7 +139,7 @@ GTPResponse HavannahGTP::gtp_solve_pnstt_params(vecstr args){
 			"  -d --df       Use depth-first thresholds                               [" + to_str(solverpnstt.df) + "]\n"
 			"  -e --epsilon  How big should the threshold be                          [" + to_str(solverpnstt.epsilon) + "]\n"
 			"  -a --abdepth  Run an alpha-beta search of this size at each leaf       [" + to_str(solverpnstt.ab) + "]\n"
-			"  -c --copy     Try to copy a proof to this many siblings                [" + to_str(solverpnstt.copyproof) + "]\n"
+			"  -c --copy     Try to copy a proof to this many siblings, <0 quit early [" + to_str(solverpnstt.copyproof) + "]\n"
 //			"  -l --lbdist   Initialize with the lower bound on distance to win       [" + to_str(solverpnstt.lbdist) + "]\n"
 			);
 

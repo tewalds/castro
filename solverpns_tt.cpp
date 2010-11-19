@@ -98,7 +98,7 @@ void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t t
 			//just found a loss, try to copy proof to siblings
 			if(copyproof && child->delta == LOSS){
 //				fprintf(stderr, "!%s ", move1.to_s().c_str());
-				int count = copyproof;
+				int count = abs(copyproof);
 				for(Board::MoveIterator move = board.moveit(true); count-- && !move.done(); ++move){
 					if(!tt(board, *move)->terminal()){
 //						fprintf(stderr, "?%s ", move->to_s().c_str());
@@ -106,6 +106,9 @@ void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t t
 						sibling.move(*move);
 						copy_proof(next, sibling, move1, *move);
 						updatePDnum(sibling);
+
+						if(copyproof < 0 && !tt(sibling)->terminal())
+							break;
 					}
 				}
 			}
