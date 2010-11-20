@@ -49,7 +49,9 @@ $sizes.each{|size|
 }
 
 results = tests.map_fork($parallel){|test|
+	$stderr.puts test
 	gtp = GTPClient.new("#{$exec} -f #{test}")
+	sleep(0.1)
 	gtp.cmd("#{$solver}_params #{$params} -m #{$memory}")
 
 	result = nil;
