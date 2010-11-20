@@ -26,12 +26,8 @@
 		end
 	end
 
-def timer
-	start = Time.now
-	yield
-	return Time.now - start
-end
 
+require 'lib.rb'
 require 'net/http'
 
 expectedtime = 11.0 # expect 11 seconds
@@ -44,63 +40,6 @@ exit if benchtime < 1.0
 time_factor = benchtime / expectedtime
 
 puts "time_factor: " + time_factor.inspect
-
-
-def loop_fork(concurrency, &block)
-	if(concurrency == 1)
-		loop &block
-	end
-
-	children = []
-
-	loop {
-		children << fork {
-			loop {
-				block.call
-			}
-			exit;
-		}
-
-		#if needed, wait for a previous process to exit
-		if(concurrency)
-			begin
-				begin
-					while(pid = Process.wait(-1, Process::WNOHANG))
-						children.delete(pid);
-					end
-				end while(children.length >= concurrency && sleep(0.1))
-			rescue SystemCallError
-				children = []
-			end
-		end
-	}
-
-	#wait for all processes to finish before returning
-	begin
-		begin
-			while(pid = Process.wait(-1, Process::WNOHANG))
-				children.delete(pid);
-			end
-		end while(children.length > 0 && sleep(0.1))
-	rescue SystemCallError
-		children = []
-	end
-
-	return self
-end
-
-class GTPClient
-	def initialize(cmdline)
-		@io=IO.popen(cmdline,'w+')
-	end
-	def cmd(c)
-		@io.puts c.strip
-		return @io.gets("\n\n")
-	end
-	def close
-		@io.close
-	end
-end
 
 
 n = 0;

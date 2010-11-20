@@ -26,7 +26,6 @@ nums = {
 loop{
 	(4..10).each{|size|
 		begin
-			puts "------------------------------------------------------------------";
 			puts "Starting size #{size}"
 
 			gtp = GTPClient.new("./castro");
@@ -74,7 +73,10 @@ loop{
 			}
 			nums[size] = num+1;
 
+			puts "------------------------------------------------------------------";
+			puts "solver/#{size}/#{num}.tst : "
 			puts log
+			puts "------------------------------------------------------------------";
 		rescue => e
 			p e.message
 			p e.backtrace
