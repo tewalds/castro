@@ -95,6 +95,28 @@ GTPResponse HavannahGTP::gtp_move_stats(vecstr args){
 	return GTPResponse(true, s);
 }
 
+GTPResponse HavannahGTP::gtp_player_solved(vecstr args){
+	string s = "";
+	Player::Node * child = player.root.children.begin(),
+	             * childend = player.root.children.end();
+	int toplay = player.rootboard.toplay();
+	int best = 0;
+	for( ; child != childend; child++){
+		if(child->move == M_NONE)
+			continue;
+
+		if(child->outcome == toplay)
+			return GTPResponse(true, won_str(toplay));
+		else if(child->outcome == -1)
+			best = 2;
+		else if(child->outcome == 0)
+			best = 1;
+	}
+	if(best == 2) return GTPResponse(true, won_str(-2));
+	if(best == 1) return GTPResponse(true, won_str(0));
+	return GTPResponse(true, won_str(3 - toplay));
+}
+
 GTPResponse HavannahGTP::gtp_pv(vecstr args){
 	string pvstr = "";
 	vector<Move> pv = player.get_pv();
