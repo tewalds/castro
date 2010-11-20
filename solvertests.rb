@@ -1,17 +1,6 @@
 #!/usr/bin/ruby -W0
 
-class GTPClient
-	def initialize(cmdline)
-		@io=IO.popen(cmdline,'w+')
-	end
-	def cmd(c)
-		@io.puts c.strip
-		return @io.gets("\n\n")
-	end
-	def close
-		@io.close
-	end
-end
+require 'lib.rb'
 
 nums = {
 	4 => 1,
