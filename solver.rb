@@ -54,37 +54,47 @@ $sizes.each{|size|
 
 results = tests.map_fork($parallel){|test|
 	$stderr.puts test
-	gtp = GTPClient.new("#{$exec} -f #{test}")
-	sleep(0.1)
-	gtp.cmd("#{$solver}_params #{$params} -m #{$memory}")
 
-	result = nil;
-	time = timer { result = gtp.cmd("#{$solver}_solve #{$time}")[2..-3] }
-	gtp.cmd("quit")
-	gtp.close
+	result = 'unknown unknown 0 0'
+	time = $time
+	begin
+		gtp = GTPClient.new("#{$exec} -f #{test}")
+		sleep(0.1)
+		gtp.cmd("#{$solver}_params #{$params} -m #{$memory}")
+
+		time = timer { result = gtp.cmd("#{$solver}_solve #{$time}")[2..-3] }
+		gtp.cmd("quit")
+		gtp.close
+	rescue
+		gtp.close
+	end
 
 	[test, time, *(result.split)]
 }
 
-solved = 0
-total = 0
-solvedtime = 0.0
-totaltime = 0.0
+#[test, time, outcome, move, depth, states]
+
+problems = [0, 0]
+time     = [0.0, 0.0]
+states   = [0, 0]
 
 results.each{|result|
 	puts result.join(' ')
 
-	total += 1
-	totaltime += result[1]
+	problems[0] += 1
+	time[0]     += result[1]
+	states[0]   += result[5].to_i
 
 	if(result[2] != 'unknown')
-		solved += 1
-		solvedtime += result[1]
+		problems[1] += 1
+		time[1]     += result[1]
+		states[1]   += result[5].to_i
 	end
 }
 
 puts
-puts "           solved    total"
-puts "problems #{solved.to_s.rjust(8)} #{total.to_s.rjust(8)}"
-puts "time sec #{solvedtime.round(1).to_s.rjust(8)} #{totaltime.round(1).to_s.rjust(8)}"
+puts "             solved      total"
+puts "problems #{problems[1].to_s.rjust(10)} #{problems[0].to_s.rjust(10)}"
+puts "time sec #{time[1].round(1).to_s.rjust(10)} #{time[0].round(1).to_s.rjust(10)}"
+puts "states   #{states[1].to_s.rjust(10)} #{states[0].to_s.rjust(10)}"
 
