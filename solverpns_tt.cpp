@@ -167,7 +167,7 @@ bool SolverPNSTT::updatePDnum(const Board & board, PNSNode * node){
 //each has one move that the other doesn't, which are stored in smove and dmove
 //if either move is used but only available in one board, the other is substituted
 void SolverPNSTT::copy_proof(const Board & source, const Board & dest, Move smove, Move dmove){
-	if(tt(source)->delta != LOSS || tt(dest)->terminal())
+	if(timeout || tt(source)->delta != LOSS || tt(dest)->terminal())
 		return;
 
 	//find winning move from the source tree
