@@ -80,6 +80,9 @@ void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t t
 				child = i;
 				move2 = move1;
 				move1 = *move;
+			}else if(i->delta < child2->delta){
+				child2 = i;
+				move2 = *move;
 			}
 		}
 

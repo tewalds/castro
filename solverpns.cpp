@@ -117,6 +117,8 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 				if(i->delta <= child->delta){
 					child2 = child;
 					child = i;
+				}else if(i->delta < child2->delta){
+					child2 = i;
 				}
 			}
 
