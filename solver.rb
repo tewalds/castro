@@ -8,6 +8,7 @@ $parallel = 1
 $solver = 'pns'
 $params = '-e 0 -a 1 -d 1'
 $exec   = './castro'
+$base   = 'solver'
 
 	while(ARGV.length > 0)
 		arg = ARGV.shift
@@ -20,8 +21,9 @@ $exec   = './castro'
 		when "-o", "--solver"   then $solver   = ARGV.shift;
 		when "-a", "--params"   then $params   = ARGV.shift;
 		when "-e", "--exec"     then $exec     = ARGV.shift;
+		when "-b", "--base"     then $base     = ARGV.shift;
 		when "-h", "--help"     then
-			puts "Run a solver over a bunch of test cases to "
+			puts "Run a solver over a bunch of test cases"
 			puts "Usage: #{$0} [<options>]"
 			puts "  -s --sizes    Comma separated list of boardsizes to test [#{$sizes.join(',')}]"
 			puts "  -n --num      The number of tests to run per board size  [#{$num}]"
@@ -30,6 +32,8 @@ $exec   = './castro'
 			puts "  -t --time     Time limit per solve                       [#{$time}]"
 			puts "  -o --solver   Which solver to use                        [#{$solver}]"
 			puts "  -a --params   Parameters for the solver                  [#{$params}]"
+			puts "  -e --exec     Program to run                             [#{$exec}]"
+			puts "  -b --base     Which test set to run                      [#{$base}]"
 			puts "  -h --help     Print this help"
 			exit;
 		else
@@ -44,7 +48,7 @@ tests = []
 
 $sizes.each{|size|
 	(1..$num).each{|n|
-		tests << "solver/#{size}/#{n}.tst"
+		tests << "#{$base}/#{size}/#{n}.tst"
 	}
 }
 
@@ -79,6 +83,7 @@ results.each{|result|
 	end
 }
 
+puts
 puts "           solved    total"
 puts "problems #{solved.to_s.rjust(8)} #{total.to_s.rjust(8)}"
 puts "time sec #{solvedtime.round(1).to_s.rjust(8)} #{totaltime.round(1).to_s.rjust(8)}"
