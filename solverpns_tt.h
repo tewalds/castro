@@ -57,7 +57,7 @@ public:
 		TT = NULL;
 		reset();
 
-		set_memlimit(1000);
+		set_memlimit(100);
 	}
 
 	~SolverPNSTT(){
