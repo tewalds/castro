@@ -89,11 +89,24 @@ def loop_fork(concurrency, &block)
 	return self
 end
 
+class GTPClient
+	def initialize(cmdline)
+		@io=IO.popen(cmdline,'w+')
+	end
+	def cmd(c)
+		@io.puts c.strip
+		return @io.gets("\n\n")
+	end
+	def close
+		@io.close
+	end
+end
 
 
 n = 0;
 loop_fork($parallel) {
 	n += 1;
+	gtp = [nil, nil, nil]
 	begin
 		req = Net::HTTP.get(URI.parse("#{$url}/api/getwork"));
 
@@ -116,97 +129,87 @@ puts req.inspect
 
 		player = rand(2) + 1;
 
-		fds = [nil];
-		IO.popen($player, "w+"){|fd1|
-			fds << fd1;
-
-		IO.popen($player, "w+"){|fd2|
-			fds << fd2;
-
-			log = "";
-
-			$cmds = [
-				"time #{req['tp']}",
-				"boardsize #{req['sp']}",
-				"player_params #{req['bp']}",
-			]
+		gtp[1] = GTPClient.new($player)
+		gtp[2] = GTPClient.new($player)
 
 
-			#send the initial commands
-			$cmds.each{|cmd|
-				puts cmd;
-				log << cmd + "\n"
+		log = "";
 
-				fd1.write(cmd+"\n");
-				fd1.gets; fd1.gets;
+		$cmds = [
+			"time #{req['tp']}",
+			"boardsize #{req['sp']}",
+			"player_params #{req['bp']}",
+		]
 
-				fd2.write(cmd+"\n");
-				fd2.gets; fd2.gets;
+
+		#send the initial commands
+		$cmds.each{|cmd|
+			puts cmd;
+			log << cmd + "\n"
+
+			gtp[1].cmd(cmd);
+			gtp[2].cmd(cmd);
+		}
+
+		puts "player_params #{req['pp']}";
+		gtp[player].cmd("player_params #{req['pp']}");
+
+		turnstrings = ["draw","white","black"];
+
+		turn = 1;
+		i = 1;
+		ret = nil;
+		totaltime = timer {
+		loop{
+			$0 = "Game #{n} move #{i}, size #{req['sp']}"
+			i += 1;
+
+			#ask for a move
+			print "genmove #{turnstrings[turn]}: ";
+			time = timer {
+				ret = gtp[turn].cmd("genmove #{turnstrings[turn]}")[2..-3];
 			}
+			puts ret
 
-			puts "player_params #{req['pp']}";
-			fds[player].write("player_params #{req['pp']}\n");
-			fds[player].gets
-			fds[player].gets
+			break if(ret == "resign" || ret == "none")
 
-			turnstrings = ["draw","white","black"];
+			turn = 3-turn;
 
-			turn = 1;
-			i = 1;
-			ret = nil;
-			totaltime = timer {
-			loop{
-				$0 = "Game #{n} move #{i}, size #{req['sp']}"
-				i += 1;
+			#pass the move to the other player
+			gtp[turn].cmd("play #{turnstrings[3-turn]} #{ret}");
 
-				#ask for a move
-				print "genmove #{turnstrings[turn]}: ";
-				time = timer {
-					fds[turn].write("genmove #{turnstrings[turn]}\n");
-					ret = fds[turn].gets.slice(2, 100).rstrip;
-					fds[turn].gets;
-				}
-				puts ret
-
-				break if(ret == "resign" || ret == "none")
-
-				turn = 3-turn;
-
-				#pass the move to the other player
-				fds[turn].write("play #{turnstrings[3-turn]} #{ret}\n");
-				fds[turn].gets;
-				fds[turn].gets;
-
-				log << "play #{turnstrings[3-turn]} #{ret}\n"
-				log << "# took #{time} seconds\n\n"
-			}
-			}
-
-			fd1.write("havannah_winner\n");
-			ret = fd1.gets.slice(2, 100).rstrip;
-			fd1.gets;
-			turn = turnstrings.index(ret);
-
-			log << "# Winner: #{ret}\n"
-			log << "# Total time: #{totaltime} seconds\n"
-
-			fd1.write("quit\n");
-			fd2.write("quit\n");
-
-			result = {
-            	"baseline" => req['b'],
-            	"player" => req['p'],
-            	"size" => req['s'],
-            	"time" => req['t'],
-            	"outcome" => (turn == 0 ? turn : (turn == player ? 2 : 1)), # tie = 0, loss = 1, win = 2
-            	"log" => log,
-            	}
-
-			res = Net::HTTP.post_form(URI.parse("#{$url}/api/submit"), result);
+			log << "play #{turnstrings[3-turn]} #{ret}\n"
+			log << "# took #{time} seconds\n\n"
 		}
 		}
+
+		ret = gtp[1].cmd("havannah_winner")[2..-3];
+		turn = turnstrings.index(ret);
+
+		log << "# Winner: #{ret}\n"
+		log << "# Total time: #{totaltime} seconds\n"
+
+		gtp[1].cmd("quit");
+		gtp[2].cmd("quit");
+
+		gtp[1].close;
+		gtp[2].close;
+
+		result = {
+			"baseline" => req['b'],
+			"player" => req['p'],
+			"size" => req['s'],
+			"time" => req['t'],
+			"outcome" => (turn == 0 ? turn : (turn == player ? 2 : 1)), # tie = 0, loss = 1, win = 2
+			"log" => log,
+		}
+
+		res = Net::HTTP.post_form(URI.parse("#{$url}/api/submit"), result);
 	rescue
+		gtp[1].close if gtp[1]
+		gtp[2].close if gtp[2]
 		print "An error occurred: ",$!, "\n"
+		sleep(1);
 	end
 }
 

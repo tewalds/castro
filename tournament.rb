@@ -63,82 +63,86 @@ def timer
 	return Time.now - start
 end
 
+class GTPClient
+	def initialize(cmdline)
+		@io=IO.popen(cmdline,'w+')
+	end
+	def cmd(c)
+		@io.puts c.strip
+		return @io.gets("\n\n")
+	end
+	def close
+		@io.close
+	end
+end
+
 def play_game(n, p1, p2)
 #start the programs
+	gtp = [nil, nil, nil];
 	begin
-		fds = [nil];
-		IO.popen($players[p1], "w+"){|fd1|
-			fds << fd1;
-	
-		IO.popen($players[p2], "w+"){|fd2|
-			fds << fd2;
+		gtp[1] = GTPClient.new($players[p1])
+		gtp[2] = GTPClient.new($players[p2])
 
-			log = nil;
-			if($log)
-				log = File.open("#{$log}/#{n}-#{p1}-#{p2}", "w");
-				log.write("# Game #{n} between  #{$players[p1]} vs #{$players[p2]}\n")
-			end
+		log = nil;
+		if($log)
+			log = File.open("#{$log}/#{n}-#{p1}-#{p2}", "w");
+			log.write("# Game #{n} between  #{$players[p1]} vs #{$players[p2]}\n")
+		end
 
-		#send the initial commands
-			$cmds.each{|cmd|
-				puts cmd;
-				log.write(cmd+"\n") if log
+	#send the initial commands
+		$cmds.each{|cmd|
+			puts cmd;
+			log.write(cmd+"\n") if log
 
-				fd1.write(cmd+"\n");
-				fd1.gets; fd1.gets;
-			
-				fd2.write(cmd+"\n");
-				fd2.gets; fd2.gets;
+			gtp[1].cmd(cmd);
+			gtp[2].cmd(cmd);
+		}
+
+		turnstrings = ["draw","white","black"];
+
+		turn = 1;
+		i = 1;
+		ret = nil;
+		totaltime = timer {
+		loop{
+			$0 = "Game #{n}/#{$num_games} move #{i}: #{$players[p1]} vs #{$players[p2]}"
+			i += 1;
+
+			#ask for a move
+			print "genmove #{turnstrings[turn]}: ";
+			time = timer {
+				ret = gtp[turn].cmd("genmove #{turnstrings[turn]}\n")[2..-3];
 			}
+			puts ret
 
-			turnstrings = ["draw","white","black"];
+			break if(ret == "resign" || ret == "none")
 
-			turn = 1;
-			i = 1;
-			ret = nil;
-			totaltime = timer {
-			loop{
-				$0 = "Game #{n}/#{$num_games} move #{i}: #{$players[p1]} vs #{$players[p2]}"
-				i += 1;
+			turn = 3-turn;
 
-				#ask for a move
-				print "genmove #{turnstrings[turn]}: ";
-				time = timer {
-					fds[turn].write("genmove #{turnstrings[turn]}\n");
-					ret = fds[turn].gets.slice(2, 100).rstrip;
-					fds[turn].gets;
-				}
-				puts ret
+			#pass the move to the other player
+			gtp[turn].cmd("play #{turnstrings[3-turn]} #{ret}");
 
-				break if(ret == "resign" || ret == "none")
-
-				turn = 3-turn;
-
-				#pass the move to the other player
-				fds[turn].write("play #{turnstrings[3-turn]} #{ret}\n");
-				fds[turn].gets;
-				fds[turn].gets;
-
-				log.write("play #{turnstrings[3-turn]} #{ret}\n") if log
-				log.write("# took #{time} seconds\n\n") if log
-			}
-			}
-
-			fd1.write("havannah_winner\n");
-			ret = fd1.gets.slice(2, 100).rstrip;
-			fd1.gets;
-			turn = turnstrings.index(ret);
-
-			log.write("# Winner: #{ret}, #{$players[turn]}\n") if log
-			log.write("# Total time: #{totaltime} seconds\n") if log
-
-			fd1.write("quit\n");
-			fd2.write("quit\n");
-
-			return turn;
+			log.write("play #{turnstrings[3-turn]} #{ret}\n") if log
+			log.write("# took #{time} seconds\n\n") if log
 		}
 		}
+
+		ret = gtp[1].cmd("havannah_winner")[2..-3];
+		turn = turnstrings.index(ret);
+
+		log.write("# Winner: #{ret}, #{$players[turn]}\n") if log
+		log.write("# Total time: #{totaltime} seconds\n") if log
+
+		gtp[1].cmd("quit");
+		gtp[2].cmd("quit");
+
+		gtp[1].close
+		gtp[2].close
+
+		return turn;
 	rescue
+		gtp[1].close if gtp[1]
+		gtp[2].close if gtp[2]
 		return 0;
 	end
 end
