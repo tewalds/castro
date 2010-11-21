@@ -95,6 +95,100 @@ GTPResponse HavannahGTP::gtp_move_stats(vecstr args){
 	return GTPResponse(true, s);
 }
 
+GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
+	double use_time = get_time();
+
+	if(args.size() >= 1)
+		use_time = from_str<double>(args[0]);
+
+	fprintf(stderr, "time remain: %.1f, time: %.3f, sims: %i\n", time_remain, use_time, time.max_sims);
+
+	player.rootboard.setswap(allow_swap);
+
+	Player::Node * ret = player.genmove(use_time, time.max_sims);
+	Move best = M_RESIGN;
+	if(ret)
+		best = ret->move;
+
+	if(time.flexible)
+		time_remain += time.move - player.time_used;
+	else
+		time_remain += min(0.0, time.move - player.time_used);
+
+	if(time_remain < 0)
+		time_remain = 0;
+
+	int toplay = player.rootboard.toplay();
+
+	DepthStats gamelen, treelen;
+	int runs = 0;
+	DepthStats wintypes[2][4];
+	for(unsigned int i = 0; i < player.threads.size(); i++){
+		gamelen += player.threads[i]->gamelen;
+		treelen += player.threads[i]->treelen;
+		runs += player.threads[i]->runs;
+
+		for(int a = 0; a < 2; a++)
+			for(int b = 0; b < 4; b++)
+				wintypes[a][b] += player.threads[i]->wintypes[a][b];
+
+		player.threads[i]->reset();
+	}
+
+	string stats = "Finished " + to_str(runs) + " runs in " + to_str((int)(player.time_used*1000)) + " msec: " + to_str((int)(runs/player.time_used)) + " Games/s\n";
+	if(runs > 0){
+		stats += "Game length: " + gamelen.to_s() + "\n";
+		stats += "Tree depth:  " + treelen.to_s() + "\n";
+		stats += "Win Types:   ";
+		stats += "P1: f " + to_str(wintypes[0][1].num) + ", b " + to_str(wintypes[0][2].num) + ", r " + to_str(wintypes[0][3].num) + "; ";
+		stats += "P2: f " + to_str(wintypes[1][1].num) + ", b " + to_str(wintypes[1][2].num) + ", r " + to_str(wintypes[1][3].num) + "\n";
+
+		if(verbose){
+			stats += "P1 fork:     " + wintypes[0][1].to_s() + "\n";
+			stats += "P1 bridge:   " + wintypes[0][2].to_s() + "\n";
+			stats += "P1 ring:     " + wintypes[0][3].to_s() + "\n";
+			stats += "P2 fork:     " + wintypes[1][1].to_s() + "\n";
+			stats += "P2 bridge:   " + wintypes[1][2].to_s() + "\n";
+			stats += "P2 ring:     " + wintypes[1][3].to_s() + "\n";
+		}
+	}
+
+	if(ret){
+		stats += "Move Score:  " + to_str(ret->exp.avg()) + "\n";
+
+		if(ret->outcome >= 0){
+			stats += "Solved as a ";
+			if(ret->outcome == 0)           stats += "draw";
+			else if(ret->outcome == toplay) stats += "win";
+			else                            stats += "loss";
+			stats += "\n";
+		}
+	}
+
+	stats += "PV:          " + gtp_pv(vecstr()).response + "\n";
+
+	if(verbose && !player.root.children.empty())
+		stats += "Exp-Rave:\n" + gtp_move_stats(vecstr()).response + "\n";
+
+	fprintf(stderr, "%s", stats.c_str());
+
+	Solver s;
+	if(ret){
+		s.outcome = (ret->outcome >= 0 ? ret->outcome : -3);
+		s.bestmove = ret->move;
+		s.maxdepth = gamelen.maxdepth;
+		s.nodes_seen = runs;
+	}else{
+		s.outcome = 3-toplay;
+		s.bestmove = M_RESIGN;
+		s.maxdepth = 0;
+		s.nodes_seen = 0;
+	}
+
+	return GTPResponse(true, solve_str(s));
+}
+
+
 GTPResponse HavannahGTP::gtp_player_solved(vecstr args){
 	string s = "";
 	Player::Node * child = player.root.children.begin(),
