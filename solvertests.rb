@@ -91,6 +91,9 @@ loop_fork($parallel){
 				end
 			}
 
+			gtp.cmd("quit");
+			gtp.close
+
 			log << "\n";
 
 			num = nums[size];
