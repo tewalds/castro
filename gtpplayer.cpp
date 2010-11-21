@@ -135,7 +135,10 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 
 	player.rootboard.setswap(allow_swap);
 
-	Move best = player.genmove(use_time, time.max_sims);
+	Player::Node * ret = player.genmove(use_time, time.max_sims);
+	Move best = M_RESIGN;
+	if(ret)
+		best = ret->move;
 
 	if(time.flexible)
 		time_remain += time.move - player.time_used;
@@ -148,10 +151,59 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	log("#genmove " + implode(args, " "));
 	log(string("play ") + (game.toplay() == 2 ? 'w' : 'b') + ' ' + move_str(best, false));
 
+	int toplay = player.rootboard.toplay();
 
-	fprintf(stderr, "PV:          %s\n", gtp_pv(vecstr()).response.c_str());
+	DepthStats gamelen, treelen;
+	int runs = 0;
+	DepthStats wintypes[2][4];
+	for(unsigned int i = 0; i < player.threads.size(); i++){
+		gamelen += player.threads[i]->gamelen;
+		treelen += player.threads[i]->treelen;
+		runs += player.threads[i]->runs;
+
+		for(int a = 0; a < 2; a++)
+			for(int b = 0; b < 4; b++)
+				wintypes[a][b] += player.threads[i]->wintypes[a][b];
+
+		player.threads[i]->reset();
+	}
+
+	string stats = "Finished " + to_str(runs) + " runs in " + to_str((int)(player.time_used*1000)) + " msec: " + to_str((int)(runs/player.time_used)) + " Games/s\n";
+	if(runs > 0){
+		stats += "Game length: " + gamelen.to_s() + "\n";
+		stats += "Tree depth:  " + treelen.to_s() + "\n";
+		stats += "Win Types:   ";
+		stats += "P1: f " + to_str(wintypes[0][1].num) + ", b " + to_str(wintypes[0][2].num) + ", r " + to_str(wintypes[0][3].num) + "; ";
+		stats += "P2: f " + to_str(wintypes[1][1].num) + ", b " + to_str(wintypes[1][2].num) + ", r " + to_str(wintypes[1][3].num) + "\n";
+
+		if(verbose){
+			stats += "P1 fork:     " + wintypes[0][1].to_s() + "\n";
+			stats += "P1 bridge:   " + wintypes[0][2].to_s() + "\n";
+			stats += "P1 ring:     " + wintypes[0][3].to_s() + "\n";
+			stats += "P2 fork:     " + wintypes[1][1].to_s() + "\n";
+			stats += "P2 bridge:   " + wintypes[1][2].to_s() + "\n";
+			stats += "P2 ring:     " + wintypes[1][3].to_s() + "\n";
+		}
+	}
+
+	if(ret){
+		stats += "Move Score:  " + to_str(ret->exp.avg()) + "\n";
+
+		if(ret->outcome >= 0){
+			stats += "Solved as a ";
+			if(ret->outcome == 0)           stats += "draw";
+			else if(ret->outcome == toplay) stats += "win";
+			else                            stats += "loss";
+			stats += "\n";
+		}
+	}
+
+	stats += "PV:          " + gtp_pv(vecstr()).response + "\n";
+
 	if(verbose && !player.root.children.empty())
-		fprintf(stderr, "Exp-Rave:\n%s\n", gtp_move_stats(vecstr()).response.c_str());
+		stats += "Exp-Rave:\n" + gtp_move_stats(vecstr()).response + "\n";
+
+	fprintf(stderr, "%s", stats.c_str());
 
 	game.move(best);
 	player.move(best);

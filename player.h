@@ -581,7 +581,7 @@ public:
 		fprintf(solved_logfile, "0x%s,%u,%i\n", hashbuf, node->exp.num(), node->outcome);
 	}
 
-	Move genmove(double time, int maxruns);
+	Node * genmove(double time, int maxruns);
 	vector<Move> get_pv();
 	void garbage_collect(Board & board, Node * node, unsigned int limit); //destroys the board, so pass in a copy
 
