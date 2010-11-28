@@ -39,6 +39,7 @@ public:
 
 //return -2 for loss, -1,1 for tie, 0 for unknown, 2 for win, all from toplay's perspective
 	int negamax(const Board & board, const int depth, int alpha, int beta);
+	int negamax_outcome(const Board & board, const int depth);
 };
 
 #endif
