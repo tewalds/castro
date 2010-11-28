@@ -9,6 +9,11 @@ player solver size 4:
 - player_params -g 1 -P 1 -t 12 -M 15000 -o 1
 
 
+resigns instead of making winning move...
+
+
+
+
 switch to 64 bit exp values?
 log, then prune solved nodes
 solver threads should use a TT instead of using the tree?
@@ -41,7 +46,7 @@ multiple rollouts per simulation
 - GPU rollouts for those that don't care about rings?
 
 
-fix crash after last move
+fix crash after last move, seems to be related to pondering
 
 batch update for the first couple moves to speed up backups
 
@@ -179,6 +184,7 @@ MCTS based:
 - change updates so it's not a complete weighted average
   - do minimax backup
   - weighted average ignoring solved nodes
+    - hard, since it isn't clear what to do when multiple threads are down a node
   - weighted average over the best 50% of work
 
 Hybrid:
