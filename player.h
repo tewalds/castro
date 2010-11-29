@@ -513,7 +513,7 @@ public:
 
 		uword nodesbefore = nodes;
 
-		if(keeptree){
+		if(keeptree && root.children.num() > 0){
 			Node child;
 
 			for(Node * i = root.children.begin(); i != root.children.end(); i++){
