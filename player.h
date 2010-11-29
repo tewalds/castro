@@ -14,7 +14,7 @@
 #include "mtrand.h"
 #include "weightedrandtree.h"
 #include "lbdist.h"
-#include "children.h"
+#include "compacttree.h"
 
 class Player {
 public:
@@ -56,7 +56,8 @@ public:
 		int16_t outcome;
 		Move    move;
 		Move    bestmove; //if outcome is set, then bestmove is the way to get there
-		Children<Node> children;
+		CompactTree<Node>::Children children;
+//		int padding;
 		//seems to need padding to multiples of 8 bytes or it segfaults?
 		//don't forget to update the copy constructor/operator
 
@@ -94,8 +95,9 @@ public:
 		unsigned int size() const {
 			unsigned int num = children.num();
 
-			for(Node * i = children.begin(); i != children.end(); i++)
-				num += i->size();
+			if(children.num())
+				for(Node * i = children.begin(); i != children.end(); i++)
+					num += i->size();
 
 			return num;
 		}
@@ -104,15 +106,16 @@ public:
 			assert(children.empty());
 		}
 
-		unsigned int alloc(unsigned int num){
-			return children.alloc(num);
+		unsigned int alloc(unsigned int num, CompactTree<Node> & ct){
+			return children.alloc(num, ct);
 		}
-		unsigned int dealloc(){
+		unsigned int dealloc(CompactTree<Node> & ct){
 			unsigned int num = 0;
 
-			for(Node * i = children.begin(); i != children.end(); i++)
-				num += i->dealloc();
-			num += children.dealloc();
+			if(children.num())
+				for(Node * i = children.begin(); i != children.end(); i++)
+					num += i->dealloc(ct);
+			num += children.dealloc(ct);
 
 			return num;
 		}
@@ -337,9 +340,11 @@ public:
 
 	Board rootboard;
 	Node  root;
-	uword nodes, maxnodes;
+	uword nodes;
 	int   gclimit; //the minimum experience needed to not be garbage collected
 	Barrier gcbarrier;
+
+	CompactTree<Node> ctmem;
 
 	string solved_logname;
 	FILE * solved_logfile;
@@ -361,7 +366,7 @@ public:
 		ponder      = false;
 //#ifdef SINGLE_THREAD ... make sure only 1 thread
 		numthreads  = 1;
-		maxmem      = 1000;
+		maxmem      = 1000*1024*1024;
 
 		msrave      = -2;
 		msexplore   = 0;
@@ -417,14 +422,13 @@ public:
 			fclose(solved_logfile);
 		}
 
-		root.dealloc();
-
+		root.dealloc(ctmem);
+		ctmem.compact();
 	}
 	void timedout() { done.broadcast(); }
 
 	void set_maxmem(u64 m){
 		maxmem = m;
-		maxnodes = maxmem*1024*1024/sizeof(Node);
 	}
 
 	void reset_threads(){ //better have the write lock before calling this
@@ -483,7 +487,7 @@ public:
 		}
 
 		rootboard = board;
-		nodes -= root.dealloc();
+		nodes -= root.dealloc(ctmem);
 		root = Node();
 
 		reset_threads();
@@ -520,14 +524,14 @@ public:
 				}
 			}
 
-			nodes -= root.dealloc();
+			nodes -= root.dealloc(ctmem);
 			root = child;
 			root.swap_tree(child);
 
 			if(nodesbefore > 0)
 				fprintf(stderr, "Nodes before: %u, after: %u, saved %.1f%% of the tree\n", nodesbefore, nodes, 100.0*nodes/nodesbefore);
 		}else{
-			nodes -= root.dealloc();
+			nodes -= root.dealloc(ctmem);
 			root = Node();
 			root.move = m;
 		}

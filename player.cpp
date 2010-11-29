@@ -12,7 +12,7 @@ void Player::PlayerThread::run(){
 //	player->runners.wait(); //wait for the broadcast to start
 //	player->runners.unlock();
 	while(!cancelled){
-		while(!cancelled && player->nodes < player->maxnodes && player->root.outcome == -1 && (maxruns == 0 || runs < maxruns) && player->lock.tryrdlock() == 0){ //not solved yet, has the lock, lock is last so it won't be holding the lock for gc
+		while(!cancelled && player->ctmem.memused() < player->maxmem && player->root.outcome == -1 && (maxruns == 0 || runs < maxruns) && player->lock.tryrdlock() == 0){ //not solved yet, has the lock, lock is last so it won't be holding the lock for gc
 			runs++;
 			iterate();
 			player->lock.unlock();
@@ -20,14 +20,16 @@ void Player::PlayerThread::run(){
 
 		if(player->root.outcome != -1 || !(maxruns == 0 || runs < maxruns)){ //let the main thread know in case it was solved early
 			player->done.broadcast();
-		}else if(player->nodes >= player->maxnodes){ //garbage collect
+		}else if(player->ctmem.memused() >= player->maxmem){ //garbage collect
 			if(player->gcbarrier.wait()){
 				fprintf(stderr, "Starting player GC with limit %i ... ", player->gclimit);
+				uint64_t nodesbefore = player->nodes;
 				Board copy = player->rootboard;
 				player->garbage_collect(copy, & player->root, player->gclimit);
-				fprintf(stderr, "%.1f %% of tree remains\n", 100.0*player->nodes/player->maxnodes);
+				player->ctmem.compact();
+				fprintf(stderr, "%.1f %% of tree remains\n", 100.0*player->nodes/nodesbefore);
 
-				if(player->nodes >= player->maxnodes/2)
+				if(player->ctmem.memused() >= player->maxmem/2)
 					player->gclimit *= 1.3;
 				else
 					player->gclimit *= 0.9; //slowly decay
@@ -162,9 +164,9 @@ void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
 				logsolved(board.gethash(), child);
 				board.unset(child->move);
 			}
-			nodes -= child->dealloc();
+			nodes -= child->dealloc(ctmem);
 		}else if(child->exp.num() < limit){ //low exp, ignore solvedness since it's trivial to re-solve
-			nodes -= child->dealloc();
+			nodes -= child->dealloc(ctmem);
 		}else if(node->children.num() > 0){
 			board.set(child->move);
 			garbage_collect(board, child, limit);

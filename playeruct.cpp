@@ -75,9 +75,9 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	if(!node->children.lock())
 		return false;
 
-	Children<Node> temp;
+	CompactTree<Node>::Children temp;
 
-	temp.alloc(board.movesremain());
+	temp.alloc(board.movesremain(), player->ctmem);
 
 	if(player->dists)
 		dists.run(&board);
@@ -103,7 +103,7 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 				node->outcome = child->outcome;
 				node->bestmove = *move;
 				node->children.unlock();
-				temp.dealloc();
+				temp.dealloc(player->ctmem);
 				return true;
 			}
 		}
@@ -121,20 +121,20 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	//Make a macro move, add experience to the move so the current simulation continues past this move
 	if(losses == 1){
 		Node macro = *loss;
-		temp.dealloc();
-		temp.alloc(1);
+		temp.dealloc(player->ctmem);
+		temp.alloc(1, player->ctmem);
 		macro.exp.addwins(player->visitexpand);
 		*(temp.begin()) = macro;
 	}else if(losses >= 2){ //proven loss, but at least try to block one of them
 		node->outcome = 3 - toplay;
 		node->bestmove = loss->move;
 		node->children.unlock();
-		temp.dealloc();
+		temp.dealloc(player->ctmem);
 		return true;
 	}
 
 	PLUS(player->nodes, temp.num());
-	node->children.atomic_set(temp);
+	node->children.swap(temp);
 	temp.neuter();
 
 	return true;

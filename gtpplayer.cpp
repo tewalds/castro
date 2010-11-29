@@ -317,7 +317,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -t --threads     Number of MCTS threads                            [" + to_str(player.numthreads) + "]\n" +
 #endif
 			"  -o --ponder      Continue to ponder during the opponents time      [" + to_str(player.ponder) + "]\n" +
-			"  -M --maxmem      Max memory in Mb to use for the tree              [" + to_str(player.maxmem) + "]\n" +
+			"  -M --maxmem      Max memory in Mb to use for the tree              [" + to_str(player.maxmem/(1024*1024)) + "]\n" +
 			"Final move selection:\n" +
 			"  -E --msexplore   Lower bound constant in final move selection      [" + to_str(player.msexplore) + "]\n" +
 			"  -F --msrave      Rave factor, 0 for pure exp, -1 # sims, -2 # wins [" + to_str(player.msrave) + "]\n" +
@@ -366,7 +366,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 		}else if((arg == "-o" || arg == "--ponder") && i+1 < args.size()){
 			player.set_ponder(from_str<bool>(args[++i]));
 		}else if((arg == "-M" || arg == "--maxmem") && i+1 < args.size()){
-			player.set_maxmem(from_str<int>(args[++i]));
+			player.set_maxmem(from_str<uint64_t>(args[++i])*1024*1024);
 		}else if((arg == "-E" || arg == "--msexplore") && i+1 < args.size()){
 			player.msexplore = from_str<float>(args[++i]);
 		}else if((arg == "-F" || arg == "--msrave") && i+1 < args.size()){
