@@ -256,12 +256,17 @@ public:
 				//where to move
 				while(1){
 					Chunk * c = chunks[dchunk];
-					if(doff + size <= c->capacity){
+					if(doff + size <= c->capacity){ //if space, allocate from this chunk
 						d = (Data *)(c->mem + doff);
 						doff += size;
 						break;
-					}else{
+					}else{ //otherwise finish this chunk and prepare the next
 						c->used = doff;
+
+						//zero out the remainder of the chunk
+						for(char * i = c->mem + c->used, * iend = c->mem + c->capacity ; i != iend; i++)
+							*i = 0;
+
 						dchunk++;
 						doff = 0;
 					}
@@ -291,6 +296,7 @@ public:
 		chunks[dchunk]->used = doff;
 		numchunks = dchunk + 1;
 
+		//zero out the remainder of the chunk
 		Chunk * ch = chunks[dchunk];
 		for(char * i = ch->mem + ch->used, * iend = ch->mem + ch->capacity ; i != iend; i++)
 			*i = 0;
