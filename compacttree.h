@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include "thread.h"
+#include "types.h"
 
 /* CompactTree is a Tree of Nodes. It malloc's one chunk at a time, and has a very efficient allocation strategy
  * It maintains a freelist of empty segments, but never assigns a segment to a smaller amount of memory,
@@ -65,7 +66,7 @@ public:
 		unsigned int alloc(unsigned int n, CompactTree & ct){
 			assert(data == NULL);
 			data = ct.alloc(n);
-			data->header = ((int)data >> 4) & 0xFFFF;
+			data->header = ((unsigned long)data >> 4) & 0xFFFF;
 			if(data->header == 0) data->header = 0xABCD;
 			data->num = n;
 			data->parent = &data;
@@ -80,7 +81,7 @@ public:
 			Data * t = data;
 			int n = 0;
 			if(t){
-				if(CAS(data, t, NULL)){
+				if(CAS(data, t, (Data*)NULL)){
 					n = t->num;
 					ct.dealloc(t);
 				}
