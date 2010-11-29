@@ -70,8 +70,11 @@ public:
 			if(data->header == 0) data->header = 0xABCD;
 			data->num = n;
 			data->parent = &data;
-			for(unsigned int i = 0; i < n; i++)
+			for(unsigned int i = 0; i < n; i++){
+				//actually intend to call the constructor, not the copy constructor, make sure children are empty first
+				data->children[i].children.neuter();
 				data->children[i] = Node();
+			}
 			return n;
 		}
 		void neuter(){
@@ -104,7 +107,7 @@ public:
 				other.data->parent = &(other.data);
 		}
 		unsigned int num() const {
-			return (data > (Data*)LOCK ? data->num : 0);
+			return (data > (Data *) LOCK ? data->num : 0);
 		}
 		bool empty() const {
 			return num() == 0;
