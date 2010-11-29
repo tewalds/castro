@@ -167,7 +167,7 @@ void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
 			nodes -= child->dealloc(ctmem);
 		}else if(child->exp.num() < limit){ //low exp, ignore solvedness since it's trivial to re-solve
 			nodes -= child->dealloc(ctmem);
-		}else if(node->children.num() > 0){
+		}else if(child->children.num() > 0){
 			board.set(child->move);
 			garbage_collect(board, child, limit);
 			board.unset(child->move);
