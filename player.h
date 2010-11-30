@@ -75,7 +75,7 @@ public:
 				move = n.move;
 				bestmove = n.bestmove;
 				outcome = n.outcome;
-				children = n.children;
+				//children = n.children; ignore the children, they need to be swap_tree'd in
 			}
 			return *this;
 		}
