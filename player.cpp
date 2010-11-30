@@ -31,9 +31,8 @@ void Player::PlayerThread::run(){
 
 				if(player->ctmem.memused() >= player->maxmem/2)
 					player->gclimit *= 1.3;
-				else
-					player->gclimit *= 0.9; //slowly decay
-				player->gclimit++; //make sure it doesn't get too small
+				else if(player->gclimit > 5)
+					player->gclimit *= 0.9; //slowly decay to a minimum of 5
 			}
 			player->gcbarrier.wait();
 		}else{

@@ -359,7 +359,7 @@ public:
 
 	Player() {
 		nodes = 0;
-		gclimit = 10;
+		gclimit = 5;
 		time_used = 0;
 
 		solved_logfile = NULL;
