@@ -79,8 +79,23 @@ double HavannahGTP::get_time(){
 
 GTPResponse HavannahGTP::gtp_move_stats(vecstr args){
 	string s = "";
-	Player::Node * child = player.root.children.begin(),
-	             * childend = player.root.children.end();
+
+	Player::Node * node = &(player.root);
+
+	for(unsigned int i = 0; i < args.size(); i++){
+		Move m(args[i]);
+		Player::Node * c = node->children.begin(),
+		             * cend = node->children.end();
+		for(; c != cend; c++){
+			if(c->move == m){
+				node = c;
+				break;
+			}
+		}
+	}
+
+	Player::Node * child = node->children.begin(),
+	             * childend = node->children.end();
 	for( ; child != childend; child++){
 		if(child->move == M_NONE)
 			continue;
