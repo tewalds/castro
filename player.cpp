@@ -109,7 +109,7 @@ vector<Move> Player::get_pv(){
 }
 
 Player::Node * Player::return_move(Node * node, int toplay) const {
-	double val, maxval = -10000000000.0; //10 billion
+	double val, maxval = -1000000000000.0; //1 trillion
 
 	Node * ret = NULL,
 		 * child = node->children.begin(),
@@ -117,9 +117,9 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 
 	for( ; child != end; child++){
 		if(child->outcome != -1){
-			if(child->outcome == toplay) val =  8000000000.0 - child->exp.num(); //shortest win
-			else if(child->outcome == 0) val = -4000000000.0 + child->exp.num(); //longest tie
-			else                         val = -8000000000.0 + child->exp.num(); //longest loss
+			if(child->outcome == toplay) val =  800000000000.0 - child->exp.num(); //shortest win
+			else if(child->outcome == 0) val = -400000000000.0 + child->exp.num(); //longest tie
+			else                         val = -800000000000.0 + child->exp.num(); //longest loss
 		}else{ //not proven
 			if(msrave == -1) //num simulations
 				val = child->exp.num();

@@ -19,13 +19,13 @@
 class Player {
 public:
 	class ExpPair {
-		uint32_t s, n;
-		ExpPair(uint32_t S, uint32_t N) : s(S), n(N) { }
+		uint64_t s, n;
+		ExpPair(uint64_t S, uint64_t N) : s(S), n(N) { }
 	public:
 		ExpPair() : s(0), n(0) { }
 		float avg() const { return 0.5f*s/n; }
-		uint32_t num() const { return n; }
-		uint32_t sum() const { return s/2; }
+		uint64_t num() const { return n; }
+		uint64_t sum() const { return s/2; }
 
 		void addvloss(){ INCR(n); }
 		void addvtie() { INCR(s); }
@@ -583,7 +583,7 @@ public:
 		char hashbuf[17];
 		u64buf(hashbuf, hash);
 
-		fprintf(solved_logfile, "0x%s,%u,%i\n", hashbuf, node->exp.num(), node->outcome);
+		fprintf(solved_logfile, "0x%s,%llu,%i\n", hashbuf, node->exp.num(), node->outcome);
 	}
 
 	Node * genmove(double time, int maxruns);
