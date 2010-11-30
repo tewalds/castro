@@ -118,11 +118,11 @@ public:
 			return data->children[offset];
 		}
 		Node * begin() const {
-			assert(data > (Data *) LOCK);
+//			assert(data > (Data *) LOCK);
 			return data->children;
 		}
 		Node * end() const {
-			assert(data > (Data *) LOCK);
+//			assert(data > (Data *) LOCK);
 			return data->children + data->num;
 		}
 	};
