@@ -1,11 +1,15 @@
 
 #include "string.h"
-
+#include "types.h"
+#include <cmath>
 using namespace std;
 
-std::string to_str(double a, int prec){
-	std::stringstream out;
-	out.precision(prec);
+string to_str(double a, int prec){
+	double p = pow(10, prec);
+	a = ((uint64_t)(0.5 + a*p))/p;
+
+	stringstream out;
+//	out.precision(prec);
 	out << a;
 	return out.str();
 }
