@@ -116,7 +116,7 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 	if(args.size() >= 1)
 		use_time = from_str<double>(args[0]);
 
-	fprintf(stderr, "time remain: %.1f, time: %.3f, sims: %i\n", time_remain, use_time, time.max_sims);
+	logerr("time remain: " + to_str(time_remain, 1) + ", time: " + to_str(use_time, 3) + ", sims: " + to_str(time.max_sims) + "\n");
 
 	player.rootboard.setswap(allow_swap);
 
@@ -150,7 +150,7 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 		player.threads[i]->reset();
 	}
 
-	string stats = "Finished " + to_str(runs) + " runs in " + to_str((int)(player.time_used*1000)) + " msec: " + to_str((int)(runs/player.time_used)) + " Games/s\n";
+	string stats = "Finished " + to_str(runs) + " runs in " + to_str(player.time_used*1000, 0) + " msec: " + to_str(runs/player.time_used, 0) + " Games/s\n";
 	if(runs > 0){
 		stats += "Game length: " + gamelen.to_s() + "\n";
 		stats += "Tree depth:  " + treelen.to_s() + "\n";
@@ -185,7 +185,7 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 	if(verbose && !player.root.children.empty())
 		stats += "Exp-Rave:\n" + gtp_move_stats(vecstr()).response + "\n";
 
-	fprintf(stderr, "%s", stats.c_str());
+	logerr(stats);
 
 	Solver s;
 	if(ret){
@@ -240,7 +240,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(args.size() >= 2)
 		use_time = from_str<double>(args[1]);
 
-	fprintf(stderr, "time remain: %.1f, time: %.3f, sims: %i\n", time_remain, use_time, time.max_sims);
+	logerr("time remain: " + to_str(time_remain, 1) + ", time: " + to_str(use_time, 3) + ", sims: " + to_str(time.max_sims) + "\n");
 
 	player.rootboard.setswap(allow_swap);
 
@@ -277,7 +277,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 		player.threads[i]->reset();
 	}
 
-	string stats = "Finished " + to_str(runs) + " runs in " + to_str((int)(player.time_used*1000)) + " msec: " + to_str((int)(runs/player.time_used)) + " Games/s\n";
+	string stats = "Finished " + to_str(runs) + " runs in " + to_str(player.time_used*1000, 0) + " msec: " + to_str(runs/player.time_used, 0) + " Games/s\n";
 	if(runs > 0){
 		stats += "Game length: " + gamelen.to_s() + "\n";
 		stats += "Tree depth:  " + treelen.to_s() + "\n";
@@ -312,7 +312,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(verbose && !player.root.children.empty())
 		stats += "Exp-Rave:\n" + gtp_move_stats(vecstr()).response + "\n";
 
-	fprintf(stderr, "%s", stats.c_str());
+	logerr(stats);
 
 	game.move(best);
 	player.move(best);

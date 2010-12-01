@@ -178,7 +178,7 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 		return false;
 
 	if(backup->outcome != toplay){
-		uint32_t sims = 0, maxsims = 0, outcome = 0, bestoutcome = 0;
+		uint64_t sims = 0, maxsims = 0, outcome = 0, bestoutcome = 0;
 		backup = NULL;
 
 		Node * child = node->children.begin(),

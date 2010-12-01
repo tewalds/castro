@@ -4,6 +4,7 @@
 
 #include "time.h"
 #include "timer.h"
+#include "log.h"
 
 void SolverPNS::solve(double time){
 	if(rootboard.won() >= 0){
@@ -15,7 +16,7 @@ void SolverPNS::solve(double time){
 	Timer timer(time, bind(&SolverPNS::timedout, this));
 	Time start;
 
-	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, memlimit);
+	logerr("max nodes: " + to_str(maxnodes) + ", max memory: " + to_str(memlimit) + " Mb\n");
 
 	run_pns();
 
@@ -43,7 +44,7 @@ void SolverPNS::solve(double time){
 		outcome = -3;
 	}
 
-	fprintf(stderr, "Finished in %.0f msec\n", (Time() - start)*1000);
+	logerr("Finished in " + to_str((Time() - start)*1000, 0) + " msec\n");
 }
 
 void SolverPNS::run_pns(){
@@ -51,7 +52,10 @@ void SolverPNS::run_pns(){
 		if(!pns(rootboard, &root, 0, INF32/2, INF32/2)){
 			int64_t before = nodes;
 			garbage_collect(&root);
-			fprintf(stderr, "Garbage collection cleaned up %lli nodes, %lli of %lli Mb still in use\n", before - nodes, nodes*sizeof(PNSNode)/1024/1024, maxnodes*sizeof(PNSNode)/1024/1024);
+
+			logerr("Garbage collection cleaned up " + to_str(before - nodes) + " nodes, " +
+				to_str(nodes*sizeof(PNSNode)/1024/1024) +  " of " + to_str(maxnodes*sizeof(PNSNode)/1024/1024) + " Mb still in use\n");
+
 			if(maxnodes - nodes < maxnodes/100)
 				break;
 		}

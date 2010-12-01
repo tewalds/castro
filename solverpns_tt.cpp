@@ -3,6 +3,7 @@
 #include "solverab.h"
 #include "time.h"
 #include "timer.h"
+#include "log.h"
 
 void SolverPNSTT::solve(double time){
 	if(rootboard.won() >= 0){
@@ -14,7 +15,7 @@ void SolverPNSTT::solve(double time){
 	Timer timer(time, bind(&SolverPNSTT::timedout, this));
 	Time start;
 
-	fprintf(stderr, "max nodes: %lli, max memory: %lli Mb\n", maxnodes, memlimit);
+	logerr("max nodes: " + to_str(maxnodes) + ", max memory: " + to_str(memlimit) + " Mb\n");
 
 	run_pns();
 
@@ -46,7 +47,7 @@ void SolverPNSTT::solve(double time){
 		outcome = -3;
 	}
 
-	fprintf(stderr, "Finished in %.0f msec\n", (Time() - start)*1000);
+	logerr("Finished in " + to_str((Time() - start)*1000, 0) + " msec\n");
 }
 
 void SolverPNSTT::run_pns(){
@@ -100,11 +101,11 @@ void SolverPNSTT::pns(const Board & board, PNSNode * node, int depth, uint32_t t
 
 			//just found a loss, try to copy proof to siblings
 			if(copyproof && child->delta == LOSS){
-//				fprintf(stderr, "!%s ", move1.to_s().c_str());
+//				logerr("!" + move1.to_s() + " ");
 				int count = abs(copyproof);
 				for(Board::MoveIterator move = board.moveit(true); count-- && !move.done(); ++move){
 					if(!tt(board, *move)->terminal()){
-//						fprintf(stderr, "?%s ", move->to_s().c_str());
+//						logerr("?" + move->to_s() + " ");
 						Board sibling = board;
 						sibling.move(*move);
 						copy_proof(next, sibling, move1, *move);

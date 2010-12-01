@@ -2,6 +2,7 @@
 #include "solverab.h"
 #include "time.h"
 #include "timer.h"
+#include "log.h"
 
 void SolverAB::solve(double time){
 	reset();
@@ -12,12 +13,12 @@ void SolverAB::solve(double time){
 	rootboard.setswap(false);
 
 	Timer timer(time, bind(&SolverAB::timedout, this));
-	int starttime = time_msec();
+	Time start;
 
 	int turn = rootboard.toplay();
 
 	for(maxdepth = 2; !timeout; maxdepth++){
-		fprintf(stderr, "Starting depth %d\n", maxdepth);
+		logerr("Starting depth " + to_str(maxdepth) + "\n");
 
 		//the first depth of negamax
 		int ret, alpha = -2, beta = 2;
@@ -47,11 +48,10 @@ void SolverAB::solve(double time){
 			else if(ret ==  2){ outcome = turn; }
 			else /*-1 || 1*/  { outcome = 0; }
 
-			fprintf(stderr, "Finished in %d msec\n", time_msec() - starttime);
-			return;
+			break;
 		}
 	}
-	fprintf(stderr, "Timed out after %d msec\n", time_msec() - starttime);
+	logerr("Finished in " + to_str((Time() - start)*1000, 0) + " msec\n");
 }
 
 

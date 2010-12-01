@@ -15,6 +15,7 @@
 #include "weightedrandtree.h"
 #include "lbdist.h"
 #include "compacttree.h"
+#include "log.h"
 
 class Player {
 public:
@@ -530,7 +531,7 @@ public:
 			root.swap_tree(child);
 
 			if(nodesbefore > 0)
-				fprintf(stderr, "Nodes before: %u, after: %u, saved %.1f%% of the tree\n", nodesbefore, nodes, 100.0*nodes/nodesbefore);
+				logerr("Nodes before: " + to_str(nodesbefore) + ", after: " + to_str(nodes) + ", saved " +  to_str(100.0*nodes/nodesbefore, 1) + "% of the tree\n");
 		}else{
 			nodes -= root.dealloc(ctmem);
 			root = Node();
@@ -582,8 +583,8 @@ public:
 	void logsolved(hash_t hash, const Node * node){
 		char hashbuf[17];
 		u64buf(hashbuf, hash);
-
-		fprintf(solved_logfile, "0x%s,%llu,%i\n", hashbuf, node->exp.num(), node->outcome);
+		string s = string("0x") + hashbuf + "," + to_str(node->exp.num()) + "," + to_str(node->outcome) + "\n";
+		fprintf(solved_logfile, "%s", s.c_str());
 	}
 
 	Node * genmove(double time, int maxruns);

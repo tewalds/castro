@@ -22,12 +22,12 @@ void Player::PlayerThread::run(){
 			player->done.broadcast();
 		}else if(player->ctmem.memused() >= player->maxmem){ //garbage collect
 			if(player->gcbarrier.wait()){
-				fprintf(stderr, "Starting player GC with limit %i ... ", player->gclimit);
+				logerr("Starting player GC with limit " + to_str(player->gclimit) + " ... ");
 				uint64_t nodesbefore = player->nodes;
 				Board copy = player->rootboard;
 				player->garbage_collect(copy, & player->root, player->gclimit);
 				player->ctmem.compact();
-				fprintf(stderr, "%.1f %% of tree remains\n", 100.0*player->nodes/nodesbefore);
+				logerr(to_str(100.0*player->nodes/nodesbefore, 1) + " % of tree remains\n");
 
 				if(player->ctmem.memused() >= player->maxmem/2)
 					player->gclimit *= 1.3;
@@ -65,7 +65,7 @@ Player::Node * Player::genmove(double time, int maxruns){
 		threads[i]->maxruns = maxruns;
 	}
 	if(runs)
-		fprintf(stderr, "Pondered %i runs\n", runs);
+		logerr("Pondered " + to_str(runs) + " runs\n");
 
 	//let them run!
 	if(!running){

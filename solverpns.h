@@ -7,6 +7,7 @@
 #include "solver.h"
 #include "children.h"
 #include "lbdist.h"
+#include "log.h"
 
 
 class SolverPNS : public Solver {
@@ -150,7 +151,7 @@ public:
 		root.swap_tree(child);
 
 		if(nodesbefore > 0)
-			fprintf(stderr, "PNS Nodes before: %llu, after: %llu, saved %.1f%% of the tree\n", nodesbefore, nodes, 100.0*nodes/nodesbefore);
+			logerr(string("PNS Nodes before: ") + to_str(nodesbefore) + ", after: " + to_str(nodes) + ", saved " + to_str(100.0*nodes/nodesbefore, 1) + "% of the tree\n");
 
 		assert(nodes == root.size());
 		
