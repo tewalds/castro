@@ -26,6 +26,7 @@ void Player::PlayerThread::run(){
 				uint64_t nodesbefore = player->nodes;
 				Board copy = player->rootboard;
 				player->garbage_collect(copy, & player->root, player->gclimit);
+				player->flushlog();
 				player->ctmem.compact();
 				logerr(to_str(100.0*player->nodes/nodesbefore, 1) + " % of tree remains\n");
 

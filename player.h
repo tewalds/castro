@@ -571,6 +571,11 @@ public:
 		return solved_logfile;
 	}
 
+	void flushlog(){
+		if(solved_logfile)
+			fflush(solved_logfile);
+	}
+
 	void u64buf(char * buf, uint64_t val){
 		static const char hexlookup[] = "0123456789abcdef";
 		for(int i = 15; i >= 0; i--){
