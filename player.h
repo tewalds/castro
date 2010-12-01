@@ -20,13 +20,13 @@
 class Player {
 public:
 	class ExpPair {
-		uint64_t s, n;
-		ExpPair(uint64_t S, uint64_t N) : s(S), n(N) { }
+		uword s, n;
+		ExpPair(uword S, uword N) : s(S), n(N) { }
 	public:
 		ExpPair() : s(0), n(0) { }
 		float avg() const { return 0.5f*s/n; }
-		uint64_t num() const { return n; }
-		uint64_t sum() const { return s/2; }
+		uword num() const { return n; }
+		uword sum() const { return s/2; }
 
 		void addvloss(){ INCR(n); }
 		void addvtie() { INCR(s); }
