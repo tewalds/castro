@@ -30,9 +30,9 @@ void Player::PlayerThread::run(){
 				logerr(to_str(100.0*player->nodes/nodesbefore, 1) + " % of tree remains\n");
 
 				if(player->ctmem.memused() >= player->maxmem/2)
-					player->gclimit *= 1.3;
+					player->gclimit = (int)(player->gclimit*1.3);
 				else if(player->gclimit > 5)
-					player->gclimit *= 0.9; //slowly decay to a minimum of 5
+					player->gclimit = (int)(player->gclimit*0.9); //slowly decay to a minimum of 5
 			}
 			player->gcbarrier.wait();
 		}else{

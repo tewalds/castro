@@ -5,7 +5,7 @@
 using namespace std;
 
 string to_str(double a, int prec){
-	double p = pow(10, prec);
+	double p = pow(10.0, prec);
 	a = ((uint64_t)(0.5 + a*p))/p;
 
 	stringstream out;

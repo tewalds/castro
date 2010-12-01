@@ -377,9 +377,9 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 		doinstwin *= - board.get_size();
 
 	bool checkrings = (unitrand() < player->checkrings);
-	int  checkdepth = player->checkringdepth;
+	int  checkdepth = (int)player->checkringdepth;
 	if(player->checkringdepth < 0)
-		checkdepth = board.movesremain() * player->checkringdepth * -1;
+		checkdepth = (int)(board.movesremain() * player->checkringdepth * -1);
 
 	while((won = board.won()) < 0){
 		//do a complex choice
