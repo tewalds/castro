@@ -16,7 +16,7 @@ void SolverPNS::solve(double time){
 	Timer timer(time, bind(&SolverPNS::timedout, this));
 	Time start;
 
-	logerr("max nodes: " + to_str(maxnodes) + ", max memory: " + to_str(memlimit) + " Mb\n");
+	logerr("max nodes: " + to_str(memlimit/sizeof(PNSNode)) + ", max memory: " + to_str(memlimit/(1024*1024)) + " Mb\n");
 
 	run_pns();
 
@@ -52,11 +52,12 @@ void SolverPNS::run_pns(){
 		if(!pns(rootboard, &root, 0, INF32/2, INF32/2)){
 			int64_t before = nodes;
 			garbage_collect(&root);
+			ctmem.compact();
 
 			logerr("Garbage collection cleaned up " + to_str(before - nodes) + " nodes, " +
-				to_str(nodes*sizeof(PNSNode)/1024/1024) +  " of " + to_str(maxnodes*sizeof(PNSNode)/1024/1024) + " Mb still in use\n");
+				to_str(ctmem.memused()) +  " of " + to_str(memlimit) + " Mb still in use\n");
 
-			if(maxnodes - nodes < maxnodes/100)
+			if(ctmem.memused() < memlimit*0.99)
 				break;
 		}
 	}
@@ -67,11 +68,11 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 		maxdepth = depth;
 
 	if(node->children.empty()){
-		if(nodes >= maxnodes)
+		if(ctmem.memused() >= memlimit)
 			return false;
 
 		int numnodes = board.movesremain();
-		nodes += node->alloc(numnodes);
+		nodes += node->alloc(numnodes, ctmem);
 		nodes_seen += numnodes;
 
 		if(lbdist)
@@ -139,7 +140,7 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 		mem = pns(next, child, depth + 1, tpc, tdc);
 
 		if(child->phi == 0 || child->delta == 0)
-			nodes -= child->dealloc();
+			nodes -= child->dealloc(ctmem);
 
 		if(updatePDnum(node) && !df)
 			break;
@@ -196,7 +197,7 @@ bool SolverPNS::garbage_collect(PNSNode * node){
 		collect &= garbage_collect(i);
 
 	if(collect)
-		nodes -= node->dealloc();
+		nodes -= node->dealloc(ctmem);
 
 	return false;
 }

@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #include "solver.h"
-#include "children.h"
+#include "compacttree.h"
 #include "lbdist.h"
 #include "log.h"
 
@@ -19,7 +19,7 @@ public:
 	struct PNSNode {
 		uint32_t phi, delta;
 		Move move;
-		Children<PNSNode> children;
+		CompactTree<PNSNode>::Children children;
 
 		PNSNode() { }
 		PNSNode(int x, int y,   int v = 1)     : phi(v), delta(v), move(Move(x,y)) { }
@@ -36,6 +36,7 @@ public:
 				phi = n.phi;
 				delta = n.delta;
 				move = n.move;
+				//don't copy the children
 			}
 			return *this;
 		}
@@ -70,15 +71,15 @@ public:
 			children.swap(n.children);
 		}
 
-		unsigned int alloc(unsigned int num){
-			return children.alloc(num);
+		unsigned int alloc(unsigned int num, CompactTree<PNSNode> & ct){
+			return children.alloc(num, ct);
 		}
-		unsigned int dealloc(){
+		unsigned int dealloc(CompactTree<PNSNode> & ct){
 			unsigned int num = 0;
 
 			for(PNSNode * i = children.begin(); i != children.end(); i++)
-				num += i->dealloc();
-			num += children.dealloc();
+				num += i->dealloc(ct);
+			num += children.dealloc(ct);
 
 			return num;
 		}
@@ -86,7 +87,8 @@ public:
 
 
 //memory management for PNS which uses a tree to store the nodes
-	uint64_t nodes, maxnodes, memlimit;
+	uint64_t nodes, memlimit;
+	CompactTree<PNSNode> ctmem;
 
 	int   ab; // how deep of an alpha-beta search to run at each leaf node
 	bool  df; // go depth first?
@@ -106,11 +108,12 @@ public:
 
 		reset();
 
-		set_memlimit(100);
+		set_memlimit(100*1024*1024);
 	}
 
 	~SolverPNS(){
-		root.dealloc();
+		root.dealloc(ctmem);
+		ctmem.compact();
 	}
 
 	void reset(){
@@ -146,7 +149,7 @@ public:
 			}
 		}
 
-		nodes -= root.dealloc();
+		nodes -= root.dealloc(ctmem);
 		root = child;
 		root.swap_tree(child);
 
@@ -161,12 +164,12 @@ public:
 
 	void set_memlimit(uint64_t lim){
 		memlimit = lim;
-		maxnodes = memlimit*1024*1024/sizeof(PNSNode);
 	}
 
 	void clear_mem(){
 		reset();
-		root.dealloc();
+		root.dealloc(ctmem);
+		ctmem.compact();
 		root = PNSNode(0, 0, 1);
 		nodes = 0;
 	}

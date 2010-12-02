@@ -63,7 +63,7 @@ GTPResponse HavannahGTP::gtp_solve_pns_params(vecstr args){
 	if(args.size() == 0)
 		return GTPResponse(true, string("\n") +
 			"Update the pns solver settings, eg: pns_params -m 100 -s 0 -d 1 -e 0.25 -a 2 -l 0\n"
-			"  -m --memory   Memory limit in Mb                                       [" + to_str(solverpns.memlimit) + "]\n"
+			"  -m --memory   Memory limit in Mb                                       [" + to_str(solverpns.memlimit/(1024*1024)) + "]\n"
 			"  -s --ties     Which side to assign ties to, 0 = handle, 1 = p1, 2 = p2 [" + to_str(solverpns.ties) + "]\n"
 //			"  -t --threads  How many threads to run
 //			"  -o --ponder   Ponder in the background
@@ -79,7 +79,7 @@ GTPResponse HavannahGTP::gtp_solve_pns_params(vecstr args){
 		if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
 			int mem = from_str<int>(args[++i]);
 			if(mem < 1) return GTPResponse(false, "Memory can't be less than 1mb");
-			solverpns.set_memlimit(mem);
+			solverpns.set_memlimit(mem*(1024*1024));
 		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
 			solverpns.ties = from_str<int>(args[++i]);
 			solverpns.clear_mem();
