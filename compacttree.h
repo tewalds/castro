@@ -4,9 +4,9 @@
 #ifndef _COMPACTTREE_H_
 #define _COMPACTTREE_H_
 
-#include <cstring>
+#include <cstring> //for memmove
+#include <stdint.h>
 #include "thread.h"
-#include "types.h"
 
 /* CompactTree is a Tree of Nodes. It malloc's one chunk at a time, and has a very efficient allocation strategy
  * It maintains a freelist of empty segments, but never assigns a segment to a smaller amount of memory,
@@ -119,11 +119,15 @@ public:
 		}
 		Node * begin() const {
 //			assert(data > (Data *) LOCK);
-			return data->children;
+			if(data > (Data *) LOCK)
+				return data->children;
+			return NULL;
 		}
 		Node * end() const {
 //			assert(data > (Data *) LOCK);
-			return data->children + data->num;
+			if(data > (Data *) LOCK)
+				return data->children + data->num;
+			return NULL;
 		}
 	};
 
