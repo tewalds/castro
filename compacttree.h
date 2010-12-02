@@ -141,13 +141,13 @@ private:
 			assert_empty();
 			capacity = c;
 			used = 0;
-			mem = (char *)malloc(capacity);
+			mem = new char[capacity];
 		}
 		void dealloc(){
 			assert(capacity > 0 && mem != NULL);
 			capacity = 0;
 			used = 0;
-			free(mem);
+			delete[] mem;
 			mem = NULL;
 		}
 		void assert_empty(){ assert(capacity == 0 && used == 0 && mem == NULL); }
