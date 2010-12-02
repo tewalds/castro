@@ -4,6 +4,7 @@
 #ifndef _COMPACTTREE_H_
 #define _COMPACTTREE_H_
 
+#include <new>
 #include <cstring> //for memmove
 #include <stdint.h>
 #include "thread.h"
@@ -70,11 +71,8 @@ public:
 			if(data->header == 0) data->header = 0xABCD;
 			data->num = n;
 			data->parent = &data;
-			for(unsigned int i = 0; i < n; i++){
-				//actually intend to call the constructor, not the copy constructor, make sure children are empty first
-				data->children[i].children.neuter();
-				data->children[i] = Node();
-			}
+			for(Node * i = begin(), * e = end(); i != e; ++i)
+				new(i) Node(); //call the constructors
 			return n;
 		}
 		void neuter(){
@@ -85,6 +83,10 @@ public:
 			int n = 0;
 			if(t){
 				if(CAS(data, t, (Data*)NULL)){
+					//call the destructors
+					for(Node * i = t->children, * e = t->children + t->num; i != e; ++i)
+						i->~Node();
+
 					n = t->num;
 					ct.dealloc(t);
 				}
