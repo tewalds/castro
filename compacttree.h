@@ -22,13 +22,40 @@ template <class Node> class CompactTree {
 	static const unsigned int MAX_NUM = 300; //maximum amount of Node's to allocate at once
 
 	struct Data {
-		uint16_t    header; //sanity check value, 0 means it's unused
-		uint16_t    num;    //number of children to follow
+		uint32_t    header; //sanity check value, 0 means it's unused
+		uint32_t    num;    //number of children to follow
+		//use 32bit values instead of 16bit values to ensure sizeof(Data) is a multiple of word size on 64bit machines
+		//if more fields are needed later, the values above can be reduced such that their sum is a multiple of 8 bytes
+		//could also switch to half-word sized values so their size sum to 32bit on 32bit machines and 64bit on 64bit machines
 		union {
 			Data ** parent;  //pointer to the Data* in the parent Node that references this Data instance
 			Data *  nextfree; //next free Data block of this size when in the free list
 		};
 		Node        children[0]; //array of Nodes, runs past the end of the data block
+
+		Data(unsigned int n, Data ** p) : num(n), parent(p) {
+			assert(header == 0);
+
+			header = ((unsigned long)this >> 2) & 0xFFFFFF;
+			if(header == 0) header = 0xABCDF3;
+
+			for(Node * i = begin(), * e = end(); i != e; ++i)
+				new(i) Node(); //call the constructors
+		}
+
+		~Data(){
+			for(Node * i = begin(), * e = end(); i != e; ++i)
+				i->~Node();
+			header = 0;
+		}
+
+		Node * begin(){
+			return children;
+		}
+
+		Node * end(){
+			return children + num;
+		}
 
 		void move(Data * s){
 			assert(header > 0);
@@ -52,7 +79,7 @@ template <class Node> class CompactTree {
 
 public:
 	class Children {
-		static const int LOCK = 1; //needs to be cast to (Data *) at usage point
+		static const int LOCK = 1; //must be cast to (Data *) at usage point
 		Data * data;
 		friend class Data;
 
@@ -66,13 +93,7 @@ public:
 
 		unsigned int alloc(unsigned int n, CompactTree & ct){
 			assert(data == NULL);
-			data = ct.alloc(n);
-			data->header = ((unsigned long)data >> 4) & 0xFFFF;
-			if(data->header == 0) data->header = 0xABCD;
-			data->num = n;
-			data->parent = &data;
-			for(Node * i = begin(), * e = end(); i != e; ++i)
-				new(i) Node(); //call the constructors
+			data = ct.alloc(n, &data);
 			return n;
 		}
 		void neuter(){
@@ -81,17 +102,10 @@ public:
 		unsigned int dealloc(CompactTree & ct){
 			Data * t = data;
 			int n = 0;
-			if(t){
-				if(CAS(data, t, (Data*)NULL)){
-					//call the destructors
-					for(Node * i = t->children, * e = t->children + t->num; i != e; ++i)
-						i->~Node();
-
-					n = t->num;
-					ct.dealloc(t);
-				}
+			if(t && CAS(data, t, (Data*)NULL)){
+				n = t->num;
+				ct.dealloc(t);
 			}
-			data = NULL;
 			return n;
 		}
 		void swap(Children & other){
@@ -120,15 +134,13 @@ public:
 			return data->children[offset];
 		}
 		Node * begin() const {
-//			assert(data > (Data *) LOCK);
 			if(data > (Data *) LOCK)
-				return data->children;
+				return data->begin();
 			return NULL;
 		}
 		Node * end() const {
-//			assert(data > (Data *) LOCK);
 			if(data > (Data *) LOCK)
-				return data->children + data->num;
+				return data->end();
 			return NULL;
 		}
 	};
@@ -190,7 +202,7 @@ public:
 		return ((uint64_t)(numchunks - 1))*((uint64_t)CHUNK_SIZE) + chunks[numchunks - 1]->used;
 	}
 
-	Data * alloc(unsigned int num){
+	Data * alloc(unsigned int num, Data ** parent){
 		assert(num > 0 && num < MAX_NUM);
 
 //		fprintf(stderr, "+%u ", num);
@@ -198,7 +210,7 @@ public:
 	//check freelist
 		while(Data * t = freelist[num]){
 			if(CAS(freelist[num], t, t->nextfree))
-				return t;
+				return new(t) Data(num, parent);
 		}
 
 	//allocate new memory
@@ -208,7 +220,7 @@ public:
 			uint32_t used = c->used;
 			if(used + size <= c->capacity){
 				if(CAS(c->used, used, used+size))
-					return (Data *)(c->mem + used);
+					return new((Data *)(c->mem + used)) Data(num, parent);
 				else
 					continue;
 			}else{
@@ -225,13 +237,14 @@ public:
 		return NULL;
 	}
 	void dealloc(Data * d){
-
 //		fprintf(stderr, "-%u ", d->num);
-
-		//add to the freelist
 		assert(d->num > 0 && d->num < MAX_NUM);
 		assert(d->header > 0);
-		d->header = 0;
+
+		//call the destructor
+		d->~Data();
+
+		//add to the freelist
 		while(1){
 			Data * t = freelist[d->num];
 			d->nextfree = t;
