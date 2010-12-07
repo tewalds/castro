@@ -147,8 +147,8 @@ public:
 
 private:
 	struct Chunk {
-		uint32_t capacity;
-		uint32_t used;
+		uint32_t capacity; //in bytes
+		uint32_t used;     //in bytes
 		char *   mem;
 
 		Chunk()               : capacity(0), used(0), mem(NULL) { }
@@ -159,13 +159,13 @@ private:
 			assert_empty();
 			capacity = c;
 			used = 0;
-			mem = new char[capacity];
+			mem = (char*) new uint64_t[capacity / sizeof(uint64_t)]; //use uint64_t instead of char to guarantee alignment
 		}
 		void dealloc(){
 			assert(capacity > 0 && mem != NULL);
 			capacity = 0;
 			used = 0;
-			delete[] mem;
+			delete[] (uint64_t *)mem;
 			mem = NULL;
 		}
 		void assert_empty(){ assert(capacity == 0 && used == 0 && mem == NULL); }
