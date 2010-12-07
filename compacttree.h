@@ -57,21 +57,26 @@ template <class Node> class CompactTree {
 			return children + num;
 		}
 
+		//make sure the parent points back to the same place
+		bool parent_consistent(){
+			return (header == (*parent)->header);
+		}
+
 		void move(Data * s){
 			assert(header > 0);
-			assert(*parent == s);
+			assert(*parent == s); //my parent points to my old location
 
-			//update my parent
+			//update my parent with my new location
 			*parent = this;
 
 			//make sure the parent points back to the same place
-			assert(header == (*parent)->header);
+			assert(parent_consistent());
 
 			//update my children
-			for(unsigned int i = 0; i < num; i++){
-				if(children[i].children.data){
-					children[i].children.data->parent = &(children[i].children.data);
-					assert(children[i].children.data->header == (*(children[i].children.data->parent))->header);
+			for(Node * i = begin(), * e = end(); i != e; ++i){
+				if(i->children.data){
+					i->children.data->parent = &(i->children.data);
+					assert(i->children.data->parent_consistent());
 				}
 			}
 		}
