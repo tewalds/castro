@@ -34,8 +34,6 @@ template <class Node> class CompactTree {
 		Node        children[0]; //array of Nodes, runs past the end of the data block
 
 		Data(unsigned int n, Data ** p) : num(n), parent(p) {
-			assert(header == 0);
-
 			header = ((unsigned long)this >> 2) & 0xFFFFFF;
 			if(header == 0) header = 0xABCDF3;
 
