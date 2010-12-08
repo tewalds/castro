@@ -55,9 +55,9 @@ void SolverPNS::run_pns(){
 			ctmem.compact();
 
 			logerr("Garbage collection cleaned up " + to_str(before - nodes) + " nodes, " +
-				to_str(ctmem.memused()) +  " of " + to_str(memlimit) + " Mb still in use\n");
+				to_str(ctmem.memused()/(1024*1024)) +  " of " + to_str(memlimit/(1024*1024)) + " Mb still in use\n");
 
-			if(ctmem.memused() < memlimit*0.99)
+			if(ctmem.memused() > memlimit*0.99)
 				break;
 		}
 	}
