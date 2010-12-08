@@ -135,7 +135,7 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 
 	PLUS(player->nodes, temp.num());
 	node->children.swap(temp);
-	temp.neuter();
+	assert(temp.unlock());
 
 	return true;
 }
