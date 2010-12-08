@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include "thread.h"
 
-/* CompactTree is a Tree of Nodes. It malloc's one chunk at a time, and has a very efficient allocation strategy
+/* CompactTree is a Tree of Nodes. It malloc's one chunk at a time, and has a very efficient allocation strategy.
  * It maintains a freelist of empty segments, but never assigns a segment to a smaller amount of memory,
  * completely avoiding fragmentation, but potentially being having empty space in sizes that are no longer popular
  * Since it maintains forward and backward pointers within the tree structure, it can move nodes around,
@@ -19,7 +19,7 @@
 template <class Node> class CompactTree {
 	static const unsigned int CHUNK_SIZE = 16*1024*1024;
 	static const unsigned int MAX_CHUNKS = 10240;
-	static const unsigned int MAX_NUM = 300; //maximum amount of Node's to allocate at once
+	static const unsigned int MAX_NUM = 300; //maximum amount of Node's to allocate at once, needed for size of freelist
 
 	struct Data {
 		uint32_t    header; //sanity check value, 0 means it's unused
