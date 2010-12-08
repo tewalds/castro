@@ -269,7 +269,7 @@ public:
 	}
 
 	//assume this is the only thread running
-	void compact(){
+	void compact(float arenasize = 0){
 //		fprintf(stderr, "Compact\n");
 		Chunk      * dchunk = head; //destination chunk
 		unsigned int doff = 0;      //destination offset
@@ -277,7 +277,7 @@ public:
 		unsigned int soff = 0;      //source offset
 
 		//iterate over each chunk
-		while(schunk != NULL && (schunk->next != NULL || schunk->used > soff)){
+		while(schunk != NULL && schunk->used > soff){
 			assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff));
 
 			//iterate over each Data block
@@ -318,7 +318,7 @@ public:
 
 			//update source
 			soff += size;
-			if(soff >= schunk->used){
+			while(schunk && schunk->used <= soff){ //move forward, skip empty chunks
 				schunk = schunk->next;
 				soff = 0;
 			}
@@ -326,11 +326,17 @@ public:
 //			fprintf(stderr, "\n");
 		}
 		//free unused chunks
-		if(dchunk->next != NULL){
-			dchunk->next->dealloc(true);
-			delete dchunk->next;
-			dchunk->next = NULL;
-			numchunks = dchunk->id + 1;
+		Chunk * del = dchunk;
+		while(del->next && del->id < arenasize*current->id){
+			del = del->next;
+			del->used = 0;
+		}
+
+		if(del->next != NULL){
+			del->next->dealloc(true);
+			delete del->next;
+			del->next = NULL;
+			numchunks = del->id + 1;
 		}
 
 		//save used last position
