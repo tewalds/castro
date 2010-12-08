@@ -18,7 +18,6 @@
  */
 template <class Node> class CompactTree {
 	static const unsigned int CHUNK_SIZE = 16*1024*1024;
-	static const unsigned int MAX_CHUNKS = 10240;
 	static const unsigned int MAX_NUM = 300; //maximum amount of Node's to allocate at once, needed for size of freelist
 
 	struct Data {
@@ -150,12 +149,14 @@ public:
 
 private:
 	struct Chunk {
+		Chunk *  next; //linked list of chunks
+		uint32_t id;   //number of chunks before this one
 		uint32_t capacity; //in bytes
 		uint32_t used;     //in bytes
-		char *   mem;
+		char *   mem;  //actual memory
 
-		Chunk()               : capacity(0), used(0), mem(NULL) { }
-		Chunk(unsigned int c) : capacity(0), used(0), mem(NULL) { alloc(c); }
+		Chunk()               : next(NULL), id(0), capacity(0), used(0), mem(NULL) { }
+		Chunk(unsigned int c) : next(NULL), id(0), capacity(0), used(0), mem(NULL) { alloc(c); }
 		~Chunk() { assert_empty(); }
 
 		void alloc(unsigned int c){
@@ -164,45 +165,45 @@ private:
 			used = 0;
 			mem = (char*) new uint64_t[capacity / sizeof(uint64_t)]; //use uint64_t instead of char to guarantee alignment
 		}
-		void dealloc(){
+		void dealloc(bool deallocnext = false){
 			assert(capacity > 0 && mem != NULL);
+			if(deallocnext && next != NULL){
+				next->dealloc(deallocnext);
+				delete next;
+				next = NULL;
+			}
+			assert(next == NULL);
 			capacity = 0;
 			used = 0;
 			delete[] (uint64_t *)mem;
 			mem = NULL;
 		}
-		void assert_empty(){ assert(capacity == 0 && used == 0 && mem == NULL); }
+		void assert_empty(){ assert(capacity == 0 && used == 0 && mem == NULL && next == NULL); }
 	};
 
-	Chunk * chunks[MAX_CHUNKS];
+	Chunk * head, * current;
 	unsigned int numchunks;
-	Mutex lock; //lock around malloc calls to add new chunks
 	Data * freelist[MAX_NUM];
 
 public:
 
-	CompactTree() : numchunks(0) {
-		for(unsigned int i = 0; i < MAX_CHUNKS; i++)
-			chunks[i] = NULL;
+	CompactTree() {
 		for(unsigned int i = 0; i < MAX_NUM; i++)
 			freelist[i] = NULL;
 
 		//allocate the first chunk
-		chunks[numchunks++] = new Chunk(CHUNK_SIZE);
+		head = current = new Chunk(CHUNK_SIZE);
+		numchunks = 1;
 	}
 	~CompactTree(){
-		for(unsigned int i = 0; i < numchunks; i++){
-			chunks[i]->dealloc();
-			delete chunks[i];
-		}
+		head->dealloc(true);
+		delete head;
+		head = current = NULL;
 		numchunks = 0;
 	}
 
 	uint64_t memused(){
-		if(numchunks == 0)
-			return 0;
-
-		return ((uint64_t)(numchunks - 1))*((uint64_t)CHUNK_SIZE) + chunks[numchunks - 1]->used;
+		return ((uint64_t)(current->id))*((uint64_t)CHUNK_SIZE) + current->used;
 	}
 
 	Data * alloc(unsigned int num, Data ** parent){
@@ -219,20 +220,31 @@ public:
 	//allocate new memory
 		unsigned int size = sizeof(Data) + sizeof(Node)*num;
 		while(1){
-			Chunk * c = chunks[numchunks-1];
+			Chunk * c = current;
 			uint32_t used = c->used;
-			if(used + size <= c->capacity){
+			if(used + size <= c->capacity){ //if there is room, try to use it
 				if(CAS(c->used, used, used+size))
 					return new((Data *)(c->mem + used)) Data(num, parent);
 				else
 					continue;
-			}else{
-				lock.lock();
+			}else if(c->next != NULL){ //if there is a next chunk, advance to it and try again
+				CAS(current, c, c->next); //CAS to avoid skipping a chunk
+				continue;
+			}else{ //need to allocate a new chunk
+				Chunk * next = new Chunk(CHUNK_SIZE);
 
-				if(c == chunks[numchunks-1]) //add a new chunk if this is still the last chunk
-					chunks[numchunks++] = new Chunk(CHUNK_SIZE);
+				while(1){
+					while(c->next != NULL) //advance to the end
+						c = c->next;
 
-				lock.unlock();
+					next->id = c->id+1;
+					if(CAS(c->next, NULL, next)){ //put it in place
+						INCR(numchunks);
+						//note that this doesn't move current forward since this may not be the next chunk
+						// if there is a race condition where two threads allocate chunks at the same time
+						break;
+					}
+				}
 				continue;
 			}
 		}
@@ -259,17 +271,17 @@ public:
 	//assume this is the only thread running
 	void compact(){
 //		fprintf(stderr, "Compact\n");
-		unsigned int dchunk = 0; //destination chunk
-		unsigned int doff = 0;   //destination offset
-		unsigned int schunk = 0; //source chunk
-		unsigned int soff = 0;   //source offset
-		unsigned int lastchunk = numchunks-1;
+		Chunk      * dchunk = head; //destination chunk
+		unsigned int doff = 0;      //destination offset
+		Chunk      * schunk = head; //source chunk
+		unsigned int soff = 0;      //source offset
+
 		//iterate over each chunk
-		while(schunk < lastchunk || (schunk == lastchunk && soff < chunks[lastchunk]->used)){
-			assert(schunk > dchunk || (schunk == dchunk && soff >= doff));
+		while(schunk != NULL && (schunk->next != NULL || schunk->used > soff)){
+			assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff));
 
 			//iterate over each Data block
-			Data * s = (Data *)(chunks[schunk]->mem + soff);
+			Data * s = (Data *)(schunk->mem + soff);
 //			fprintf(stderr, "%u, %u, %p, %u, %u, %p -> %u, %u", schunk, soff, s, s->header, s->num, s->parent, dchunk, doff);
 			assert(s->num > 0 && s->num < MAX_NUM);
 			int size = sizeof(Data) + sizeof(Node)*s->num;
@@ -280,19 +292,18 @@ public:
 
 				//where to move
 				while(1){
-					Chunk * c = chunks[dchunk];
-					if(doff + size <= c->capacity){ //if space, allocate from this chunk
-						d = (Data *)(c->mem + doff);
+					if(doff + size <= dchunk->capacity){ //if space, allocate from this chunk
+						d = (Data *)(dchunk->mem + doff);
 						doff += size;
 						break;
 					}else{ //otherwise finish this chunk and prepare the next
-						c->used = doff;
+						dchunk->used = doff;
 
 						//zero out the remainder of the chunk
-						for(char * i = c->mem + c->used, * iend = c->mem + c->capacity ; i != iend; i++)
+						for(char * i = dchunk->mem + dchunk->used, * iend = dchunk->mem + dchunk->capacity ; i != iend; i++)
 							*i = 0;
 
-						dchunk++;
+						dchunk = dchunk->next;
 						doff = 0;
 					}
 				}
@@ -304,26 +315,30 @@ public:
 				}
 //				fprintf(stderr, ", %p, %u, %u, %p", d, d->header, d->num, d->parent);
 			}
+
 			//update source
 			soff += size;
-			if(soff >= chunks[schunk]->used){
-				schunk++;
+			if(soff >= schunk->used){
+				schunk = schunk->next;
 				soff = 0;
 			}
 
 //			fprintf(stderr, "\n");
 		}
 		//free unused chunks
-		for(unsigned int i = dchunk+1; i < numchunks; i++)
-			chunks[i]->dealloc();
+		if(dchunk->next != NULL){
+			dchunk->next->dealloc(true);
+			delete dchunk->next;
+			dchunk->next = NULL;
+			numchunks = dchunk->id + 1;
+		}
 
 		//save used last position
-		chunks[dchunk]->used = doff;
-		numchunks = dchunk + 1;
+		dchunk->used = doff;
+		current = dchunk;
 
 		//zero out the remainder of the chunk
-		Chunk * ch = chunks[dchunk];
-		for(char * i = ch->mem + ch->used, * iend = ch->mem + ch->capacity ; i != iend; i++)
+		for(char * i = dchunk->mem + dchunk->used, * iend = dchunk->mem + dchunk->capacity ; i != iend; i++)
 			*i = 0;
 
 		//clear the freelist
