@@ -270,6 +270,9 @@ public:
 
 	//assume this is the only thread running
 	void compact(float arenasize = 0){
+		if(head->used == 0)
+			return;
+
 //		fprintf(stderr, "Compact\n");
 		Chunk      * dchunk = head; //destination chunk
 		unsigned int doff = 0;      //destination offset
@@ -277,7 +280,7 @@ public:
 		unsigned int soff = 0;      //source offset
 
 		//iterate over each chunk
-		while(schunk != NULL && schunk->used > soff){
+		while(schunk != NULL){
 			assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff));
 
 			//iterate over each Data block
