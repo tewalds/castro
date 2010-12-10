@@ -269,17 +269,48 @@ public:
 	}
 
 	//assume this is the only thread running
-	void compact(float arenasize = 0){
+	void compact(float arenasize = 0, float generationsize = 0){
+		assert(arenasize >= 0 && arenasize <= 1);
+		assert(generationsize >= 0 && generationsize <= 1);
+
 		if(head->used == 0)
 			return;
 
 //		fprintf(stderr, "Compact\n");
-		Chunk      * dchunk = head; //destination chunk
-		unsigned int doff = 0;      //destination offset
 		Chunk      * schunk = head; //source chunk
-		unsigned int soff = 0;      //source offset
+		unsigned int soff   = 0;    //source offset
 
-		//iterate over each chunk
+		//clear the freelist
+		for(unsigned int i = 0; i < MAX_NUM; i++)
+			freelist[i] = NULL;
+
+	//add the empty blocks for the first part of the memory space to the freelist to avoid moving so many blocks
+		unsigned int generationid = generationsize * current->id;
+		while(schunk != NULL && schunk->id < generationid){
+			//iterate over each Data block
+			Data * s = (Data *)(schunk->mem + soff);
+
+			assert(s->num > 0 && s->num < MAX_NUM);
+			int size = sizeof(Data) + sizeof(Node)*s->num;
+
+			//add empty blocks to the freelist
+			if(s->header == 0){
+				s->nextfree = freelist[s->num];
+				freelist[s->num] = s;
+			}
+
+			//update source
+			soff += size;
+			while(schunk && schunk->used <= soff){ //move forward, skip empty chunks
+				schunk = schunk->next;
+				soff = 0;
+			}
+		}
+
+		Chunk      * dchunk = schunk; //destination chunk
+		unsigned int doff   = soff;   //destination offset
+
+		//iterate over each chunk, moving data blocks to the left to fill empty space
 		while(schunk != NULL){
 			assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff));
 
@@ -290,7 +321,7 @@ public:
 			int size = sizeof(Data) + sizeof(Node)*s->num;
 
 			//move from -> to, update parent pointer
-			if(s->header > 0){
+			if(s->header != 0){
 				Data * d = NULL;
 
 				//where to move
@@ -349,10 +380,6 @@ public:
 		//zero out the remainder of the chunk
 		for(char * i = dchunk->mem + dchunk->used, * iend = dchunk->mem + dchunk->capacity ; i != iend; i++)
 			*i = 0;
-
-		//clear the freelist
-		for(unsigned int i = 0; i < MAX_NUM; i++)
-			freelist[i] = NULL;
 
 //		fprintf(stderr, "Compact done\n");
 	}
