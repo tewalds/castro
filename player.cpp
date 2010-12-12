@@ -27,7 +27,7 @@ void Player::PlayerThread::run(){
 				Board copy = player->rootboard;
 				player->garbage_collect(copy, & player->root, player->gclimit);
 				player->flushlog();
-				player->ctmem.compact();
+				player->ctmem.compact(1.0);
 				logerr(to_str(100.0*player->nodes/nodesbefore, 1) + " % of tree remains\n");
 
 				if(player->ctmem.memused() >= player->maxmem/2)
