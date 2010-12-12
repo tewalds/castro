@@ -238,7 +238,7 @@ public:
 						c = c->next;
 
 					next->id = c->id+1;
-					if(CAS(c->next, NULL, next)){ //put it in place
+					if(CAS(c->next, (Chunk *)NULL, next)){ //put it in place
 						INCR(numchunks);
 						//note that this doesn't move current forward since this may not be the next chunk
 						// if there is a race condition where two threads allocate chunks at the same time
@@ -285,7 +285,7 @@ public:
 			freelist[i] = NULL;
 
 	//add the empty blocks for the first part of the memory space to the freelist to avoid moving so many blocks
-		unsigned int generationid = generationsize * current->id;
+		unsigned int generationid = (unsigned int)(generationsize * current->id);
 		while(schunk != NULL && schunk->id < generationid){
 			//iterate over each Data block
 			Data * s = (Data *)(schunk->mem + soff);
