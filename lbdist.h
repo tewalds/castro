@@ -169,7 +169,8 @@ public:
 		}
 	}
 
-	int get(Move pos){ return min(get(board->xy(pos), 1),  get(board->xy(pos), 2)); }
+	int get(Move pos){ return min(get(pos, 1),  get(pos, 2)); }
+	int get(Move pos, int player){ return get(board->xy(pos), player); }
 	int get(int pos, int player){
 		int list[6];
 		for(int i = 0; i < 6; i++)
