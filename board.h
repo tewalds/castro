@@ -369,6 +369,28 @@ public:
 		return size;
 	}
 
+	//check if a position is encirclable by a given player
+	//false if it or one of its neighbours are the opponent's and connected to an edge or corner
+	bool encirclable(const Move pos, int player) const {
+		int otherplayer = 3-player;
+
+		const Cell * g = & cells[find_group(pos)];
+		if(g->piece == otherplayer && (g->edge || g->corner))
+			return false;
+
+		for(int i = 0; i < 6; i++){
+			Move loc = pos + neighbours[i];
+
+			if(!onboard(loc))
+				return false;
+
+			const Cell * g = & cells[find_group(loc)];
+			if(g->piece == otherplayer && (g->edge || g->corner))
+				return false;
+		}
+		return true;
+	}
+
 	// recursively follow a ring
 	bool detectring(const Move & pos, char turn) const {
 		for(int i = 0; i < 4; i++){ //4 instead of 6 since any ring must have its first endpoint in the first 4
