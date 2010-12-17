@@ -345,17 +345,23 @@ public:
 	Node  root;
 	uword nodes;
 	int   gclimit; //the minimum experience needed to not be garbage collected
-	Barrier gcbarrier;
 
 	CompactTree<Node> ctmem;
 
 	string solved_logname;
 	FILE * solved_logfile;
 
+	enum ThreadState {
+		Thread_Cancelled,  //threads should exit
+		Thread_Wait_Start, //threads are waiting to start
+		Thread_Running,    //threads are running
+		Thread_GC,         //one thread is running garbage collection, the rest are waiting
+		Thread_GC_End,     //once done garbage collecting, go to wait_end instead of back to running
+		Thread_Wait_End,   //threads are waiting to end
+	};
+	volatile ThreadState threadstate;
 	vector<PlayerThread *> threads;
-	CondVar runners, done;
-	RWLock  lock;
-	volatile bool running; //whether the write lock is held by the master thread
+	Barrier runbarrier, gcbarrier;
 
 	double time_used;
 
@@ -409,14 +415,11 @@ public:
 		set_maxmem(maxmem);
 
 		//no threads started until a board is set
-		lock.wrlock();
-		running = false;
+		threadstate = Thread_Wait_Start;
 	}
 	~Player(){
-		if(running){
-			lock.wrlock();
-			running = false;
-		}
+		stop_threads();
+
 		numthreads = 0;
 		reset_threads(); //shut down the theads properly
 
@@ -429,22 +432,38 @@ public:
 		root.dealloc(ctmem);
 		ctmem.compact();
 	}
-	void timedout() { done.broadcast(); }
+	void timedout() {
+		CAS(threadstate, Thread_Running, Thread_Wait_End);
+		CAS(threadstate, Thread_GC, Thread_GC_End);
+	}
 
 	void set_maxmem(u64 m){
 		maxmem = m;
 	}
 
-	void reset_threads(){ //better have the write lock before calling this
-		assert(running == false);
+	void stop_threads(){
+		if(threadstate != Thread_Wait_Start){
+			timedout();
+			runbarrier.wait();
+		}
+		usleep(0);
+		assert(threadstate == Thread_Wait_Start);
+	}
+
+	void start_threads(){
+		assert(threadstate == Thread_Wait_Start);
+		runbarrier.wait();
+	}
+
+	void reset_threads(){ //start and end with threadstate = Thread_Wait_Start
+		assert(threadstate == Thread_Wait_Start);
 
 	//kill all the threads
 		for(unsigned int i = 0; i < threads.size(); i++)
 			threads[i]->cancel();
 
-		lock.unlock(); //let the runners run and exit since rdlock is not a cancellation point
-		runners.broadcast();
-		running = true;
+		threadstate = Thread_Cancelled;
+		runbarrier.wait();
 
 	//make sure they exited cleanly
 		for(unsigned int i = 0; i < threads.size(); i++)
@@ -452,8 +471,9 @@ public:
 
 		threads.clear();
 
-		lock.wrlock(); //lock so the new threads don't run
-		running = false;
+		threadstate = Thread_Wait_Start;
+
+		runbarrier.reset(numthreads + 1);
 		gcbarrier.reset(numthreads);
 
 	//start new threads
@@ -464,26 +484,15 @@ public:
 	void set_ponder(bool p){
 		if(ponder != p){
 			ponder = p;
-			if(ponder){
-				if(!running){
-					lock.unlock();
-					runners.broadcast();
-					running = true;
-				}
-			}else{
-				if(running){
-					lock.wrlock();
-					running = false;
-				}
-			}
+			stop_threads();
+
+			if(ponder)
+				start_threads();
 		}
 	}
 
 	void set_board(const Board & board){
-		if(running){
-			lock.wrlock();
-			running = false;
-		}
+		stop_threads();
 
 		if(solved_logfile){
 			Board copy = rootboard;
@@ -496,17 +505,11 @@ public:
 
 		reset_threads();
 
-		if(ponder){
-			lock.unlock();
-			runners.broadcast();
-			running = true;
-		}
+		if(ponder)
+			start_threads();
 	}
 	void move(const Move & m){
-		if(running){
-			lock.wrlock();
-			running = false;
-		}
+		stop_threads();
 
 		if(solved_logfile){
 			Board copy = rootboard;
@@ -545,11 +548,8 @@ public:
 		if(rootboard.won() == -1)
 			root.outcome = -1;
 
-		if(ponder){
-			lock.unlock();
-			runners.broadcast();
-			running = true;
-		}
+		if(ponder)
+			start_threads();
 	}
 
 	double gamelen(){

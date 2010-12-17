@@ -8,42 +8,59 @@
 #include "timer.h"
 
 void Player::PlayerThread::run(){
-//	player->runners.lock();
-//	player->runners.wait(); //wait for the broadcast to start
-//	player->runners.unlock();
 	while(!cancelled){
-		while(!cancelled && player->ctmem.memused() < player->maxmem && player->root.outcome == -1 && (maxruns == 0 || runs < maxruns) && player->lock.tryrdlock() == 0){ //not solved yet, has the lock, lock is last so it won't be holding the lock for gc
+		switch(player->threadstate){
+		case Thread_Cancelled:  //threads should exit
+			return;
+
+		case Thread_Wait_Start: //threads are waiting to start
+			player->runbarrier.wait();
+			CAS(player->threadstate, Thread_Wait_Start, Thread_Running);
+			break;
+
+		case Thread_Wait_End:   //threads are waiting to end
+			player->runbarrier.wait();
+			CAS(player->threadstate, Thread_Wait_End, Thread_Wait_Start);
+			break;
+
+		case Thread_Running:    //threads are running
+			if(player->root.outcome >= 0 || (maxruns > 0 && runs < maxruns)){ //solved or finished runs
+				CAS(player->threadstate, Thread_Running, Thread_Wait_End);
+				break;
+			}
+			if(player->ctmem.memused() >= player->maxmem){ //out of memory, start garbage collection
+				CAS(player->threadstate, Thread_Running, Thread_GC);
+				break;
+			}
+
 			runs++;
 			iterate();
-			player->lock.unlock();
-		}
+			break;
 
-		if(player->root.outcome != -1 || !(maxruns == 0 || runs < maxruns)){ //let the main thread know in case it was solved early
-			player->done.broadcast();
-		}else if(player->ctmem.memused() >= player->maxmem){ //garbage collect
+		case Thread_GC:         //one thread is running garbage collection, the rest are waiting
+		case Thread_GC_End:     //once done garbage collecting, go to wait_end instead of back to running
 			if(player->gcbarrier.wait()){
 				logerr("Starting player GC with limit " + to_str(player->gclimit) + " ... ");
 				uint64_t nodesbefore = player->nodes;
 				Board copy = player->rootboard;
 				player->garbage_collect(copy, & player->root, player->gclimit);
 				player->flushlog();
-				player->ctmem.compact(1.0);
+				player->ctmem.compact();
 				logerr(to_str(100.0*player->nodes/nodesbefore, 1) + " % of tree remains\n");
 
 				if(player->ctmem.memused() >= player->maxmem/2)
 					player->gclimit = (int)(player->gclimit*1.3);
 				else if(player->gclimit > 5)
 					player->gclimit = (int)(player->gclimit*0.9); //slowly decay to a minimum of 5
+
+				CAS(player->threadstate, Thread_GC,     Thread_Running);
+				CAS(player->threadstate, Thread_GC_End, Thread_Wait_End);
 			}
 			player->gcbarrier.wait();
-		}else{
-			player->runners.lock();
-			player->runners.wait(); //wait for the broadcast to start
-			player->runners.unlock();
+			break;
 		}
 	}
 }
-
 
 Player::Node * Player::genmove(double time, int maxruns){
 	time_used = 0;
@@ -51,7 +68,6 @@ Player::Node * Player::genmove(double time, int maxruns){
 
 	if(rootboard.won() >= 0 || (time <= 0 && maxruns == 0))
 		return NULL;
-
 
 	Time starttime;
 
@@ -69,20 +85,20 @@ Player::Node * Player::genmove(double time, int maxruns){
 		logerr("Pondered " + to_str(runs) + " runs\n");
 
 	//let them run!
-	if(!running){
-		lock.unlock(); //remove the write lock
-		runners.broadcast();
-		running = true;
+	if(threadstate == Thread_Wait_Start || threadstate == Thread_Wait_End){
+		threadstate = Thread_Running;
+		runbarrier.wait();
 	}
 
-	done.lock();
-	done.wait(); //wait for the timer or solved
-	done.unlock();
+	//threadstate == Thread_Running
 
-	if(!ponder || root.outcome != -1){
-		lock.wrlock(); //stop the runners
-		running = false;
-	}
+	//wait for the timer to stop them
+	runbarrier.wait();
+
+	//threadstate == Thread_Wait_Start
+
+	if(ponder && root.outcome < 0)
+		runbarrier.wait();
 
 	time_used = Time() - starttime;
 
