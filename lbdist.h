@@ -71,6 +71,7 @@ class LBDists {
 	};
 
 	int dists[12][2][361]; //[edge/corner][player][cell]
+	static const int maxdist = 1000;
 	IntPQueue Q;
 	const Board * board;
 
@@ -97,7 +98,7 @@ public:
 		for(int i = 0; i < 12; i++)
 			for(int j = 0; j < 2; j++)
 				for(int k = 0; k < board->vecsize(); k++)
-					dists[i][j][k] = 1000; //far far away!
+					dists[i][j][k] = maxdist; //far far away!
 
 		int m = board->get_size()-1, e = board->get_size_d()-1;
 
@@ -167,6 +168,18 @@ public:
 				}
 			}
 		}
+	}
+
+	bool isdraw(){
+		for(int y = 0; y < board->get_size_d(); y++){
+			for(int x = board->linestart(y); x < board->lineend(y); x++){
+				Move pos(x,y);
+
+				if(board->encirclable(pos, 1) || board->encirclable(pos, 2) || get(pos, 1) < maxdist-5 || get(pos, 2) < maxdist-5)
+					return false;
+			}
+		}
+		return true;
 	}
 
 	int get(Move pos){ return min(get(pos, 1),  get(pos, 2)); }
