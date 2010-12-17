@@ -24,7 +24,7 @@ void Player::PlayerThread::run(){
 			break;
 
 		case Thread_Running:    //threads are running
-			if(player->root.outcome >= 0 || (maxruns > 0 && runs > maxruns)){ //solved or finished runs
+			if(player->root.outcome >= 0 || (maxruns > 0 && runs >= maxruns)){ //solved or finished runs
 				CAS(player->threadstate, Thread_Running, Thread_Wait_End);
 				break;
 			}
