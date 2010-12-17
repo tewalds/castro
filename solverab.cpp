@@ -65,12 +65,12 @@ int SolverAB::negamax(const Board & board, const int depth, int alpha, int beta)
 	int b = beta;
 	int first = true;
 	int value, losses = 0;
-	static const int lookup[4] = {0, 1, 2, 2};
+	static const int lookup[6] = {0, 0, 0, 1, 2, 2};
 	for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
 		nodes_seen++;
 
 		if(depth <= 2){
-			value = lookup[board.test_win(*move)+1];
+			value = lookup[board.test_win(*move)+3];
 
 			if(board.test_win(*move, 3 - board.toplay()) > 0)
 				losses++;

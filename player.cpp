@@ -133,7 +133,7 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 		 * end = node->children.end();
 
 	for( ; child != end; child++){
-		if(child->outcome != -1){
+		if(child->outcome >= 0){
 			if(child->outcome == toplay) val =  800000000000.0 - child->exp.num(); //shortest win
 			else if(child->outcome == 0) val = -400000000000.0 + child->exp.num(); //longest tie
 			else                         val = -800000000000.0 + child->exp.num(); //longest loss

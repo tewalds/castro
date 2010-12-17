@@ -17,14 +17,14 @@ void Player::PlayerUCT::iterate(){
 int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){
 	int toplay = board.toplay();
 
-	if(!node->children.empty() && node->outcome == -1){
+	if(!node->children.empty() && node->outcome < 0){
 	//choose a child and recurse
 		Node * child;
 		do{
 			int remain = board.movesremain();
 			child = choose_move(node, toplay, remain);
 
-			if(child->outcome == -1){
+			if(child->outcome < 0){
 				movelist.add(child->move, toplay);
 				if(!board.move(child->move, (player->minimax == 0), player->locality)){
 					logerr("move failed: " + child->move.to_s() + "\n" + board.to_s());
@@ -53,12 +53,12 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 	int won = (player->minimax ? node->outcome : board.won());
 
 	//create children if valid
-	if(won == -1 && node->exp.num() >= player->visitexpand+1)
+	if(won < 0 && node->exp.num() >= player->visitexpand+1)
 		if(create_children(board, node, toplay))
 			return walk_tree(board, node, movelist, depth);
 
 	//do random game on this node if it's not already decided
-	if(won == -1)
+	if(won < 0)
 		won = rollout(board, movelist, node->move, depth);
 
 
@@ -181,10 +181,10 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int
 }
 
 bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
-	if(node->outcome != -1) //already proven by a different thread
+	if(node->outcome >= 0) //already proven by a different thread
 		return true;
 
-	if(backup->outcome == -1) //not yet proven by this child, so no chance
+	if(backup->outcome == -3) //not yet proven by this child, so no chance
 		return false;
 
 	if(backup->outcome != toplay){
@@ -199,7 +199,7 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 				backup = child;
 				outcome = 3;
 				break;
-			}else if(child->outcome == -1){ //unknown
+			}else if(child->outcome == -3){ //unknown
 				outcome = 2;
 			}else if(child->outcome == 0){ //draw
 				outcome = 1;
@@ -223,7 +223,7 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 			return false;
 	}
 
-	if(CAS(node->outcome, -1, backup->outcome))
+	if(CAS(node->outcome, -3, backup->outcome))
 		node->bestmove = backup->bestmove;
 
 	return true;

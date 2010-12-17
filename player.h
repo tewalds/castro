@@ -62,8 +62,8 @@ public:
 		//seems to need padding to multiples of 8 bytes or it segfaults?
 		//don't forget to update the copy constructor/operator
 
-		Node()                            : know(0), outcome(-1)          { }
-		Node(const Move & m, char o = -1) : know(0), outcome(o), move(m)  { }
+		Node()                            : know(0), outcome(-3)          { }
+		Node(const Move & m, char o = -3) : know(0), outcome(o), move(m)  { }
 		Node(const Node & n) { *this = n; }
 		Node & operator = (const Node & n){
 			if(this != & n){ //don't copy to self
@@ -545,8 +545,8 @@ public:
 		assert(nodes == root.size());
 
 		root.exp.addwins(visitexpand+1); //+1 to compensate for the virtual loss
-		if(rootboard.won() == -1)
-			root.outcome = -1;
+		if(rootboard.won() < 0)
+			root.outcome = -3;
 
 		if(ponder)
 			start_threads();

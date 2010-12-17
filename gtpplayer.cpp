@@ -173,9 +173,9 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 
 		if(ret->outcome >= 0){
 			stats += "Solved as a ";
-			if(ret->outcome == 0)           stats += "draw";
-			else if(ret->outcome == toplay) stats += "win";
-			else                            stats += "loss";
+			if(ret->outcome == toplay) stats += "win";
+			else if(ret->outcome == 0) stats += "draw";
+			else                       stats += "loss";
 			stats += "\n";
 		}
 	}
@@ -216,12 +216,12 @@ GTPResponse HavannahGTP::gtp_player_solved(vecstr args){
 
 		if(child->outcome == toplay)
 			return GTPResponse(true, won_str(toplay));
-		else if(child->outcome == -1)
+		else if(child->outcome < 0)
 			best = 2;
 		else if(child->outcome == 0)
 			best = 1;
 	}
-	if(best == 2) return GTPResponse(true, won_str(-2));
+	if(best == 2) return GTPResponse(true, won_str(-3));
 	if(best == 1) return GTPResponse(true, won_str(0));
 	return GTPResponse(true, won_str(3 - toplay));
 }

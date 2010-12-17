@@ -10,10 +10,12 @@ GTPResponse HavannahGTP::gtp_print(vecstr args){
 
 string HavannahGTP::won_str(int outcome) const {
 	switch(outcome){
-		case -1: return "none";
-		case  0: return "draw";
-		case  1: return "white";
-		case  2: return "black";
+		case -3: return "none";
+		case -2: return "black_or_draw";
+		case -1: return "white_or_draw";
+		case 0:  return "draw";
+		case 1:  return "white";
+		case 2:  return "black";
 		default: return "unknown";
 	}
 }
@@ -138,7 +140,7 @@ GTPResponse HavannahGTP::play(const string & pos, int toplay){
 	log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(move, false));
 
 	if(verbose)
-		return GTPResponse(true, "Placement: " + move_str(move) + ", outcome: " + won_str(game.getboard().won()) + "\n" + game.getboard().to_s());
+		return GTPResponse(true, "Placement: " + move_str(move) + ", outcome: " + game.getboard().won_str() + "\n" + game.getboard().to_s());
 	else
 		return GTPResponse(true);
 }
@@ -183,7 +185,7 @@ GTPResponse HavannahGTP::gtp_playblack(vecstr args){
 
 GTPResponse HavannahGTP::gtp_winner(vecstr args){
 	log("havannah_winner");
-	return GTPResponse(true, won_str(game.getboard().won()));
+	return GTPResponse(true, game.getboard().won_str());
 }
 
 GTPResponse HavannahGTP::gtp_name(vecstr args){

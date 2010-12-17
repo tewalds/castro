@@ -61,7 +61,7 @@ public:
 		HashSet hashes;
 	public:
 		MoveIterator(const Board & b, bool Unique, bool allowswap) : board(b), lineend(0), move(Move(M_SWAP)), unique(Unique) {
-			if(board.outcome != -1){
+			if(board.outcome >= 0){
 				move = Move(0, board.size_d); //already done
 			}else if(!allowswap || !board.valid_move(move)){ //check if swap is valid
 				if(unique){
@@ -110,7 +110,7 @@ private:
 	short nummoves;
 	short unique_depth; //update and test rotations/symmetry with less than this many pieces on the board
 	char toPlay;
-	char outcome; //-1 = unknown, 0 = tie, 1,2 = player win
+	char outcome; //-3 = unknown, 0 = tie, 1,2 = player win
 	char wintype; //0 no win, 1 = edge, 2 = corner, 3 = ring
 	bool allowswap;
 
@@ -128,7 +128,7 @@ public:
 		nummoves = 0;
 		unique_depth = 5;
 		toPlay = 1;
-		outcome = -1;
+		outcome = -3;
 		wintype = 0;
 		allowswap = false;
 
@@ -180,8 +180,8 @@ public:
 	bool valid_move_fast(int x, int y)   const { return !get(x,y); }
 	bool valid_move_fast(const Move & m) const { return !get(m); }
 	//checks array bounds too
-	bool valid_move(int x, int y)   const { return (outcome == -1 && onboard(x, y) && !get(x,y)); } //ignores swap rule!
-	bool valid_move(const Move & m) const { return (outcome == -1 && ((onboard(m) && !get(m)) || (m == M_SWAP && canswap()))); }
+	bool valid_move(int x, int y)   const { return (outcome == -3 && onboard(x, y) && !get(x,y)); } //ignores swap rule!
+	bool valid_move(const Move & m) const { return (outcome == -3 && ((onboard(m) && !get(m)) || (m == M_SWAP && canswap()))); }
 
 	int iscorner(int x, int y) const {
 		if(!onboard(x,y))
@@ -253,7 +253,9 @@ public:
 	
 	string won_str() const {
 		switch(outcome){
-			case -1: return "none";
+			case -3: return "none";
+			case -2: return "black_or_draw";
+			case -1: return "white_or_draw";
 			case 0:  return "draw";
 			case 1:  return "white";
 			case 2:  return "black";
@@ -265,7 +267,7 @@ public:
 		return outcome;
 	}
 
-	int win() const{
+	int win() const{ // 0 for draw or unknown, 1 for win, -1 for loss
 		if(outcome <= 0)
 			return 0;
 		return (outcome == toplay() ? 1 : -1);
@@ -531,7 +533,7 @@ public:
 	//test if making this move would win, but don't actually make the move
 	int test_win(const Move & pos, char turn = 0) const {
 		if(cells[xy(pos)].local != 3)
-			return -1;
+			return -3;
 
 		if(turn == 0)
 			turn = toplay();
@@ -557,7 +559,7 @@ public:
 		if(nummoves+1 == numcells())
 			return 0;
 
-		return -1;
+		return -3;
 	}
 };
 
