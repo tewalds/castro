@@ -78,12 +78,19 @@ int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	if(!node->children.lock())
 		return false;
 
-	CompactTree<Node>::Children temp;
-
-	temp.alloc(board.movesremain(), player->ctmem);
-
-	if(player->dists)
+	if(player->dists || player->detectdraw){
 		dists.run(&board);
+
+		if(player->detectdraw && dists.isdraw()){ //proven draw, neither side can influence the outcome
+			node->outcome = 0;
+			node->bestmove = *(board.moveit()); //just choose the first move since all are equal at this point
+			node->children.unlock();
+			return true;
+		}
+	}
+
+	CompactTree<Node>::Children temp;
+	temp.alloc(board.movesremain(), player->ctmem);
 
 	int losses = 0;
 

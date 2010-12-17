@@ -348,6 +348,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -s --shortrave   Only use moves from short rollouts for rave       [" + to_str(player.shortrave) + "]\n" +
 			"  -k --keeptree    Keep the tree from the previous move              [" + to_str(player.keeptree) + "]\n" +
 			"  -m --minimax     Backup the minimax proof in the UCT tree          [" + to_str(player.minimax) + "]\n" +
+			"  -T --detectdraw  Detect draws once no win is possible at all       [" + to_str(player.detectdraw) + "]\n" +
 			"  -x --visitexpand Number of visits before expanding a node          [" + to_str(player.visitexpand) + "]\n" +
 			"  -P --symmetry    Prune symmetric moves, good for proof, not play   [" + to_str(player.prunesymmetry) + "]\n" +
 			"  -L --logproof    Log proven nodes hashes and outcomes to this file [" + player.solved_logname + "]\n" +
@@ -400,6 +401,8 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			player.keeptree = from_str<bool>(args[++i]);
 		}else if((arg == "-m" || arg == "--minimax") && i+1 < args.size()){
 			player.minimax = from_str<int>(args[++i]);
+		}else if((arg == "-T" || arg == "--detectdraw") && i+1 < args.size()){
+			player.detectdraw = from_str<bool>(args[++i]);
 		}else if((arg == "-P" || arg == "--symmetry") && i+1 < args.size()){
 			player.prunesymmetry = from_str<bool>(args[++i]);
 		}else if((arg == "-L" || arg == "--logproof") && i+1 < args.size()){

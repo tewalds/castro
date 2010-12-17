@@ -321,6 +321,7 @@ public:
 	bool  shortrave;  //only update rave values on short rollouts
 	bool  keeptree;   //reuse the tree from the previous move
 	int   minimax;    //solve the minimax tree within the uct tree
+	bool  detectdraw; //look for draws early, slow
 	uint  visitexpand;//number of visits before expanding a node
 	bool  prunesymmetry; //prune symmetric children from the move list, useful for proving but likely not for playing
 //knowledge
@@ -384,6 +385,7 @@ public:
 		shortrave   = false;
 		keeptree    = true;
 		minimax     = 2;
+		detectdraw  = false;
 		visitexpand = 1;
 		prunesymmetry = false;
 
