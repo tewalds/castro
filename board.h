@@ -37,16 +37,25 @@ const MoveScore neighbours[18] = {
 
 class Board{
 	struct Cell {
+/*
 		unsigned piece  : 2; //who controls this cell, 0 for none, 1,2 for players
 		mutable unsigned parent : 9; //parent for this group of cells
 		unsigned size   : 7; //size of this group of cells
 		unsigned corner : 6; //which corners are this group connected to
 		unsigned edge   : 6; //which edges are this group connected to
 		unsigned local  : 2; //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
+/*/
+		uint8_t piece;  //who controls this cell, 0 for none, 1,2 for players
+mutable uint16_t parent; //parent for this group of cells
+		uint8_t size;   //size of this group of cells
+		uint8_t corner; //which corners are this group connected to
+		uint8_t edge;   //which edges are this group connected to
+		uint8_t local;  //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
+//*/
 
 		Cell() : piece(0), parent(0), size(0), corner(0), edge(0), local(0) { }
-		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e) :
-			piece(p), parent(a), size(s), corner(c), edge(e) { }
+		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e, unsigned int l) :
+			piece(p), parent(a), size(s), corner(c), edge(e), local(l) { }
 
 		int numcorners(){ return BitsSetTable64[corner]; }
 		int numedges()  { return BitsSetTable64[edge];   }
@@ -137,7 +146,7 @@ public:
 		for(int y = 0; y < size_d; y++){
 			for(int x = 0; x < size_d; x++){
 				int i = xy(x, y);
-				cells[i] = Cell(0, i, 1, (1 << iscorner(x, y)), (1 << isedge(x, y)));
+				cells[i] = Cell(0, i, 1, (1 << iscorner(x, y)), (1 << isedge(x, y)), 0);
 			}
 		}
 	}
