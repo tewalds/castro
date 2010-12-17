@@ -445,9 +445,8 @@ public:
 		if(threadstate != Thread_Wait_Start){
 			timedout();
 			runbarrier.wait();
+			CAS(threadstate, Thread_Wait_End, Thread_Wait_Start);
 		}
-		usleep(0);
-		assert(threadstate == Thread_Wait_Start);
 	}
 
 	void start_threads(){
