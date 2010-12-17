@@ -3,19 +3,18 @@ worker stuff
 - PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 - cd /tmp; wget -N --no-check-certificate https://dropbox.ewalds.ca/worker.sh; screen -d -m sh worker.sh; logout
 
-player solver size 4:
-- LD_PRELOAD="/usr/lib/libtcmalloc.so"
-- boardsize 4
-- player_params -g 1 -P 1 -t 12 -M 15000 -o 1
 
 
 resigns instead of making winning move...
 
+compact tree memory manager
+- store a generation counter in the Data struct?
+- useful to know if this empty slot stayed empty for a whole generation?
+
+Draw detection
+- if proven no move can win, backup any draw immediately, don't need to prove all the rest are draws/losses
 
 
-
-switch to 64 bit exp values?
-log, then prune solved nodes
 solver threads should use a TT instead of using the tree?
 
 progressive widening
@@ -32,6 +31,7 @@ reuse (partial?) proof trees
 - if a move is backed up as a win, it is likely a win under its siblings too
 - give it a bonus to its equivalent cousins
 - can we try to prove siblings by reusing the proof tree?
+- store which sibling was used to prove the current tree, to avoid having to store it
 
 Test the accuracy of the rollouts
 - do a tree search to get a value of a position
@@ -79,7 +79,7 @@ do proven nodes need
   - solved ties
   - solved losses
 - how to do this multi-threaded?
-
+  - do sorting during garbage collection?
 
 detect dead areas, areas where your opponent has limited you to one corner or two sides and no rings
 - negative knowledge?
@@ -121,9 +121,6 @@ share the tree between the player and solver
 - run multiple different solvers? dfpnsab/pnsab
 - knowledge for phi/delta
 
-avoid symmetry for the first 3-5 moves, or just build an opening book
-
-detect frames?
 
 prior knowledge
 - criticality
@@ -133,8 +130,6 @@ prior knowledge
 - lower bound needs virtual connection bonus / penalty for crossing opponents VC
 
 rollout policy
-- use weighted random choices instead of uniform random:
-- different weights for black vs white?
 - local reply?
 - locality?
 - connections?
