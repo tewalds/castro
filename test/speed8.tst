@@ -1,5 +1,5 @@
-time -g 0 -m 0 -i 50000
-boardsize 6
+time -g 0 -m 0 -i 30000
+boardsize 8
 genmove w
 undo
 genmove w
