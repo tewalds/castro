@@ -90,15 +90,18 @@ Player::Node * Player::genmove(double time, int maxruns){
 		runbarrier.wait();
 	}
 
-	//threadstate == Thread_Running
+	assert(threadstate == Thread_Running);
 
 	//wait for the timer to stop them
 	runbarrier.wait();
+	CAS(threadstate, Thread_Wait_End, Thread_Wait_Start);
 
-	//threadstate == Thread_Wait_Start
+	assert(threadstate == Thread_Wait_Start);
 
-	if(ponder && root.outcome < 0)
+	if(ponder && root.outcome < 0){
 		runbarrier.wait();
+		assert(threadstate == Thread_Running);
+	}
 
 	time_used = Time() - starttime;
 
