@@ -495,12 +495,14 @@ public:
 			timedout();
 			runbarrier.wait();
 			CAS(threadstate, Thread_Wait_End, Thread_Wait_Start);
+			assert(threadstate == Thread_Wait_Start);
 		}
 	}
 
 	void start_threads(){
 		assert(threadstate == Thread_Wait_Start);
 		runbarrier.wait();
+		CAS(threadstate, Thread_Wait_Start, Thread_Running);
 	}
 
 	void reset_threads(){ //start and end with threadstate = Thread_Wait_Start

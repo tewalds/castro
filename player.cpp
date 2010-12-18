@@ -71,9 +71,7 @@ Player::Node * Player::genmove(double time, int maxruns){
 
 	Time starttime;
 
-	Timer timer;
-	if(time > 0)
-		timer.set(time, bind(&Player::timedout, this));
+	stop_threads();
 
 	int runs = 0;
 	for(unsigned int i = 0; i < threads.size(); i++){
@@ -84,24 +82,21 @@ Player::Node * Player::genmove(double time, int maxruns){
 	if(runs)
 		logerr("Pondered " + to_str(runs) + " runs\n");
 
-	//let them run!
-	if(threadstate == Thread_Wait_Start || threadstate == Thread_Wait_End){
-		threadstate = Thread_Running;
-		runbarrier.wait();
-	}
 
-	assert(threadstate == Thread_Running);
+	//let them run!
+	start_threads();
+
+	Timer timer;
+	if(time > 0)
+		timer.set(time - (Time() - starttime), bind(&Player::timedout, this));
 
 	//wait for the timer to stop them
 	runbarrier.wait();
 	CAS(threadstate, Thread_Wait_End, Thread_Wait_Start);
-
 	assert(threadstate == Thread_Wait_Start);
 
-	if(ponder && root.outcome < 0){
-		runbarrier.wait();
-		assert(threadstate == Thread_Running);
-	}
+	if(ponder && root.outcome < 0)
+		start_threads();
 
 	time_used = Time() - starttime;
 
