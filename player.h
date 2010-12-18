@@ -490,6 +490,17 @@ public:
 		maxmem = m;
 	}
 
+	string statestring(){
+		switch(threadstate){
+		case Thread_Cancelled:  return "Thread_Wait_Cancelled";
+		case Thread_Wait_Start: return "Thread_Wait_Start";
+		case Thread_Running:    return "Thread_Running";
+		case Thread_GC:         return "Thread_GC";
+		case Thread_GC_End:     return "Thread_GC_End";
+		case Thread_Wait_End:   return "Thread_Wait_End";
+		}
+	}
+
 	void stop_threads(){
 		if(threadstate != Thread_Wait_Start){
 			timedout();
@@ -508,12 +519,13 @@ public:
 	void reset_threads(){ //start and end with threadstate = Thread_Wait_Start
 		assert(threadstate == Thread_Wait_Start);
 
+	//wait for them to all get to the barrier
+		runbarrier.wait();
+
 	//kill all the threads
+		threadstate = Thread_Cancelled;
 		for(unsigned int i = 0; i < threads.size(); i++)
 			threads[i]->cancel();
-
-		threadstate = Thread_Cancelled;
-		runbarrier.wait();
 
 	//make sure they exited cleanly
 		for(unsigned int i = 0; i < threads.size(); i++)
@@ -553,7 +565,7 @@ public:
 		nodes -= root.dealloc(ctmem);
 		root = Node();
 
-		reset_threads();
+		reset_threads(); //needed since the threads aren't started before a board it set
 
 		if(ponder)
 			start_threads();

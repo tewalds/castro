@@ -8,7 +8,7 @@
 #include "timer.h"
 
 void Player::PlayerThread::run(){
-	while(!cancelled){
+	while(true){
 		switch(player->threadstate){
 		case Thread_Cancelled:  //threads should exit
 			return;
@@ -24,6 +24,9 @@ void Player::PlayerThread::run(){
 			break;
 
 		case Thread_Running:    //threads are running
+			if(cancelled)
+				return;
+
 			if(player->root.outcome >= 0 || (maxruns > 0 && runs >= maxruns)){ //solved or finished runs
 				CAS(player->threadstate, Thread_Running, Thread_Wait_End);
 				break;
