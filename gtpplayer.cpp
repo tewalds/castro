@@ -344,6 +344,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -r --userave     Use rave with this probability [0-1]              [" + to_str(player.userave) + "]\n" +
 			"  -X --useexplore  Use exploration with this probability [0-1]       [" + to_str(player.useexplore) + "]\n" +
 			"  -u --fpurgency   Value to assign to an unplayed move               [" + to_str(player.fpurgency) + "]\n" +
+			"  -O --rollouts    Number of rollouts to run per simulation          [" + to_str(player.rollouts) + "]\n" +
 			"Tree building:\n" +
 			"  -s --shortrave   Only use moves from short rollouts for rave       [" + to_str(player.shortrave) + "]\n" +
 			"  -k --keeptree    Keep the tree from the previous move              [" + to_str(player.keeptree) + "]\n" +
@@ -413,6 +414,8 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			player.useexplore = from_str<float>(args[++i]);
 		}else if((arg == "-u" || arg == "--fpurgency") && i+1 < args.size()){
 			player.fpurgency = from_str<float>(args[++i]);
+		}else if((arg == "-O" || arg == "--rollouts") && i+1 < args.size()){
+			player.rollouts = from_str<int>(args[++i]);
 		}else if((arg == "-x" || arg == "--visitexpand") && i+1 < args.size()){
 			player.visitexpand = from_str<uint>(args[++i]);
 		}else if((arg == "-l" || arg == "--localreply") && i+1 < args.size()){

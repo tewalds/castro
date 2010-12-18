@@ -28,9 +28,23 @@ public:
 		uword num() const { return n; }
 		uword sum() const { return s/2; }
 
+		void clear() { s = 0; n = 0; }
+
 		void addvloss(){ INCR(n); }
 		void addvtie() { INCR(s); }
 		void addvwin() { PLUS(s, 2); }
+		void addv(const ExpPair & a){
+			if(a.s) PLUS(s, a.s);
+			if(a.n) PLUS(n, a.n);
+		}
+
+		void addloss(){ n++; }
+		void addtie() { s++; }
+		void addwin() { s += 2; }
+		void add(const ExpPair & a){
+			s += a.s;
+			n += a.n;
+		}
 
 		void addwins(int num)  { n += num; s += 2*num; }
 		void addlosses(int num){ n += num; }
@@ -189,41 +203,73 @@ public:
 //*/
 	};
 
-	struct RaveMoveList {
+	struct MoveList {
 		struct RaveMove : public Move {
 			char player;
 
+			RaveMove() : Move(M_UNKNOWN), player(0) { }
 			RaveMove(const Move & m, char p = 0) : Move(m), player(p) { }
 		};
-		typedef vector<RaveMove>::const_iterator iterator;
 
-		vector<RaveMove> list;
+		ExpPair  exp[2];       //aggregated outcomes overall
+		ExpPair  rave[2][361]; //aggregated outcomes per move
+		RaveMove moves[361];   //moves made in order
+		int      tree;         //number of moves in the tree
+		int      rollout;      //number of moves in the rollout
+		Board *  board;        //reference to rootboard for xy()
 
-		RaveMoveList(int s = 0){
-			list.reserve(s);
-		}
+		MoveList() : tree(0), rollout(0), board(NULL) { }
 
-		void add(const Move & move, char player){
-			list.push_back(RaveMove(move, player));
+		void addtree(const Move & move, char player){
+			moves[tree++] = RaveMove(move, player);
 		}
-		void clear(){
-			list.clear();
+		void addrollout(const Move & move, char player){
+			moves[rollout++] = RaveMove(move, player);
 		}
-		unsigned int size() const {
-			return list.size();
+		void reset(Board * b){
+			tree = 0;
+			rollout = 0;
+			board = b;
+			exp[0].clear();
+			exp[1].clear();
+			for(int i = 0; i < b->vecsize(); i++){
+				rave[0][i].clear();
+				rave[1][i].clear();
+			}
 		}
-		const RaveMove & operator[](int i) const {
-			return list[i];
+		void finishrollout(int won){
+			exp[0].addloss();
+			exp[1].addloss();
+			if(won == 0){
+				exp[0].addtie();
+				exp[1].addtie();
+			}else{
+				exp[won-1].addwin();
+
+				for(RaveMove * i = begin(), * e = end(); i != e; i++){
+					ExpPair & r = rave[i->player-1][board->xy(*i)];
+					r.addloss();
+					if(i->player == won)
+						r.addwin();
+				}
+			}
+			rollout = 0;
 		}
-		iterator begin() const {
-			return list.begin();
+		RaveMove * begin() {
+			return moves;
 		}
-		iterator end() const {
-			return list.end();
+		RaveMove * end() {
+			return moves + tree + rollout;
 		}
-		//sort in y,x order
-		void clean(){
-			sort(list.begin(), list.end()); //sort in y,x order
+		void subvlosses(int n){
+			exp[0].addlosses(-n);
+			exp[1].addlosses(-n);
+		}
+		const ExpPair & getrave(int player, const Move & move) const {
+			return rave[player-1][board->xy(move)];
+		}
+		const ExpPair & getexp(int player) const {
+			return exp[player-1];
 		}
 	};
 
@@ -256,6 +302,7 @@ public:
 		int  rollout_pattern_offset; //where to start the rollout pattern
 		WeightedRandTree wtree; //struct to hold the valued for weighted random values
 		LBDists dists;    //holds the distances to the various non-ring wins as a heuristic for the minimum moves needed to win
+		MoveList movelist;
 
 	public:
 		PlayerUCT(Player * p) {
@@ -285,15 +332,15 @@ public:
 
 	private:
 		void iterate();
-		int walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth);
-		int create_children(Board & board, Node * node, int toplay);
+		void walk_tree(Board & board, Node * node, int depth);
+		bool create_children(Board & board, Node * node, int toplay);
 		void add_knowledge(Board & board, Node * node, Node * child);
 		Node * choose_move(const Node * node, int toplay, int remain) const;
 		bool do_backup(Node * node, Node * backup, int toplay);
-		void update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay);
+		void update_rave(const Node * node, int toplay);
 		bool test_bridge_probe(const Board & board, const Move & move, const Move & test) const;
 
-		int rollout(Board & board, RaveMoveList & movelist, Move move, int depth);
+		int rollout(Board & board, Move move, int depth);
 		Move rollout_choose_move(Board & board, const 	Move & prev, int & doinstwin);
 		Move rollout_pattern(const Board & board, const Move & move);
 	};
@@ -317,6 +364,7 @@ public:
 	float userave;    //what probability to use rave
 	float useexplore; //what probability to use UCT exploration
 	float fpurgency;  //what value to return for a move that hasn't been played yet
+	int   rollouts;   //number of rollouts to run after the tree traversal
 //tree building
 	bool  shortrave;  //only update rave values on short rollouts
 	bool  keeptree;   //reuse the tree from the previous move
@@ -387,6 +435,7 @@ public:
 		userave     = 1;
 		useexplore  = 1;
 		fpurgency   = 1;
+		rollouts    = 1;
 
 		shortrave   = false;
 		keeptree    = true;

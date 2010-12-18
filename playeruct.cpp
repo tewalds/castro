@@ -5,16 +5,15 @@
 #include "string.h"
 
 void Player::PlayerUCT::iterate(){
-	RaveMoveList movelist;
+	movelist.reset(&(player->rootboard));
 	player->root.exp.addvloss();
 	Board copy = player->rootboard;
 	use_rave    = (unitrand() < player->userave);
 	use_explore = (unitrand() < player->useexplore);
-	walk_tree(copy, & player->root, movelist, 0);
+	walk_tree(copy, & player->root, 0);
 }
 
-//return the winner of the simulation
-int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & movelist, int depth){
+void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 	int toplay = board.toplay();
 
 	if(!node->children.empty() && node->outcome < 0){
@@ -25,56 +24,57 @@ int Player::PlayerUCT::walk_tree(Board & board, Node * node, RaveMoveList & move
 			child = choose_move(node, toplay, remain);
 
 			if(child->outcome < 0){
-				movelist.add(child->move, toplay);
+				movelist.addtree(child->move, toplay);
+
 				if(!board.move(child->move, (player->minimax == 0), player->locality)){
 					logerr("move failed: " + child->move.to_s() + "\n" + board.to_s());
 					assert(false && "move failed");
 				}
 
-				child->exp.addvloss();
+				child->exp.addvloss(); //balanced out after rollouts
 
-				int won = walk_tree(board, child, movelist, depth+1);
+				walk_tree(board, child, depth+1);
 
-				if(won == toplay) child->exp.addvwin();
-				else if(won == 0) child->exp.addvtie();
-				//else loss is already added
+				child->exp.addv(movelist.getexp(toplay));
 
 				if(!do_backup(node, child, toplay) && //not solved
 					player->ravefactor > min_rave &&  //using rave
 					node->children.num() > 1 &&       //not a macro move
 					50*remain*(player->ravefactor + player->decrrave*remain) > node->exp.num()) //rave is still significant
-					update_rave(node, movelist, won, toplay);
+					update_rave(node, toplay);
 
-				return won;
+				return;
 			}
 		}while(!do_backup(node, child, toplay));
 	}
 
 	int won = (player->minimax ? node->outcome : board.won());
 
-	//create children if valid
-	if(won < 0 && node->exp.num() >= player->visitexpand+1)
-		if(create_children(board, node, toplay))
-			return walk_tree(board, node, movelist, depth);
+	//if it's not already decided
+	if(won < 0){
+		//create children if valid
+		if(node->exp.num() >= player->visitexpand+1 && create_children(board, node, toplay)){
+			walk_tree(board, node, depth);
+			return;
+		}
 
-	//do random game on this node if it's not already decided
-	if(won < 0)
-		won = rollout(board, movelist, node->move, depth);
-
+		//do random game on this node
+		for(int i = 0; i < player->rollouts; i++){
+			Board copy = board;
+			rollout(copy, node->move, depth);
+		}
+	}else{
+		movelist.finishrollout(won); //got to a terminal state, it's worth recording
+	}
 
 	treelen.add(depth);
 
-	if(player->ravefactor > min_rave){
-		if(won == 0 || (player->shortrave && movelist.size() > gamelen.avg()))
-			movelist.clear();
-		else
-			movelist.clean();
-	}
+	movelist.subvlosses(1);
 
-	return won;
+	return;
 }
 
-int Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
+bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	if(!node->children.lock())
 		return false;
 
@@ -229,27 +229,13 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 	return true;
 }
 
-void Player::PlayerUCT::update_rave(const Node * node, const RaveMoveList & movelist, int won, int toplay){
-	//update the rave score of all children that were played
-	RaveMoveList::iterator rave = movelist.begin(), raveend = movelist.end();
+//update the rave score of all children that were played
+void Player::PlayerUCT::update_rave(const Node * node, int toplay){
 	Node * child = node->children.begin(),
 	     * childend = node->children.end();
 
-	while(rave != raveend && child != childend){
-		if(*rave == child->move){
-			if(rave->player == toplay){
-				child->rave.addvloss();
-				if(rave->player == won)
-					child->rave.addvwin();
-			}
-			rave++;
-			child++;
-		}else if(*rave > child->move){
-			child++;
-		}else{ //(*rave < child->move)
-			rave++;
-		}
-	}
+	for( ; child != childend; ++child)
+		child->rave.addv(movelist.getrave(toplay, child->move));
 }
 
 void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
@@ -324,7 +310,7 @@ bool Player::PlayerUCT::test_bridge_probe(const Board & board, const Move & move
 
 
 //play a random game starting from a board state, and return the results of who won
-int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move, int depth){
+int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	int won;
 
 	int num = board.movesremain();
@@ -409,7 +395,7 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 			}while(!board.valid_move_fast(move));
 		}
 
-		movelist.add(move, board.toplay());
+		movelist.addrollout(move, board.toplay());
 		board.move(move, true, false, (checkrings && depth < checkdepth));
 		depth++;
 	}
@@ -421,7 +407,7 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 
 	//update the last good reply table
 	if(player->lastgoodreply && won > 0){
-		RaveMoveList::iterator rave = movelist.begin(), raveend = movelist.end();
+		MoveList::RaveMove * rave = movelist.begin(), *raveend = movelist.end();
 
 		int m = -1;
 		while(rave != raveend){
@@ -436,6 +422,7 @@ int Player::PlayerUCT::rollout(Board & board, RaveMoveList & movelist, Move move
 		}
 	}
 
+	movelist.finishrollout(won);
 	return won;
 }
 
