@@ -168,7 +168,9 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int
 
 			val = (child->outcome == 0 ? -1 : -2); //-1 for tie so any unknown is better, -2 for loss so it's even worse
 		}else{
-			val = child->value(raveval, player->knowledge, player->fpurgency) + explore*sqrt(logvisits/(child->exp.num() + 1));
+			val = child->value(raveval, player->knowledge, player->fpurgency);
+			if(explore > 0)
+				val += explore*sqrt(logvisits/(child->exp.num() + 1));
 		}
 
 		if(maxval < val){
