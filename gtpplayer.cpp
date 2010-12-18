@@ -235,6 +235,9 @@ GTPResponse HavannahGTP::gtp_pv(vecstr args){
 }
 
 GTPResponse HavannahGTP::gtp_genmove(vecstr args){
+	if(player.rootboard.won() >= 0)
+		return GTPResponse(true, "resign");
+
 	double use_time = get_time();
 
 	if(args.size() >= 2)
@@ -245,9 +248,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	player.rootboard.setswap(allow_swap);
 
 	Player::Node * ret = player.genmove(use_time, time.max_sims);
-	Move best = M_RESIGN;
-	if(ret)
-		best = ret->move;
+	Move best = player.root.bestmove;
 
 	if(time.flexible)
 		time_remain += time.move - player.time_used;
