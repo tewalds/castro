@@ -139,22 +139,27 @@ public:
 		//new way, more standard way of changing over from rave scores to real scores
 		float value(float ravefactor, bool knowledge, float fpurgency){
 			float val = fpurgency;
+			float expnum = exp.num();
 
 			if(ravefactor <= min_rave){
-				if(exp.num() > 0)
+				if(expnum > 0)
 					val = exp.avg();
-			}else if(rave.num() || exp.num()){
-				float alpha = ravefactor/(ravefactor + exp.num());
+			}else if(rave.num() || expnum > 0){
+				float alpha = ravefactor/(ravefactor + expnum);
 //				float alpha = sqrt(ravefactor/(ravefactor + 3*exp.num()));
 //				float alpha = (float)rave.num()/((float)exp.num() + (float)rave.num() + 4.0*exp.num()*rave.num()*ravefactor);
 
 				val = 0;
 				if(rave.num()) val += alpha*rave.avg();
-				if(exp.num())  val += (1-alpha)*exp.avg();
+				if(expnum > 0) val += (1-alpha)*exp.avg();
 			}
 
-			if(knowledge && know > 0)
-				val += 0.01f * know / sqrt((float)(exp.num() + 1));
+			if(knowledge && know > 0){
+				if(expnum <= 1)
+					val += 0.01f * know;
+				else if(expnum < 1000) //knowledge is only useful with little experience
+					val += 0.01f * know / sqrt(expnum);
+			}
 
 			return val;
 		}
