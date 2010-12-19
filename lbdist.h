@@ -170,16 +170,22 @@ public:
 		}
 	}
 
-	bool isdraw(){
+	int isdraw(){
+		int outcome = 0;
 		for(int y = 0; y < board->get_size_d(); y++){
 			for(int x = board->linestart(y); x < board->lineend(y); x++){
 				Move pos(x,y);
 
-				if(board->encirclable(pos, 1) || board->encirclable(pos, 2) || get(pos, 1) < maxdist-5 || get(pos, 2) < maxdist-5)
-					return false;
+				if(board->encirclable(pos, 1) || get(pos, 1) < maxdist-5)
+					outcome |= 1;
+				if(board->encirclable(pos, 2) || get(pos, 2) < maxdist-5)
+					outcome |= 2;
+
+				if(outcome == 3)
+					return -3;
 			}
 		}
-		return true;
+		return -outcome;
 	}
 
 	int get(Move pos){ return min(get(pos, 1),  get(pos, 2)); }
