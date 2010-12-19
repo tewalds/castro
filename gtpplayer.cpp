@@ -296,16 +296,17 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 		}
 	}
 
-	if(ret){
+	if(ret)
 		stats += "Move Score:  " + to_str(ret->exp.avg()) + "\n";
 
-		if(ret->outcome >= 0){
-			stats += "Solved as a ";
-			if(ret->outcome == 0)           stats += "draw";
-			else if(ret->outcome == toplay) stats += "win";
-			else                            stats += "loss";
-			stats += "\n";
-		}
+	if(player.root.outcome != -3){
+		stats += "Solved as a ";
+		if(player.root.outcome == 0)             stats += "draw";
+		else if(player.root.outcome == toplay)   stats += "win";
+		else if(player.root.outcome == 3-toplay) stats += "loss";
+		else if(player.root.outcome == -toplay)  stats += "win or draw";
+		else if(player.root.outcome == toplay-3) stats += "loss or draw";
+		stats += "\n";
 	}
 
 	stats += "PV:          " + gtp_pv(vecstr()).response + "\n";
