@@ -74,6 +74,10 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 	return;
 }
 
+bool sort_node_know(const Player::Node & a, const Player::Node & b){
+	return (a.know > b.know);
+}
+
 bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	if(!node->children.lock())
 		return false;
@@ -143,6 +147,9 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 		return true;
 	}
 
+	if(player->dynwiden > 0) //sort in decreasing order by knowledge
+		sort(temp.begin(), temp.end(), sort_node_know);
+
 	PLUS(player->nodes, temp.num());
 	node->children.swap(temp);
 	assert(temp.unlock());
@@ -153,13 +160,14 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int remain) const {
 	float val, maxval = -1000000000;
 	float logvisits = log(node->exp.num());
+	int dynwidenlim = (player->dynwiden > 0 ? logvisits/player->logdynwiden : 361);
 
 	float raveval = use_rave * (player->ravefactor + player->decrrave*remain);
 	float explore = use_explore * player->explore;
 
 	Node * ret = NULL,
 		 * child = node->children.begin(),
-		 * end = node->children.end();
+		 * end = min(node->children.end(), child + dynwidenlim);
 
 	for(; child != end; child++){
 		if(child->outcome >= 0){

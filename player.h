@@ -365,6 +365,8 @@ public:
 	float useexplore; //what probability to use UCT exploration
 	float fpurgency;  //what value to return for a move that hasn't been played yet
 	int   rollouts;   //number of rollouts to run after the tree traversal
+	float dynwiden;   //dynamic widening, look at first log_dynwiden(experience) number of children, 0 to disable
+	float logdynwiden; // = log(dynwiden), cached for performance
 //tree building
 	bool  shortrave;  //only update rave values on short rollouts
 	bool  keeptree;   //reuse the tree from the previous move
@@ -436,6 +438,7 @@ public:
 		useexplore  = 1;
 		fpurgency   = 1;
 		rollouts    = 1;
+		dynwiden    = 0;
 
 		shortrave   = false;
 		keeptree    = true;
