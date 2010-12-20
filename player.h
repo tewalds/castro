@@ -285,16 +285,14 @@ public:
 		mutable MTRand unitrand;
 		Thread thread;
 		Player * player;
-		bool cancelled;
 	public:
 		int runs, maxruns;
 		DepthStats treelen, gamelen;
 		DepthStats wintypes[2][4]; //player,wintype
 
-		PlayerThread() : rand32(std::rand()), unitrand(std::rand()), cancelled(false), runs(0), maxruns(0) {}
+		PlayerThread() : rand32(std::rand()), unitrand(std::rand()), runs(0), maxruns(0) {}
 		virtual ~PlayerThread() { }
 		virtual void reset() { }
-		void cancel(){ cancelled = true; }
 		int join(){ return thread.join(); }
 		void run(); //thread runner, calls iterate on each iteration
 		virtual void iterate() { } //handles each iteration
@@ -409,6 +407,7 @@ public:
 	enum ThreadState {
 		Thread_Cancelled,  //threads should exit
 		Thread_Wait_Start, //threads are waiting to start
+		Thread_Wait_Start_Cancelled, //once done waiting, go to cancelled instead of running
 		Thread_Running,    //threads are running
 		Thread_GC,         //one thread is running garbage collection, the rest are waiting
 		Thread_GC_End,     //once done garbage collecting, go to wait_end instead of back to running
@@ -502,6 +501,7 @@ public:
 		switch(threadstate){
 		case Thread_Cancelled:  return "Thread_Wait_Cancelled";
 		case Thread_Wait_Start: return "Thread_Wait_Start";
+		case Thread_Wait_Start_Cancelled: return "Thread_Wait_Start_Cancelled";
 		case Thread_Running:    return "Thread_Running";
 		case Thread_GC:         return "Thread_GC";
 		case Thread_GC_End:     return "Thread_GC_End";
@@ -528,12 +528,8 @@ public:
 		assert(threadstate == Thread_Wait_Start);
 
 	//wait for them to all get to the barrier
+		assert(CAS(threadstate, Thread_Wait_Start, Thread_Wait_Start_Cancelled));
 		runbarrier.wait();
-
-	//kill all the threads
-		threadstate = Thread_Cancelled;
-		for(unsigned int i = 0; i < threads.size(); i++)
-			threads[i]->cancel();
 
 	//make sure they exited cleanly
 		for(unsigned int i = 0; i < threads.size(); i++)

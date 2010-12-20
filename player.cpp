@@ -14,8 +14,10 @@ void Player::PlayerThread::run(){
 			return;
 
 		case Thread_Wait_Start: //threads are waiting to start
+		case Thread_Wait_Start_Cancelled:
 			player->runbarrier.wait();
 			CAS(player->threadstate, Thread_Wait_Start, Thread_Running);
+			CAS(player->threadstate, Thread_Wait_Start_Cancelled, Thread_Cancelled);
 			break;
 
 		case Thread_Wait_End:   //threads are waiting to end
@@ -24,9 +26,6 @@ void Player::PlayerThread::run(){
 			break;
 
 		case Thread_Running:    //threads are running
-			if(cancelled)
-				return;
-
 			if(player->root.outcome >= 0 || (maxruns > 0 && runs >= maxruns)){ //solved or finished runs
 				CAS(player->threadstate, Thread_Running, Thread_Wait_End);
 				break;
