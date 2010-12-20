@@ -103,6 +103,7 @@ GTPResponse HavannahGTP::gtp_move_stats(vecstr args){
 		s += move_str(child->move, true);
 		s += "," + to_str(child->exp.avg(), 2) + "," + to_str(child->exp.num());
 		s += "," + to_str(child->rave.avg(), 2) + "," + to_str(child->rave.num());
+		s += "," + to_str(child->know);
 		if(child->outcome >= 0)
 			s += "," + won_str(child->outcome);
 		s += "\n";
