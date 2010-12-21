@@ -88,7 +88,7 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 		dists.run(&board);
 
 		if(player->detectdraw){
-			assert(node->outcome == -3);
+//			assert(node->outcome == -3);
 			node->outcome = dists.isdraw(); //could be winnable by only one side
 
 			if(node->outcome == 0){ //proven draw, neither side can influence the outcome
