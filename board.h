@@ -362,11 +362,14 @@ public:
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 
-			if(onboard(loc) && turn == get(loc)){
-				const Cell * g = & cells[find_group(loc)];
-				testcell.corner |= g->corner;
-				testcell.edge   |= g->edge;
-				i++; //skip the next one
+			if(onboard(loc)){
+				int locxy = xy(loc);
+				if(turn == get(locxy)){
+					const Cell * g = & cells[find_group(locxy)];
+					testcell.corner |= g->corner;
+					testcell.edge   |= g->edge;
+					i++; //skip the next one
+				}
 			}
 		}
 		return testcell.numcorners() + testcell.numedges();
@@ -379,9 +382,12 @@ public:
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 
-			if(onboard(loc) && turn == get(loc)){
-				size += cells[find_group(loc)].size;
-				i++; //skip the next one
+			if(onboard(loc)){
+				int locxy = xy(loc);
+				if(turn == get(locxy)){
+					size += cells[find_group(locxy)].size;
+					i++; //skip the next one
+				}
 			}
 		}
 		return size;
