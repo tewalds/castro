@@ -114,6 +114,7 @@ public:
 
 private:
 	char size; //the length of one side of the hexagon
+	char sizem1; //size - 1
 	char size_d; //diameter of the board = size*2-1
 
 	short nummoves;
@@ -133,6 +134,7 @@ public:
 
 	Board(int s){
 		size = s;
+		sizem1 = s - 1;
 		size_d = s*2-1;
 		nummoves = 0;
 		unique_depth = 5;
@@ -157,7 +159,7 @@ public:
 	int get_size() const{ return size; }
 
 	int vecsize() const { return size_d*size_d; }
-	int numcells() const { return vecsize() - size*(size - 1); }
+	int numcells() const { return vecsize() - size*sizem1; }
 
 	int num_moves() const { return nummoves; }
 	int movesremain() const { return (won() >= 0 ? 0 : numcells() - nummoves + canswap()); }
@@ -165,8 +167,8 @@ public:
 	int xy(int x, int y)   const { return   y*size_d +   x; }
 	int xy(const Move & m) const { return m.y*size_d + m.x; }
 
-	int xyc(int x, int y)   const { return xy(  x + size-1,   y + size-1); }
-	int xyc(const Move & m) const { return xy(m.x + size-1, m.y + size-1); }
+	int xyc(int x, int y)   const { return xy(  x + sizem1,   y + sizem1); }
+	int xyc(const Move & m) const { return xy(m.x + sizem1, m.y + sizem1); }
 	
 	//assumes valid x,y
 	int get(int i)          const { return cells[i].piece; }
@@ -196,7 +198,7 @@ public:
 		if(!onboard(x,y))
 			return -1;
 
-		int m = size-1, e = size_d-1;
+		int m = sizem1, e = size_d-1;
 
 		if(x == 0 && y == 0) return 0;
 		if(x == m && y == 0) return 1;
@@ -212,7 +214,7 @@ public:
 		if(!onboard(x,y))
 			return -1;
 
-		int m = size-1, e = size_d-1;
+		int m = sizem1, e = size_d-1;
 
 		if(y   == 0 && x != 0 && x != m) return 0;
 		if(x-y == m && x != m && x != e) return 1;
@@ -225,9 +227,9 @@ public:
 	}
 
 
-	int linestart(int y) const { return (y < size ? 0 : y - (size-1)); }
+	int linestart(int y) const { return (y < size ? 0 : y - sizem1); }
 	int lineend(int y)   const { return (y < size ? size + y : size_d); }
-	int linelen(int y)   const { return size_d - abs((size-1) - y); }
+	int linelen(int y)   const { return size_d - abs(sizem1 - y); }
 
 	string to_s() const {
 		string s;
@@ -239,7 +241,7 @@ public:
 		s += "\n";
 
 		for(int y = 0; y < size_d; y++){
-			s += string(abs(size-1 - y) + 2, ' ');
+			s += string(abs(sizem1 - y) + 2, ' ');
 			s += char('A' + y);
 			s += " ";
 			for(int x = linestart(y); x < lineend(y); x++){
@@ -441,8 +443,8 @@ public:
 		}
 
 		//mirror is simply flip x,y
-		int x = pos.x - size+1,
-		    y = pos.y - size+1,
+		int x = pos.x - sizem1,
+		    y = pos.y - sizem1,
 		    z = y - x;
 
 //x,y; y,z; z,-x; -x,-y; -y,-z; -z,x
@@ -466,8 +468,8 @@ public:
 		if(nummoves >= unique_depth) //simple test, no rotations/symmetry
 			return hash.test(0, 3*xy(pos) + turn);
 
-		int x = pos.x - size+1,
-		    y = pos.y - size+1,
+		int x = pos.x - sizem1,
+		    y = pos.y - sizem1,
 		    z = y - x;
 
 		hash_t m = hash.test(0,  3*xyc( x,  y) + turn);
