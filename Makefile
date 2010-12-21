@@ -7,7 +7,7 @@ OBJECTS		= castro.o gtpgeneral.o gtpplayer.o gtpsolver.o mtrand.o string.o \
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall
 else
-	CPPFLAGS	+= -O3 -funroll-loops -Wall
+	CPPFLAGS	+= -O3 -funroll-loops -Wall -march=native
 endif
 
 all: castro
