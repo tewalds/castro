@@ -502,15 +502,17 @@ public:
 			}
 		}
 
-		bool local = (cells[xy(pos)].local == 3);
+		int posxy = xy(pos);
+		bool local = (cells[posxy].local == 3);
 		bool alreadyjoined = false; //useful for finding rings
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 		
 			if(onboard(loc)){
-				cells[xy(loc)].local = 3;
-				if(local && turn == get(loc)){
-					alreadyjoined |= join_groups(pos, loc);
+				int locxy = xy(loc);
+				cells[locxy].local = 3;
+				if(local && turn == get(locxy)){
+					alreadyjoined |= join_groups(posxy, locxy);
 					i++; //skip the next one. If it is the same group,
 						 //it is already connected and forms a corner, which we can ignore
 				}
@@ -518,7 +520,7 @@ public:
 		}
 
 		if(checkwin){
-			Cell * g = & cells[find_group(pos)];
+			Cell * g = & cells[find_group(posxy)];
 			if(g->numedges() >= 3){
 				outcome = turn;
 				wintype = 1;
@@ -541,24 +543,28 @@ public:
 
 	//test if making this move would win, but don't actually make the move
 	int test_win(const Move & pos, char turn = 0) const {
-		if(cells[xy(pos)].local != 3)
+		int posxy = xy(pos);
+		if(cells[posxy].local != 3)
 			return -3;
 
 		if(turn == 0)
 			turn = toplay();
 
-		Cell testcell = cells[find_group(pos)];
+		Cell testcell = cells[find_group(posxy)];
 		int numgroups = 0;
 		for(int i = 0; i < 6; i++){
 			Move loc = pos + neighbours[i];
 
-			if(onboard(loc) && turn == get(loc)){
-				const Cell * g = & cells[find_group(loc)];
-				testcell.corner |= g->corner;
-				testcell.edge   |= g->edge;
-				testcell.size   += g->size;
-				i++; //skip the next one
-				numgroups++;
+			if(onboard(loc)){
+				int locxy = xy(loc);
+				if(turn == get(locxy)){
+					const Cell * g = & cells[find_group(locxy)];
+					testcell.corner |= g->corner;
+					testcell.edge   |= g->edge;
+					testcell.size   += g->size;
+					i++; //skip the next one
+					numgroups++;
+				}
 			}
 		}
 
