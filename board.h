@@ -321,9 +321,14 @@ public:
 	int find_group(const Move & m) const { return find_group(xy(m)); }
 	int find_group(int x, int y)   const { return find_group(xy(x, y)); }
 	int find_group(unsigned int i) const {
-		if(cells[i].parent != i)
-			cells[i].parent = find_group(cells[i].parent);
-		return cells[i].parent;
+		unsigned int p = cells[i].parent;
+		if(p != i){
+			do{
+				p = cells[p].parent;
+			}while(p != cells[p].parent);
+			cells[i].parent = p; //do path compression, but only the current one, not all, to avoid recursion
+		}
+		return p;
 	}
 
 	//join the groups of two positions, propagating group size, and edge/corner connections
@@ -333,10 +338,10 @@ public:
 	bool join_groups(int i, int j){
 		i = find_group(i);
 		j = find_group(j);
-		
+
 		if(i == j)
 			return true;
-		
+
 		if(cells[i].size < cells[j].size) //force i's subtree to be bigger
 			swap(i, j);
 
