@@ -35,6 +35,9 @@ const MoveScore neighbours[18] = {
 	MoveScore(-1,-2, 2), MoveScore(1,-1, 2), MoveScore(2, 1, 2), MoveScore(1, 2, 2), MoveScore(-1, 1, 2), MoveScore(-2,-1, 2), //sides of ring 2, virtual connections
 	};
 
+static MoveValid * staticneighbourlist[11] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+
+
 class Board{
 	struct Cell {
 /*
@@ -126,6 +129,7 @@ private:
 
 	vector<Cell> cells;
 	Zobrist hash;
+	const MoveValid * neighbourlist;
 
 public:
 	Board(){
@@ -142,6 +146,7 @@ public:
 		outcome = -3;
 		wintype = 0;
 		allowswap = false;
+		neighbourlist = get_neighbour_list();
 
 		cells.resize(vecsize());
 
@@ -194,6 +199,15 @@ public:
 	bool valid_move(int x, int y)   const { return (outcome == -3 && onboard(x, y) && !get(x,y)); } //ignores swap rule!
 	bool valid_move(const Move & m) const { return (outcome == -3 && ((onboard(m) && !get(m)) || (m == M_SWAP && canswap()))); }
 
+	//iterator through neighbours of a position
+	const MoveValid * nb_begin(int x, int y)   const { return nb_begin(xy(x, y)); }
+	const MoveValid * nb_begin(const Move & m) const { return nb_begin(xy(m)); }
+	const MoveValid * nb_begin(int i)          const { return &neighbourlist[i*6]; }
+
+	const MoveValid * nb_end(int x, int y)   const { return nb_end(xy(x, y)); }
+	const MoveValid * nb_end(const Move & m) const { return nb_end(xy(m)); }
+	const MoveValid * nb_end(int i)          const { return nb_begin(i) + 6; }
+
 	int iscorner(int x, int y) const {
 		if(!onboard(x,y))
 			return -1;
@@ -224,6 +238,29 @@ public:
 		if(x   == 0 && y != m && y != 0) return 5;
 
 		return -1;
+	}
+
+	MoveValid * get_neighbour_list(){
+		if(!staticneighbourlist[(int)size]){
+			MoveValid * list = new MoveValid[vecsize()*6];
+			MoveValid * a = list;
+			for(int y = 0; y < size_d; y++){
+				for(int x = 0; x < size_d; x++){
+					Move pos(x,y);
+
+					for(int i = 0; i < 6; i++){
+						Move loc = pos + neighbours[i];
+						if(onboard(loc))
+							*a = MoveValid(loc, xy(loc));
+						++a;
+					}
+				}
+			}
+
+			staticneighbourlist[(int)size] = list;
+		}
+
+		return staticneighbourlist[(int)size];
 	}
 
 
@@ -357,19 +394,15 @@ public:
 
 	int test_connectivity(const Move & pos) const {
 		char turn = toplay();
+		int posxy = xy(pos);
 
 		Cell testcell = cells[find_group(pos)];
-		for(int i = 0; i < 6; i++){
-			Move loc = pos + neighbours[i];
-
-			if(onboard(loc)){
-				int locxy = xy(loc);
-				if(turn == get(locxy)){
-					const Cell * g = & cells[find_group(locxy)];
-					testcell.corner |= g->corner;
-					testcell.edge   |= g->edge;
-					i++; //skip the next one
-				}
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+			if(i->onboard() && turn == get(i->xy)){
+				const Cell * g = & cells[find_group(i->xy)];
+				testcell.corner |= g->corner;
+				testcell.edge   |= g->edge;
+				i++; //skip the next one
 			}
 		}
 		return testcell.numcorners() + testcell.numedges();
@@ -377,17 +410,13 @@ public:
 
 	int test_size(const Move & pos) const {
 		char turn = toplay();
+		int posxy = xy(pos);
 
 		int size = 1;
-		for(int i = 0; i < 6; i++){
-			Move loc = pos + neighbours[i];
-
-			if(onboard(loc)){
-				int locxy = xy(loc);
-				if(turn == get(locxy)){
-					size += cells[find_group(locxy)].size;
-					i++; //skip the next one
-				}
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+			if(i->onboard() && turn == get(i->xy)){
+				size += cells[find_group(i->xy)].size;
+				i++; //skip the next one
 			}
 		}
 		return size;
@@ -397,18 +426,17 @@ public:
 	//false if it or one of its neighbours are the opponent's and connected to an edge or corner
 	bool encirclable(const Move pos, int player) const {
 		int otherplayer = 3-player;
+		int posxy = xy(pos);
 
-		const Cell * g = & cells[find_group(pos)];
+		const Cell * g = & cells[find_group(posxy)];
 		if(g->piece == otherplayer && (g->edge || g->corner))
 			return false;
 
-		for(int i = 0; i < 6; i++){
-			Move loc = pos + neighbours[i];
-
-			if(!onboard(loc))
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+			if(!i->onboard())
 				return false;
 
-			const Cell * g = & cells[find_group(loc)];
+			const Cell * g = & cells[find_group(i->xy)];
 			if(g->piece == otherplayer && (g->edge || g->corner))
 				return false;
 		}
@@ -518,14 +546,11 @@ public:
 		int posxy = xy(pos);
 		bool local = (cells[posxy].local == 3);
 		bool alreadyjoined = false; //useful for finding rings
-		for(int i = 0; i < 6; i++){
-			Move loc = pos + neighbours[i];
-		
-			if(onboard(loc)){
-				int locxy = xy(loc);
-				cells[locxy].local = 3;
-				if(local && turn == get(locxy)){
-					alreadyjoined |= join_groups(posxy, locxy);
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+			if(i->onboard()){
+				cells[i->xy].local = 3;
+				if(local && turn == get(i->xy)){
+					alreadyjoined |= join_groups(posxy, i->xy);
 					i++; //skip the next one. If it is the same group,
 						 //it is already connected and forms a corner, which we can ignore
 				}
@@ -565,19 +590,14 @@ public:
 
 		Cell testcell = cells[find_group(posxy)];
 		int numgroups = 0;
-		for(int i = 0; i < 6; i++){
-			Move loc = pos + neighbours[i];
-
-			if(onboard(loc)){
-				int locxy = xy(loc);
-				if(turn == get(locxy)){
-					const Cell * g = & cells[find_group(locxy)];
-					testcell.corner |= g->corner;
-					testcell.edge   |= g->edge;
-					testcell.size   += g->size;
-					i++; //skip the next one
-					numgroups++;
-				}
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+			if(i->onboard() && turn == get(i->xy)){
+				const Cell * g = & cells[find_group(i->xy)];
+				testcell.corner |= g->corner;
+				testcell.edge   |= g->edge;
+				testcell.size   += g->size;
+				i++; //skip the next one
+				numgroups++;
 			}
 		}
 
