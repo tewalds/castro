@@ -4,23 +4,11 @@ worker stuff
 - cd /tmp; wget -N --no-check-certificate https://dropbox.ewalds.ca/worker.sh; screen -d -m sh worker.sh; logout
 
 
-
-resigns instead of making winning move...
-
 compact tree memory manager
 - store a generation counter in the Data struct?
 - useful to know if this empty slot stayed empty for a whole generation?
 
-Draw detection
-- if proven no move can win, backup any draw immediately, don't need to prove all the rest are draws/losses
-
-
 solver threads should use a TT instead of using the tree?
-
-progressive widening
-- start at one child
-- add an extra move after 1.5x as many rollouts
-- implement as looking at the first log(children)/log(1.5) of the children
 
 if not keeptree, and the number of non-losing moves at the root is 1, just make that move
 
@@ -39,16 +27,20 @@ Test the accuracy of the rollouts
 - compare the two for many positions
 - compare at various stages in a game
 - test different rollout policies to minimize error
+- look at error distribution
+- error and absolute error
+
+Test accuracy of knowledge
+- do a tree search with exploration to get the value of a position and the order of moves
+- try various knowledge combinations to see how they order moves
+- consider equal knowledge value when determining distance
 
 multiple rollouts per simulation
-- combine rave updates, lower contention
-- also allow children to be stored out of order so progressive widening will work
 - GPU rollouts for those that don't care about rings?
 
 
 fix crash after last move, seems to be related to pondering
 
-batch update for the first couple moves to speed up backups
 
 
 move ordering by knowledge
