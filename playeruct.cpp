@@ -11,6 +11,7 @@ void Player::PlayerUCT::iterate(){
 	use_rave    = (unitrand() < player->userave);
 	use_explore = (unitrand() < player->useexplore);
 	walk_tree(copy, & player->root, 0);
+	player->root.exp.addv(movelist.getexp(3-player->rootboard.toplay()));
 }
 
 void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
