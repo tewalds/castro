@@ -8,7 +8,11 @@ compact tree memory manager
 - store a generation counter in the Data struct?
 - useful to know if this empty slot stayed empty for a whole generation?
 
-solver threads should use a TT instead of using the tree?
+detect ties
+- if not using lbdists, use 1 flood fill instead of 24
+- keep bits for corners and edges for each colour
+- if crossing empty or your own, propagate connections, otherwise don't
+- how to go backwards?
 
 if not keeptree, and the number of non-losing moves at the root is 1, just make that move
 
@@ -101,6 +105,7 @@ final move selection
 multi-thread
 - different parameters (ie ravefactor) for each player thread?
   - useful for testing parameters at different parts of the game
+- solver threads should use a TT instead of using the tree?
 
 
 share the tree between the player and solver
