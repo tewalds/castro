@@ -300,7 +300,7 @@ void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
 		child->know += player->bridge;
 
 	if(player->dists)
-		child->know += player->dists * max(0, board.get_size() - dists.get(node->move));
+		child->know += player->dists * max(0, board.get_size_d() - dists.get(child->move));
 }
 
 //test whether this move is a forced reply to the opponent probing your virtual connections
