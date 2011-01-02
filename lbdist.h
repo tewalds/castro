@@ -12,9 +12,6 @@ Decrease distance when crossing your own virtual connection?
 #ifndef _LBDIST_H_
 #define _LBDIST_H_
 
-#include <queue>
-using namespace std;
-
 #include "board.h"
 #include "move.h"
 
@@ -27,7 +24,6 @@ class LBDists {
 		MoveDist() { }
 		MoveDist(Move p, int d, int r)       : pos(p),         dist(d), dir(r) { }
 		MoveDist(int x, int y, int d, int r) : pos(Move(x,y)), dist(d), dir(r) { }
-		void print() const { printf("%i,%i: %i\n", pos.x, pos.y, dist); }
 	};
 
 	//a specialized priority queue
