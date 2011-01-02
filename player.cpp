@@ -6,6 +6,7 @@
 #include "string.h"
 #include "solverab.h"
 #include "timer.h"
+#include "time.h"
 
 void Player::PlayerThread::run(){
 	while(true){
@@ -104,6 +105,243 @@ Player::Node * Player::genmove(double time, int maxruns){
 
 //return the best one
 	return return_move(& root, toplay);
+}
+
+
+
+Player::Player() {
+	nodes = 0;
+	gclimit = 5;
+	time_used = 0;
+
+	solved_logfile = NULL;
+
+	ponder      = false;
+//#ifdef SINGLE_THREAD ... make sure only 1 thread
+	numthreads  = 1;
+	maxmem      = 1000*1024*1024;
+
+	msrave      = -2;
+	msexplore   = 0;
+
+	explore     = 0;
+	ravefactor  = 500;
+	decrrave    = 200;
+	knowledge   = true;
+	userave     = 1;
+	useexplore  = 1;
+	fpurgency   = 1;
+	rollouts    = 1;
+	dynwiden    = 0;
+
+	shortrave   = false;
+	keeptree    = true;
+	minimax     = 2;
+	detectdraw  = false;
+	visitexpand = 1;
+	prunesymmetry = false;
+
+	localreply  = 0;
+	locality    = 0;
+	connect     = 20;
+	size        = 0;
+	bridge      = 25;
+	dists       = 0;
+
+	weightedrandom = false;
+	weightedknow   = false;
+	checkrings     = 1.0;
+	checkringdepth = 1000;
+	rolloutpattern = false;
+	lastgoodreply  = false;
+	instantwin     = 0;
+	instwindepth   = 1000;
+
+	//no threads started until a board is set
+	threadstate = Thread_Wait_Start;
+}
+Player::~Player(){
+	stop_threads();
+
+	numthreads = 0;
+	reset_threads(); //shut down the theads properly
+
+	if(solved_logfile){
+		Board copy = rootboard;
+		garbage_collect(copy, & root, 0);
+		fclose(solved_logfile);
+	}
+
+	root.dealloc(ctmem);
+	ctmem.compact();
+}
+void Player::timedout() {
+	CAS(threadstate, Thread_Running, Thread_Wait_End);
+	CAS(threadstate, Thread_GC, Thread_GC_End);
+}
+
+string Player::statestring(){
+	switch(threadstate){
+	case Thread_Cancelled:  return "Thread_Wait_Cancelled";
+	case Thread_Wait_Start: return "Thread_Wait_Start";
+	case Thread_Wait_Start_Cancelled: return "Thread_Wait_Start_Cancelled";
+	case Thread_Running:    return "Thread_Running";
+	case Thread_GC:         return "Thread_GC";
+	case Thread_GC_End:     return "Thread_GC_End";
+	case Thread_Wait_End:   return "Thread_Wait_End";
+	}
+	return "Thread_State_Unknown!!!";
+}
+
+void Player::stop_threads(){
+	if(threadstate != Thread_Wait_Start){
+		timedout();
+		runbarrier.wait();
+		CAS(threadstate, Thread_Wait_End, Thread_Wait_Start);
+		assert(threadstate == Thread_Wait_Start);
+	}
+}
+
+void Player::start_threads(){
+	assert(threadstate == Thread_Wait_Start);
+	runbarrier.wait();
+	CAS(threadstate, Thread_Wait_Start, Thread_Running);
+}
+
+void Player::reset_threads(){ //start and end with threadstate = Thread_Wait_Start
+	assert(threadstate == Thread_Wait_Start);
+
+//wait for them to all get to the barrier
+	assert(CAS(threadstate, Thread_Wait_Start, Thread_Wait_Start_Cancelled));
+	runbarrier.wait();
+
+//make sure they exited cleanly
+	for(unsigned int i = 0; i < threads.size(); i++)
+		threads[i]->join();
+
+	threads.clear();
+
+	threadstate = Thread_Wait_Start;
+
+	runbarrier.reset(numthreads + 1);
+	gcbarrier.reset(numthreads);
+
+//start new threads
+	for(int i = 0; i < numthreads; i++)
+		threads.push_back(new PlayerUCT(this));
+}
+
+void Player::set_ponder(bool p){
+	if(ponder != p){
+		ponder = p;
+		stop_threads();
+
+		if(ponder)
+			start_threads();
+	}
+}
+
+void Player::set_board(const Board & board){
+	stop_threads();
+
+	if(solved_logfile){
+		Board copy = rootboard;
+		garbage_collect(copy, & root, 0);
+	}
+
+	rootboard = board;
+	nodes -= root.dealloc(ctmem);
+	root = Node();
+
+	reset_threads(); //needed since the threads aren't started before a board it set
+
+	if(ponder)
+		start_threads();
+}
+void Player::move(const Move & m){
+	stop_threads();
+
+	if(solved_logfile){
+		Board copy = rootboard;
+		garbage_collect(copy, & root, 0);
+	}
+
+	rootboard.move(m, true, true);
+
+	uword nodesbefore = nodes;
+
+	if(keeptree && root.children.num() > 0){
+		Node child;
+
+		for(Node * i = root.children.begin(); i != root.children.end(); i++){
+			if(i->move == m){
+				child = *i;          //copy the child experience to temp
+				child.swap_tree(*i); //move the child tree to temp
+				break;
+			}
+		}
+
+		nodes -= root.dealloc(ctmem);
+		root = child;
+		root.swap_tree(child);
+
+		if(nodesbefore > 0)
+			logerr("Nodes before: " + to_str(nodesbefore) + ", after: " + to_str(nodes) + ", saved " +  to_str(100.0*nodes/nodesbefore, 1) + "% of the tree\n");
+	}else{
+		nodes -= root.dealloc(ctmem);
+		root = Node();
+		root.move = m;
+	}
+	assert(nodes == root.size());
+
+	root.exp.addwins(visitexpand+1); //+1 to compensate for the virtual loss
+	if(rootboard.won() < 0)
+		root.outcome = -3;
+
+	if(ponder)
+		start_threads();
+}
+
+double Player::gamelen(){
+	DepthStats len;
+	for(unsigned int i = 0; i < threads.size(); i++)
+		len += threads[i]->gamelen;
+	return len.avg();
+}
+
+bool Player::setlogfile(string name){
+	if(solved_logfile)
+		fclose(solved_logfile);
+
+	solved_logfile = fopen(name.c_str(), "a");
+
+	if(solved_logfile)
+		solved_logname = name;
+	else
+		solved_logname = "";
+
+	return solved_logfile;
+}
+
+void Player::flushlog(){
+	if(solved_logfile)
+		fflush(solved_logfile);
+}
+
+void u64buf(char * buf, uint64_t val){
+	static const char hexlookup[] = "0123456789abcdef";
+	for(int i = 15; i >= 0; i--){
+		buf[i] = hexlookup[val & 15];
+		val >>= 4;
+	}
+	buf[16] = '\0';
+}
+
+void Player::logsolved(hash_t hash, const Node * node){
+	char hashbuf[17];
+	u64buf(hashbuf, hash);
+	string s = string("0x") + hashbuf + "," + to_str(node->exp.num()) + "," + to_str(node->outcome) + "\n";
+	fprintf(solved_logfile, "%s", s.c_str());
 }
 
 vector<Move> Player::get_pv(){
