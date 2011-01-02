@@ -375,6 +375,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -W --instwindep  How deep to check instant wins, - multiplies size [" + to_str(player.instwindepth) + "]\n"
 			);
 
+	string errs;
 	for(unsigned int i = 0; i < args.size(); i++) {
 		string arg = args[i];
 
@@ -411,7 +412,8 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 		}else if((arg == "-P" || arg == "--symmetry") && i+1 < args.size()){
 			player.prunesymmetry = from_str<bool>(args[++i]);
 		}else if((arg == "-L" || arg == "--logproof") && i+1 < args.size()){
-			player.setlogfile(args[++i]);
+			if(player.setlogfile(args[++i]) == 0)
+				errs += "Can't set the log file\n";
 		}else if((arg == "-r" || arg == "--userave") && i+1 < args.size()){
 			player.userave = from_str<float>(args[++i]);
 		}else if((arg == "-X" || arg == "--useexplore") && i+1 < args.size()){
@@ -457,6 +459,6 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			return GTPResponse(false, "Missing or unknown parameter");
 		}
 	}
-	return GTPResponse(true);
+	return GTPResponse(true, errs);
 }
 
