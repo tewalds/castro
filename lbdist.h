@@ -98,43 +98,21 @@ public:
 
 		int m = board->get_size()-1, e = board->get_size_d()-1;
 
-	//corner 0
-		init(0, 0, 0, 1, 3); flood(0, 1);
-		init(0, 0, 0, 2, 3); flood(0, 2);
-	//corner 1
-		init(m, 0, 1, 1, 4); flood(1, 1);
-		init(m, 0, 1, 2, 4); flood(1, 2);
-	//corner 2
-		init(e, m, 2, 1, 5); flood(2, 1);
-		init(e, m, 2, 2, 5); flood(2, 2);
-	//corner 3
-		init(e, e, 3, 1, 0); flood(3, 1);
-		init(e, e, 3, 2, 0); flood(3, 2);
-	//corner 4
-		init(m, e, 4, 1, 1); flood(4, 1);
-		init(m, e, 4, 2, 1); flood(4, 2);
-	//corner 5
-		init(0, m, 5, 1, 2); flood(5, 1);
-		init(0, m, 5, 2, 2); flood(5, 2);
+		for(int player = 1; player <= 2; player++){
+			init(0, 0, 0, player, 3); flood(0, player); //corner 0
+			init(m, 0, 1, player, 4); flood(1, player); //corner 1
+			init(e, m, 2, player, 5); flood(2, player); //corner 2
+			init(e, e, 3, player, 0); flood(3, player); //corner 3
+			init(m, e, 4, player, 1); flood(4, player); //corner 4
+			init(0, m, 5, player, 2); flood(5, player); //corner 5
 
-	//edge 0
-		for(int x = 1; x < m; x++)   { init(x,   0, 6,  1, 3+(x==1)); } flood(6, 1);
-		for(int x = 1; x < m; x++)   { init(x,   0, 6,  2, 3+(x==1)); } flood(6, 2);
-	//edge 1
-		for(int y = 1; y < m; y++)   { init(m+y, y, 7,  1, 4+(y==1)); } flood(7, 1);
-		for(int y = 1; y < m; y++)   { init(m+y, y, 7,  2, 4+(y==1)); } flood(7, 2);
-	//edge 2
-		for(int y = m+1; y < e; y++) { init(e,   y, 8,  1, 5+(y==m+1)); } flood(8, 1);
-		for(int y = m+1; y < e; y++) { init(e,   y, 8,  2, 5+(y==m+1)); } flood(8, 2);
-	//edge 3
-		for(int x = m+1; x < e; x++) { init(x,   e, 9,  1, 0+(x==e-1)); } flood(9, 1);
-		for(int x = m+1; x < e; x++) { init(x,   e, 9,  2, 0+(x==e-1)); } flood(9, 2);
-	//edge 4
-		for(int x = 1; x < m; x++)   { init(x, m+x, 10, 1, 1+(x==m-1)); } flood(10, 1);
-		for(int x = 1; x < m; x++)   { init(x, m+x, 10, 2, 1+(x==m-1)); } flood(10, 2);
-	//edge 5
-		for(int y = 1; y < m; y++)   { init(0,   y, 11, 1, 2+(y==m-1)); } flood(11, 1);
-		for(int y = 1; y < m; y++)   { init(0,   y, 11, 2, 2+(y==m-1)); } flood(11, 2);
+			for(int x = 1; x < m; x++)   { init(x,   0, 6,  player, 3+(x==1));   } flood(6,  player); //edge 0
+			for(int y = 1; y < m; y++)   { init(m+y, y, 7,  player, 4+(y==1));   } flood(7,  player); //edge 1
+			for(int y = m+1; y < e; y++) { init(e,   y, 8,  player, 5+(y==m+1)); } flood(8,  player); //edge 2
+			for(int x = m+1; x < e; x++) { init(x,   e, 9,  player, 0+(x==e-1)); } flood(9,  player); //edge 3
+			for(int x = 1; x < m; x++)   { init(x, m+x, 10, player, 1+(x==m-1)); } flood(10, player); //edge 4
+			for(int y = 1; y < m; y++)   { init(0,   y, 11, player, 2+(y==m-1)); } flood(11, player); //edge 5
+		}
 	}
 
 	void flood(int edge, int player){
