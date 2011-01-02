@@ -135,7 +135,7 @@ public:
 
 			return num;
 		}
-//*
+
 		//new way, more standard way of changing over from rave scores to real scores
 		float value(float ravefactor, bool knowledge, float fpurgency){
 			float val = fpurgency;
@@ -163,49 +163,6 @@ public:
 
 			return val;
 		}
-/*/
-		//my understanding of how fuego does it
-		float value(float ravefactor, float fpurgency){
-			float val = 0;
-			float weight = 0;
-			if(visits) {
-				val += score;
-				weight += visits;
-			}
-			if(ravevisits){
-				float bias = 1.0/(1.1 + ravevisits/20000.0);
-				val += rave*bias;
-				weight += ravevisits*bias;
-			}
-			if(weight > 0)
-				return val / weight;
-			else
-				return fpurgency;
-		}
-
-		//based directly on fuego
-		float value(float ravefactor, float fpurgency){
-			float val = 0.f;
-			float weightSum = 0.f;
-			bool hasValue = false;
-			if(visits){
-				val += score;
-				weightSum += visits;
-				hasValue = true;
-			}
-			if(ravevisits){
-				float weight = ravevisits / (  1.1 + ravevisits/20000.);
-				val += weight * rave / ravevisits;
-				weightSum += weight;
-				hasValue = true;
-			}
-			if(hasValue)
-				return val / weightSum;
-			else
-				return fpurgency;
-		}
-
-//*/
 	};
 
 	struct MoveList {
