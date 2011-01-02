@@ -77,7 +77,7 @@ public:
 	}
 
 	//sets the weight and updates the tree, O(log s)
-	void set_weight(unsigned int i, double w){
+	void set_weight(unsigned int i, float w){
 		i += size;
 
 		if(weights[i] == w)
