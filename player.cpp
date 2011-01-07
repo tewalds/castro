@@ -43,13 +43,17 @@ void Player::PlayerThread::run(){
 		case Thread_GC:         //one thread is running garbage collection, the rest are waiting
 		case Thread_GC_End:     //once done garbage collecting, go to wait_end instead of back to running
 			if(player->gcbarrier.wait()){
+				Time starttime;
 				logerr("Starting player GC with limit " + to_str(player->gclimit) + " ... ");
 				uint64_t nodesbefore = player->nodes;
 				Board copy = player->rootboard;
 				player->garbage_collect(copy, & player->root, player->gclimit);
 				player->flushlog();
+				Time gctime;
 				player->ctmem.compact();
-				logerr(to_str(100.0*player->nodes/nodesbefore, 1) + " % of tree remains\n");
+				Time compacttime;
+				logerr(to_str(100.0*player->nodes/nodesbefore, 1) + " % of tree remains - " +
+					to_str((gctime - starttime)*1000, 0)  + " msec gc, " + to_str((compacttime - gctime)*1000, 0) + " msec compact\n");
 
 				if(player->ctmem.memused() >= player->maxmem/2)
 					player->gclimit = (int)(player->gclimit*1.3);
