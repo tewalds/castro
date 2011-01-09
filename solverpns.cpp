@@ -55,9 +55,9 @@ void SolverPNS::run_pns(){
 			ctmem.compact();
 
 			logerr("Garbage collection cleaned up " + to_str(before - nodes) + " nodes, " +
-				to_str(ctmem.memused()/(1024*1024)) +  " of " + to_str(memlimit/(1024*1024)) + " Mb still in use\n");
+				to_str(ctmem.meminuse()/(1024*1024)) +  " of " + to_str(memlimit/(1024*1024)) + " Mb still in use\n");
 
-			if(ctmem.memused() > memlimit*0.99)
+			if(ctmem.meminuse() > memlimit*0.99)
 				break;
 		}
 	}
@@ -68,7 +68,7 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 		maxdepth = depth;
 
 	if(node->children.empty()){
-		if(ctmem.memused() >= memlimit)
+		if(ctmem.memalloced() >= memlimit)
 			return false;
 
 		int numnodes = board.movesremain();

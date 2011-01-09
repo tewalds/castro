@@ -202,6 +202,7 @@ private:
 	Chunk * head, * current;
 	unsigned int numchunks;
 	Data * freelist[MAX_NUM];
+	uint64_t memused;
 
 public:
 
@@ -212,6 +213,7 @@ public:
 		//allocate the first chunk
 		head = current = new Chunk(CHUNK_SIZE);
 		numchunks = 1;
+		memused = 0;
 	}
 	~CompactTree(){
 		head->dealloc(true);
@@ -220,12 +222,31 @@ public:
 		numchunks = 0;
 	}
 
-	uint64_t memused(){
+	//how much memory is malloced and available for use
+	uint64_t memarena() const {
+		Chunk * c = current;
+		while(c->next)
+			c = c->next;
+		return ((uint64_t)(c->id+1))*((uint64_t)CHUNK_SIZE);
+	}
+
+	//how much memory is in use or in a freelist, a good approximation of real memory usage from the OS perspective
+	uint64_t memalloced() const {
 		return ((uint64_t)(current->id))*((uint64_t)CHUNK_SIZE) + current->used;
+	}
+
+	//how much memory is actually in use by nodes in the tree, plus the overhead of the Data struct
+	//uses capacity, so may be inacurate for data segments that were shrunk but haven't been compacted yet
+	//Data segments that are in the freelist are not included here
+	uint64_t meminuse() const {
+		return memused;
 	}
 
 	Data * alloc(unsigned int num, Data ** parent){
 		assert(num > 0 && num < MAX_NUM);
+
+		unsigned int size = sizeof(Data) + sizeof(Node)*num;
+		PLUS(memused, size);
 
 	//check freelist
 		while(Data * t = freelist[num]){
@@ -234,7 +255,6 @@ public:
 		}
 
 	//allocate new memory
-		unsigned int size = sizeof(Data) + sizeof(Node)*num;
 		while(1){
 			Chunk * c = current;
 			uint32_t used = c->used;
@@ -270,6 +290,9 @@ public:
 	void dealloc(Data * d){
 		assert(d->header > 0 && d->capacity > 0 && d->capacity < MAX_NUM);
 
+		unsigned int size = sizeof(Data) + sizeof(Node)*d->capacity;
+		PLUS(memused, -size);
+
 		//call the destructor
 		d->~Data();
 		d->used = d->capacity;
@@ -291,6 +314,8 @@ public:
 	void compact(float arenasize = 0, float generationsize = 0){
 		assert(arenasize >= 0 && arenasize <= 1);
 		assert(generationsize >= 0 && generationsize <= 1);
+
+		memused = 0;
 
 		if(head->used == 0)
 			return;
@@ -315,6 +340,8 @@ public:
 			if(s->header == 0){
 				s->nextfree = freelist[s->capacity];
 				freelist[s->capacity] = s;
+			}else{
+				memused += size;
 			}
 
 			//update source
@@ -370,6 +397,7 @@ public:
 					memmove(d, s, dsize);
 					d->move(s);
 				}
+				memused += dsize;
 			}
 
 			//update source

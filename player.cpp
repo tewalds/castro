@@ -31,7 +31,7 @@ void Player::PlayerThread::run(){
 				CAS(player->threadstate, Thread_Running, Thread_Wait_End);
 				break;
 			}
-			if(player->ctmem.memused() >= player->maxmem){ //out of memory, start garbage collection
+			if(player->ctmem.memalloced() >= player->maxmem){ //out of memory, start garbage collection
 				CAS(player->threadstate, Thread_Running, Thread_GC);
 				break;
 			}
@@ -55,7 +55,7 @@ void Player::PlayerThread::run(){
 				logerr(to_str(100.0*player->nodes/nodesbefore, 1) + " % of tree remains - " +
 					to_str((gctime - starttime)*1000, 0)  + " msec gc, " + to_str((compacttime - gctime)*1000, 0) + " msec compact\n");
 
-				if(player->ctmem.memused() >= player->maxmem/2)
+				if(player->ctmem.meminuse() >= player->maxmem/2)
 					player->gclimit = (int)(player->gclimit*1.3);
 				else if(player->gclimit > 5)
 					player->gclimit = (int)(player->gclimit*0.9); //slowly decay to a minimum of 5
