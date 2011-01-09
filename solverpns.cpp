@@ -101,8 +101,7 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 
 			i++;
 		}
-		for(; i < numnodes; i++) //add losses to the end so they aren't considered, only used when unique is true
-			node->children[i] = PNSNode(Move(M_NONE), 0, LOSS);
+		node->children.shrink(i); //if symmetry, there may be extra moves to ignore
 
 		updatePDnum(node);
 
