@@ -12,15 +12,17 @@
 
 /* CompactTree is a Tree of Nodes. It malloc's one chunk at a time, and has a very efficient allocation strategy.
  * It maintains a freelist of empty segments, but never assigns a segment to a smaller amount of memory,
- * completely avoiding fragmentation, but potentially being having empty space in sizes that are no longer popular
+ * completely avoiding fragmentation, but potentially having empty space in sizes that are no longer popular.
  * Since it maintains forward and backward pointers within the tree structure, it can move nodes around,
  * compacting the empty space and freeing it back to the OS. It can scan memory since it is a contiguous block
  * of memory with no fragmentation.
+ * Your tree Node should include an instance of CompactTree<Node>::Children named 'children'
  */
 template <class Node> class CompactTree {
 	static const unsigned int CHUNK_SIZE = 16*1024*1024;
 	static const unsigned int MAX_NUM = 300; //maximum amount of Node's to allocate at once, needed for size of freelist
 
+	//Hold a list of children within the compact tree
 	struct Data {
 		uint32_t    header;   //sanity check value, 0 means it's unused
 		uint16_t    capacity; //number of Node's worth of memory to follow
@@ -74,6 +76,7 @@ template <class Node> class CompactTree {
 			return (header == (*parent)->header);
 		}
 
+		//called after moving the memory to update the parent pointers for this node and its children
 		void move(Data * s){
 			assert(header > 0); //don't move an empty Data segment
 			assert(*parent == s); //my parent points to my old location
@@ -95,6 +98,7 @@ template <class Node> class CompactTree {
 	};
 
 public:
+	//Sits in Node to manage the children, which are actually stored in a Data struct
 	class Children {
 		static const int LOCK = 1; //must be cast to (Data *) at usage point
 		Data * data;
@@ -105,17 +109,18 @@ public:
 		Children() : data(NULL) { }
 		~Children() { assert(data == NULL); }
 
+		//lock the children, so only one thread creates them at a time, returns false if another thread already has the lock
 		bool lock()   { return CAS(data, (Data *) NULL, (Data *) LOCK); }
 		bool unlock() { return CAS(data, (Data *) LOCK, (Data *) NULL); }
 
+		//allocate n nodes, likely best used in a temporary node and swapped in
 		unsigned int alloc(unsigned int n, CompactTree & ct){
 			assert(data == NULL);
 			data = ct.alloc(n, &data);
 			return n;
 		}
-		void neuter(){
-			data = NULL;
-		}
+
+		//deallocate the children
 		unsigned int dealloc(CompactTree & ct){
 			Data * t = data;
 			int n = 0;
@@ -125,6 +130,7 @@ public:
 			}
 			return n;
 		}
+		//swap children with the other node, used for threadsafe child creation
 		void swap(Children & other){
 			//swap data pointer
 			Data * temp;
@@ -139,25 +145,31 @@ public:
 			if(other.data > (Data*)LOCK)
 				other.data->parent = &(other.data);
 		}
+		//keep only the first n children, used if too many children were allocated
 		int shrink(int n){
 			return data->shrink(n);
 		}
+		//how many children are there?
 		unsigned int num() const {
 			return (data > (Data *) LOCK ? data->used : 0);
 		}
+		//does this node have any children?
 		bool empty() const {
 			return num() == 0;
 		}
+		//access a child at a specific offset
 		Node & operator[](unsigned int offset){
 			assert(data > (Data *) LOCK);
 			assert(offset >= 0 && offset < data->used);
 			return data->children[offset];
 		}
+		//iterator through the children
 		Node * begin() const {
 			if(data > (Data *) LOCK)
 				return data->begin();
 			return NULL;
 		}
+		//end of the iterator through the children
 		Node * end() const {
 			if(data > (Data *) LOCK)
 				return data->end();
@@ -166,6 +178,7 @@ public:
 	};
 
 private:
+	//Holds the large chunks of memory requested from the OS
 	struct Chunk {
 		Chunk *  next; //linked list of chunks
 		uint32_t id;   //number of chunks before this one
