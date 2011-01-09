@@ -50,7 +50,7 @@ void Player::PlayerThread::run(){
 				player->garbage_collect(copy, & player->root, player->gclimit);
 				player->flushlog();
 				Time gctime;
-				player->ctmem.compact();
+				player->ctmem.compact(1.0, 0.3);
 				Time compacttime;
 				logerr(to_str(100.0*player->nodes/nodesbefore, 1) + " % of tree remains - " +
 					to_str((gctime - starttime)*1000, 0)  + " msec gc, " + to_str((compacttime - gctime)*1000, 0) + " msec compact\n");
