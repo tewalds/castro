@@ -7,6 +7,7 @@
 #include <new>
 #include <cstring> //for memmove
 #include <stdint.h>
+#include <cassert>
 #include "thread.h"
 
 /* CompactTree is a Tree of Nodes. It malloc's one chunk at a time, and has a very efficient allocation strategy.
@@ -21,18 +22,18 @@ template <class Node> class CompactTree {
 	static const unsigned int MAX_NUM = 300; //maximum amount of Node's to allocate at once, needed for size of freelist
 
 	struct Data {
-		uint32_t    header; //sanity check value, 0 means it's unused
-		uint32_t    num;    //number of children to follow
-		//use 32bit values instead of 16bit values to ensure sizeof(Data) is a multiple of word size on 64bit machines
-		//if more fields are needed later, the values above can be reduced such that their sum is a multiple of 8 bytes
-		//could also switch to half-word sized values so their size sum to 32bit on 32bit machines and 64bit on 64bit machines
+		uint32_t    header;   //sanity check value, 0 means it's unused
+		uint16_t    capacity; //number of Node's worth of memory to follow
+		uint16_t    used;     //number of children to follow that are actually used, num <= capacity
+		//sizes are chosen such that they add to a multiple of word size on 32bit and 64bit machines.
+
 		union {
 			Data ** parent;  //pointer to the Data* in the parent Node that references this Data instance
 			Data *  nextfree; //next free Data block of this size when in the free list
 		};
 		Node        children[0]; //array of Nodes, runs past the end of the data block
 
-		Data(unsigned int n, Data ** p) : num(n), parent(p) {
+		Data(unsigned int n, Data ** p) : capacity(n), used(n), parent(p) {
 			header = ((unsigned long)this >> 2) & 0xFFFFFF;
 			if(header == 0) header = 0xABCDF3;
 
@@ -51,7 +52,21 @@ template <class Node> class CompactTree {
 		}
 
 		Node * end(){
-			return children + num;
+			return children + used;
+		}
+
+		//not thread safe, so only use in child creation or garbage collection
+		//useful if you allocated too much memory, then realized you didn't need it all, or
+		//to reduce the size once you realize some nodes are no longer needed, like if they're proven a loss and can be ignored
+		//shrink will simply remove the last few Nodes, so make sure to reorder the nodes before calling shrink
+		//allows compact() to move the Data segment to a location where capacity matches used again to save space
+		int shrink(int n){
+			assert(n > 0 && n <= capacity && n <= used);
+			for(Node * i = children + n, * e = children + used; i != e; ++i)
+				i->~Node();
+			int diff = used - n;
+			used = n;
+			return diff;
 		}
 
 		//make sure the parent points back to the same place
@@ -60,7 +75,7 @@ template <class Node> class CompactTree {
 		}
 
 		void move(Data * s){
-			assert(header > 0);
+			assert(header > 0); //don't move an empty Data segment
 			assert(*parent == s); //my parent points to my old location
 
 			//update my parent with my new location
@@ -105,7 +120,7 @@ public:
 			Data * t = data;
 			int n = 0;
 			if(t && CAS(data, t, (Data*)NULL)){
-				n = t->num;
+				n = t->used;
 				ct.dealloc(t);
 			}
 			return n;
@@ -124,15 +139,18 @@ public:
 			if(other.data > (Data*)LOCK)
 				other.data->parent = &(other.data);
 		}
+		int shrink(int n){
+			return data->shrink(n);
+		}
 		unsigned int num() const {
-			return (data > (Data *) LOCK ? data->num : 0);
+			return (data > (Data *) LOCK ? data->used : 0);
 		}
 		bool empty() const {
 			return num() == 0;
 		}
 		Node & operator[](unsigned int offset){
 			assert(data > (Data *) LOCK);
-			assert(offset >= 0 && offset < data->num);
+			assert(offset >= 0 && offset < data->used);
 			return data->children[offset];
 		}
 		Node * begin() const {
@@ -209,8 +227,6 @@ public:
 	Data * alloc(unsigned int num, Data ** parent){
 		assert(num > 0 && num < MAX_NUM);
 
-//		fprintf(stderr, "+%u ", num);
-
 	//check freelist
 		while(Data * t = freelist[num]){
 			if(CAS(freelist[num], t, t->nextfree))
@@ -252,18 +268,17 @@ public:
 		return NULL;
 	}
 	void dealloc(Data * d){
-//		fprintf(stderr, "-%u ", d->num);
-		assert(d->num > 0 && d->num < MAX_NUM);
-		assert(d->header > 0);
+		assert(d->header > 0 && d->capacity > 0 && d->capacity < MAX_NUM);
 
 		//call the destructor
 		d->~Data();
+		d->used = d->capacity;
 
 		//add to the freelist
 		while(1){
-			Data * t = freelist[d->num];
+			Data * t = freelist[d->capacity];
 			d->nextfree = t;
-			if(CAS(freelist[d->num], t, d))
+			if(CAS(freelist[d->capacity], t, d))
 				break;
 		}
 	}
@@ -276,7 +291,6 @@ public:
 		if(head->used == 0)
 			return;
 
-//		fprintf(stderr, "Compact\n");
 		Chunk      * schunk = head; //source chunk
 		unsigned int soff   = 0;    //source offset
 
@@ -290,13 +304,13 @@ public:
 			//iterate over each Data block
 			Data * s = (Data *)(schunk->mem + soff);
 
-			assert(s->num > 0 && s->num < MAX_NUM);
-			int size = sizeof(Data) + sizeof(Node)*s->num;
+			assert(s->capacity > 0 && s->capacity < MAX_NUM);
+			int size = sizeof(Data) + sizeof(Node)*s->capacity;
 
 			//add empty blocks to the freelist
 			if(s->header == 0){
-				s->nextfree = freelist[s->num];
-				freelist[s->num] = s;
+				s->nextfree = freelist[s->capacity];
+				freelist[s->capacity] = s;
 			}
 
 			//update source
@@ -312,23 +326,24 @@ public:
 
 		//iterate over each chunk, moving data blocks to the left to fill empty space
 		while(schunk != NULL){
-			assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff));
-
 			//iterate over each Data block
 			Data * s = (Data *)(schunk->mem + soff);
-//			fprintf(stderr, "%u, %u, %p, %u, %u, %p -> %u, %u", schunk, soff, s, s->header, s->num, s->parent, dchunk, doff);
-			assert(s->num > 0 && s->num < MAX_NUM);
-			int size = sizeof(Data) + sizeof(Node)*s->num;
+			assert(s->capacity > 0 && s->capacity < MAX_NUM);
+
+			int ssize = sizeof(Data) + sizeof(Node)*s->capacity; //how much to move the source pointer
 
 			//move from -> to, update parent pointer
 			if(s->header != 0){
+				assert(s->used > 0 && s->used <= s->capacity);
+				int dsize = sizeof(Data) + sizeof(Node)*s->used; //how much to move the dest pointer
 				Data * d = NULL;
 
 				//where to move
 				while(1){
-					if(doff + size <= dchunk->capacity){ //if space, allocate from this chunk
+					if(doff + dsize <= dchunk->capacity){ //if space, allocate from this chunk
+						assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff)); //make sure I'm moving left
 						d = (Data *)(dchunk->mem + doff);
-						doff += size;
+						doff += dsize;
 						break;
 					}else{ //otherwise finish this chunk and prepare the next
 						dchunk->used = doff;
@@ -343,22 +358,21 @@ public:
 				}
 
 				//move!
+				s->capacity = s->used;
 				if(s != d){
-					memmove(d, s, size);
+					memmove(d, s, dsize);
 					d->move(s);
 				}
-//				fprintf(stderr, ", %p, %u, %u, %p", d, d->header, d->num, d->parent);
 			}
 
 			//update source
-			soff += size;
+			soff += ssize;
 			while(schunk && schunk->used <= soff){ //move forward, skip empty chunks
 				schunk = schunk->next;
 				soff = 0;
 			}
-
-//			fprintf(stderr, "\n");
 		}
+
 		//free unused chunks
 		Chunk * del = dchunk;
 		while(del->next && del->id < arenasize*current->id){
@@ -380,8 +394,6 @@ public:
 		//zero out the remainder of the chunk
 		for(char * i = dchunk->mem + dchunk->used, * iend = dchunk->mem + dchunk->capacity ; i != iend; i++)
 			*i = 0;
-
-//		fprintf(stderr, "Compact done\n");
 	}
 };
 
