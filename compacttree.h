@@ -284,6 +284,10 @@ public:
 	}
 
 	//assume this is the only thread running
+	//arenasize is how much memory to keep around, as a fraction of current usage
+	//  0 frees all extra memory, 1 keeps enough memory allocated to avoid having to call malloc to get back to this level
+	//generationsize is how far to go through the list only adding to the freelist, not compacting. This avoids moving memory
+	//  at the potential cost of not freeing any space at the end. Values around 1.0 are a waste of time, but 0.2 - 0.6 is good
 	void compact(float arenasize = 0, float generationsize = 0){
 		assert(arenasize >= 0 && arenasize <= 1);
 		assert(generationsize >= 0 && generationsize <= 1);
@@ -340,7 +344,10 @@ public:
 
 				//where to move
 				while(1){
-					if(doff + dsize <= dchunk->capacity){ //if space, allocate from this chunk
+					if((d = freelist[s->used])){ //allocate off the freelist if possible
+						freelist[s->used] = d->nextfree;
+						break;
+					}else if(doff + dsize <= dchunk->capacity){ //if space, allocate from this chunk
 						assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff)); //make sure I'm moving left
 						d = (Data *)(dchunk->mem + doff);
 						doff += dsize;
