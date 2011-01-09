@@ -109,6 +109,7 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	     * end   = temp.end(),
 	     * loss  = NULL;
 	Board::MoveIterator move = board.moveit(player->prunesymmetry);
+	int nummoves = 0;
 	for(; !move.done() && child != end; ++move, ++child){
 		*child = Node(*move);
 
@@ -130,14 +131,13 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 		}
 
 		add_knowledge(board, node, child);
+		nummoves++;
 	}
 
 	if(player->prunesymmetry)
-		for(; child != end; ++child) //add losses to the end so they aren't considered
-			*child = Node(M_NONE, 3 - toplay);
-
-	//both end conditions should happen in parallel, so either both happen or neither do
-	assert(move.done() == (child == end));
+		temp.shrink(nummoves); //shrink the node to ignore the extra moves
+	else //both end conditions should happen in parallel
+		assert(move.done() && child == end);
 
 	//Make a macro move, add experience to the move so the current simulation continues past this move
 	if(losses == 1){
