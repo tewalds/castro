@@ -24,7 +24,8 @@ template <class Node> class CompactTree {
 
 	//Hold a list of children within the compact tree
 	struct Data {
-		uint32_t    header;   //sanity check value, 0 means it's unused
+		const static uint32_t oldcount = 4; //how many generations it needs to be empty before it's considered old
+		uint32_t    header;   //sanity check value, <= oldcount means it's empty
 		uint16_t    capacity; //number of Node's worth of memory to follow
 		uint16_t    used;     //number of children to follow that are actually used, num <= capacity
 		//sizes are chosen such that they add to a multiple of word size on 32bit and 64bit machines.
@@ -37,7 +38,7 @@ template <class Node> class CompactTree {
 
 		Data(unsigned int n, Data ** p) : capacity(n), used(n), parent(p) {
 			header = ((unsigned long)this >> 2) & 0xFFFFFF;
-			if(header == 0) header = 0xABCDF3;
+			if(empty()) header += 0xABCDF3;
 
 			for(Node * i = begin(), * e = end(); i != e; ++i)
 				new(i) Node(); //call the constructors
@@ -48,6 +49,9 @@ template <class Node> class CompactTree {
 				i->~Node();
 			header = 0;
 		}
+
+		bool empty() const { return (header <= oldcount); }
+		bool old()   const { return (header == oldcount); }
 
 		Node * begin(){
 			return children;
@@ -78,7 +82,7 @@ template <class Node> class CompactTree {
 
 		//called after moving the memory to update the parent pointers for this node and its children
 		void move(Data * s){
-			assert(header > 0); //don't move an empty Data segment
+			assert(!empty()); //don't move an empty Data segment
 			assert(*parent == s); //my parent points to my old location
 
 			//update my parent with my new location
@@ -210,9 +214,15 @@ private:
 			mem = NULL;
 		}
 		void assert_empty(){ assert(capacity == 0 && used == 0 && mem == NULL && next == NULL); }
+		void clear_unused(){
+			for(char * i = mem + used, * iend = mem + capacity ; i != iend; i++)
+				*i = 0;
+		}
 	};
 
-	Chunk * head, * current;
+	Chunk * head,    //start of the chunk list
+	      * current, //where memory is currently being allocated
+	      * last;    //last chunk that isn't empty
 	unsigned int numchunks;
 	Data * freelist[MAX_NUM];
 	uint64_t memused;
@@ -224,14 +234,14 @@ public:
 			freelist[i] = NULL;
 
 		//allocate the first chunk
-		head = current = new Chunk(CHUNK_SIZE);
+		head = current = last = new Chunk(CHUNK_SIZE);
 		numchunks = 1;
 		memused = 0;
 	}
 	~CompactTree(){
 		head->dealloc(true);
 		delete head;
-		head = current = NULL;
+		head = current = last = NULL;
 		numchunks = 0;
 	}
 
@@ -245,7 +255,7 @@ public:
 
 	//how much memory is in use or in a freelist, a good approximation of real memory usage from the OS perspective
 	uint64_t memalloced() const {
-		return ((uint64_t)(current->id))*((uint64_t)CHUNK_SIZE) + current->used;
+		return ((uint64_t)(last->id))*((uint64_t)CHUNK_SIZE) + current->used;
 	}
 
 	//how much memory is actually in use by nodes in the tree, plus the overhead of the Data struct
@@ -278,6 +288,7 @@ public:
 					continue;
 			}else if(c->next != NULL){ //if there is a next chunk, advance to it and try again
 				CAS(current, c, c->next); //CAS to avoid skipping a chunk
+				CAS(last, c, c->next); //most last forward too
 				continue;
 			}else{ //need to allocate a new chunk
 				Chunk * next = new Chunk(CHUNK_SIZE);
@@ -301,7 +312,7 @@ public:
 		return NULL;
 	}
 	void dealloc(Data * d){
-		assert(d->header > 0 && d->capacity > 0 && d->capacity < MAX_NUM);
+		assert(!d->empty() && d->capacity > 0 && d->capacity < MAX_NUM);
 
 		unsigned int size = sizeof(Data) + sizeof(Node)*d->capacity;
 		PLUS(memused, -size);
@@ -333,40 +344,17 @@ public:
 		if(head->used == 0)
 			return;
 
-		Chunk      * schunk = head; //source chunk
-		unsigned int soff   = 0;    //source offset
-
 		//clear the freelist
 		for(unsigned int i = 0; i < MAX_NUM; i++)
 			freelist[i] = NULL;
 
-	//add the empty blocks for the first part of the memory space to the freelist to avoid moving so many blocks
-		unsigned int generationid = (unsigned int)(generationsize * current->id);
-		while(schunk != NULL && schunk->id < generationid){
-			//iterate over each Data block
-			Data * s = (Data *)(schunk->mem + soff);
-
-			assert(s->capacity > 0 && s->capacity < MAX_NUM);
-			int size = sizeof(Data) + sizeof(Node)*s->capacity;
-
-			//add empty blocks to the freelist
-			if(s->header == 0){
-				s->nextfree = freelist[s->capacity];
-				freelist[s->capacity] = s;
-			}else{
-				memused += size;
-			}
-
-			//update source
-			soff += size;
-			while(schunk && schunk->used <= soff){ //move forward, skip empty chunks
-				schunk = schunk->next;
-				soff = 0;
-			}
-		}
-
+		Chunk      * schunk = head; //source chunk
+		unsigned int soff   = 0;    //source offset
 		Chunk      * dchunk = schunk; //destination chunk
 		unsigned int doff   = soff;   //destination offset
+
+		unsigned int generationid = (unsigned int)(generationsize * current->id);
+		bool compactthischunk = (generationid == 0);
 
 		//iterate over each chunk, moving data blocks to the left to fill empty space
 		while(schunk != NULL){
@@ -377,49 +365,80 @@ public:
 			int ssize = sizeof(Data) + sizeof(Node)*s->capacity; //how much to move the source pointer
 
 			//move from -> to, update parent pointer
-			if(s->header != 0){
-				assert(s->used > 0 && s->used <= s->capacity);
-				int dsize = sizeof(Data) + sizeof(Node)*s->used; //how much to move the dest pointer
-				Data * d = NULL;
-
-				//where to move
-				while(1){
-					if((d = freelist[s->used])){ //allocate off the freelist if possible
-						freelist[s->used] = d->nextfree;
-						break;
-					}else if(doff + dsize <= dchunk->capacity){ //if space, allocate from this chunk
-						assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff)); //make sure I'm moving left
-						d = (Data *)(dchunk->mem + doff);
-						doff += dsize;
-						break;
-					}else{ //otherwise finish this chunk and prepare the next
-						dchunk->used = doff;
-
-						//zero out the remainder of the chunk
-						for(char * i = dchunk->mem + dchunk->used, * iend = dchunk->mem + dchunk->capacity ; i != iend; i++)
-							*i = 0;
-
-						dchunk = dchunk->next;
-						doff = 0;
+			if(s->empty()){
+				if(!compactthischunk){
+					if(s->old()){//this empty segment is an unpopular size, lets compact this chunk to clean up this segment
+						compactthischunk = true;
+						dchunk = schunk;
+						doff = soff;
+					}else{ //freed recently, add to the free list
+						s->nextfree = freelist[s->capacity];
+						freelist[s->capacity] = s;
+						s->header++; //empty, but a generation old
 					}
-				}
+				}//else this position will be overwritten by the next full chunk
+			}else{
+				if(!compactthischunk){
+					memused += ssize;
+				}else{
+					assert(s->used > 0 && s->used <= s->capacity);
+					int dsize = sizeof(Data) + sizeof(Node)*s->used; //how much to move the dest pointer
+					Data * d = NULL;
 
-				//move!
-				s->capacity = s->used;
-				if(s != d){
-					memmove(d, s, dsize);
-					d->move(s);
+					//where to move
+					while(1){
+						if((d = freelist[s->used])){ //allocate off the freelist if possible
+							freelist[s->used] = d->nextfree;
+							break;
+						}else if(doff + dsize <= dchunk->capacity){ //if space, allocate from this chunk
+							assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff)); //make sure I'm moving left
+							d = (Data *)(dchunk->mem + doff);
+							doff += dsize;
+							break;
+						}else{ //otherwise finish this chunk and prepare the next
+							dchunk->used = doff;
+							dchunk->clear_unused();
+
+							dchunk = dchunk->next;
+							doff = 0;
+						}
+					}
+
+					//move!
+					s->capacity = s->used;
+					if(s != d){
+						memmove(d, s, dsize);
+						d->move(s);
+					}
+					memused += dsize;
 				}
-				memused += dsize;
 			}
 
 			//update source
 			soff += ssize;
 			while(schunk && schunk->used <= soff){ //move forward, skip empty chunks
+				//if the last chunk was being compacted out of order, finish it off
+				if(schunk->id < generationid && compactthischunk){
+					dchunk->used = doff;
+					dchunk->clear_unused();
+				}
+				//go to the next source chunk
 				schunk = schunk->next;
 				soff = 0;
+				//if we're done the static generation, initialize the destination chunk
+				if(schunk){
+					if(schunk->id == generationid){
+						dchunk = schunk;
+						doff = soff;
+					}
+					compactthischunk = (schunk->id >= generationid);
+				}
 			}
 		}
+
+		//finish the last used chunk
+		dchunk->used = doff;
+		dchunk->clear_unused();
 
 		//free unused chunks
 		Chunk * del = dchunk;
@@ -435,13 +454,9 @@ public:
 			numchunks = del->id + 1;
 		}
 
-		//save used last position
-		dchunk->used = doff;
-		current = dchunk;
-
-		//zero out the remainder of the chunk
-		for(char * i = dchunk->mem + dchunk->used, * iend = dchunk->mem + dchunk->capacity ; i != iend; i++)
-			*i = 0;
+		//set current to head in case some chunks aren't filled completely due to generations
+		current = head;
+		last = dchunk;
 	}
 };
 
