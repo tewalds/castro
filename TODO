@@ -5,8 +5,20 @@ worker stuff
 
 
 compact tree memory manager
-- store a generation counter in the Data struct?
-- useful to know if this empty slot stayed empty for a whole generation?
+- move old unused elements of the freelist to the front so they get used first? or is it better that they're at the back?
+- store a Chunk pointer in each data block, then traverse the freelist instead of the memory
+  - remove elements that are outside the generation size, compact the rest
+  - compact Chunks that have old unused segments
+  - might be faster, but has an extra pointer...
+
+tree checkpointing to deal with a crash?
+
+when looking for rings, return the ring length... if len == 6, ignore, otherwise allow
+- how to tell if a ring is size 6?
+  - if a 6 ring exists but was ignored, adding to the ring will go around the ring and still make it back to the start
+    but claim it's a bigger ring...
+  - the O(1) ring detection has no concept of ring size, need to check that it's not a 6 ring...
+    - only need to check for the 101000 case, and don't need to check anything for the 111000 case
 
 detect ties
 - if not using lbdists, use 1 flood fill instead of 24
@@ -15,6 +27,7 @@ detect ties
 - how to go backwards?
 
 if not keeptree, and the number of non-losing moves at the root is 1, just make that move
+- what if the last move is also a loss? should choose hardest loss
 
 any ideas to handle ladders?
 - always generate threats?
