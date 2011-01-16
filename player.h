@@ -242,7 +242,7 @@ public:
 		Thread thread;
 		Player * player;
 	public:
-		int runs, maxruns;
+		uint64_t runs, maxruns;
 		DepthStats treelen, gamelen;
 		DepthStats wintypes[2][4]; //player,wintype
 

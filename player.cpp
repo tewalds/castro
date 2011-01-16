@@ -80,7 +80,7 @@ Player::Node * Player::genmove(double time, int maxruns){
 
 	stop_threads();
 
-	int runs = 0;
+	uint64_t runs = 0;
 	for(unsigned int i = 0; i < threads.size(); i++){
 		runs += threads[i]->runs;
 		threads[i]->reset();
