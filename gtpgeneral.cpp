@@ -2,7 +2,9 @@
 #include "havannahgtp.h"
 #include "lbdist.h"
 
-
+GTPResponse HavannahGTP::gtp_echo(vecstr args){
+	return GTPResponse(true, implode(args, " "));
+}
 
 GTPResponse HavannahGTP::gtp_print(vecstr args){
 	return GTPResponse(true, "\n" + game.getboard().to_s());

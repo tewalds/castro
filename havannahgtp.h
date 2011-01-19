@@ -77,6 +77,7 @@ public:
 		newcallback("version",         bind(&HavannahGTP::gtp_version,       this, _1), "Version of the program");
 		newcallback("verbose",         bind(&HavannahGTP::gtp_verbose,       this, _1), "Enable verbose mode");
 		newcallback("debug",           bind(&HavannahGTP::gtp_debug,         this, _1), "Enable debug mode");
+		newcallback("echo",            bind(&HavannahGTP::gtp_echo,          this, _1), "Return the arguments as the response");
 		newcallback("hguicoords",      bind(&HavannahGTP::gtp_hguicoords,    this, _1), "Switch coordinate systems to match HavannahGui");
 		newcallback("gridcoords",      bind(&HavannahGTP::gtp_gridcoords,    this, _1), "Switch coordinate systems to match Little Golem");
 		newcallback("showboard",       bind(&HavannahGTP::gtp_print,         this, _1), "Show the board");
@@ -116,6 +117,7 @@ public:
 		newcallback("pnstt_clear",     bind(&HavannahGTP::gtp_solve_pnstt_clear,  this, _1),  "Stop the solver and release the memory");
 	}
 
+	GTPResponse gtp_echo(vecstr args);
 	GTPResponse gtp_print(vecstr args);
 	string won_str(int outcome) const;
 	GTPResponse gtp_swap(vecstr args);
