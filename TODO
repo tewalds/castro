@@ -11,6 +11,17 @@ compact tree memory manager
   - compact Chunks that have old unused segments
   - might be faster, but has an extra pointer...
 
+UCT constant = parent value
+- if you're doing well, explore less
+- if you're doing bad, explore more
+
+Proof number search player
+- choose by amount of work spent in a node
+
+Multi-thread PNS
+- increment the delta as you go down
+
+
 tree checkpointing to deal with a crash?
 
 when looking for rings, return the ring length... if len == 6, ignore, otherwise allow
@@ -25,6 +36,12 @@ detect ties
 - keep bits for corners and edges for each colour
 - if crossing empty or your own, propagate connections, otherwise don't
 - how to go backwards?
+- start a flood fill from each corner/edge
+  - mark each edge/corner position as reached by the other flood fills
+  - skip if it's already reached
+
+PV doesn't take win_or_draw, loss_or_draw into account
+final move selection doesn't choos good moves for proven draws
 
 if not keeptree, and the number of non-losing moves at the root is 1, just make that move
 - what if the last move is also a loss? should choose hardest loss
