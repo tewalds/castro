@@ -1,4 +1,78 @@
 
+boardsize 4
+playgame a1
+pnstt_params -m 28000 -e 0
+pnstt_solve 21600
+echo 6 hours
+pnstt_stats
+pnstt_solve 21600
+echo 12 hours
+pnstt_stats
+pnstt_solve 21600
+echo 18 hours
+pnstt_stats
+pnstt_solve 21600
+echo 24 hours
+pnstt_stats
+pnstt_solve 21600
+echo 30 hours
+pnstt_stats
+pnstt_solve 21600
+echo 36 hours
+pnstt_stats
+pnstt_solve 21600
+echo 42 hours
+pnstt_stats
+pnstt_solve 21600
+echo 48 hours
+pnstt_stats
+pnstt_solve 21600
+echo 54 hours
+pnstt_stats
+pnstt_solve 21600
+echo 60 hours
+pnstt_stats
+pnstt_solve 21600
+echo 66 hours
+pnstt_stats
+pnstt_solve 21600
+echo 72 hours
+pnstt_stats
+pnstt_solve 21600
+echo 78 hours
+pnstt_stats
+pnstt_solve 21600
+echo 84 hours
+pnstt_stats
+pnstt_solve 21600
+echo 90 hours
+pnstt_stats
+
+started at jan 19 5:30pm on joffre02
+solved after 86 hours!
+
+
+= unknown unknown 34 129904635561
+= unknown unknown 34 253642227090
+= unknown unknown 34 377650177877
+= unknown unknown 34 499579850656
+= unknown unknown 34 619925595410
+= unknown unknown 34 739426997747
+= unknown unknown 34 861083865219
+= unknown unknown 34 979673924163
+= unknown unknown 34 1098535735086
+= unknown unknown 34 1218670949975
+= unknown unknown 34 1340263831623
+= unknown unknown 34 1461187774560
+= unknown unknown 34 1583452698464
+= unknown unknown 34 1703038799926
+= white   none    34 1735724643683
+
+
+
+
+
+
 a1 - win - solved in 4 hours on joffre01
 	a2,0.25,231515529,0.42,5101721,white
 	a3,0.25,168644253,0.43,6050751,white
@@ -132,32 +206,32 @@ c3
 
 
 boardsize 4
-playgame d4 a1 b4
-player_params -e 1 -g 1 -T 1 -P 1 -t 8 -M 28000 -L /usr/data/tewalds/size4-d4-a1-b4 -o 1
+playgame d4 a1 g7 f7
+player_params -e 0 -g 1 -T 1 -P 1 -t 8 -M 28000 -L /usr/data/tewalds/size4-d4-a1-g7-f7 -o 1
 
 
-d4
-	a1,
-		a2, joffre01 - jan 13 11:50pm
-		a3, joffre02 - jan 13 11:50pm
-		a4,0.45,34029579660,black
-		b2, joffre03 - jan 13 11:50pm
-		b3, jofree04 - jan 13 11:50pm
-		b4, joffre05 - jan 13 11:50pm
-		b5,0.48,12389,0.53,290496,20
-		c3,0.51,35860,0.53,293659,0
-		c4,0.5,19280,0.53,301804,0
-		c5,0.5,26195,0.54,303784,0
-		c6,0.5,17455,0.53,276096,20
-		d5,0.5,20218,0.53,305296,0
-		d6,0.5,22470,0.54,296808,0
-		d7,0.52,117567,0.56,238690,20
-		e5,0.51,29589,0.53,300131,0
-		e6,0.51,33937,0.53,317647,0
-		e7,0.5,23091,0.53,280391,20
-		f6,0.51,37404,0.53,305079,0
-		f7,0.5,21394,0.53,282692,20
-		g7,0.52,111839,0.56,247766,20
+d4,white
+	a1,white
+		a2,0.59,17983947955,black - b2
+		a3,0.54,6524714182,black - g4
+		a4,0.45,34029579660,black - d1
+		b2,0.58,950932941,black - a2
+		b3,0.56,38641584264,black - d7
+		b4,0.56,4836798392,black - d7
+		b5,0.55,7580511701,black - g4
+		c3,0.54,826349289,black - g7
+		c4,0.52,5644926689,black - g4
+		c5,0.58,12807474104,black - g7
+		c6,0.56,1262790649,black - d1
+		d5,0.59,1357440097,black - d7
+		d6,0.5,17967733748,black - d2
+		d7,
+		e5,0.53,877635102,black - g7
+		e6,0.52,4956266591,black - a4
+		e7,0.58,8265190636,black - d2
+		f6,0.52,3543941081,black - b3
+		f7,0.55,4728485603,black - g4
+		g7,white
 
 		a4,black
 			a2,0.27,9474512448,white - d7
@@ -166,7 +240,7 @@ d4
 			b2,0.29,3910207882,white - d7
 			b3,0.32,9453717286,white - d1
 			b4,0.32,114491575,white - b5
-			b5, joffre05 - jan 10 9:10am
+			b5,
 			c1,0.27,13203520684,white - d7
 			c2,0.31,7638173050,white - d1
 			c3,0.32,3234507103,white - d1
@@ -174,26 +248,34 @@ d4
 			c5,0.30,20135026959,white - d1
 			c6,0.33,10669326117,white - d1
 			d1,0.55,34029579660,black
-			d2, joffre01 - jan 13 9:00am
+			d2,
 			d3,0.32,3591366911,white - d1
 			d5,0.30,8959585921,white - d1
-			d6, joffre02 - jan 12 10pm
-			d7,0.43,8625264129,0.5,2634978,20
-			e2,0.43,1754863937,0.48,4770265,20
-			e3,0.42,103137516,0.49,4948324,0
-			e4,0.42,3904846,0.48,5170777,0
-			e5,0.42,2917468,0.47,5204489,0
-			e6,0.42,27197102,0.49,4889676,0
-			e7,0.42,13074974,0.49,4784501,20
-			f3,0.42,359637360,0.49,4868640,20
-			f4,0.42,6024520,0.49,5109350,0
-			f5,0.42,4725658,0.49,5047142,0
-			f6,0.42,1167119296,0.49,5034255,0
-			f7,0.42,15351080,0.49,4520482,20
-			g4,0.43,7724730625,0.53,3004239,20
-			g5,0.42,3181430,0.49,4919316,20
-			g6,0.42,99175949,0.49,4943055,20
-			g7,0.42,472600240,0.53,3422338,20
+
+		g7 - white
+			a2,0.81,1250799547,white - a4
+			a3,0.77,159525784,white - a4
+			a4,0.8,19629060444,white - b3
+			b2,0.79,955264680,white - a4
+			b3,0.77,3143770864,white - b4
+			b4,0.58,13544283846,white - d6
+			b5,0.75,387669355,white - d6
+			c3,0.76,2270213881,white - a4
+			c4,0.71,317652138,white - a4
+			c5,0.72,120176868,white - d6
+			c6,0.71,78144300,white - f5
+			d5,0.74,67851679,white - f4
+			d6,0.56,804302616,white - g4
+			d7,0.73,9585863259,white - a4
+			e5,0.77,1538431877,white - d5
+			e6,0.75,407518623,white - f4
+			e7,0.65,20354432,white - f5
+			f6,0.69,4446691,white - f7
+			f7,0.79,960775618,white - f6
+
+
+
+
 	a2,0.22,6278004747,white - d1
 	b2,0.26,484514946,white - a1
 	b3,0.27,2729427682,white - d1
