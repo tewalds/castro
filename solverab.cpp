@@ -17,7 +17,7 @@ void SolverAB::solve(double time){
 
 	int turn = rootboard.toplay();
 
-	for(maxdepth = 2; !timeout; maxdepth++){
+	for(maxdepth = startdepth; !timeout; maxdepth++){
 		logerr("Starting depth " + to_str(maxdepth) + "\n");
 
 		//the first depth of negamax

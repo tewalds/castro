@@ -24,11 +24,16 @@ string HavannahGTP::solve_str(const Solver & solve){
 
 GTPResponse HavannahGTP::gtp_solve_ab(vecstr args){
 	double time = 60;
+	int startdepth = 2;
 
 	if(args.size() >= 1)
 		time = from_str<double>(args[0]);
 
+	if(args.size() >= 2)
+		startdepth = from_str<int>(args[1]);
+
 	SolverAB solve(false);
+	solve.startdepth = startdepth;
 	solve.set_board(game.getboard());
 	solve.solve(time);
 
@@ -37,11 +42,16 @@ GTPResponse HavannahGTP::gtp_solve_ab(vecstr args){
 
 GTPResponse HavannahGTP::gtp_solve_scout(vecstr args){
 	double time = 60;
+	int startdepth = 2;
 
 	if(args.size() >= 1)
 		time = from_str<double>(args[0]);
 
+	if(args.size() >= 2)
+		startdepth = from_str<int>(args[1]);
+
 	SolverAB solve(true);
+	solve.startdepth = startdepth;
 	solve.set_board(game.getboard());
 	solve.solve(time);
 

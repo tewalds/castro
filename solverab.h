@@ -9,9 +9,11 @@
 class SolverAB : public Solver {
 public:
 	bool scout;
+	int startdepth;
 
 	SolverAB(bool Scout = false) {
 		scout = Scout;
+		startdepth = 2;
 		reset();
 	}
 	~SolverAB() { }
