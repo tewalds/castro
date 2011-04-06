@@ -85,10 +85,9 @@ GTPResponse HavannahGTP::gtp_undo(vecstr args){
 	solverab.set_board(game.getboard());
 	solverpns.set_board(game.getboard());
 	solverpnstt.set_board(game.getboard(), false);
-	if(verbose)
-		return GTPResponse(true, "\n" + game.getboard().to_s());
-	else
-		return GTPResponse(true);
+	if(verbose >= 2)
+		logerr(game.getboard().to_s() + "\n");
+	return GTPResponse(true);
 }
 
 Move HavannahGTP::parse_move(const string & str){
@@ -141,10 +140,10 @@ GTPResponse HavannahGTP::play(const string & pos, int toplay){
 
 	log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(move, false));
 
-	if(verbose)
-		return GTPResponse(true, "Placement: " + move_str(move) + ", outcome: " + game.getboard().won_str() + "\n" + game.getboard().to_s());
-	else
-		return GTPResponse(true);
+	if(verbose >= 2)
+		logerr("Placement: " + move_str(move) + ", outcome: " + game.getboard().won_str() + "\n" + game.getboard().to_s());
+
+	return GTPResponse(true);
 }
 
 GTPResponse HavannahGTP::gtp_playgame(vecstr args){
@@ -200,7 +199,7 @@ GTPResponse HavannahGTP::gtp_version(vecstr args){
 
 GTPResponse HavannahGTP::gtp_verbose(vecstr args){
 	if(args.size() >= 1)
-		verbose = from_str<bool>(args[0]);
+		verbose = from_str<int>(args[0]);
 	else
 		verbose = !verbose;
 	return GTPResponse(true, "Verbose " + to_str(verbose));

@@ -45,7 +45,7 @@ class HavannahGTP : public GTPclient {
 	HavannahGame game;
 
 public:
-	bool verbose;
+	int verbose;
 	bool hguicoords;
 
 	TimeControl time;
@@ -63,7 +63,7 @@ public:
 	HavannahGTP(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
 		GTPclient(i, o, l);
 
-		verbose = false;
+		verbose = 1;
 		hguicoords = false;
 
 		time_remain = time.game;
@@ -75,7 +75,7 @@ public:
 
 		newcallback("name",            bind(&HavannahGTP::gtp_name,          this, _1), "Name of the program");
 		newcallback("version",         bind(&HavannahGTP::gtp_version,       this, _1), "Version of the program");
-		newcallback("verbose",         bind(&HavannahGTP::gtp_verbose,       this, _1), "Enable verbose mode");
+		newcallback("verbose",         bind(&HavannahGTP::gtp_verbose,       this, _1), "Set verbosity, 0 for quiet, 1 for normal, 2+ for more output");
 		newcallback("debug",           bind(&HavannahGTP::gtp_debug,         this, _1), "Enable debug mode");
 		newcallback("echo",            bind(&HavannahGTP::gtp_echo,          this, _1), "Return the arguments as the response");
 		newcallback("hguicoords",      bind(&HavannahGTP::gtp_hguicoords,    this, _1), "Switch coordinate systems to match HavannahGui");

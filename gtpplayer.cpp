@@ -117,7 +117,8 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 	if(args.size() >= 1)
 		use_time = from_str<double>(args[0]);
 
-	logerr("time remain: " + to_str(time_remain, 1) + ", time: " + to_str(use_time, 3) + ", sims: " + to_str(time.max_sims) + "\n");
+	if(verbose)
+		logerr("time remain: " + to_str(time_remain, 1) + ", time: " + to_str(use_time, 3) + ", sims: " + to_str(time.max_sims) + "\n");
 
 	player.rootboard.setswap(allow_swap);
 
@@ -159,7 +160,7 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 		stats += "P1: f " + to_str(wintypes[0][1].num) + ", b " + to_str(wintypes[0][2].num) + ", r " + to_str(wintypes[0][3].num) + "; ";
 		stats += "P2: f " + to_str(wintypes[1][1].num) + ", b " + to_str(wintypes[1][2].num) + ", r " + to_str(wintypes[1][3].num) + "\n";
 
-		if(verbose){
+		if(verbose >= 2){
 			stats += "P1 fork:     " + wintypes[0][1].to_s() + "\n";
 			stats += "P1 bridge:   " + wintypes[0][2].to_s() + "\n";
 			stats += "P1 ring:     " + wintypes[0][3].to_s() + "\n";
@@ -183,10 +184,11 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 
 	stats += "PV:          " + gtp_pv(vecstr()).response + "\n";
 
-	if(verbose && !player.root.children.empty())
+	if(verbose >= 3&& !player.root.children.empty())
 		stats += "Exp-Rave:\n" + gtp_move_stats(vecstr()).response + "\n";
 
-	logerr(stats);
+	if(verbose)
+		logerr(stats);
 
 	Solver s;
 	if(ret){
@@ -244,7 +246,8 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(args.size() >= 2)
 		use_time = from_str<double>(args[1]);
 
-	logerr("time remain: " + to_str(time_remain, 1) + ", time: " + to_str(use_time, 3) + ", sims: " + to_str(time.max_sims) + "\n");
+	if(verbose)
+		logerr("time remain: " + to_str(time_remain, 1) + ", time: " + to_str(use_time, 3) + ", sims: " + to_str(time.max_sims) + "\n");
 
 	player.rootboard.setswap(allow_swap);
 
@@ -287,7 +290,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 		stats += "P1: f " + to_str(wintypes[0][1].num) + ", b " + to_str(wintypes[0][2].num) + ", r " + to_str(wintypes[0][3].num) + "; ";
 		stats += "P2: f " + to_str(wintypes[1][1].num) + ", b " + to_str(wintypes[1][2].num) + ", r " + to_str(wintypes[1][3].num) + "\n";
 
-		if(verbose){
+		if(verbose >= 2){
 			stats += "P1 fork:     " + wintypes[0][1].to_s() + "\n";
 			stats += "P1 bridge:   " + wintypes[0][2].to_s() + "\n";
 			stats += "P1 ring:     " + wintypes[0][3].to_s() + "\n";
@@ -312,16 +315,21 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 
 	stats += "PV:          " + gtp_pv(vecstr()).response + "\n";
 
-	if(verbose && !player.root.children.empty())
+	if(verbose >= 3 && !player.root.children.empty())
 		stats += "Exp-Rave:\n" + gtp_move_stats(vecstr()).response + "\n";
 
-	logerr(stats);
 
 	game.move(best);
 	player.move(best);
 	solverab.move(best);
 	solverpns.move(best);
 	solverpnstt.move(best);
+
+	if(verbose >= 2)
+		stats += game.getboard().to_s() + "\n";
+
+	if(verbose)
+		logerr(stats);
 
 	return GTPResponse(true, move_str(best));
 }
