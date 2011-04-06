@@ -3,6 +3,12 @@ worker stuff
 - PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 - cd /tmp; wget -N --no-check-certificate https://dropbox.ewalds.ca/worker.sh; screen -d -m sh worker.sh; logout
 
+Set different cutoffs for ring checking to be less blind to rings
+- 0.4 for me, 0.5 for my opponent, etc
+
+Build a large persistent tree in some database
+- save and reload heavy Nodes between games
+- tokyo or kyoto cabinet?
 
 compact tree memory manager
 - move old unused elements of the freelist to the front so they get used first? or is it better that they're at the back?
@@ -153,10 +159,12 @@ prior knowledge
 - criticality
 - copy knowledge from proof tree
 - locality for friendly stones only
+- size of the group
 - avoid clumping? penalty for being near many of your own stones
 - lower bound needs virtual connection bonus / penalty for crossing opponents VC
 
 rollout policy
+- avoid attacking virtual connections
 - local reply?
 - locality?
 - connections?
