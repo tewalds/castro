@@ -284,8 +284,8 @@ public:
 			for(int x = linestart(y); x < lineend(y); x++){
 				int p = get(x, y);
 				if(p == 0) s += '.';
-				if(p == 1) s += 'W';
-				if(p == 2) s += 'B';
+				if(p == 1) s += 'O';
+				if(p == 2) s += '@';
 				s += ' ';
 			}
 			if(y < size-1)
