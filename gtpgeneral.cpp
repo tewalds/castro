@@ -205,6 +205,14 @@ GTPResponse HavannahGTP::gtp_verbose(vecstr args){
 	return GTPResponse(true, "Verbose " + to_str(verbose));
 }
 
+GTPResponse HavannahGTP::gtp_extended(vecstr args){
+	if(args.size() >= 1)
+		genmoveextended = from_str<bool>(args[0]);
+	else
+		genmoveextended = !genmoveextended;
+	return GTPResponse(true, "extended " + to_str(genmoveextended));
+}
+
 GTPResponse HavannahGTP::gtp_hguicoords(vecstr args){
 	hguicoords = true;
 	return GTPResponse(true);

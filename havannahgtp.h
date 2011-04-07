@@ -46,6 +46,7 @@ class HavannahGTP : public GTPclient {
 
 public:
 	int verbose;
+	bool genmoveextended;
 	bool hguicoords;
 
 	TimeControl time;
@@ -64,6 +65,7 @@ public:
 		GTPclient(i, o, l);
 
 		verbose = 1;
+		genmoveextended = false;
 		hguicoords = false;
 
 		time_remain = time.game;
@@ -76,6 +78,7 @@ public:
 		newcallback("name",            bind(&HavannahGTP::gtp_name,          this, _1), "Name of the program");
 		newcallback("version",         bind(&HavannahGTP::gtp_version,       this, _1), "Version of the program");
 		newcallback("verbose",         bind(&HavannahGTP::gtp_verbose,       this, _1), "Set verbosity, 0 for quiet, 1 for normal, 2+ for more output");
+		newcallback("extended",        bind(&HavannahGTP::gtp_extended,      this, _1), "Output extra stats from genmove in the response");
 		newcallback("debug",           bind(&HavannahGTP::gtp_debug,         this, _1), "Enable debug mode");
 		newcallback("echo",            bind(&HavannahGTP::gtp_echo,          this, _1), "Return the arguments as the response");
 		newcallback("hguicoords",      bind(&HavannahGTP::gtp_hguicoords,    this, _1), "Switch coordinate systems to match HavannahGui");
@@ -138,6 +141,7 @@ public:
 	GTPResponse gtp_name(vecstr args);
 	GTPResponse gtp_version(vecstr args);
 	GTPResponse gtp_verbose(vecstr args);
+	GTPResponse gtp_extended(vecstr args);
 	GTPResponse gtp_hguicoords(vecstr args);
 	GTPResponse gtp_gridcoords(vecstr args);
 	GTPResponse gtp_debug(vecstr args);

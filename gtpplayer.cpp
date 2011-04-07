@@ -249,6 +249,8 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(verbose)
 		logerr("time remain: " + to_str(time_remain, 1) + ", time: " + to_str(use_time, 3) + ", sims: " + to_str(time.max_sims) + "\n");
 
+	uword nodesbefore = player.nodes;
+
 	player.rootboard.setswap(allow_swap);
 
 	Player::Node * ret = player.genmove(use_time, time.max_sims);
@@ -318,6 +320,18 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(verbose >= 3 && !player.root.children.empty())
 		stats += "Exp-Rave:\n" + gtp_move_stats(vecstr()).response + "\n";
 
+	string extended;
+	if(genmoveextended){
+		//move score
+		if(ret) extended += " " + to_str(ret->exp.avg());
+		else    extended += " 0";
+		//outcome
+		extended += " " + to_str(player.root.outcome);
+		//work
+		extended += " " + to_str(runs);
+		//nodes
+		extended += " " + to_str(player.nodes - nodesbefore);
+	}
 
 	game.move(best);
 	player.move(best);
@@ -331,7 +345,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(verbose)
 		logerr(stats);
 
-	return GTPResponse(true, move_str(best));
+	return GTPResponse(true, move_str(best) + extended);
 }
 
 GTPResponse HavannahGTP::gtp_player_params(vecstr args){
