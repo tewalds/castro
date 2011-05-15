@@ -87,7 +87,7 @@ GTPResponse HavannahGTP::gtp_solve_pns_params(vecstr args){
 		string arg = args[i];
 
 		if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
-			int mem = from_str<int>(args[++i]);
+			uint64_t mem = from_str<uint64_t>(args[++i]);
 			if(mem < 1) return GTPResponse(false, "Memory can't be less than 1mb");
 			solverpns.set_memlimit(mem*(1024*1024));
 		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
@@ -175,7 +175,7 @@ GTPResponse HavannahGTP::gtp_solve_pns2_params(vecstr args){
 			solverpns2.numthreads = from_str<int>(args[++i]);
 			solverpns2.reset_threads();
 		}else if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
-			int mem = from_str<int>(args[++i]);
+			uint64_t mem = from_str<uint64_t>(args[++i]);
 			if(mem < 1) return GTPResponse(false, "Memory can't be less than 1mb");
 			solverpns2.set_memlimit(mem*(1024*1024));
 		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
