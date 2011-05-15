@@ -8,6 +8,7 @@
 #include "solver.h"
 #include "solverab.h"
 #include "solverpns.h"
+#include "solverpns2.h"
 #include "solverpns_tt.h"
 #include "player.h"
 #include "board.h"
@@ -59,6 +60,7 @@ public:
 
 	SolverAB    solverab;
 	SolverPNS   solverpns;
+	SolverPNS2  solverpns2;
 	SolverPNSTT solverpnstt;
 
 	HavannahGTP(FILE * i = stdin, FILE * o = stdout, FILE * l = NULL){
@@ -114,6 +116,11 @@ public:
 		newcallback("pns_stats",       bind(&HavannahGTP::gtp_solve_pns_stats,  this, _1),  "Output the stats for the PNS solver");
 		newcallback("pns_clear",       bind(&HavannahGTP::gtp_solve_pns_clear,  this, _1),  "Stop the solver and release the memory");
 
+		newcallback("pns2_solve",      bind(&HavannahGTP::gtp_solve_pns2,        this, _1),  "Solve with proof number search and an explicit tree");
+		newcallback("pns2_params",     bind(&HavannahGTP::gtp_solve_pns2_params, this, _1),  "Set Parameters for PNS");
+		newcallback("pns2_stats",      bind(&HavannahGTP::gtp_solve_pns2_stats,  this, _1),  "Output the stats for the PNS solver");
+		newcallback("pns2_clear",      bind(&HavannahGTP::gtp_solve_pns2_clear,  this, _1),  "Stop the solver and release the memory");
+
 		newcallback("pnstt_solve",     bind(&HavannahGTP::gtp_solve_pnstt,        this, _1),  "Solve with proof number search and a transposition table of fixed size");
 		newcallback("pnstt_params",    bind(&HavannahGTP::gtp_solve_pnstt_params, this, _1),  "Set Parameters for PNSTT");
 		newcallback("pnstt_stats",     bind(&HavannahGTP::gtp_solve_pnstt_stats,  this, _1),  "Outupt the stats for the PNSTT solver");
@@ -165,6 +172,11 @@ public:
 	GTPResponse gtp_solve_pns_params(vecstr args);
 	GTPResponse gtp_solve_pns_stats(vecstr args);
 	GTPResponse gtp_solve_pns_clear(vecstr args);
+
+	GTPResponse gtp_solve_pns2(vecstr args);
+	GTPResponse gtp_solve_pns2_params(vecstr args);
+	GTPResponse gtp_solve_pns2_stats(vecstr args);
+	GTPResponse gtp_solve_pns2_clear(vecstr args);
 
 	GTPResponse gtp_solve_pnstt(vecstr args);
 	GTPResponse gtp_solve_pnstt_params(vecstr args);

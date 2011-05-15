@@ -52,6 +52,7 @@ GTPResponse HavannahGTP::gtp_boardsize(vecstr args){
 	player.set_board(game.getboard());
 	solverab.set_board(game.getboard());
 	solverpns.set_board(game.getboard());
+	solverpns2.set_board(game.getboard());
 	solverpnstt.set_board(game.getboard());
 
 	time_remain = time.game;
@@ -64,6 +65,7 @@ GTPResponse HavannahGTP::gtp_clearboard(vecstr args){
 	player.set_board(game.getboard());
 	solverab.set_board(game.getboard());
 	solverpns.set_board(game.getboard());
+	solverpns2.set_board(game.getboard());
 	solverpnstt.set_board(game.getboard());
 
 	time_remain = time.game;
@@ -84,6 +86,7 @@ GTPResponse HavannahGTP::gtp_undo(vecstr args){
 	player.set_board(game.getboard());
 	solverab.set_board(game.getboard());
 	solverpns.set_board(game.getboard());
+	solverpns2.set_board(game.getboard());
 	solverpnstt.set_board(game.getboard(), false);
 	if(verbose >= 2)
 		logerr(game.getboard().to_s() + "\n");
@@ -136,6 +139,7 @@ GTPResponse HavannahGTP::play(const string & pos, int toplay){
 	player.move(move);
 	solverab.move(move);
 	solverpns.move(move);
+	solverpns2.move(move);
 	solverpnstt.move(move);
 
 	log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(move, false));

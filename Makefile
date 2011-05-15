@@ -2,7 +2,7 @@
 
 LDFLAGS   += -lpthread
 OBJECTS		= castro.o gtpgeneral.o gtpplayer.o gtpsolver.o mtrand.o string.o \
-				solverab.o solverpns.o solverpns_tt.o player.o playeruct.o zobrist.o
+				solverab.o solverpns.o solverpns2.o solverpns_tt.o player.o playeruct.o zobrist.o
 
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall
@@ -17,20 +17,20 @@ castro: $(OBJECTS)
 
 castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h move.h \
  zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
- compacttree.h thread.h lbdist.h log.h solverpns_tt.h player.h \
- depthstats.h mtrand.h weightedrandtree.h
+ compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
+ player.h depthstats.h mtrand.h weightedrandtree.h
 gtpgeneral.o: gtpgeneral.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
- compacttree.h thread.h lbdist.h log.h solverpns_tt.h player.h \
- depthstats.h mtrand.h weightedrandtree.h
+ compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
+ player.h depthstats.h mtrand.h weightedrandtree.h
 gtpplayer.o: gtpplayer.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
- compacttree.h thread.h lbdist.h log.h solverpns_tt.h player.h \
- depthstats.h mtrand.h weightedrandtree.h
+ compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
+ player.h depthstats.h mtrand.h weightedrandtree.h
 gtpsolver.o: gtpsolver.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
- compacttree.h thread.h lbdist.h log.h solverpns_tt.h player.h \
- depthstats.h mtrand.h weightedrandtree.h
+ compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
+ player.h depthstats.h mtrand.h weightedrandtree.h
 mtrand.o: mtrand.cpp mtrand.h
 player.o: player.cpp player.h types.h move.h string.h board.h zobrist.h \
  hashset.h depthstats.h thread.h mtrand.h weightedrandtree.h lbdist.h \
@@ -40,6 +40,9 @@ playeruct.o: playeruct.cpp player.h types.h move.h string.h board.h \
  lbdist.h compacttree.h log.h
 solverab.o: solverab.cpp solverab.h solver.h board.h move.h string.h \
  zobrist.h types.h hashset.h time.h timer.h thread.h log.h
+solverpns2.o: solverpns2.cpp solverpns2.h solver.h board.h move.h \
+ string.h zobrist.h types.h hashset.h compacttree.h thread.h lbdist.h \
+ log.h solverab.h time.h timer.h
 solverpns.o: solverpns.cpp solverpns.h solver.h board.h move.h string.h \
  zobrist.h types.h hashset.h compacttree.h thread.h lbdist.h log.h \
  solverab.h time.h timer.h
