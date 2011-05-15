@@ -159,6 +159,7 @@ public:
 		ties = 0;
 		lbdist = false;
 		numthreads = 1;
+		gclimit = 5;
 
 		reset();
 

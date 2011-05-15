@@ -254,11 +254,10 @@ bool SolverPNS2::SolverThread::pns(const Board & board, PNSNode * node, int dept
 		next.move(child->move, false, false);
 		
 		child->ref();
+		uint64_t itersbefore = iters;
 		mem = pns(next, child, depth + 1, tpc, tdc);
 		child->deref();
-
-//		if(child->phi == 0 || child->delta == 0)
-//			PLUS(solver->nodes, -child->dealloc(solver->ctmem));
+		PLUS(child->work, iters - itersbefore);
 
 		if(updatePDnum(node) && !solver->df)
 			break;
@@ -310,9 +309,9 @@ void SolverPNS2::garbage_collect(PNSNode * node, unsigned int limit){
 	for( ; child != end; child++){
 		if(child->terminal()){ //solved
 			//log heavy nodes?
-			child->dealloc(ctmem);
+			PLUS(nodes, -child->dealloc(ctmem));
 		}else if(child->work < limit){ //low exp, ignore solvedness since it's trivial to re-solve
-			child->dealloc(ctmem);
+			PLUS(nodes, -child->dealloc(ctmem));
 		}else if(child->children.num() > 0){
 			garbage_collect(child, limit);
 		}
