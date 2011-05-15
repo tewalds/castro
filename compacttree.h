@@ -179,6 +179,13 @@ public:
 				return data->end();
 			return NULL;
 		}
+		//find a node associated with a move
+		Node * find(const Move & m) const {
+			for(Node * c = begin(), * cend = end(); c != cend; c++)
+				if(c->move == m)
+					return c;
+			return NULL;
+		}
 	};
 
 private:
