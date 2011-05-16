@@ -175,6 +175,9 @@ bool SolverPNS2::SolverThread::pns(const Board & board, PNSNode * node, int dept
 		solver->maxdepth = depth;
 
 	if(node->children.empty()){
+		if(node->terminal())
+			return true;
+
 		if(solver->ctmem.memalloced() >= solver->memlimit)
 			return false;
 
