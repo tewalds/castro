@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <cassert>
 using namespace std;
 
 #include "move.h"
@@ -444,7 +445,7 @@ public:
 	}
 
 	// recursively follow a ring
-	bool detectring(const Move & pos, char turn) const {
+	bool detectring(const Move & pos, const int turn) const {
 		for(int i = 0; i < 4; i++){ //4 instead of 6 since any ring must have its first endpoint in the first 4
 			Move loc = pos + neighbours[i];
 			
@@ -522,6 +523,8 @@ public:
 	}
 
 	bool move(const Move & pos, bool checkwin = true, bool locality = false, bool checkrings = true){
+		assert(outcome == -1);
+
 		if(!valid_move(pos))
 			return false;
 
