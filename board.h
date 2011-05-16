@@ -523,7 +523,7 @@ public:
 	}
 
 	bool move(const Move & pos, bool checkwin = true, bool locality = false, bool checkrings = true){
-		assert(outcome == -1);
+		assert(outcome < 0);
 
 		if(!valid_move(pos))
 			return false;
