@@ -184,7 +184,7 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 
 	stats += "PV:          " + gtp_pv(vecstr()).response + "\n";
 
-	if(verbose >= 3&& !player.root.children.empty())
+	if(verbose >= 3 && !player.root.children.empty())
 		stats += "Exp-Rave:\n" + gtp_move_stats(vecstr()).response + "\n";
 
 	if(verbose)
@@ -337,6 +337,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	player.move(best);
 	solverab.move(best);
 	solverpns.move(best);
+	solverpns2.move(best);
 	solverpnstt.move(best);
 
 	if(verbose >= 2)
