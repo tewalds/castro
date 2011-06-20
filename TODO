@@ -3,6 +3,8 @@ worker stuff
 - PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 - cd /tmp; wget -N --no-check-certificate https://dropbox.ewalds.ca/worker.sh; screen -d -m sh worker.sh; logout
 
+player_solved claims an empty board is a win by black
+
 Set different cutoffs for ring checking to be less blind to rings
 - 0.4 for me, 0.5 for my opponent, etc
 
@@ -21,12 +23,17 @@ UCT constant = parent value
 - if you're doing well, explore less
 - if you're doing bad, explore more
 
+lambda DFPN http://www.aaai.org/Papers/IJCAI/2007/IJCAI07-387.pdf
+
 Proof number search player
 - choose by amount of work spent in a node
 
 Multi-thread PNS
 - increment the delta as you go down
 
+Count nodes expanded per move
+- how to deal with garbage collection?
+- how to deal with multi-threading/pondering?
 
 tree checkpointing to deal with a crash?
 
