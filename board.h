@@ -36,7 +36,7 @@ const MoveScore neighbours[18] = {
 	MoveScore(-1,-2, 2), MoveScore(1,-1, 2), MoveScore(2, 1, 2), MoveScore(1, 2, 2), MoveScore(-1, 1, 2), MoveScore(-2,-1, 2), //sides of ring 2, virtual connections
 	};
 
-static MoveValid * staticneighbourlist[11] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+static MoveValid * staticneighbourlist[11] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL}; //one per boardsize
 
 
 class Board{
@@ -175,7 +175,7 @@ public:
 
 	int xyc(int x, int y)   const { return xy(  x + sizem1,   y + sizem1); }
 	int xyc(const Move & m) const { return xy(m.x + sizem1, m.y + sizem1); }
-	
+
 	//assumes valid x,y
 	int get(int i)          const { return cells[i].piece; }
 	int get(int x, int y)   const { return get(xy(x,y)); }
@@ -295,11 +295,11 @@ public:
 		}
 		return s;
 	}
-	
+
 	void print() const {
 		printf("%s", to_s().c_str());
 	}
-	
+
 	string won_str() const {
 		switch(outcome){
 			case -3: return "none";
@@ -389,7 +389,7 @@ public:
 		cells[i].size   += cells[j].size;
 		cells[i].corner |= cells[j].corner;
 		cells[i].edge   |= cells[j].edge;
-		
+
 		return false;
 	}
 
@@ -448,7 +448,7 @@ public:
 	bool detectring(const Move & pos, const int turn) const {
 		for(int i = 0; i < 4; i++){ //4 instead of 6 since any ring must have its first endpoint in the first 4
 			Move loc = pos + neighbours[i];
-			
+
 			if(onboard(loc) && turn == get(loc) && followring(pos, loc, i, turn))
 				return true;
 		}
@@ -575,7 +575,7 @@ public:
 				outcome = 0;
 			}
 		}
-		return true;	
+		return true;
 	}
 
 	bool test_local(const Move & pos) const {
