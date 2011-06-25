@@ -37,8 +37,8 @@ template <class Node> class CompactTree {
 		Node        children[0]; //array of Nodes, runs past the end of the data block
 
 		Data(unsigned int n, Data ** p) : capacity(n), used(n), parent(p) {
-			header = ((unsigned long)this >> 2) & 0xFFFFFF;
-			if(empty()) header += 0xABCDF3;
+			header = (((unsigned long)this >> 2) & 0xFFFF) | (0xBEEF << 16);
+			if(empty()) header += 0xABCD;
 
 			for(Node * i = begin(), * e = end(); i != e; ++i)
 				new(i) Node(); //call the constructors
@@ -49,6 +49,10 @@ template <class Node> class CompactTree {
 				i->~Node();
 			header = 0;
 		}
+
+		//how big is this structure in bytes by capacity or used
+		size_t memsize() const { return sizeof(Data) + sizeof(Node)*capacity; }
+		size_t memused() const { return sizeof(Data) + sizeof(Node)*used; }
 
 		bool empty() const { return (header <= oldcount); }
 		bool old()   const { return (header == oldcount); }
@@ -76,7 +80,7 @@ template <class Node> class CompactTree {
 		}
 
 		//make sure the parent points back to the same place
-		bool parent_consistent(){
+		bool parent_consistent() const {
 			return (header == (*parent)->header);
 		}
 
@@ -227,19 +231,55 @@ private:
 		}
 	};
 
+	class Freelist {
+		Data * list[MAX_NUM];
+		SpinLock lock;
+	public:
+		Freelist(){
+			clear();
+		}
+		void clear(){
+			for(unsigned int i = 0; i < MAX_NUM; i++)
+				list[i] = NULL;
+		}
+
+		void push_nolock(Data * d){
+			unsigned int num = d->capacity;
+			d->nextfree = list[num];
+			list[num] = d;
+		}
+		void push(Data * d){
+			assert(d->empty());
+			lock.lock();
+			push_nolock(d);
+			lock.unlock();
+		}
+
+		Data * pop_nolock(unsigned int num){
+			Data * t = list[num];
+			if(t)
+				list[num] = t->nextfree;
+			return t;
+		}
+		Data * pop(unsigned int num){
+			lock.lock();
+			Data * t = pop_nolock(num);
+			lock.unlock();
+			return t;
+		}
+	};
+
+
 	Chunk * head,    //start of the chunk list
 	      * current, //where memory is currently being allocated
 	      * last;    //last chunk that isn't empty
 	unsigned int numchunks;
-	Data * freelist[MAX_NUM];
+	Freelist freelist;
 	uint64_t memused;
 
 public:
 
 	CompactTree() {
-		for(unsigned int i = 0; i < MAX_NUM; i++)
-			freelist[i] = NULL;
-
 		//allocate the first chunk
 		head = current = last = new Chunk(CHUNK_SIZE);
 		numchunks = 1;
@@ -279,9 +319,9 @@ public:
 		PLUS(memused, size);
 
 	//check freelist
-		while(Data * t = freelist[num]){
-			if(CAS(freelist[num], t, t->nextfree))
-				return new(t) Data(num, parent);
+		if(Data * t = freelist.pop(num)){
+			assert(t->empty() && t->capacity == num);
+			return new(t) Data(num, parent);
 		}
 
 	//allocate new memory
@@ -321,20 +361,15 @@ public:
 	void dealloc(Data * d){
 		assert(!d->empty() && d->capacity > 0 && d->capacity < MAX_NUM);
 
-		unsigned int size = sizeof(Data) + sizeof(Node)*d->capacity;
+		unsigned int size = d->memsize();
 		PLUS(memused, -size);
 
 		//call the destructor
 		d->~Data();
-		d->used = d->capacity;
+		d->used = 0;
 
 		//add to the freelist
-		while(1){
-			Data * t = freelist[d->capacity];
-			d->nextfree = t;
-			if(CAS(freelist[d->capacity], t, d))
-				break;
-		}
+		freelist.push(d);
 	}
 
 	//assume this is the only thread running
@@ -352,8 +387,7 @@ public:
 			return;
 
 		//clear the freelist
-		for(unsigned int i = 0; i < MAX_NUM; i++)
-			freelist[i] = NULL;
+		freelist.clear();
 
 		Chunk      * schunk = head; //source chunk
 		unsigned int soff   = 0;    //source offset
@@ -369,7 +403,7 @@ public:
 			Data * s = (Data *)(schunk->mem + soff);
 			assert(s->capacity > 0 && s->capacity < MAX_NUM);
 
-			int ssize = sizeof(Data) + sizeof(Node)*s->capacity; //how much to move the source pointer
+			int ssize = s->memsize(); //how much to move the source pointer
 
 			//move from -> to, update parent pointer
 			if(s->empty()){
@@ -379,8 +413,7 @@ public:
 						dchunk = schunk;
 						doff = soff;
 					}else{ //freed recently, add to the free list
-						s->nextfree = freelist[s->capacity];
-						freelist[s->capacity] = s;
+						freelist.push_nolock(s);
 						s->header++; //empty, but a generation old
 					}
 				}//else this position will be overwritten by the next full chunk
@@ -389,13 +422,12 @@ public:
 					memused += ssize;
 				}else{
 					assert(s->used > 0 && s->used <= s->capacity);
-					int dsize = sizeof(Data) + sizeof(Node)*s->used; //how much to move the dest pointer
+					int dsize = s->memused(); //how much to move the dest pointer
 					Data * d = NULL;
 
 					//where to move
 					while(1){
-						if((d = freelist[s->used])){ //allocate off the freelist if possible
-							freelist[s->used] = d->nextfree;
+						if((d = freelist.pop_nolock(s->used))){ //allocate off the freelist if possible
 							break;
 						}else if(doff + dsize <= dchunk->capacity){ //if space, allocate from this chunk
 							assert(schunk->id > dchunk->id || (schunk == dchunk && soff >= doff)); //make sure I'm moving left
