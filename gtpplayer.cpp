@@ -138,12 +138,11 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 	int toplay = player.rootboard.toplay();
 
 	DepthStats gamelen, treelen;
-	int runs = 0;
+	uint64_t runs = player.runs;
 	DepthStats wintypes[2][4];
 	for(unsigned int i = 0; i < player.threads.size(); i++){
 		gamelen += player.threads[i]->gamelen;
 		treelen += player.threads[i]->treelen;
-		runs += player.threads[i]->runs;
 
 		for(int a = 0; a < 2; a++)
 			for(int b = 0; b < 4; b++)
@@ -151,6 +150,7 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 
 		player.threads[i]->reset();
 	}
+	player.runs = 0;
 
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(player.time_used*1000, 0) + " msec: " + to_str(runs/player.time_used, 0) + " Games/s\n";
 	if(runs > 0){
@@ -270,12 +270,11 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	int toplay = player.rootboard.toplay();
 
 	DepthStats gamelen, treelen;
-	int runs = 0;
+	uint64_t runs = player.runs;
 	DepthStats wintypes[2][4];
 	for(unsigned int i = 0; i < player.threads.size(); i++){
 		gamelen += player.threads[i]->gamelen;
 		treelen += player.threads[i]->treelen;
-		runs += player.threads[i]->runs;
 
 		for(int a = 0; a < 2; a++)
 			for(int b = 0; b < 4; b++)
@@ -283,6 +282,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 
 		player.threads[i]->reset();
 	}
+	player.runs = 0;
 
 	string stats = "Finished " + to_str(runs) + " runs in " + to_str(player.time_used*1000, 0) + " msec: " + to_str(runs/player.time_used, 0) + " Games/s\n";
 	if(runs > 0){

@@ -242,11 +242,10 @@ public:
 		Thread thread;
 		Player * player;
 	public:
-		uint64_t runs, maxruns;
 		DepthStats treelen, gamelen;
 		DepthStats wintypes[2][4]; //player,wintype
 
-		PlayerThread() : rand32(std::rand()), unitrand(std::rand()), runs(0), maxruns(0) {}
+		PlayerThread() : rand32(std::rand()), unitrand(std::rand()) {}
 		virtual ~PlayerThread() { }
 		virtual void reset() { }
 		int join(){ return thread.join(); }
@@ -272,7 +271,6 @@ public:
 		}
 
 		void reset(){
-			runs = 0;
 			treelen.reset();
 			gamelen.reset();
 
@@ -355,6 +353,8 @@ public:
 	uword nodes;
 	int   gclimit; //the minimum experience needed to not be garbage collected
 
+	uint64_t runs, maxruns;
+
 	CompactTree<Node> ctmem;
 
 	string solved_logname;
@@ -397,7 +397,7 @@ public:
 	void flushlog();
 	void logsolved(hash_t hash, const Node * node);
 
-	Node * genmove(double time, int maxruns);
+	Node * genmove(double time, int max_runs);
 	vector<Move> get_pv();
 	void garbage_collect(Board & board, Node * node, unsigned int limit); //destroys the board, so pass in a copy
 

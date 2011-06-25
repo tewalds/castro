@@ -27,7 +27,7 @@ void Player::PlayerThread::run(){
 			break;
 
 		case Thread_Running:    //threads are running
-			if(player->root.outcome >= 0 || (maxruns > 0 && runs >= maxruns)){ //solved or finished runs
+			if(player->root.outcome >= 0 || (player->maxruns > 0 && player->runs >= player->maxruns)){ //solved or finished runs
 				if(CAS(player->threadstate, Thread_Running, Thread_Wait_End) && player->root.outcome >= 0)
 					logerr("Solved as " + to_str(player->root.outcome >= 0) + "\n");
 				break;
@@ -37,7 +37,7 @@ void Player::PlayerThread::run(){
 				break;
 			}
 
-			runs++;
+			INCR(player->runs);
 			iterate();
 			break;
 
@@ -70,25 +70,24 @@ void Player::PlayerThread::run(){
 	}
 }
 
-Player::Node * Player::genmove(double time, int maxruns){
+Player::Node * Player::genmove(double time, int max_runs){
 	time_used = 0;
 	int toplay = rootboard.toplay();
 
-	if(rootboard.won() >= 0 || (time <= 0 && maxruns == 0))
+	if(rootboard.won() >= 0 || (time <= 0 && max_runs == 0))
 		return NULL;
 
 	Time starttime;
 
 	stop_threads();
 
-	uint64_t runs = 0;
-	for(unsigned int i = 0; i < threads.size(); i++){
-		runs += threads[i]->runs;
-		threads[i]->reset();
-		threads[i]->maxruns = maxruns;
-	}
 	if(runs)
 		logerr("Pondered " + to_str(runs) + " runs\n");
+
+	runs = 0;
+	maxruns = max_runs;
+	for(unsigned int i = 0; i < threads.size(); i++)
+		threads[i]->reset();
 
 
 	//let them run!
