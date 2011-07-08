@@ -50,16 +50,17 @@ class Board{
 		unsigned local  : 2; //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
 /*/
 		uint8_t piece;  //who controls this cell, 0 for none, 1,2 for players
-mutable uint16_t parent; //parent for this group of cells
 		uint8_t size;   //size of this group of cells
+mutable uint16_t parent; //parent for this group of cells
 		uint8_t corner; //which corners are this group connected to
 		uint8_t edge;   //which edges are this group connected to
 		uint8_t local;  //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
+mutable uint8_t ringdepth; //when doing a ring search, what depth was this position found
 //*/
 
-		Cell() : piece(0), parent(0), size(0), corner(0), edge(0), local(0) { }
+		Cell() : piece(0), size(0), parent(0), corner(0), edge(0), local(0), ringdepth(0) { }
 		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e, unsigned int l) :
-			piece(p), parent(a), size(s), corner(c), edge(e), local(l) { }
+			piece(p), size(s), parent(a), corner(c), edge(e), local(l), ringdepth(0) { }
 
 		int numcorners(){ return BitsSetTable64[corner]; }
 		int numedges()  { return BitsSetTable64[edge];   }
@@ -445,23 +446,54 @@ public:
 	}
 
 	// recursively follow a ring
-	bool detectring(const Move & pos, const int turn) const {
+	bool detectring(const Move & pos, const int turn, const int ringsize = 6) const {
+		const Cell * start = & cells[xy(pos)];
+		start->ringdepth = 1;
+		bool success = false;
 		for(int i = 0; i < 4; i++){ //4 instead of 6 since any ring must have its first endpoint in the first 4
 			Move loc = pos + neighbours[i];
 
-			if(onboard(loc) && turn == get(loc) && followring(pos, loc, i, turn))
-				return true;
+			if(!onboard(loc))
+				continue;
+
+			const Cell * g = & cells[xy(loc)];
+
+			if(turn != g->piece)
+				continue;
+
+			g->ringdepth = 2;
+			success = followring(loc, i, turn, 3, ringsize);
+			g->ringdepth = 0;
+
+			if(success)
+				break;
 		}
-		return false;
+		start->ringdepth = 0;
+		return success;
 	}
 	// only take the 3 directions that are valid in a ring
 	// the backwards directions are either invalid or not part of the shortest loop
-	bool followring(const Move & start, const Move & cur, const int & dir, const int & turn) const {
+	bool followring(const Move & cur, const int & dir, const int & turn, const int & depth, const int & ringsize) const {
 		for(int i = 5; i <= 7; i++){
 			int nd = (dir + i) % 6;
 			Move next = cur + neighbours[nd];
 
-			if(start == next || (onboard(next) && turn == get(next) && followring(start, next, nd, turn)))
+			if(!onboard(next))
+				continue;
+
+			const Cell * g = & cells[xy(next)];
+
+			if(turn != g->piece)
+				continue;
+
+			if(g->ringdepth)
+				return (depth - g->ringdepth >= ringsize);
+
+			g->ringdepth = depth;
+			bool success = followring(next, nd, turn, depth+1, ringsize);
+			g->ringdepth = 0;
+
+			if(success)
 				return true;
 		}
 		return false;
@@ -522,7 +554,7 @@ public:
 		return m;
 	}
 
-	bool move(const Move & pos, bool checkwin = true, bool locality = false, bool checkrings = true){
+	bool move(const Move & pos, bool checkwin = true, bool locality = false, int ringsize = 6){
 		assert(outcome < 0);
 
 		if(!valid_move(pos))
@@ -568,7 +600,7 @@ public:
 			}else if(g->numcorners() >= 2){
 				outcome = turn;
 				wintype = 2;
-			}else if(checkrings && alreadyjoined && g->size >= 6 && detectring(pos, turn)){
+			}else if(ringsize && alreadyjoined && g->size >= ringsize && detectring(pos, turn, ringsize)){
 				outcome = turn;
 				wintype = 3;
 			}else if(nummoves == numcells()){
