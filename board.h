@@ -546,26 +546,26 @@ public:
 			case 0b101010: { int a = find_group(s[0]), b = find_group(s[2]), c = find_group(s[4]); return (a == b || a == c || b == c); }
 
 			//might have a ring?
-			case 0b000111: return (s[10].onboard() && get(s[10]) == turn && get(s[16]) == turn && get(s[15]) == turn);
-			case 0b001110: return (s[ 9].onboard() && get(s[ 9]) == turn && get(s[15]) == turn && get(s[14]) == turn);
-			case 0b011100: return (s[ 8].onboard() && get(s[ 8]) == turn && get(s[14]) == turn && get(s[13]) == turn);
-			case 0b111000: return (s[ 7].onboard() && get(s[ 7]) == turn && get(s[13]) == turn && get(s[12]) == turn);
-			case 0b110001: return (s[ 6].onboard() && get(s[ 6]) == turn && get(s[12]) == turn && get(s[17]) == turn);
-			case 0b100011: return (s[11].onboard() && get(s[11]) == turn && get(s[17]) == turn && get(s[16]) == turn);
+			case 0b000111: return checkring_back(s[10], s[16], s[15], turn);
+			case 0b001110: return checkring_back(s[ 9], s[15], s[14], turn);
+			case 0b011100: return checkring_back(s[ 8], s[14], s[13], turn);
+			case 0b111000: return checkring_back(s[ 7], s[13], s[12], turn);
+			case 0b110001: return checkring_back(s[ 6], s[12], s[17], turn);
+			case 0b100011: return checkring_back(s[11], s[17], s[16], turn);
 
-			case 0b001111: return (geton(s[15]) == turn && ((geton(s[10]) == turn && get(s[16]) == turn) || (geton(s[ 9]) == turn && get(s[14]) == turn)));
-			case 0b011110: return (geton(s[14]) == turn && ((geton(s[ 9]) == turn && get(s[15]) == turn) || (geton(s[ 8]) == turn && get(s[13]) == turn)));
-			case 0b111100: return (geton(s[13]) == turn && ((geton(s[ 8]) == turn && get(s[14]) == turn) || (geton(s[ 7]) == turn && get(s[12]) == turn)));
-			case 0b111001: return (geton(s[12]) == turn && ((geton(s[ 7]) == turn && get(s[13]) == turn) || (geton(s[ 6]) == turn && get(s[17]) == turn)));
-			case 0b110011: return (geton(s[17]) == turn && ((geton(s[ 6]) == turn && get(s[12]) == turn) || (geton(s[11]) == turn && get(s[16]) == turn)));
-			case 0b100111: return (geton(s[16]) == turn && ((geton(s[11]) == turn && get(s[17]) == turn) || (geton(s[10]) == turn && get(s[15]) == turn)));
+			case 0b001111: return (checkring_back(s[10], s[16], s[15], turn) || checkring_back(s[ 9], s[14], s[15], turn));
+			case 0b011110: return (checkring_back(s[ 9], s[15], s[14], turn) || checkring_back(s[ 8], s[13], s[14], turn));
+			case 0b111100: return (checkring_back(s[ 8], s[14], s[13], turn) || checkring_back(s[ 7], s[12], s[13], turn));
+			case 0b111001: return (checkring_back(s[ 7], s[13], s[12], turn) || checkring_back(s[ 6], s[17], s[12], turn));
+			case 0b110011: return (checkring_back(s[ 6], s[12], s[17], turn) || checkring_back(s[11], s[16], s[17], turn));
+			case 0b100111: return (checkring_back(s[11], s[17], s[16], turn) || checkring_back(s[10], s[15], s[16], turn));
 
-			case 0b011111: return ((geton(s[15]) == turn && ((geton(s[10]) == turn && get(s[16]) == turn) || (geton(s[ 9]) == turn && get(s[14]) == turn))) || (geton(s[ 8]) == turn && get(s[14]) == turn && get(s[13]) == turn));
-			case 0b111110: return ((geton(s[14]) == turn && ((geton(s[ 9]) == turn && get(s[15]) == turn) || (geton(s[ 8]) == turn && get(s[13]) == turn))) || (geton(s[ 7]) == turn && get(s[13]) == turn && get(s[12]) == turn));
-			case 0b111101: return ((geton(s[13]) == turn && ((geton(s[ 8]) == turn && get(s[14]) == turn) || (geton(s[ 7]) == turn && get(s[12]) == turn))) || (geton(s[ 6]) == turn && get(s[12]) == turn && get(s[17]) == turn));
-			case 0b111011: return ((geton(s[12]) == turn && ((geton(s[ 7]) == turn && get(s[13]) == turn) || (geton(s[ 6]) == turn && get(s[17]) == turn))) || (geton(s[11]) == turn && get(s[17]) == turn && get(s[16]) == turn));
-			case 0b110111: return ((geton(s[17]) == turn && ((geton(s[ 6]) == turn && get(s[12]) == turn) || (geton(s[11]) == turn && get(s[16]) == turn))) || (geton(s[10]) == turn && get(s[16]) == turn && get(s[15]) == turn));
-			case 0b101111: return ((geton(s[16]) == turn && ((geton(s[11]) == turn && get(s[17]) == turn) || (geton(s[10]) == turn && get(s[15]) == turn))) || (geton(s[ 9]) == turn && get(s[15]) == turn && get(s[14]) == turn));
+			case 0b011111: return (checkring_back(s[10], s[16], s[15], turn) || checkring_back(s[ 9], s[14], s[15], turn) || checkring_back(s[ 8], s[14], s[13], turn));
+			case 0b111110: return (checkring_back(s[ 9], s[15], s[14], turn) || checkring_back(s[ 8], s[13], s[14], turn) || checkring_back(s[ 7], s[13], s[12], turn));
+			case 0b111101: return (checkring_back(s[ 8], s[14], s[13], turn) || checkring_back(s[ 7], s[12], s[13], turn) || checkring_back(s[ 6], s[12], s[17], turn));
+			case 0b111011: return (checkring_back(s[ 7], s[13], s[12], turn) || checkring_back(s[ 6], s[17], s[12], turn) || checkring_back(s[11], s[17], s[16], turn));
+			case 0b110111: return (checkring_back(s[ 6], s[12], s[17], turn) || checkring_back(s[11], s[16], s[17], turn) || checkring_back(s[10], s[16], s[15], turn));
+			case 0b101111: return (checkring_back(s[11], s[17], s[16], turn) || checkring_back(s[10], s[15], s[16], turn) || checkring_back(s[ 9], s[15], s[14], turn));
 
 			case 0b111111: //a ring around this position? how'd that happen
 				return true;
@@ -576,6 +576,10 @@ public:
 			default:
 				return false;
 		}
+	}
+
+	bool checkring_back(const MoveValid & a, const MoveValid & b, const MoveValid & c, int turn) const {
+		return (a.onboard() && get(a) == turn && get(b) == turn && get(c) == turn);
 	}
 
 	hash_t gethash() const {
