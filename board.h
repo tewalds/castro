@@ -215,7 +215,7 @@ public:
 	//iterator through neighbours of a position
 	const MoveValid * nb_begin(int x, int y)   const { return nb_begin(xy(x, y)); }
 	const MoveValid * nb_begin(const Move & m) const { return nb_begin(xy(m)); }
-	const MoveValid * nb_begin(int i)          const { return &neighbourlist[i*6]; }
+	const MoveValid * nb_begin(int i)          const { return &neighbourlist[i*18]; }
 
 	const MoveValid * nb_end(int x, int y)   const { return nb_end(xy(x, y)); }
 	const MoveValid * nb_end(const Move & m) const { return nb_end(xy(m)); }
@@ -256,13 +256,13 @@ public:
 
 	MoveValid * get_neighbour_list(){
 		if(!staticneighbourlist[(int)size]){
-			MoveValid * list = new MoveValid[vecsize()*6];
+			MoveValid * list = new MoveValid[vecsize()*18];
 			MoveValid * a = list;
 			for(int y = 0; y < size_d; y++){
 				for(int x = 0; x < size_d; x++){
 					Move pos(x,y);
 
-					for(int i = 0; i < 6; i++){
+					for(int i = 0; i < 18; i++){
 						Move loc = pos + neighbours[i];
 						if(onboard(loc))
 							*a = MoveValid(loc, xy(loc));
@@ -529,7 +529,6 @@ public:
 				bitpattern |= 1;
 		}
 
-		const MoveScore * n = neighbours;
 		switch(bitpattern){
 			case 0b000101: case 0b001101: case 0b011101: case 0b100101: return (find_group(s+3) == find_group(s+5));
 			case 0b001010: case 0b011010: case 0b111010: case 0b001011: return (find_group(s+2) == find_group(s+4));
@@ -547,26 +546,26 @@ public:
 			case 0b101010: return (find_group(s+0) == find_group(s+2) || find_group(s+2) == find_group(s+4) || find_group(s+0) == find_group(s+4));
 
 			//might have a ring?
-			case 0b000111: return (get(pos + n[16]) == turn && get(pos + n[10]) == turn && get(pos + n[15]) == turn);
-			case 0b001110: return (get(pos + n[15]) == turn && get(pos + n[ 9]) == turn && get(pos + n[14]) == turn);
-			case 0b011100: return (get(pos + n[14]) == turn && get(pos + n[ 8]) == turn && get(pos + n[13]) == turn);
-			case 0b111000: return (get(pos + n[13]) == turn && get(pos + n[ 7]) == turn && get(pos + n[12]) == turn);
-			case 0b110001: return (get(pos + n[12]) == turn && get(pos + n[ 6]) == turn && get(pos + n[17]) == turn);
-			case 0b100011: return (get(pos + n[17]) == turn && get(pos + n[11]) == turn && get(pos + n[16]) == turn);
+			case 0b000111: return (get(s + 16) == turn && get(s + 10) == turn && get(s + 15) == turn);
+			case 0b001110: return (get(s + 15) == turn && get(s +  9) == turn && get(s + 14) == turn);
+			case 0b011100: return (get(s + 14) == turn && get(s +  8) == turn && get(s + 13) == turn);
+			case 0b111000: return (get(s + 13) == turn && get(s +  7) == turn && get(s + 12) == turn);
+			case 0b110001: return (get(s + 12) == turn && get(s +  6) == turn && get(s + 17) == turn);
+			case 0b100011: return (get(s + 17) == turn && get(s + 11) == turn && get(s + 16) == turn);
 
-			case 0b001111: return (get(pos + n[15]) == turn && ((get(pos + n[16]) == turn && get(pos + n[10]) == turn) || (get(pos + n[ 9]) == turn && get(pos + n[14]) == turn)));
-			case 0b011110: return (get(pos + n[14]) == turn && ((get(pos + n[15]) == turn && get(pos + n[ 9]) == turn) || (get(pos + n[ 8]) == turn && get(pos + n[13]) == turn)));
-			case 0b111100: return (get(pos + n[13]) == turn && ((get(pos + n[14]) == turn && get(pos + n[ 8]) == turn) || (get(pos + n[ 7]) == turn && get(pos + n[12]) == turn)));
-			case 0b111001: return (get(pos + n[12]) == turn && ((get(pos + n[13]) == turn && get(pos + n[ 7]) == turn) || (get(pos + n[ 6]) == turn && get(pos + n[17]) == turn)));
-			case 0b110011: return (get(pos + n[17]) == turn && ((get(pos + n[12]) == turn && get(pos + n[ 6]) == turn) || (get(pos + n[11]) == turn && get(pos + n[16]) == turn)));
-			case 0b100111: return (get(pos + n[16]) == turn && ((get(pos + n[17]) == turn && get(pos + n[11]) == turn) || (get(pos + n[10]) == turn && get(pos + n[15]) == turn)));
+			case 0b001111: return (get(s + 15) == turn && ((get(s + 16) == turn && get(s + 10) == turn) || (get(s +  9) == turn && get(s + 14) == turn)));
+			case 0b011110: return (get(s + 14) == turn && ((get(s + 15) == turn && get(s +  9) == turn) || (get(s +  8) == turn && get(s + 13) == turn)));
+			case 0b111100: return (get(s + 13) == turn && ((get(s + 14) == turn && get(s +  8) == turn) || (get(s +  7) == turn && get(s + 12) == turn)));
+			case 0b111001: return (get(s + 12) == turn && ((get(s + 13) == turn && get(s +  7) == turn) || (get(s +  6) == turn && get(s + 17) == turn)));
+			case 0b110011: return (get(s + 17) == turn && ((get(s + 12) == turn && get(s +  6) == turn) || (get(s + 11) == turn && get(s + 16) == turn)));
+			case 0b100111: return (get(s + 16) == turn && ((get(s + 17) == turn && get(s + 11) == turn) || (get(s + 10) == turn && get(s + 15) == turn)));
 
-			case 0b011111: return ((get(pos + n[15]) == turn && ((get(pos + n[16]) == turn && get(pos + n[10]) == turn) || (get(pos + n[ 9]) == turn && get(pos + n[14]) == turn))) || (get(pos + n[14]) == turn && get(pos + n[ 8]) == turn && get(pos + n[13]) == turn));
-			case 0b111110: return ((get(pos + n[14]) == turn && ((get(pos + n[15]) == turn && get(pos + n[ 9]) == turn) || (get(pos + n[ 8]) == turn && get(pos + n[13]) == turn))) || (get(pos + n[13]) == turn && get(pos + n[ 7]) == turn && get(pos + n[12]) == turn));
-			case 0b111101: return ((get(pos + n[13]) == turn && ((get(pos + n[14]) == turn && get(pos + n[ 8]) == turn) || (get(pos + n[ 7]) == turn && get(pos + n[12]) == turn))) || (get(pos + n[12]) == turn && get(pos + n[ 6]) == turn && get(pos + n[17]) == turn));
-			case 0b111011: return ((get(pos + n[12]) == turn && ((get(pos + n[13]) == turn && get(pos + n[ 7]) == turn) || (get(pos + n[ 6]) == turn && get(pos + n[17]) == turn))) || (get(pos + n[17]) == turn && get(pos + n[11]) == turn && get(pos + n[16]) == turn));
-			case 0b110111: return ((get(pos + n[17]) == turn && ((get(pos + n[12]) == turn && get(pos + n[ 6]) == turn) || (get(pos + n[11]) == turn && get(pos + n[16]) == turn))) || (get(pos + n[16]) == turn && get(pos + n[10]) == turn && get(pos + n[15]) == turn));
-			case 0b101111: return ((get(pos + n[16]) == turn && ((get(pos + n[17]) == turn && get(pos + n[11]) == turn) || (get(pos + n[10]) == turn && get(pos + n[15]) == turn))) || (get(pos + n[15]) == turn && get(pos + n[ 9]) == turn && get(pos + n[14]) == turn));
+			case 0b011111: return ((get(s + 15) == turn && ((get(s + 16) == turn && get(s + 10) == turn) || (get(s +  9) == turn && get(s + 14) == turn))) || (get(s + 14) == turn && get(s +  8) == turn && get(s + 13) == turn));
+			case 0b111110: return ((get(s + 14) == turn && ((get(s + 15) == turn && get(s +  9) == turn) || (get(s +  8) == turn && get(s + 13) == turn))) || (get(s + 13) == turn && get(s +  7) == turn && get(s + 12) == turn));
+			case 0b111101: return ((get(s + 13) == turn && ((get(s + 14) == turn && get(s +  8) == turn) || (get(s +  7) == turn && get(s + 12) == turn))) || (get(s + 12) == turn && get(s +  6) == turn && get(s + 17) == turn));
+			case 0b111011: return ((get(s + 12) == turn && ((get(s + 13) == turn && get(s +  7) == turn) || (get(s +  6) == turn && get(s + 17) == turn))) || (get(s + 17) == turn && get(s + 11) == turn && get(s + 16) == turn));
+			case 0b110111: return ((get(s + 17) == turn && ((get(s + 12) == turn && get(s +  6) == turn) || (get(s + 11) == turn && get(s + 16) == turn))) || (get(s + 16) == turn && get(s + 10) == turn && get(s + 15) == turn));
+			case 0b101111: return ((get(s + 16) == turn && ((get(s + 17) == turn && get(s + 11) == turn) || (get(s + 10) == turn && get(s + 15) == turn))) || (get(s + 15) == turn && get(s +  9) == turn && get(s + 14) == turn));
 
 			case 0b111111: //a ring around this position? how'd that happen
 				return true;
