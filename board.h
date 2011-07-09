@@ -521,6 +521,73 @@ public:
 	// do an O(1) ring check
 	// must be done before placing the stone and joining it with the neighbouring groups
 	bool checkring_o1(const Move & pos, const int turn) const {
+		static const unsigned char ringdata[64][10] = {
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //000000
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //000001
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //000010
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //000011
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //000100
+			{1, 3, 5, 0, 0, 0, 0, 0, 0, 0}, //000101
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //000110
+			{3,10,16,15, 0, 0, 0, 0, 0, 0}, //000111
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //001000
+			{1, 2, 5, 0, 0, 0, 0, 0, 0, 0}, //001001
+			{1, 2, 4, 0, 0, 0, 0, 0, 0, 0}, //001010
+			{1, 2, 4, 0, 0, 0, 0, 0, 0, 0}, //001011
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //001100
+			{1, 2, 5, 0, 0, 0, 0, 0, 0, 0}, //001101
+			{3, 9,15,14, 0, 0, 0, 0, 0, 0}, //001110
+			{4,10,16,15, 9,14,15, 0, 0, 0}, //001111
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //010000
+			{1, 1, 5, 0, 0, 0, 0, 0, 0, 0}, //010001
+			{1, 1, 4, 0, 0, 0, 0, 0, 0, 0}, //010010
+			{1, 1, 4, 0, 0, 0, 0, 0, 0, 0}, //010011
+			{1, 1, 3, 0, 0, 0, 0, 0, 0, 0}, //010100
+			{2, 1, 3, 5, 0, 0, 0, 0, 0, 0}, //010101
+			{1, 1, 3, 0, 0, 0, 0, 0, 0, 0}, //010110
+			{7,10,16,15, 1, 3, 0, 0, 0, 0}, //010111
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //011000
+			{1, 1, 5, 0, 0, 0, 0, 0, 0, 0}, //011001
+			{1, 1, 4, 0, 0, 0, 0, 0, 0, 0}, //011010
+			{1, 1, 4, 0, 0, 0, 0, 0, 0, 0}, //011011
+			{3, 8,14,13, 0, 0, 0, 0, 0, 0}, //011100
+			{7, 8,14,13, 1, 5, 0, 0, 0, 0}, //011101
+			{4, 9,15,14, 8,13,14, 0, 0, 0}, //011110
+			{5,10,16,15, 9,14,15, 8,14,13}, //011111
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //100000
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //100001
+			{1, 0, 4, 0, 0, 0, 0, 0, 0, 0}, //100010
+			{3,11,17,16, 0, 0, 0, 0, 0, 0}, //100011
+			{1, 0, 3, 0, 0, 0, 0, 0, 0, 0}, //100100
+			{1, 0, 3, 0, 0, 0, 0, 0, 0, 0}, //100101
+			{1, 0, 3, 0, 0, 0, 0, 0, 0, 0}, //100110
+			{4,11,17,16,10,15,16, 0, 0, 0}, //100111
+			{1, 0, 2, 0, 0, 0, 0, 0, 0, 0}, //101000
+			{1, 0, 2, 0, 0, 0, 0, 0, 0, 0}, //101001
+			{2, 0, 2, 4, 0, 0, 0, 0, 0, 0}, //101010
+			{7,11,17,16, 0, 2, 0, 0, 0, 0}, //101011
+			{1, 0, 2, 0, 0, 0, 0, 0, 0, 0}, //101100
+			{1, 0, 2, 0, 0, 0, 0, 0, 0, 0}, //101101
+			{7, 9,15,14, 0, 2, 0, 0, 0, 0}, //101110
+			{5,11,17,16,10,15,16, 9,15,14}, //101111
+			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //110000
+			{3, 6,12,17, 0, 0, 0, 0, 0, 0}, //110001
+			{1, 0, 4, 0, 0, 0, 0, 0, 0, 0}, //110010
+			{4, 6,12,17,11,16,17, 0, 0, 0}, //110011
+			{1, 0, 3, 0, 0, 0, 0, 0, 0, 0}, //110100
+			{7, 6,12,17, 0, 3, 0, 0, 0, 0}, //110101
+			{1, 0, 3, 0, 0, 0, 0, 0, 0, 0}, //110110
+			{5, 6,12,17,11,16,17,10,16,15}, //110111
+			{3, 7,13,12, 0, 0, 0, 0, 0, 0}, //111000
+			{4, 7,13,12, 6,17,12, 0, 0, 0}, //111001
+			{7, 7,13,12, 0, 4, 0, 0, 0, 0}, //111010
+			{5, 7,13,12, 6,17,12,11,17,16}, //111011
+			{4, 8,14,13, 7,12,13, 0, 0, 0}, //111100
+			{5, 8,14,13, 7,12,13, 6,12,17}, //111101
+			{5, 9,15,14, 8,13,14, 7,13,12}, //111110
+			{6, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //111111
+		};
+
 		int bitpattern = 0;
 		const MoveValid * s = nb_begin(pos);
 		for(const MoveValid * i = s, *e = nb_end(i); i < e; i++){
@@ -529,55 +596,45 @@ public:
 				bitpattern |= 1;
 		}
 
-		switch(bitpattern){
-			case 0b000101: case 0b001101: case 0b011101: case 0b100101: return (find_group(s[3]) == find_group(s[5]));
-			case 0b001010: case 0b011010: case 0b111010: case 0b001011: return (find_group(s[2]) == find_group(s[4]));
-			case 0b010100: case 0b110100: case 0b110101: case 0b010110: return (find_group(s[1]) == find_group(s[3]));
-			case 0b101000: case 0b101001: case 0b101011: case 0b101100: return (find_group(s[0]) == find_group(s[2]));
-			case 0b010001: case 0b010011: case 0b010111: case 0b011001: return (find_group(s[1]) == find_group(s[5]));
-			case 0b100010: case 0b100110: case 0b101110: case 0b110010: return (find_group(s[0]) == find_group(s[4]));
+		const unsigned char * d = ringdata[bitpattern];
 
-			case 0b001001: case 0b011011: return (find_group(s[2]) == find_group(s[5]));
-			case 0b010010: case 0b110110: return (find_group(s[1]) == find_group(s[4]));
-			case 0b100100: case 0b101101: return (find_group(s[0]) == find_group(s[3]));
+		switch(d[0]){
+			case 0: //no ring (000000, 000001, 000011)
+				return false;
 
-			//check if two of the three have the same group
-			case 0b010101: { int a = find_group(s[1]), b = find_group(s[3]), c = find_group(s[5]); return (a == b || a == c || b == c); }
-			case 0b101010: { int a = find_group(s[0]), b = find_group(s[2]), c = find_group(s[4]); return (a == b || a == c || b == c); }
+			case 1: //simple case (000101, 001101, 001011, 011011)
+				return (find_group(s[d[1]]) == find_group(s[d[2]]));
 
-			//might have a ring?
-			case 0b000111: return checkring_back(s[10], s[16], s[15], turn);
-			case 0b001110: return checkring_back(s[ 9], s[15], s[14], turn);
-			case 0b011100: return checkring_back(s[ 8], s[14], s[13], turn);
-			case 0b111000: return checkring_back(s[ 7], s[13], s[12], turn);
-			case 0b110001: return checkring_back(s[ 6], s[12], s[17], turn);
-			case 0b100011: return checkring_back(s[11], s[17], s[16], turn);
+			case 2:{ //3 non-neighbours (010101)
+				int a = find_group(s[d[1]]), b = find_group(s[d[2]]), c = find_group(s[d[3]]);
+				return (a == b || a == c || b == c);
+			}
 
-			case 0b001111: return (checkring_back(s[10], s[16], s[15], turn) || checkring_back(s[ 9], s[14], s[15], turn));
-			case 0b011110: return (checkring_back(s[ 9], s[15], s[14], turn) || checkring_back(s[ 8], s[13], s[14], turn));
-			case 0b111100: return (checkring_back(s[ 8], s[14], s[13], turn) || checkring_back(s[ 7], s[12], s[13], turn));
-			case 0b111001: return (checkring_back(s[ 7], s[13], s[12], turn) || checkring_back(s[ 6], s[17], s[12], turn));
-			case 0b110011: return (checkring_back(s[ 6], s[12], s[17], turn) || checkring_back(s[11], s[16], s[17], turn));
-			case 0b100111: return (checkring_back(s[11], s[17], s[16], turn) || checkring_back(s[10], s[15], s[16], turn));
+			case 7: //case 1 and 3 (010111)
+				if(find_group(s[d[4]]) == find_group(s[d[5]]))
+					return true;
+				//fall through
 
-			case 0b011111: return (checkring_back(s[10], s[16], s[15], turn) || checkring_back(s[ 9], s[14], s[15], turn) || checkring_back(s[ 8], s[14], s[13], turn));
-			case 0b111110: return (checkring_back(s[ 9], s[15], s[14], turn) || checkring_back(s[ 8], s[13], s[14], turn) || checkring_back(s[ 7], s[13], s[12], turn));
-			case 0b111101: return (checkring_back(s[ 8], s[14], s[13], turn) || checkring_back(s[ 7], s[12], s[13], turn) || checkring_back(s[ 6], s[12], s[17], turn));
-			case 0b111011: return (checkring_back(s[ 7], s[13], s[12], turn) || checkring_back(s[ 6], s[17], s[12], turn) || checkring_back(s[11], s[17], s[16], turn));
-			case 0b110111: return (checkring_back(s[ 6], s[12], s[17], turn) || checkring_back(s[11], s[16], s[17], turn) || checkring_back(s[10], s[16], s[15], turn));
-			case 0b101111: return (checkring_back(s[11], s[17], s[16], turn) || checkring_back(s[10], s[15], s[16], turn) || checkring_back(s[ 9], s[15], s[14], turn));
+			case 3: // 3 neighbours (000111)
+				return checkring_back(s[d[1]], s[d[2]], s[d[3]], turn);
 
-			case 0b111111: //a ring around this position? how'd that happen
-				return true;
+			case 4: // 4 neighbours (001111)
+				return checkring_back(s[d[1]], s[d[2]], s[d[3]], turn) ||
+				       checkring_back(s[d[4]], s[d[5]], s[d[6]], turn);
 
-			case 0b000000:
-			case 0b000001: case 0b000010: case 0b000100: case 0b001000: case 0b010000: case 0b100000:
-			case 0b000011: case 0b000110: case 0b001100: case 0b011000: case 0b110000: case 0b100001:
+			case 5: // 5 neighbours (011111)
+				return checkring_back(s[d[1]], s[d[2]], s[d[3]], turn) ||
+				       checkring_back(s[d[4]], s[d[5]], s[d[6]], turn) ||
+				       checkring_back(s[d[7]], s[d[8]], s[d[9]], turn);
+
+			case 6: // 6 neighbours (111111)
+				return true; //a ring around this position? how'd that happen
+
 			default:
 				return false;
 		}
 	}
-
+	//checks for 3 more stones, a should be the corner
 	bool checkring_back(const MoveValid & a, const MoveValid & b, const MoveValid & c, int turn) const {
 		return (a.onboard() && get(a) == turn && get(b) == turn && get(c) == turn);
 	}
