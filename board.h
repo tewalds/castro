@@ -487,11 +487,11 @@ public:
 
 			const Cell * g = & cells[xy(next)];
 
-			if(turn != g->piece)
-				continue;
-
 			if(g->ringdepth)
 				return (depth - g->ringdepth >= ringsize);
+
+			if(turn != g->piece)
+				continue;
 
 			g->ringdepth = depth;
 			bool success = followring(next, nd, turn, depth+1, ringsize);
