@@ -3,7 +3,7 @@ include("lib.php");
 
 function askresults($input){
 	global $db;
-	
+
 	$baselines  = $db->query("SELECT baseline, CONCAT(name, ' (', params, ')') FROM baselines ORDER BY name")->fetchfieldset();
 	$timelimits = $db->query("SELECT time,     CONCAT(name, ' (', params, ')') FROM times     ORDER BY name")->fetchfieldset();
 	$players    = $db->query("SELECT player,   CONCAT(name, ' (', params, ')') FROM players   ORDER BY name")->fetchfieldset();
@@ -52,16 +52,16 @@ function showresults($input){
 	}
 
 	$data = $db->pquery(
-		"SELECT 
-			results.player, 
-			players.name, 
+		"SELECT
+			results.player,
+			players.name,
 			sizes.params as size,
 			SUM(wins) as wins,
 			SUM(losses) as losses,
 			SUM(ties) as ties,
 			SUM(numgames) as numgames
-		FROM results 
-			JOIN players USING (player) 
+		FROM results
+			JOIN players USING (player)
 			JOIN sizes USING (size)
 		WHERE baseline IN (?) AND player IN (?) AND time IN (?)
 		GROUP BY player, size
@@ -258,6 +258,51 @@ function showresults($input){
 		echo "</table>";
 	}
 
+
+	if(true || $input['latexdata']){
+?>
+<textarea rows=10 cols=100>
+\begin{tikzpicture}
+	\begin{axis}[
+	xlabel=Board Size,
+	ylabel=Win Rate (\%),
+	xtick={4,5,6,7,8,9,10},
+	ymin=0, ymax=100,
+	minor y tick num=1,
+	extra y ticks={50},
+	extra y tick style={grid=major},
+	]
+<?
+		foreach($chd as $p => $row){
+			echo "	\addplot coordinates { ";
+			foreach($row as $i => $s)
+				echo "(" . ($i+4) . "," . number_format($s/10, 1) . ") ";
+			echo "};\n";
+		}
+
+#		$latex = array();
+#		foreach($data as $row){
+#			$rate = ($row['wins'] + $row['ties']/2.0)/$row['numgames'];
+#			$err = 2.0*sqrt($rate*(1-$rate)/$row['numgames']);
+#			def($latex[$row['name']], array());
+#			$latex[$row['name']][$row['size']] = array($rate, $err);
+#		}
+#		foreach($latex as $name => $row){
+#			echo "	\addplot+[error bars/.cd,y dir=both,y explicit] coordinates { ";
+#			foreach($row as $size => $vals)
+#				echo "($size," . number_format($vals[0]*100, 1) . ") +- (0," . number_format($vals[1]*100,1) . ") ";
+#			echo "};\n";
+#		}
+
+		echo "	\legend{" . implode(",", $legend) . "};\n";
+?>
+	\end{axis}
+\end{tikzpicture}
+</textarea>
+<?
+	}
+
+
 	return true;
 }
 
@@ -316,5 +361,4 @@ function getrecent($input){
 
 	return true;
 }
-
 
