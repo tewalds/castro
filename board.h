@@ -190,7 +190,6 @@ public:
 	int get(int x, int y)   const { return get(xy(x,y)); }
 	int get(const Move & m) const { return get(xy(m)); }
 	int get(const MoveValid & m) const { return get(m.xy); }
-	int get(const MoveValid * m) const { return get(m->xy); }
 
 	int local(const Move & m) const { return cells[xy(m)].local; }
 
@@ -371,7 +370,6 @@ public:
 		}
 	}
 
-	int find_group(const MoveValid * m) const { return find_group(m->xy); }
 	int find_group(const MoveValid & m) const { return find_group(m.xy); }
 	int find_group(const Move & m) const { return find_group(xy(m)); }
 	int find_group(int x, int y)   const { return find_group(xy(x, y)); }
@@ -530,42 +528,42 @@ public:
 		}
 
 		switch(bitpattern){
-			case 0b000101: case 0b001101: case 0b011101: case 0b100101: return (find_group(s+3) == find_group(s+5));
-			case 0b001010: case 0b011010: case 0b111010: case 0b001011: return (find_group(s+2) == find_group(s+4));
-			case 0b010100: case 0b110100: case 0b110101: case 0b010110: return (find_group(s+1) == find_group(s+3));
-			case 0b101000: case 0b101001: case 0b101011: case 0b101100: return (find_group(s+0) == find_group(s+2));
-			case 0b010001: case 0b010011: case 0b010111: case 0b011001: return (find_group(s+1) == find_group(s+5));
-			case 0b100010: case 0b100110: case 0b101110: case 0b110010: return (find_group(s+0) == find_group(s+4));
+			case 0b000101: case 0b001101: case 0b011101: case 0b100101: return (find_group(s[3]) == find_group(s[5]));
+			case 0b001010: case 0b011010: case 0b111010: case 0b001011: return (find_group(s[2]) == find_group(s[4]));
+			case 0b010100: case 0b110100: case 0b110101: case 0b010110: return (find_group(s[1]) == find_group(s[3]));
+			case 0b101000: case 0b101001: case 0b101011: case 0b101100: return (find_group(s[0]) == find_group(s[2]));
+			case 0b010001: case 0b010011: case 0b010111: case 0b011001: return (find_group(s[1]) == find_group(s[5]));
+			case 0b100010: case 0b100110: case 0b101110: case 0b110010: return (find_group(s[0]) == find_group(s[4]));
 
-			case 0b001001: case 0b011011: return (find_group(s+2) == find_group(s+5));
-			case 0b010010: case 0b110110: return (find_group(s+1) == find_group(s+4));
-			case 0b100100: case 0b101101: return (find_group(s+0) == find_group(s+3));
+			case 0b001001: case 0b011011: return (find_group(s[2]) == find_group(s[5]));
+			case 0b010010: case 0b110110: return (find_group(s[1]) == find_group(s[4]));
+			case 0b100100: case 0b101101: return (find_group(s[0]) == find_group(s[3]));
 
-			//check if two of the tree have the same group
-			case 0b010101: return (find_group(s+1) == find_group(s+3) || find_group(s+3) == find_group(s+5) || find_group(s+1) == find_group(s+5));
-			case 0b101010: return (find_group(s+0) == find_group(s+2) || find_group(s+2) == find_group(s+4) || find_group(s+0) == find_group(s+4));
+			//check if two of the three have the same group
+			case 0b010101: return (find_group(s[1]) == find_group(s[3]) || find_group(s[3]) == find_group(s[5]) || find_group(s[1]) == find_group(s[5]));
+			case 0b101010: return (find_group(s[0]) == find_group(s[2]) || find_group(s[2]) == find_group(s[4]) || find_group(s[0]) == find_group(s[4]));
 
 			//might have a ring?
-			case 0b000111: return (get(s + 16) == turn && get(s + 10) == turn && get(s + 15) == turn);
-			case 0b001110: return (get(s + 15) == turn && get(s +  9) == turn && get(s + 14) == turn);
-			case 0b011100: return (get(s + 14) == turn && get(s +  8) == turn && get(s + 13) == turn);
-			case 0b111000: return (get(s + 13) == turn && get(s +  7) == turn && get(s + 12) == turn);
-			case 0b110001: return (get(s + 12) == turn && get(s +  6) == turn && get(s + 17) == turn);
-			case 0b100011: return (get(s + 17) == turn && get(s + 11) == turn && get(s + 16) == turn);
+			case 0b000111: return (get(s[16]) == turn && get(s[10]) == turn && get(s[15]) == turn);
+			case 0b001110: return (get(s[15]) == turn && get(s[ 9]) == turn && get(s[14]) == turn);
+			case 0b011100: return (get(s[14]) == turn && get(s[ 8]) == turn && get(s[13]) == turn);
+			case 0b111000: return (get(s[13]) == turn && get(s[ 7]) == turn && get(s[12]) == turn);
+			case 0b110001: return (get(s[12]) == turn && get(s[ 6]) == turn && get(s[17]) == turn);
+			case 0b100011: return (get(s[17]) == turn && get(s[11]) == turn && get(s[16]) == turn);
 
-			case 0b001111: return (get(s + 15) == turn && ((get(s + 16) == turn && get(s + 10) == turn) || (get(s +  9) == turn && get(s + 14) == turn)));
-			case 0b011110: return (get(s + 14) == turn && ((get(s + 15) == turn && get(s +  9) == turn) || (get(s +  8) == turn && get(s + 13) == turn)));
-			case 0b111100: return (get(s + 13) == turn && ((get(s + 14) == turn && get(s +  8) == turn) || (get(s +  7) == turn && get(s + 12) == turn)));
-			case 0b111001: return (get(s + 12) == turn && ((get(s + 13) == turn && get(s +  7) == turn) || (get(s +  6) == turn && get(s + 17) == turn)));
-			case 0b110011: return (get(s + 17) == turn && ((get(s + 12) == turn && get(s +  6) == turn) || (get(s + 11) == turn && get(s + 16) == turn)));
-			case 0b100111: return (get(s + 16) == turn && ((get(s + 17) == turn && get(s + 11) == turn) || (get(s + 10) == turn && get(s + 15) == turn)));
+			case 0b001111: return (get(s[15]) == turn && ((get(s[16]) == turn && get(s[10]) == turn) || (get(s[ 9]) == turn && get(s[14]) == turn)));
+			case 0b011110: return (get(s[14]) == turn && ((get(s[15]) == turn && get(s[ 9]) == turn) || (get(s[ 8]) == turn && get(s[13]) == turn)));
+			case 0b111100: return (get(s[13]) == turn && ((get(s[14]) == turn && get(s[ 8]) == turn) || (get(s[ 7]) == turn && get(s[12]) == turn)));
+			case 0b111001: return (get(s[12]) == turn && ((get(s[13]) == turn && get(s[ 7]) == turn) || (get(s[ 6]) == turn && get(s[17]) == turn)));
+			case 0b110011: return (get(s[17]) == turn && ((get(s[12]) == turn && get(s[ 6]) == turn) || (get(s[11]) == turn && get(s[16]) == turn)));
+			case 0b100111: return (get(s[16]) == turn && ((get(s[17]) == turn && get(s[11]) == turn) || (get(s[10]) == turn && get(s[15]) == turn)));
 
-			case 0b011111: return ((get(s + 15) == turn && ((get(s + 16) == turn && get(s + 10) == turn) || (get(s +  9) == turn && get(s + 14) == turn))) || (get(s + 14) == turn && get(s +  8) == turn && get(s + 13) == turn));
-			case 0b111110: return ((get(s + 14) == turn && ((get(s + 15) == turn && get(s +  9) == turn) || (get(s +  8) == turn && get(s + 13) == turn))) || (get(s + 13) == turn && get(s +  7) == turn && get(s + 12) == turn));
-			case 0b111101: return ((get(s + 13) == turn && ((get(s + 14) == turn && get(s +  8) == turn) || (get(s +  7) == turn && get(s + 12) == turn))) || (get(s + 12) == turn && get(s +  6) == turn && get(s + 17) == turn));
-			case 0b111011: return ((get(s + 12) == turn && ((get(s + 13) == turn && get(s +  7) == turn) || (get(s +  6) == turn && get(s + 17) == turn))) || (get(s + 17) == turn && get(s + 11) == turn && get(s + 16) == turn));
-			case 0b110111: return ((get(s + 17) == turn && ((get(s + 12) == turn && get(s +  6) == turn) || (get(s + 11) == turn && get(s + 16) == turn))) || (get(s + 16) == turn && get(s + 10) == turn && get(s + 15) == turn));
-			case 0b101111: return ((get(s + 16) == turn && ((get(s + 17) == turn && get(s + 11) == turn) || (get(s + 10) == turn && get(s + 15) == turn))) || (get(s + 15) == turn && get(s +  9) == turn && get(s + 14) == turn));
+			case 0b011111: return ((get(s[15]) == turn && ((get(s[16]) == turn && get(s[10]) == turn) || (get(s[ 9]) == turn && get(s[14]) == turn))) || (get(s[14]) == turn && get(s[ 8]) == turn && get(s[13]) == turn));
+			case 0b111110: return ((get(s[14]) == turn && ((get(s[15]) == turn && get(s[ 9]) == turn) || (get(s[ 8]) == turn && get(s[13]) == turn))) || (get(s[13]) == turn && get(s[ 7]) == turn && get(s[12]) == turn));
+			case 0b111101: return ((get(s[13]) == turn && ((get(s[14]) == turn && get(s[ 8]) == turn) || (get(s[ 7]) == turn && get(s[12]) == turn))) || (get(s[12]) == turn && get(s[ 6]) == turn && get(s[17]) == turn));
+			case 0b111011: return ((get(s[12]) == turn && ((get(s[13]) == turn && get(s[ 7]) == turn) || (get(s[ 6]) == turn && get(s[17]) == turn))) || (get(s[17]) == turn && get(s[11]) == turn && get(s[16]) == turn));
+			case 0b110111: return ((get(s[17]) == turn && ((get(s[12]) == turn && get(s[ 6]) == turn) || (get(s[11]) == turn && get(s[16]) == turn))) || (get(s[16]) == turn && get(s[10]) == turn && get(s[15]) == turn));
+			case 0b101111: return ((get(s[16]) == turn && ((get(s[17]) == turn && get(s[11]) == turn) || (get(s[10]) == turn && get(s[15]) == turn))) || (get(s[15]) == turn && get(s[ 9]) == turn && get(s[14]) == turn));
 
 			case 0b111111: //a ring around this position? how'd that happen
 				return true;
