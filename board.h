@@ -30,6 +30,13 @@ static const int BitsSetTable64[] = {
  * This follows the H-Gui convention, not the 'standard' convention
  */
 
+/* neighbours are laid out in this pattern:
+ *      6  12   7
+ *   17   0   1  13
+ * 11   5   X   2   8
+ *   16   4   3  14
+ *     10  15   9
+ */
 const MoveScore neighbours[18] = {
 	MoveScore(-1,-1, 3), MoveScore(0,-1, 3), MoveScore(1, 0, 3), MoveScore(1, 1, 3), MoveScore( 0, 1, 3), MoveScore(-1, 0, 3), //direct neighbours, clockwise
 	MoveScore(-2,-2, 1), MoveScore(0,-2, 1), MoveScore(2, 0, 1), MoveScore(2, 2, 1), MoveScore( 0, 2, 1), MoveScore(-2, 0, 1), //corners of ring 2, easy to block
@@ -183,6 +190,7 @@ public:
 	int get(int x, int y)   const { return get(xy(x,y)); }
 	int get(const Move & m) const { return get(xy(m)); }
 	int get(const MoveValid & m) const { return get(m.xy); }
+	int get(const MoveValid * m) const { return get(m->xy); }
 
 	int local(const Move & m) const { return cells[xy(m)].local; }
 
@@ -363,6 +371,7 @@ public:
 		}
 	}
 
+	int find_group(const MoveValid * m) const { return find_group(m->xy); }
 	int find_group(const MoveValid & m) const { return find_group(m.xy); }
 	int find_group(const Move & m) const { return find_group(xy(m)); }
 	int find_group(int x, int y)   const { return find_group(xy(x, y)); }
@@ -450,8 +459,13 @@ public:
 		return true;
 	}
 
-	// recursively follow a ring
-	bool detectring(const Move & pos, const int turn, const int ringsize = 6) const {
+	// do a depth first search for a ring
+	// can take a minimum length of the ring, any ring shorter than ringsize is ignored
+	// ignores tails on small rings correctly (ie an old 6-ring plus a new stone will still be only a 6-ring)
+	// two 6-rings next to each other may count as a bigger ring
+	// can be done before or after placing the stone and joining neighbouring groups
+	// using a ringsize smaller than a previous ring check could lead to weird results
+	bool checkring_df(const Move & pos, const int turn, const int ringsize = 6) const {
 		const Cell * start = & cells[xy(pos)];
 		start->ringdepth = 1;
 		bool success = false;
@@ -502,6 +516,68 @@ public:
 				return true;
 		}
 		return false;
+	}
+
+	// do an O(1) ring check
+	// must be done before placing the stone and joining it with the neighbouring groups
+	bool checkring_o1(const Move & pos, const int turn) const {
+		int bitpattern = 0;
+		const MoveValid * s = nb_begin(pos);
+		for(const MoveValid * i = s, *e = nb_end(i); i < e; i++){
+			bitpattern <<= 1;
+			if(i->onboard() && turn == get(i->xy))
+				bitpattern |= 1;
+		}
+
+		const MoveScore * n = neighbours;
+		switch(bitpattern){
+			case 0b000101: case 0b001101: case 0b011101: case 0b100101: return (find_group(s+3) == find_group(s+5));
+			case 0b001010: case 0b011010: case 0b111010: case 0b001011: return (find_group(s+2) == find_group(s+4));
+			case 0b010100: case 0b110100: case 0b110101: case 0b010110: return (find_group(s+1) == find_group(s+3));
+			case 0b101000: case 0b101001: case 0b101011: case 0b101100: return (find_group(s+0) == find_group(s+2));
+			case 0b010001: case 0b010011: case 0b010111: case 0b011001: return (find_group(s+1) == find_group(s+5));
+			case 0b100010: case 0b100110: case 0b101110: case 0b110010: return (find_group(s+0) == find_group(s+4));
+
+			case 0b001001: case 0b011011: return (find_group(s+2) == find_group(s+5));
+			case 0b010010: case 0b110110: return (find_group(s+1) == find_group(s+4));
+			case 0b100100: case 0b101101: return (find_group(s+0) == find_group(s+3));
+
+			//check if two of the tree have the same group
+			case 0b010101: return (find_group(s+1) == find_group(s+3) || find_group(s+3) == find_group(s+5) || find_group(s+1) == find_group(s+5));
+			case 0b101010: return (find_group(s+0) == find_group(s+2) || find_group(s+2) == find_group(s+4) || find_group(s+0) == find_group(s+4));
+
+			//might have a ring?
+			case 0b000111: return (get(pos + n[16]) == turn && get(pos + n[10]) == turn && get(pos + n[15]) == turn);
+			case 0b001110: return (get(pos + n[15]) == turn && get(pos + n[ 9]) == turn && get(pos + n[14]) == turn);
+			case 0b011100: return (get(pos + n[14]) == turn && get(pos + n[ 8]) == turn && get(pos + n[13]) == turn);
+			case 0b111000: return (get(pos + n[13]) == turn && get(pos + n[ 7]) == turn && get(pos + n[12]) == turn);
+			case 0b110001: return (get(pos + n[12]) == turn && get(pos + n[ 6]) == turn && get(pos + n[17]) == turn);
+			case 0b100011: return (get(pos + n[17]) == turn && get(pos + n[11]) == turn && get(pos + n[16]) == turn);
+
+			case 0b001111: return (get(pos + n[15]) == turn && ((get(pos + n[16]) == turn && get(pos + n[10]) == turn) || (get(pos + n[ 9]) == turn && get(pos + n[14]) == turn)));
+			case 0b011110: return (get(pos + n[14]) == turn && ((get(pos + n[15]) == turn && get(pos + n[ 9]) == turn) || (get(pos + n[ 8]) == turn && get(pos + n[13]) == turn)));
+			case 0b111100: return (get(pos + n[13]) == turn && ((get(pos + n[14]) == turn && get(pos + n[ 8]) == turn) || (get(pos + n[ 7]) == turn && get(pos + n[12]) == turn)));
+			case 0b111001: return (get(pos + n[12]) == turn && ((get(pos + n[13]) == turn && get(pos + n[ 7]) == turn) || (get(pos + n[ 6]) == turn && get(pos + n[17]) == turn)));
+			case 0b110011: return (get(pos + n[17]) == turn && ((get(pos + n[12]) == turn && get(pos + n[ 6]) == turn) || (get(pos + n[11]) == turn && get(pos + n[16]) == turn)));
+			case 0b100111: return (get(pos + n[16]) == turn && ((get(pos + n[17]) == turn && get(pos + n[11]) == turn) || (get(pos + n[10]) == turn && get(pos + n[15]) == turn)));
+
+			case 0b011111: return ((get(pos + n[15]) == turn && ((get(pos + n[16]) == turn && get(pos + n[10]) == turn) || (get(pos + n[ 9]) == turn && get(pos + n[14]) == turn))) || (get(pos + n[14]) == turn && get(pos + n[ 8]) == turn && get(pos + n[13]) == turn));
+			case 0b111110: return ((get(pos + n[14]) == turn && ((get(pos + n[15]) == turn && get(pos + n[ 9]) == turn) || (get(pos + n[ 8]) == turn && get(pos + n[13]) == turn))) || (get(pos + n[13]) == turn && get(pos + n[ 7]) == turn && get(pos + n[12]) == turn));
+			case 0b111101: return ((get(pos + n[13]) == turn && ((get(pos + n[14]) == turn && get(pos + n[ 8]) == turn) || (get(pos + n[ 7]) == turn && get(pos + n[12]) == turn))) || (get(pos + n[12]) == turn && get(pos + n[ 6]) == turn && get(pos + n[17]) == turn));
+			case 0b111011: return ((get(pos + n[12]) == turn && ((get(pos + n[13]) == turn && get(pos + n[ 7]) == turn) || (get(pos + n[ 6]) == turn && get(pos + n[17]) == turn))) || (get(pos + n[17]) == turn && get(pos + n[11]) == turn && get(pos + n[16]) == turn));
+			case 0b110111: return ((get(pos + n[17]) == turn && ((get(pos + n[12]) == turn && get(pos + n[ 6]) == turn) || (get(pos + n[11]) == turn && get(pos + n[16]) == turn))) || (get(pos + n[16]) == turn && get(pos + n[10]) == turn && get(pos + n[15]) == turn));
+			case 0b101111: return ((get(pos + n[16]) == turn && ((get(pos + n[17]) == turn && get(pos + n[11]) == turn) || (get(pos + n[10]) == turn && get(pos + n[15]) == turn))) || (get(pos + n[15]) == turn && get(pos + n[ 9]) == turn && get(pos + n[14]) == turn));
+
+			case 0b111111: //a ring around this position? how'd that happen
+				return true;
+
+			case 0b000000:
+			case 0b000001: case 0b000010: case 0b000100: case 0b001000: case 0b010000: case 0b100000:
+			case 0b000011: case 0b000110: case 0b001100: case 0b011000: case 0b110000: case 0b100001:
+			default:
+				return false;
+
+		}
 	}
 
 	hash_t gethash() const {
@@ -605,7 +681,7 @@ public:
 			}else if(g->numcorners() >= 2){
 				outcome = turn;
 				wintype = 2;
-			}else if(ringsize && alreadyjoined && g->size >= max(6, ringsize) && detectring(pos, turn, ringsize)){
+			}else if(ringsize && alreadyjoined && g->size >= max(6, ringsize) && checkring_df(pos, turn, ringsize)){
 				outcome = turn;
 				wintype = 3;
 			}else if(nummoves == numcells()){
@@ -641,7 +717,7 @@ public:
 			}
 		}
 
-		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3 || (numgroups >= 2 && testcell.size >= 6 && detectring(pos, turn)))
+		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3 || (numgroups >= 2 && testcell.size >= 6 && checkring_o1(pos, turn)))
 			return turn;
 
 		if(nummoves+1 == numcells())
