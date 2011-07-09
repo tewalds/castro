@@ -173,6 +173,7 @@ public:
 
 	int xy(int x, int y)   const { return   y*size_d +   x; }
 	int xy(const Move & m) const { return m.y*size_d + m.x; }
+	int xy(const MoveValid & m) const { return m.xy; }
 
 	int xyc(int x, int y)   const { return xy(  x + sizem1,   y + sizem1); }
 	int xyc(const Move & m) const { return xy(m.x + sizem1, m.y + sizem1); }
@@ -181,6 +182,7 @@ public:
 	int get(int i)          const { return cells[i].piece; }
 	int get(int x, int y)   const { return get(xy(x,y)); }
 	int get(const Move & m) const { return get(xy(m)); }
+	int get(const MoveValid & m) const { return get(m.xy); }
 
 	int local(const Move & m) const { return cells[xy(m)].local; }
 
@@ -190,6 +192,7 @@ public:
 	//checks array bounds too
 	bool onboard(int x, int y)  const { return (  x >= 0 &&   y >= 0 &&   x < size_d &&   y < size_d && onboard_fast(x, y) ); }
 	bool onboard(const Move & m)const { return (m.x >= 0 && m.y >= 0 && m.x < size_d && m.y < size_d && onboard_fast(m) ); }
+	bool onboard(const MoveValid & m) const { return m.onboard(); }
 
 	void setswap(bool s) { allowswap = s; }
 	bool canswap() const { return (nummoves == 1 && toPlay == 2 && allowswap); }
@@ -359,6 +362,7 @@ public:
 		}
 	}
 
+	int find_group(const MoveValid & m) const { return find_group(m.xy); }
 	int find_group(const Move & m) const { return find_group(xy(m)); }
 	int find_group(int x, int y)   const { return find_group(xy(x, y)); }
 	int find_group(unsigned int i) const {
@@ -600,7 +604,7 @@ public:
 			}else if(g->numcorners() >= 2){
 				outcome = turn;
 				wintype = 2;
-			}else if(ringsize && alreadyjoined && g->size >= ringsize && detectring(pos, turn, ringsize)){
+			}else if(ringsize && alreadyjoined && g->size >= max(6, ringsize) && detectring(pos, turn, ringsize)){
 				outcome = turn;
 				wintype = 3;
 			}else if(nummoves == numcells()){
