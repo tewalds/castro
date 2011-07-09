@@ -211,7 +211,8 @@ public:
 
 	const MoveValid * nb_end(int x, int y)   const { return nb_end(xy(x, y)); }
 	const MoveValid * nb_end(const Move & m) const { return nb_end(xy(m)); }
-	const MoveValid * nb_end(int i)          const { return nb_begin(i) + 6; }
+	const MoveValid * nb_end(int i)          const { return nb_end(nb_begin(i)); }
+	const MoveValid * nb_end(const MoveValid * m) const { return m + 6; }
 
 	int iscorner(int x, int y) const {
 		if(!onboard(x,y))
@@ -403,7 +404,7 @@ public:
 		int posxy = xy(pos);
 
 		Cell testcell = cells[find_group(pos)];
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 			if(i->onboard() && turn == get(i->xy)){
 				const Cell * g = & cells[find_group(i->xy)];
 				testcell.corner |= g->corner;
@@ -419,7 +420,7 @@ public:
 		int posxy = xy(pos);
 
 		int size = 1;
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 			if(i->onboard() && turn == get(i->xy)){
 				size += cells[find_group(i->xy)].size;
 				i++; //skip the next one
@@ -438,7 +439,7 @@ public:
 		if(g->piece == otherplayer && (g->edge || g->corner))
 			return false;
 
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 			if(!i->onboard())
 				return false;
 
@@ -585,7 +586,7 @@ public:
 		int posxy = xy(pos);
 		bool local = (cells[posxy].local == 3);
 		bool alreadyjoined = false; //useful for finding rings
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 			if(i->onboard()){
 				cells[i->xy].local = 3;
 				if(local && turn == get(i->xy)){
@@ -629,7 +630,7 @@ public:
 
 		Cell testcell = cells[find_group(posxy)];
 		int numgroups = 0;
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(posxy); i < e; i++){
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 			if(i->onboard() && turn == get(i->xy)){
 				const Cell * g = & cells[find_group(i->xy)];
 				testcell.corner |= g->corner;
