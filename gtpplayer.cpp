@@ -364,6 +364,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -F --msrave      Rave factor, 0 for pure exp, -1 # sims, -2 # wins [" + to_str(player.msrave) + "]\n" +
 			"Tree traversal:\n" +
 			"  -e --explore     Exploration rate for UCT                          [" + to_str(player.explore) + "]\n" +
+			"  -A --parexplore  Multiply the explore rate by parents experience   [" + to_str(player.parentexplore) + "]\n" +
 			"  -f --ravefactor  The rave factor: alpha = rf/(rf + visits)         [" + to_str(player.ravefactor) + "]\n" +
 			"  -d --decrrave    Decrease the rave factor over time: rf += d*empty [" + to_str(player.decrrave) + "]\n" +
 			"  -a --knowledge   Use knowledge: 0.01*know/sqrt(visits+1)           [" + to_str(player.knowledge) + "]\n" +
@@ -418,6 +419,8 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			player.msrave = from_str<float>(args[++i]);
 		}else if((arg == "-e" || arg == "--explore") && i+1 < args.size()){
 			player.explore = from_str<float>(args[++i]);
+		}else if((arg == "-A" || arg == "--parexplore") && i+1 < args.size()){
+			player.parentexplore = from_str<bool>(args[++i]);
 		}else if((arg == "-f" || arg == "--ravefactor") && i+1 < args.size()){
 			player.ravefactor = from_str<float>(args[++i]);
 		}else if((arg == "-d" || arg == "--decrrave") && i+1 < args.size()){

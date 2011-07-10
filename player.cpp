@@ -129,6 +129,7 @@ Player::Player() {
 	msexplore   = 0;
 
 	explore     = 0;
+	parentexplore = false;
 	ravefactor  = 500;
 	decrrave    = 200;
 	knowledge   = true;

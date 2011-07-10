@@ -314,6 +314,7 @@ public:
 	float msrave;     //rave factor in final move selection, -1 means use number instead of value
 	float msexplore;  //the UCT constant in final move selection
 //tree traversal
+	bool  parentexplore; // whether to multiple exploration by the parents winrate
 	float explore;    //greater than one favours exploration, smaller than one favours exploitation
 	float ravefactor; //big numbers favour rave scores, small ignore it
 	float decrrave;   //decrease rave over time, add this value for each empty position on the board

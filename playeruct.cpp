@@ -171,6 +171,8 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int
 
 	float raveval = use_rave * (player->ravefactor + player->decrrave*remain);
 	float explore = use_explore * player->explore;
+	if(player->parentexplore)
+		explore *= node->exp.avg();
 
 	Node * ret = NULL,
 		 * child = node->children.begin(),
@@ -554,5 +556,4 @@ Move Player::PlayerUCT::rollout_pattern(const Board & board, const Move & move){
 	}
 	return M_UNKNOWN;
 }
-
 
