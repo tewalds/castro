@@ -10,7 +10,7 @@ class MysqlDb {
 	public $user;
 	public $pass;
 	public $persist;
-	
+
 	public $con;
 	public $lasttime;
 	public $queries;
@@ -38,7 +38,7 @@ class MysqlDb {
 	function __destruct(){
 		$this->close();
 	}
-	
+
 	function connect(){
 		if($this->con){
 			if($this->lasttime > time()-10)
@@ -68,18 +68,22 @@ class MysqlDb {
 		}
 	}
 
-	function query($query,$logthis = true){
+	function query($query,$buffered = true){
+		$logthis = true;
 		$insertid = 0;
 		$affectedrows = 0;
 		$numrows = 0;
 		$countrows = 0;
 		$qt = 0;
-	
+
 		$this->connect();
 
 		$start = microtime(true);
 
-		$result = mysql_query($query, $this->con);
+		if($buffered)
+			$result = mysql_query($query, $this->con);
+		else
+			$result = mysql_unbuffered_query($query, $this->con);
 
 		//if(substr($query, 0, 6) == "INSERT" || substr($query, 0, 6) == "UDPATE")
 		$insertid = mysql_insert_id($this->con);
@@ -102,7 +106,7 @@ class MysqlDb {
 
 		$this->count++;
 		$qt = $this->querytime = ($end - $start);
-		
+
 		if($logthis){
 			if($this->plogged)
 				$this->queries[] = array($this->qlog, $this->querytime);
@@ -119,24 +123,24 @@ class MysqlDb {
 		$this->connect();
 
 		$args = func_get_args();
-		
+
 		if(count($args) == 0)
 			trigger_error("mysql: Bad number of args (No args)",E_USER_ERROR) && exit;
-		
+
 		if(count($args) == 1)
 			return $args[0];
 
 		$query = array_shift($args);
 		$parts = explode('?', $query);
 		$query = array_shift($parts);
-		
+
 		if(count($parts) != count($args))
 			trigger_error("Wrong number of args to prepare for $query",E_USER_ERROR) && exit;
-		
+
 		for($i = 0; $i < count($args); $i++){
 			$query .= $this->prepare_part($args[$i]) . $parts[$i];
 		}
-		
+
 		return $query;
 	}
 
@@ -165,14 +169,14 @@ class MysqlDb {
 		$args = func_get_args();
 		$this->preparedq = $args[0];
 		$query = call_user_func_array(array($this, 'prepare'), $args);
-		
+
 		return $this->query($query);
 	}
-	
+
 	function pquery_array($args){
 		$this->preparedq = $args[0];
 		$query = call_user_func_array(array($this, 'prepare'), $args);
-		
+
 		return $this->query($query);
 	}
 
@@ -185,17 +189,17 @@ class MysqlDb {
 		$inid = $this->pquery("UPDATE " . $table . " SET max = LAST_INSERT_ID(max+1) WHERE id1 = ? && id2 = ? && area = ?", $id1, $id2, $area)->insertid();
 		if($inid)
 			return $inid;
-			
+
 		if(!$start)
 			$start = 1;
-			
+
 		$ignore = $this->pquery("INSERT IGNORE INTO " . $table . " SET max = ?, id1 = ?, id2 = ?, area = ?", $start, $id1, $id2, $area);
 		if($ignore->affectedrows())
 			return $start;
-		else	
+		else
 			return $this->getSeqID($id1, $id2, $area, $table, $start);
 	}
-	
+
 }
 
 class MysqlDbResult {
@@ -216,7 +220,7 @@ class MysqlDbResult {
 		$this->countrows = $countrows;
 		$this->querytime = $qt;
 	}
-	
+
 	function __destruct(){
 //		$this->free();
 	}
@@ -245,7 +249,7 @@ class MysqlDbResult {
 
 		return $ret;
 	}
-	
+
 
 	//return the full set
 	function fetchrowset($col = null, $type = DB_ASSOC){
@@ -269,7 +273,7 @@ class MysqlDbResult {
 //		return mysql_insert_id($this->dbcon);
 		return $this->insertid;
 	}
-	
+
 	function rows(){
 //		return mysql_num_rows($this->result);
 		return $this->numrows;
