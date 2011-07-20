@@ -341,7 +341,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	solverpnstt.move(best);
 
 	if(verbose >= 2)
-		stats += game.getboard().to_s() + "\n";
+		stats += game.getboard().to_s(colorboard) + "\n";
 
 	if(verbose)
 		logerr(stats);

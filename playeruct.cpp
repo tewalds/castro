@@ -28,7 +28,7 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 				movelist.addtree(child->move, toplay);
 
 				if(!board.move(child->move, (player->minimax == 0), player->locality)){
-					logerr("move failed: " + child->move.to_s() + "\n" + board.to_s());
+					logerr("move failed: " + child->move.to_s() + "\n" + board.to_s(false));
 					assert(false && "move failed");
 				}
 

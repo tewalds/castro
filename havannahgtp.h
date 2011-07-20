@@ -49,6 +49,7 @@ public:
 	int verbose;
 	bool genmoveextended;
 	bool hguicoords;
+	bool colorboard;
 
 	TimeControl time;
 	double      time_remain; //time remaining for this game
@@ -69,6 +70,7 @@ public:
 		verbose = 1;
 		genmoveextended = false;
 		hguicoords = false;
+		colorboard = true;
 
 		time_remain = time.game;
 
@@ -85,6 +87,7 @@ public:
 		newcallback("echo",            bind(&HavannahGTP::gtp_echo,          this, _1), "Return the arguments as the response");
 		newcallback("hguicoords",      bind(&HavannahGTP::gtp_hguicoords,    this, _1), "Switch coordinate systems to match HavannahGui");
 		newcallback("gridcoords",      bind(&HavannahGTP::gtp_gridcoords,    this, _1), "Switch coordinate systems to match Little Golem");
+		newcallback("colorboard",      bind(&HavannahGTP::gtp_colorboard,    this, _1), "Turn on or off the colored board");
 		newcallback("showboard",       bind(&HavannahGTP::gtp_print,         this, _1), "Show the board");
 		newcallback("print",           bind(&HavannahGTP::gtp_print,         this, _1), "Alias for showboard");
 		newcallback("dists",           bind(&HavannahGTP::gtp_dists,         this, _1), "Similar to print, but shows minimum win distances");
@@ -149,6 +152,7 @@ public:
 	GTPResponse gtp_version(vecstr args);
 	GTPResponse gtp_verbose(vecstr args);
 	GTPResponse gtp_extended(vecstr args);
+	GTPResponse gtp_colorboard(vecstr args);
 	GTPResponse gtp_hguicoords(vecstr args);
 	GTPResponse gtp_gridcoords(vecstr args);
 	GTPResponse gtp_debug(vecstr args);

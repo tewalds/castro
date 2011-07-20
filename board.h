@@ -283,7 +283,7 @@ public:
 	int lineend(int y)   const { return (y < size ? size + y : size_d); }
 	int linelen(int y)   const { return size_d - abs(sizem1 - y); }
 
-	string to_s() const {
+	string to_s(bool color) const {
 		string s;
 		s += string(size + 4, ' ');
 		for(int i = 0; i < size; i++){
@@ -292,6 +292,13 @@ public:
 		}
 		s += "\n";
 
+		string white = "O", black = "@";
+		if(color){
+			string esc = "\033", reset = esc + "[0m";
+			white = esc + "[1;33m" + "@" + reset; //yellow
+			black = esc + "[1;34m" + "@" + reset; //blue
+		}
+
 		for(int y = 0; y < size_d; y++){
 			s += string(abs(sizem1 - y) + 2, ' ');
 			s += char('A' + y);
@@ -299,8 +306,8 @@ public:
 			for(int x = linestart(y); x < lineend(y); x++){
 				int p = get(x, y);
 				if(p == 0) s += '.';
-				if(p == 1) s += 'O';
-				if(p == 2) s += '@';
+				if(p == 1) s += white;
+				if(p == 2) s += black;
 				s += ' ';
 			}
 			if(y < size-1)
@@ -310,8 +317,8 @@ public:
 		return s;
 	}
 
-	void print() const {
-		printf("%s", to_s().c_str());
+	void print(bool color = true) const {
+		printf("%s", to_s(color).c_str());
 	}
 
 	string won_str() const {
