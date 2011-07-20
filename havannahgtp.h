@@ -69,7 +69,7 @@ public:
 
 		verbose = 1;
 		genmoveextended = false;
-		hguicoords = false;
+		hguicoords = true;
 		colorboard = true;
 
 		time_remain = time.game;

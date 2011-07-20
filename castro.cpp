@@ -18,7 +18,6 @@ int main(int argc, char **argv){
 			die(255, "Usage:\n"
 				"\t   --help     Show this help\n"
 				"\t-v --verbose  Give more output over gtp\n"
-				"\t-g --coords   Use the H-Gui coordinate system\n"
 				"\t-n --nocolor  Don't output the board in color\n"
 				"\t-c --cmd      Pass a gtp command from the command line\n"
 				"\t-f --file     Run this gtp file before reading from stdin\n"
@@ -29,8 +28,6 @@ int main(int argc, char **argv){
 			gtp.verbose = true;
 		}else if(arg == "-n" || arg == "--nocolor"){
 			gtp.colorboard = false;
-		}else if(arg == "-g" || arg == "--coords"){
-			gtp.hguicoords = true;
 		}else if(arg == "-c" || arg == "--cmd"){
 			char * ptr = argv[++i];
 			if(ptr == NULL) die(255, "Missing a command");
