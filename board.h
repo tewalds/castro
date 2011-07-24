@@ -47,6 +47,7 @@ static MoveValid * staticneighbourlist[11] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL
 
 
 class Board{
+public:
 	struct Cell {
 /*
 		unsigned piece  : 2; //who controls this cell, 0 for none, 1,2 for players
@@ -73,7 +74,6 @@ mutable uint8_t ringdepth; //when doing a ring search, what depth was this posit
 		int numedges()  { return BitsSetTable64[edge];   }
 	};
 
-public:
 	class MoveIterator { //only returns valid moves...
 		const Board & board;
 		int lineend;
@@ -415,7 +415,7 @@ public:
 		return false;
 	}
 
-	int test_connectivity(const Move & pos) const {
+	Cell test_cell(const Move & pos) const {
 		char turn = toplay();
 		int posxy = xy(pos);
 
@@ -425,24 +425,21 @@ public:
 				const Cell * g = & cells[find_group(i->xy)];
 				testcell.corner |= g->corner;
 				testcell.edge   |= g->edge;
+				testcell.size   += g->size; //not quite accurate if it's joining the same group twice
 				i++; //skip the next one
 			}
 		}
+		return testcell;
+	}
+
+	int test_connectivity(const Move & pos) const {
+		Cell testcell = test_cell(pos);
 		return testcell.numcorners() + testcell.numedges();
 	}
 
 	int test_size(const Move & pos) const {
-		char turn = toplay();
-		int posxy = xy(pos);
-
-		int size = 1;
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
-			if(i->onboard() && turn == get(i->xy)){
-				size += cells[find_group(i->xy)].size;
-				i++; //skip the next one
-			}
-		}
-		return size;
+		Cell testcell = test_cell(pos);
+		return testcell.size;
 	}
 
 	//check if a position is encirclable by a given player

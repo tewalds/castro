@@ -298,17 +298,21 @@ void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
 	if(player->localreply){ //boost for moves near the previous move
 		int dist = node->move.dist(child->move);
 		if(dist < 4)
-			child->know += player->localreply*(4 - dist);
+			child->know += player->localreply * (4 - dist);
 	}
 
 	if(player->locality) //boost for moves near previous stones
-		child->know += player->locality*board.local(child->move);
+		child->know += player->locality * board.local(child->move);
+
+	Board::Cell cell;
+	if(player->connect || player->size)
+		cell = board.test_cell(child->move);
 
 	if(player->connect) //boost for moves that connect to edges/corners
-		child->know += player->connect*board.test_connectivity(child->move);
+		child->know += player->connect * (cell.numcorners() + cell.numedges());
 
 	if(player->size) //boost for size of the group
-		child->know += player->size*board.test_size(child->move);
+		child->know += player->size * cell.size;
 
 	if(player->bridge && test_bridge_probe(board, node->move, child->move)) //boost for maintaining a virtual connection
 		child->know += player->bridge;
