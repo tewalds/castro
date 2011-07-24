@@ -123,6 +123,7 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 
 			if(child->outcome == toplay){ //proven win from here, don't need children
 				node->outcome = child->outcome;
+				node->proofdepth = 1;
 				node->bestmove = *move;
 				node->children.unlock();
 				temp.dealloc(player->ctmem);
@@ -148,6 +149,7 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 		*(temp.begin()) = macro;
 	}else if(losses >= 2){ //proven loss, but at least try to block one of them
 		node->outcome = 3 - toplay;
+		node->proofdepth = 2;
 		node->bestmove = loss->move;
 		node->children.unlock();
 		temp.dealloc(player->ctmem);
@@ -219,6 +221,8 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 	if(backup->outcome == -3) //nothing proven by this child, so no chance
 		return false;
 
+
+	uint8_t proofdepth = backup->proofdepth;
 	if(backup->outcome != toplay){
 		uint64_t sims = 0, bestsims = 0, outcome = 0, bestoutcome = 0;
 		backup = NULL;
@@ -229,12 +233,16 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 		for( ; child != end; child++){
 			int childoutcome = child->outcome; //save a copy to avoid race conditions
 
+			if(proofdepth < child->proofdepth+1)
+				proofdepth = child->proofdepth+1;
+
 			//these should be sorted in likelyness of matching, most likely first
 			if(childoutcome == -3){ // win/draw/loss
 				outcome = 3;
 			}else if(childoutcome == toplay){ //win
 				backup = child;
 				outcome = 6;
+				proofdepth = child->proofdepth+1;
 				break;
 			}else if(childoutcome == 3-toplay){ //loss
 				outcome = 0;
@@ -268,9 +276,10 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 			return false;
 	}
 
-	if(CAS(node->outcome, nodeoutcome, backup->outcome))
+	if(CAS(node->outcome, nodeoutcome, backup->outcome)){
 		node->bestmove = backup->move;
-	else //if it was in a race, try again, might promote a partial solve to full solve
+		node->proofdepth = proofdepth;
+	}else //if it was in a race, try again, might promote a partial solve to full solve
 		return do_backup(node, backup, toplay);
 
 	return (node->outcome >= 0);

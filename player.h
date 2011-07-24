@@ -67,7 +67,8 @@ public:
 		ExpPair rave;
 		ExpPair exp;
 		int16_t know;
-		int16_t outcome;
+		int8_t  outcome;
+		uint8_t proofdepth;
 		Move    move;
 		Move    bestmove; //if outcome is set, then bestmove is the way to get there
 		CompactTree<Node>::Children children;
@@ -75,8 +76,8 @@ public:
 		//seems to need padding to multiples of 8 bytes or it segfaults?
 		//don't forget to update the copy constructor/operator
 
-		Node()                            : know(0), outcome(-3)          { }
-		Node(const Move & m, char o = -3) : know(0), outcome(o), move(m)  { }
+		Node()                            : know(0), outcome(-3), proofdepth(0)          { }
+		Node(const Move & m, char o = -3) : know(0), outcome( o), proofdepth(0), move(m) { }
 		Node(const Node & n) { *this = n; }
 		Node & operator = (const Node & n){
 			if(this != & n){ //don't copy to self
@@ -89,6 +90,7 @@ public:
 				move = n.move;
 				bestmove = n.bestmove;
 				outcome = n.outcome;
+				proofdepth = n.proofdepth;
 				//children = n.children; ignore the children, they need to be swap_tree'd in
 			}
 			return *this;
