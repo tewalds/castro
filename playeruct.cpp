@@ -467,7 +467,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 		movelist.addrollout(move, board.toplay());
 
-		board.move(move, true, false, (int)(checkrings && depth < checkdepth)*minringsize);
+		board.move(move, true, false, (int)((checkrings && depth < checkdepth)*minringsize));
 		minringsize += ringincr;
 		depth++;
 	}
