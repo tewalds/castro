@@ -346,6 +346,7 @@ public:
 	bool  weightedknow;   //use knowledge in the weighted random values
 	float checkrings;     //how often to allow rings as a win condition in a rollout
 	float checkringdepth; //how deep to allow rings as a win condition in a rollout
+	float ringincr;       //a growth rate on how big must the ring be to be valid
 	bool  rolloutpattern; //play the response to a virtual connection threat in rollouts
 	int   lastgoodreply;  //use the last-good-reply rollout heuristic
 	int   instantwin;     //look for instant wins in rollouts

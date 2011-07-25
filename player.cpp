@@ -157,6 +157,7 @@ Player::Player() {
 	weightedknow   = false;
 	checkrings     = 1.0;
 	checkringdepth = 1000;
+	ringincr       = 0;
 	rolloutpattern = false;
 	lastgoodreply  = false;
 	instantwin     = 0;
