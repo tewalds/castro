@@ -394,7 +394,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -C --checkrings  Check for rings only this often in rollouts       [" + to_str(player.checkrings) + "]\n" +
 			"  -R --ringdepth   Check for rings for this depth, < 0 for % moves   [" + to_str(player.checkringdepth) + "]\n" +
 			"  -Z --ringsize    Starting minimum ring size in rollouts            [" + to_str(player.minringsize) + "]\n" +
-			"  -z --ringincr    Incr min ring size by this each move, <0 to /size [" + to_str(player.ringincr) + "]\n" +
+			"  -z --ringincr    Incr min ring size every z moves, < 0 to *size    [" + to_str(player.ringincr) + "]\n" +
 			"  -p --pattern     Maintain the virtual connection pattern           [" + to_str(player.rolloutpattern) + "]\n" +
 			"  -g --goodreply   Reuse the last good reply (1), remove losses (2)  [" + to_str(player.lastgoodreply) + "]\n" +
 			"  -w --instantwin  Look for instant wins (1) and forced replies (2)  [" + to_str(player.instantwin) + "]\n" +

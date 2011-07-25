@@ -442,10 +442,10 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 	//only allow rings bigger than the minimum ring size, incrementing by the ringincr after each move
 	float minringsize = player->minringsize;
-	float ringincr = player->ringincr;
+	float ringincr = 1.0/player->ringincr;
 	//if it's negative, scale it by the board size
 	if(ringincr < 0)
-		ringincr *= -1.0 / board.get_size();
+		ringincr *= -1.0 * board.get_size();
 
 	while((won = board.won()) < 0){
 		//do a complex choice
