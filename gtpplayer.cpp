@@ -393,7 +393,8 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -K --weightknow  Use knowledge in the weighted random values       [" + to_str(player.weightedknow) + "]\n" +
 			"  -C --checkrings  Check for rings only this often in rollouts       [" + to_str(player.checkrings) + "]\n" +
 			"  -R --ringdepth   Check for rings for this depth, < 0 for % moves   [" + to_str(player.checkringdepth) + "]\n" +
-			"  -z --ringincr    Incr min ring size by this each move, <0 for /size[" + to_str(player.ringincr) + "]\n" +
+			"  -Z --ringsize    Starting minimum ring size in rollouts            [" + to_str(player.minringsize) + "]\n" +
+			"  -z --ringincr    Incr min ring size by this each move, <0 to /size [" + to_str(player.ringincr) + "]\n" +
 			"  -p --pattern     Maintain the virtual connection pattern           [" + to_str(player.rolloutpattern) + "]\n" +
 			"  -g --goodreply   Reuse the last good reply (1), remove losses (2)  [" + to_str(player.lastgoodreply) + "]\n" +
 			"  -w --instantwin  Look for instant wins (1) and forced replies (2)  [" + to_str(player.instantwin) + "]\n" +
@@ -476,6 +477,8 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			player.checkringdepth = from_str<float>(args[++i]);
 		}else if((arg == "-z" || arg == "--ringincr") && i+1 < args.size()){
 			player.ringincr = from_str<float>(args[++i]);
+		}else if((arg == "-Z" || arg == "--ringsize") && i+1 < args.size()){
+			player.minringsize = from_str<float>(args[++i]);
 		}else if((arg == "-p" || arg == "--pattern") && i+1 < args.size()){
 			player.rolloutpattern = from_str<bool>(args[++i]);
 		}else if((arg == "-g" || arg == "--goodreply") && i+1 < args.size()){

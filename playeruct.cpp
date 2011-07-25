@@ -441,7 +441,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 		checkdepth = (int)(board.movesremain() * player->checkringdepth * -1);
 
 	//only allow rings bigger than the minimum ring size, incrementing by the ringincr after each move
-	float minringsize = 1;
+	float minringsize = player->minringsize;
 	float ringincr = player->ringincr;
 	//if it's negative, scale it by the board size
 	if(ringincr < 0)
@@ -467,7 +467,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 		movelist.addrollout(move, board.toplay());
 
-		board.move(move, true, false, (checkrings && depth < checkdepth)*minringsize);
+		board.move(move, true, false, (int)(checkrings && depth < checkdepth)*minringsize);
 		minringsize += ringincr;
 		depth++;
 	}
