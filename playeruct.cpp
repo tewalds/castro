@@ -453,7 +453,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 	while((won = board.won()) < 0){
 		//do a complex choice
-		PairMove pair = rollout_choose_move(board, move, doinstwin);
+		PairMove pair = rollout_choose_move(board, move, doinstwin, checkrings);
 		move = pair.a;
 
 		//or the simple random choice if complex found nothing
@@ -472,16 +472,22 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 		movelist.addrollout(move, board.toplay());
 
-		board.move(move, true, false, ((checkrings && depth < checkdepth) ? minringsize : 0), ringperm);
+		board.move(move, true, false, (checkrings ? minringsize : 0), ringperm);
 		if(--ringcounter == 0){
 			minringsize++;
 			ringcounter = ringcounterfull;
 		}
 		depth++;
+		checkrings &= (depth < checkdepth);
 
 		if(board.won() < 0 && pair.b != M_UNKNOWN){ //should lead to a win
 			movelist.addrollout(move, board.toplay());
 			board.move(pair.b, true, false);
+			assert(board.won() >= 0);
+//			if(board.won() < 0){
+//				board.print();
+//				logerr("toplay " + to_str((int)board.toplay()) + ", moves: " + pair.a.to_s() + ", " + pair.b.to_s() + "\n");
+//			}
 			depth++;
 		}
 	}
@@ -512,11 +518,11 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	return won;
 }
 
-PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev, int & doinstwin){
+PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev, int & doinstwin, bool checkrings){
 	//look for instant wins
 	if(player->instantwin == 1 && --doinstwin >= 0){
 		for(Board::MoveIterator m = board.moveit(); !m.done(); ++m)
-			if(board.test_win(*m) > 0)
+			if(board.test_win(*m, board.toplay(), checkrings) > 0)
 				return *m;
 	}
 
@@ -525,9 +531,9 @@ PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev
 		Move loss = M_UNKNOWN;
 		for(Board::MoveIterator m = board.moveit(); !m.done(); ++m){
 			if(board.test_local(*m)){
-				if(board.test_win(*m, board.toplay()) > 0) //win
+				if(board.test_win(*m, board.toplay(), checkrings) > 0) //win
 					return *m;
-				if(board.test_win(*m, 3 - board.toplay()) > 0) //lose
+				if(board.test_win(*m, 3 - board.toplay(), checkrings) > 0) //lose
 					loss = *m;
 			}
 		}
@@ -552,10 +558,10 @@ PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev
 
 		//follow contour of the current group looking for wins
 		do{
-			if(board.onboard(cur) && board.get(cur) == 0 && board.test_win(cur, turn) > 0){
+			if(board.onboard(cur) && board.get(cur) == 0 && board.test_win(cur, turn, checkrings) > 0){
 				if(loss == M_UNKNOWN)
 					loss = cur;
-				else
+				else if(loss != cur)
 					return PairMove(loss, cur); //game over, two wins found
 			}
 
