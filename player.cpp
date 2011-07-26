@@ -260,6 +260,7 @@ void Player::set_board(const Board & board){
 	rootboard = board;
 	nodes -= root.dealloc(ctmem);
 	root = Node();
+	root.exp.addwins(visitexpand+1);
 
 	reset_threads(); //needed since the threads aren't started before a board it set
 
