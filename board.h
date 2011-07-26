@@ -764,7 +764,7 @@ public:
 	}
 
 	//test if making this move would win, but don't actually make the move
-	int test_win(const Move & pos, char turn = 0) const {
+	int test_win(const Move & pos, char turn = 0, bool checkrings = true) const {
 		int posxy = xy(pos);
 		if(cells[posxy].local != 3)
 			return -3;
@@ -785,7 +785,7 @@ public:
 			}
 		}
 
-		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3 || (numgroups >= 2 && testcell.size >= 6 && checkring_o1(pos, turn)))
+		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3 || (checkrings && numgroups >= 2 && testcell.size >= 6 && checkring_o1(pos, turn)))
 			return turn;
 
 		if(nummoves+1 == numcells())
