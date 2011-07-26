@@ -479,7 +479,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 		}
 		depth++;
 
-		if(board.won() == 0 && pair.b != M_UNKNOWN){ //should lead to a win
+		if(board.won() < 0 && pair.b != M_UNKNOWN){ //should lead to a win
 			movelist.addrollout(move, board.toplay());
 			board.move(pair.b, true, false);
 			depth++;
