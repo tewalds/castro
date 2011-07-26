@@ -438,14 +438,16 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	int  checkdepth = (int)player->checkringdepth;
 	//if it's negative, check for that fraction of the remaining moves
 	if(player->checkringdepth < 0)
-		checkdepth = (int)(board.movesremain() * player->checkringdepth * -1);
+		checkdepth = ceil(board.movesremain() * player->checkringdepth * -1);
 
 	//only allow rings bigger than the minimum ring size, incrementing by the ringincr after each move
-	float minringsize = player->minringsize;
-	float ringincr = 1.0/player->ringincr;
-	//if it's negative, scale it by the board size
-	if(ringincr < 0)
-		ringincr *= -1.0 / board.get_size();
+	int minringsize = player->minringsize;
+	int ringcounterfull = player->ringincr;
+	//if it's negative, scale by the fraction of remaining moves
+	if(player->ringincr < 0)
+		ringcounterfull = ceil(player->ringincr * board.movesremain() * -1);
+
+	int ringcounter = ringcounterfull;
 
 	while((won = board.won()) < 0){
 		//do a complex choice
@@ -467,8 +469,11 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 		movelist.addrollout(move, board.toplay());
 
-		board.move(move, true, false, (int)((checkrings && depth < checkdepth)*minringsize));
-		minringsize += ringincr;
+		board.move(move, true, false, ((checkrings && depth < checkdepth) ? minringsize : 0));
+		if(--ringcounter == 0){
+			minringsize++;
+			ringcounter = ringcounterfull;
+		}
 		depth++;
 	}
 
