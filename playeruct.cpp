@@ -449,6 +449,8 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 	int ringcounter = ringcounterfull;
 
+	int ringperm = player->ringperm;
+
 	while((won = board.won()) < 0){
 		//do a complex choice
 		move = rollout_choose_move(board, move, doinstwin);
@@ -469,7 +471,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 		movelist.addrollout(move, board.toplay());
 
-		board.move(move, true, false, ((checkrings && depth < checkdepth) ? minringsize : 0));
+		board.move(move, true, false, ((checkrings && depth < checkdepth) ? minringsize : 0), ringperm);
 		if(--ringcounter == 0){
 			minringsize++;
 			ringcounter = ringcounterfull;
