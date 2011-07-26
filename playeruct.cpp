@@ -445,7 +445,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	float ringincr = 1.0/player->ringincr;
 	//if it's negative, scale it by the board size
 	if(ringincr < 0)
-		ringincr *= -1.0 * board.get_size();
+		ringincr *= -1.0 / board.get_size();
 
 	while((won = board.won()) < 0){
 		//do a complex choice
