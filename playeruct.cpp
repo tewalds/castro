@@ -453,7 +453,8 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 	while((won = board.won()) < 0){
 		//do a complex choice
-		move = rollout_choose_move(board, move, doinstwin);
+		PairMove pair = rollout_choose_move(board, move, doinstwin);
+		move = pair.a;
 
 		//or the simple random choice if complex found nothing
 		if(move == M_UNKNOWN){
@@ -477,6 +478,12 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 			ringcounter = ringcounterfull;
 		}
 		depth++;
+
+		if(board.won() == 0 && pair.b != M_UNKNOWN){ //should lead to a win
+			movelist.addrollout(move, board.toplay());
+			board.move(pair.b, true, false);
+			depth++;
+		}
 	}
 
 	gamelen.add(depth);
@@ -505,7 +512,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	return won;
 }
 
-Move Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev, int & doinstwin){
+PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev, int & doinstwin){
 	//look for instant wins
 	if(player->instantwin == 1 && --doinstwin >= 0){
 		for(Board::MoveIterator m = board.moveit(); !m.done(); ++m)
@@ -524,6 +531,46 @@ Move Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev, in
 					loss = *m;
 			}
 		}
+		if(loss != M_UNKNOWN)
+			return loss;
+	}
+
+	if(player->instantwin == 3 && --doinstwin >= 0){
+		Move start, cur, loss = M_UNKNOWN;
+		int dir = 5;
+		int turn = 3 - board.toplay();
+
+		//find the first empty cell
+		for(const MoveValid * i = board.nb_begin(prev), *e = board.nb_end(i); i < e; i++, dir++){
+			if(i->onboard() && turn != board.get(i->xy)){
+				start = *i;
+				break;
+			}
+		}
+		dir = dir % 6;
+		cur = start;
+
+		//follow contour of the current group looking for wins
+		do{
+			if(board.onboard(cur) && board.get(cur) == 0 && board.test_win(cur, turn) > 0){
+				if(loss == M_UNKNOWN)
+					loss = cur;
+				else
+					return PairMove(loss, cur); //game over, two wins found
+			}
+
+			for(int i = 5; i <= 9; i++){
+				int nd = (dir + i) % 6;
+				Move next = cur + neighbours[nd];
+
+				if(!board.onboard(next) || board.get(next) != turn){
+					cur = next;
+					dir = nd;
+					break;
+				}
+			}
+		}while(cur != start);
+
 		if(loss != M_UNKNOWN)
 			return loss;
 	}

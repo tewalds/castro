@@ -300,7 +300,7 @@ public:
 		bool test_bridge_probe(const Board & board, const Move & move, const Move & test) const;
 
 		int rollout(Board & board, Move move, int depth);
-		Move rollout_choose_move(Board & board, const 	Move & prev, int & doinstwin);
+		PairMove rollout_choose_move(Board & board, const Move & prev, int & doinstwin);
 		Move rollout_pattern(const Board & board, const Move & move);
 	};
 
