@@ -26,8 +26,8 @@ struct TimeControl {
 	TimeControl(){
 		method   = STATS;
 		param    = 2;
-		game     = 120;
-		move     = 0;
+		game     = 0;
+		move     = 5;
 		flexible = true;
 		max_sims = 0;
 	}
