@@ -53,6 +53,7 @@ struct Move {
 	bool operator==(const MoveSpecial & b) const { return (y == b); }
 	bool operator==(const Move & b) const { return (y == b.y && x == b.x); }
 	bool operator!=(const Move & b) const { return (y != b.y || x != b.x); }
+	bool operator!=(const MoveSpecial & b) const { return (y != b); }
 	Move operator+ (const Move & b) const { return Move(x + b.x, y + b.y); }
 	Move & operator+=(const Move & b)     { y += b.y; x += b.x; return *this; }
 	Move operator- (const Move & b) const { return Move(x - b.x, y - b.y); }
@@ -80,6 +81,12 @@ struct MoveValid : public Move {
 	MoveValid(int x, int y, int XY) : Move(x,y), xy(XY) { }
 	MoveValid(const Move & m, int XY) : Move(m), xy(XY) { }
 	bool onboard() const { return xy != -1; }
+};
+
+struct PairMove {
+	Move a, b;
+	PairMove(Move A = M_UNKNOWN, Move B = M_UNKNOWN) : a(A), b(B) { }
+	PairMove(MoveSpecial A) : a(Move(A)), b(M_UNKNOWN) { }
 };
 
 #endif
