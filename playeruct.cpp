@@ -302,7 +302,7 @@ void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
 	}
 
 	if(player->locality) //boost for moves near previous stones
-		child->know += player->locality * board.local(child->move);
+		child->know += player->locality * board.local(child->move, board.toplay());
 
 	Board::Cell cell;
 	if(player->connect || player->size)
@@ -530,12 +530,10 @@ PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev
 	if(player->instantwin == 2 && --doinstwin >= 0){
 		Move loss = M_UNKNOWN;
 		for(Board::MoveIterator m = board.moveit(); !m.done(); ++m){
-			if(board.test_local(*m)){
-				if(board.test_win(*m, board.toplay(), checkrings) > 0) //win
-					return *m;
-				if(board.test_win(*m, 3 - board.toplay(), checkrings) > 0) //lose
-					loss = *m;
-			}
+			if(board.test_win(*m, board.toplay(), checkrings) > 0) //win
+				return *m;
+			if(board.test_win(*m, 3 - board.toplay(), checkrings) > 0) //lose
+				loss = *m;
 		}
 		if(loss != M_UNKNOWN)
 			return loss;

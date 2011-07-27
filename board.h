@@ -194,7 +194,11 @@ public:
 
 	int geton(const MoveValid & m) const { return (m.onboard() ? get(m.xy) : 0); }
 
-	int local(const Move & m) const { return cells[xy(m)].local; }
+	int local(const Move & m, char turn) const {
+		char localshift = (turn & 2); //0 for p1, 2 for p2
+		return ((cells[xy(m)].local >> localshift) & 3);
+	}
+
 
 	//assumes x, y are in array bounds
 	bool onboard_fast(int x, int y)   const { return (  y -   x < size) && (  x -   y < size); }
@@ -715,6 +719,7 @@ public:
 		}
 
 		char turn = toplay();
+		char localshift = (turn & 2); //0 for p1, 2 for p2
 
 		set(pos, !permring);
 
@@ -723,17 +728,17 @@ public:
 				MoveScore loc = neighbours[i] + pos;
 
 				if(onboard(loc))
-					cells[xy(loc)].local |= loc.score;
+					cells[xy(loc)].local |= (loc.score << localshift);
 			}
 		}
 
 		int posxy = xy(pos);
-		bool local = (cells[posxy].local == 3);
+		bool islocal = (local(pos, turn) == 3);
 		bool alreadyjoined = false; //useful for finding rings
 		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 			if(i->onboard()){
-				cells[i->xy].local = 3;
-				if(local && turn == get(i->xy)){
+				cells[i->xy].local |= (3 << localshift);
+				if(islocal && turn == get(i->xy)){
 					alreadyjoined |= join_groups(posxy, i->xy);
 					i++; //skip the next one. If it is the same group,
 						 //it is already connected and forms a corner, which we can ignore
@@ -759,19 +764,19 @@ public:
 		return true;
 	}
 
-	bool test_local(const Move & pos) const {
-		return (cells[xy(pos)].local == 3);
+	bool test_local(const Move & pos, char turn) const {
+		return (local(pos, turn) == 3);
 	}
 
 	//test if making this move would win, but don't actually make the move
 	int test_win(const Move & pos, char turn = 0, bool checkrings = true) const {
-		int posxy = xy(pos);
-		if(cells[posxy].local != 3)
+		if(!test_local(pos, turn))
 			return -3;
 
 		if(turn == 0)
 			turn = toplay();
 
+		int posxy = xy(pos);
 		Cell testcell = cells[find_group(posxy)];
 		int numgroups = 0;
 		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
