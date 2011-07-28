@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cassert>
 
+#include "time.h"
 #include "types.h"
 #include "move.h"
 #include "board.h"
@@ -246,6 +247,7 @@ public:
 	public:
 		DepthStats treelen, gamelen;
 		DepthStats wintypes[2][4]; //player,wintype
+		double times[4]; //time spent in each of the stages
 
 		PlayerThread() : rand32(std::rand()), unitrand(std::rand()) {}
 		virtual ~PlayerThread() { }
@@ -263,6 +265,8 @@ public:
 		WeightedRandTree wtree; //struct to hold the valued for weighted random values
 		LBDists dists;    //holds the distances to the various non-ring wins as a heuristic for the minimum moves needed to win
 		MoveList movelist;
+		int stage; //which of the four MCTS stages is it on
+		Time timestamps[4]; //timestamps for the beginning, before child creation, before rollout, after rollout
 
 	public:
 		PlayerUCT(Player * p) {
@@ -287,6 +291,9 @@ public:
 			for(int a = 0; a < 2; a++)
 				for(int b = 0; b < 4; b++)
 					wintypes[a][b].reset();
+
+			for(int a = 0; a < 4; a++)
+				times[a] = 0;
 		}
 
 	private:
@@ -312,6 +319,7 @@ public:
 	bool  ponder;     //think during opponents time?
 	int   numthreads; //number of player threads to run
 	u64   maxmem;     //maximum memory for the tree in bytes
+	bool  profile;    //count how long is spent in each stage of MCTS
 //final move selection
 	float msrave;     //rave factor in final move selection, -1 means use number instead of value
 	float msexplore;  //the UCT constant in final move selection

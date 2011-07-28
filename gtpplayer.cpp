@@ -140,6 +140,7 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 	DepthStats gamelen, treelen;
 	uint64_t runs = player.runs;
 	DepthStats wintypes[2][4];
+	double times[4] = {0,0,0,0};
 	for(unsigned int i = 0; i < player.threads.size(); i++){
 		gamelen += player.threads[i]->gamelen;
 		treelen += player.threads[i]->treelen;
@@ -147,6 +148,9 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 		for(int a = 0; a < 2; a++)
 			for(int b = 0; b < 4; b++)
 				wintypes[a][b] += player.threads[i]->wintypes[a][b];
+
+		for(int a = 0; a < 4; a++)
+			times[a] += player.threads[i]->times[a];
 
 		player.threads[i]->reset();
 	}
@@ -156,6 +160,8 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 	if(runs > 0){
 		stats += "Game length: " + gamelen.to_s() + "\n";
 		stats += "Tree depth:  " + treelen.to_s() + "\n";
+		if(player.profile)
+			stats += "Times:       " + to_str(times[0], 3) + ", " + to_str(times[1], 3) + ", " + to_str(times[2], 3) + ", " + to_str(times[3], 3) + "\n";
 		stats += "Win Types:   ";
 		stats += "P1: f " + to_str(wintypes[0][1].num) + ", b " + to_str(wintypes[0][2].num) + ", r " + to_str(wintypes[0][3].num) + "; ";
 		stats += "P2: f " + to_str(wintypes[1][1].num) + ", b " + to_str(wintypes[1][2].num) + ", r " + to_str(wintypes[1][3].num) + "\n";
@@ -272,6 +278,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	DepthStats gamelen, treelen;
 	uint64_t runs = player.runs;
 	DepthStats wintypes[2][4];
+	double times[4] = {0,0,0,0};
 	for(unsigned int i = 0; i < player.threads.size(); i++){
 		gamelen += player.threads[i]->gamelen;
 		treelen += player.threads[i]->treelen;
@@ -279,6 +286,9 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 		for(int a = 0; a < 2; a++)
 			for(int b = 0; b < 4; b++)
 				wintypes[a][b] += player.threads[i]->wintypes[a][b];
+
+		for(int a = 0; a < 4; a++)
+			times[a] += player.threads[i]->times[a];
 
 		player.threads[i]->reset();
 	}
@@ -288,6 +298,8 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(runs > 0){
 		stats += "Game length: " + gamelen.to_s() + "\n";
 		stats += "Tree depth:  " + treelen.to_s() + "\n";
+		if(player.profile)
+			stats += "Times:       " + to_str(times[0], 3) + ", " + to_str(times[1], 3) + ", " + to_str(times[2], 3) + ", " + to_str(times[3], 3) + "\n";
 		stats += "Win Types:   ";
 		stats += "P1: f " + to_str(wintypes[0][1].num) + ", b " + to_str(wintypes[0][2].num) + ", r " + to_str(wintypes[0][3].num) + "; ";
 		stats += "P2: f " + to_str(wintypes[1][1].num) + ", b " + to_str(wintypes[1][2].num) + ", r " + to_str(wintypes[1][3].num) + "\n";
@@ -359,6 +371,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 #endif
 			"  -o --ponder      Continue to ponder during the opponents time      [" + to_str(player.ponder) + "]\n" +
 			"  -M --maxmem      Max memory in Mb to use for the tree              [" + to_str(player.maxmem/(1024*1024)) + "]\n" +
+			"     --profile     Output the time used by each phase of MCTS        [" + to_str(player.profile) + "]\n" +
 			"Final move selection:\n" +
 			"  -E --msexplore   Lower bound constant in final move selection      [" + to_str(player.msexplore) + "]\n" +
 			"  -F --msrave      Rave factor, 0 for pure exp, -1 # sims, -2 # wins [" + to_str(player.msrave) + "]\n" +
@@ -414,6 +427,8 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			player.set_ponder(p);
 		}else if((arg == "-o" || arg == "--ponder") && i+1 < args.size()){
 			player.set_ponder(from_str<bool>(args[++i]));
+		}else if((arg == "--profile") && i+1 < args.size()){
+			player.profile = from_str<bool>(args[++i]);
 		}else if((arg == "-M" || arg == "--maxmem") && i+1 < args.size()){
 			player.maxmem = from_str<uint64_t>(args[++i])*1024*1024;
 		}else if((arg == "-E" || arg == "--msexplore") && i+1 < args.size()){

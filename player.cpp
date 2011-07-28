@@ -120,6 +120,7 @@ Player::Player() {
 
 	solved_logfile = NULL;
 
+	profile     = false;
 	ponder      = false;
 //#ifdef SINGLE_THREAD ... make sure only 1 thread
 	numthreads  = 1;

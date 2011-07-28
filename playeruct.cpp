@@ -5,6 +5,11 @@
 #include "string.h"
 
 void Player::PlayerUCT::iterate(){
+	if(player->profile){
+		timestamps[0] = Time();
+		stage = 0;
+	}
+
 	movelist.reset(&(player->rootboard));
 	player->root.exp.addvloss();
 	Board copy = player->rootboard;
@@ -12,6 +17,13 @@ void Player::PlayerUCT::iterate(){
 	use_explore = (unitrand() < player->useexplore);
 	walk_tree(copy, & player->root, 0);
 	player->root.exp.addv(movelist.getexp(3-player->rootboard.toplay()));
+
+	if(player->profile){
+		times[0] += timestamps[1] - timestamps[0];
+		times[1] += timestamps[2] - timestamps[1];
+		times[2] += timestamps[3] - timestamps[2];
+		times[3] += Time() - timestamps[3];
+	}
 }
 
 void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
@@ -51,6 +63,11 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 		return;
 	}
 
+	if(player->profile && stage == 0){
+		stage = 1;
+		timestamps[1] = Time();
+	}
+
 	int won = (player->minimax ? node->outcome : board.won());
 
 	//if it's not already decided
@@ -59,6 +76,11 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 		if(node->exp.num() >= player->visitexpand+1 && create_children(board, node, toplay)){
 			walk_tree(board, node, depth);
 			return;
+		}
+
+		if(player->profile){
+			stage = 2;
+			timestamps[2] = Time();
 		}
 
 		//do random game on this node
@@ -73,6 +95,13 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 	treelen.add(depth);
 
 	movelist.subvlosses(1);
+
+	if(player->profile){
+		timestamps[3] = Time();
+		if(stage == 1)
+			timestamps[2] = timestamps[3];
+		stage = 3;
+	}
 
 	return;
 }
