@@ -290,11 +290,9 @@ public:
 
 	string to_s(bool color) const {
 		string s;
-		s += string(size + 4, ' ');
-		for(int i = 0; i < size; i++){
-			s += to_str(i+1);
-			s += " ";
-		}
+		s += string(size + 3, ' ');
+		for(int i = 0; i < size; i++)
+			s += " " + to_str(i+1);
 		s += "\n";
 
 		string white = "O", black = "@";
@@ -307,16 +305,15 @@ public:
 		for(int y = 0; y < size_d; y++){
 			s += string(abs(sizem1 - y) + 2, ' ');
 			s += char('A' + y);
-			s += " ";
 			for(int x = linestart(y); x < lineend(y); x++){
+				s += ' ';
 				int p = get(x, y);
 				if(p == 0) s += '.';
 				if(p == 1) s += white;
 				if(p == 2) s += black;
-				s += ' ';
 			}
 			if(y < size-1)
-				s += to_str(1 + size + y);
+				s += " " + to_str(1 + size + y);
 			s += '\n';
 		}
 		return s;
