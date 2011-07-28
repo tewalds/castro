@@ -773,25 +773,24 @@ public:
 		if(turn == 0)
 			turn = toplay();
 
-		if(!test_local(pos, turn))
-			return -3;
-
-		int posxy = xy(pos);
-		Cell testcell = cells[find_group(posxy)];
-		int numgroups = 0;
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
-			if(i->onboard() && turn == get(i->xy)){
-				const Cell * g = & cells[find_group(i->xy)];
-				testcell.corner |= g->corner;
-				testcell.edge   |= g->edge;
-				testcell.size   += g->size;
-				i++; //skip the next one
-				numgroups++;
+		if(test_local(pos, turn)){
+			int posxy = xy(pos);
+			Cell testcell = cells[find_group(posxy)];
+			int numgroups = 0;
+			for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
+				if(i->onboard() && turn == get(i->xy)){
+					const Cell * g = & cells[find_group(i->xy)];
+					testcell.corner |= g->corner;
+					testcell.edge   |= g->edge;
+					testcell.size   += g->size;
+					i++; //skip the next one
+					numgroups++;
+				}
 			}
-		}
 
-		if(testcell.numcorners() >= 2 || testcell.numedges() >= 3 || (checkrings && numgroups >= 2 && testcell.size >= 6 && checkring_o1(pos, turn)))
-			return turn;
+			if(testcell.numcorners() >= 2 || testcell.numedges() >= 3 || (checkrings && numgroups >= 2 && testcell.size >= 6 && checkring_o1(pos, turn)))
+				return turn;
+		}
 
 		if(nummoves+1 == numcells())
 			return 0;
