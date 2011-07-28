@@ -770,11 +770,11 @@ public:
 
 	//test if making this move would win, but don't actually make the move
 	int test_win(const Move & pos, char turn = 0, bool checkrings = true) const {
-		if(!test_local(pos, turn))
-			return -3;
-
 		if(turn == 0)
 			turn = toplay();
+
+		if(!test_local(pos, turn))
+			return -3;
 
 		int posxy = xy(pos);
 		Cell testcell = cells[find_group(posxy)];
