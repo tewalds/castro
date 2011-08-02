@@ -88,7 +88,7 @@ public:
 	LBDists() : board(NULL) {}
 	LBDists(const Board * b) { run(b); }
 
-	void run(const Board * b) {
+	void run(const Board * b, int side = 0) {
 		board = b;
 
 		for(int i = 0; i < 12; i++)
@@ -98,7 +98,11 @@ public:
 
 		int m = board->get_size()-1, e = board->get_size_d()-1;
 
-		for(int player = 1; player <= 2; player++){
+		int start, end;
+		if(side){ start = end = side; }
+		else    { start = 1; end = 2; }
+
+		for(int player = start; player <= end; player++){
 			init(0, 0, 0, player, 3); flood(0, player); //corner 0
 			init(m, 0, 1, player, 4); flood(1, player); //corner 1
 			init(e, m, 2, player, 5); flood(2, player); //corner 2
@@ -133,7 +137,7 @@ public:
 
 					if(colour == 0)
 						next.dist++;
-					
+
 					if( dist(edge, player, pos) > next.dist){
 						dist(edge, player, pos) = next.dist;
 						if(next.dist < board->get_size())
@@ -183,11 +187,11 @@ public:
 	void partialsort(int * list, int max){
 		for(int i = 0; i < max; i++){
 			int mini = i;
-			
+
 			for(int j = i+1; j < 6; j++)
 				if(list[mini] > list[j])
 					mini = j;
-			
+
 			if(mini != i){
 				int t = list[i];
 				list[i] = list[mini];
