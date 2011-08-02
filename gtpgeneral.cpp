@@ -248,38 +248,52 @@ GTPResponse HavannahGTP::gtp_dists(vecstr args){
 	Board board = game.getboard();
 	LBDists dists(&board);
 
+	int side = 0;
+	if(args.size() >= 1){
+		switch(tolower(args[0][0])){
+			case 'w': side = 1; break;
+			case 'b': side = 2; break;
+			default:
+				return GTPResponse(false, "Invalid player selection");
+		}
+	}
+
 	int size = board.get_size();
 	int size_d = board.get_size_d();
 
 	string s = "\n";
-	s += string(size + 4, ' ');
-	for(int i = 0; i < size; i++){
-		s += to_str(i+1);
-		s += " ";
-	}
+	s += string(size + 3, ' ');
+	for(int i = 0; i < size; i++)
+		s += " " + to_str(i+1);
 	s += "\n";
+
+	string white = "O", black = "@";
+	if(colorboard){
+		string esc = "\033", reset = esc + "[0m";
+		white = esc + "[1;33m" + "@" + reset; //yellow
+		black = esc + "[1;34m" + "@" + reset; //blue
+	}
 
 	for(int y = 0; y < size_d; y++){
 		s += string(abs(size-1 - y) + 2, ' ');
 		s += char('A' + y);
-		s += " ";
 		for(int x = board.linestart(y); x < board.lineend(y); x++){
 			int p = board.get(x, y);
+			s += ' ';
 			if(p == 0){
-				int d = dists.get(Move(x, y));
+				int d = (side ? dists.get(Move(x, y), side) : dists.get(Move(x, y)));
 				if(d < 10)
 					s += to_str(d);
 				else
 					s += '.';
 			}else if(p == 1){
-				s += 'W';
+				s += white;
 			}else if(p == 2){
-				s += 'B';
+				s += black;
 			}
-			s += ' ';
 		}
 		if(y < size-1)
-			s += to_str(1 + size + y);
+			s += " " + to_str(1 + size + y);
 		s += '\n';
 	}
 	return GTPResponse(true, s);
