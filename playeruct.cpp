@@ -115,7 +115,7 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 		return false;
 
 	if(player->dists || player->detectdraw){
-		dists.run(&board);
+		dists.run(&board, (player->detectdraw ? 0 : toplay));
 
 		if(player->detectdraw){
 //			assert(node->outcome == -3);
@@ -347,7 +347,7 @@ void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
 		child->know += player->bridge;
 
 	if(player->dists)
-		child->know += player->dists * max(0, board.get_size_d() - dists.get(child->move));
+		child->know += player->dists * max(0, board.get_size_d() - dists.get(child->move, board.toplay()));
 }
 
 //test whether this move is a forced reply to the opponent probing your virtual connections
