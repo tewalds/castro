@@ -9,11 +9,11 @@
 // O(log n) updates, O(log n) choose
 class WeightedRandTree {
 	mutable MTRand unitrand;
-	unsigned int size;
+	unsigned int size, allocsize;
 	float * weights;
 public:
-	WeightedRandTree()      : size(0), weights(NULL) { }
-	WeightedRandTree(unsigned int s) : weights(NULL) { resize(s); }
+	WeightedRandTree()      : size(0), allocsize(0), weights(NULL) { }
+	WeightedRandTree(unsigned int s) : allocsize(0), weights(NULL) { resize(s); }
 
 	~WeightedRandTree(){
 		if(weights)
@@ -36,13 +36,13 @@ public:
 	//resize and clear the tree
 	void resize(unsigned int s){
 		if(s < 2) s = 2;
-		s = roundup(s);
+		size = roundup(s);
 
-		if(s != size){
+		if(size > allocsize){
 			if(weights)
 				delete[] weights;
 
-			size = s;
+			allocsize = size;
 			weights = new float[size*2];
 		}
 
@@ -91,6 +91,9 @@ public:
 
 	//return a weighted random index, O(log s), infinite loop if sum = 0
 	unsigned int choose() const {
+		if(weights[1] <= 0.00001f)
+			return -1;
+
 		float r;
 		unsigned int i;
 		do{
@@ -103,7 +106,7 @@ public:
 				}
 				i *= 2;
 			}
-		
+
 			if(r > weights[i])
 				i++;
 		}while(weights[i] <= 0.0001f);
