@@ -194,9 +194,10 @@ public:
 
 	int geton(const MoveValid & m) const { return (m.onboard() ? get(m.xy) : 0); }
 
-	int local(const Move & m, char turn) const {
+	int local(const Move & m, char turn) const { return local(xy(m), turn); }
+	int local(int i,          char turn) const {
 		char localshift = (turn & 2); //0 for p1, 2 for p2
-		return ((cells[xy(m)].local >> localshift) & 3);
+		return ((cells[i].local >> localshift) & 3);
 	}
 
 
@@ -227,6 +228,7 @@ public:
 	const MoveValid * nb_end(const Move & m) const { return nb_end(xy(m)); }
 	const MoveValid * nb_end(int i)          const { return nb_end(nb_begin(i)); }
 	const MoveValid * nb_end(const MoveValid * m) const { return m + 6; }
+	const MoveValid * nb_endhood(const MoveValid * m) const { return m + 18; }
 
 	int iscorner(int x, int y) const {
 		if(!onboard(x,y))
