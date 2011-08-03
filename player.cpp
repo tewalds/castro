@@ -154,7 +154,7 @@ Player::Player() {
 	bridge      = 25;
 	dists       = 0;
 
-	weightedrandom = false;
+	weightedrandom = 0;
 	weightedknow   = false;
 	checkrings     = 1.0;
 	checkringdepth = 1000;

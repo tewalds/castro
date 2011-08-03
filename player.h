@@ -262,7 +262,8 @@ public:
 		bool use_rave;    //whether to use rave for this simulation
 		bool use_explore; //whether to use exploration for this simulation
 		int  rollout_pattern_offset; //where to start the rollout pattern
-		WeightedRandTree wtree; //struct to hold the valued for weighted random values
+		Move moves[361]; //moves in the rollout
+		WeightedRandTree wtree[2]; //hold the weights for weighted random values, one per player
 		LBDists dists;    //holds the distances to the various non-ring wins as a heuristic for the minimum moves needed to win
 		MoveList movelist;
 		int stage; //which of the four MCTS stages is it on
@@ -350,7 +351,7 @@ public:
 	int   bridge;     //boost replying to a probe at a bridge
 	int   dists;      //boost based on minimum number of stones needed to finish a non-ring win
 //rollout
-	bool  weightedrandom; //use a weighted shuffle for move ordering, based on the rave results
+	int   weightedrandom; //use a weighted shuffle for move ordering, based on the rave results
 	bool  weightedknow;   //use knowledge in the weighted random values
 	float checkrings;     //how often to allow rings as a win condition in a rollout
 	float checkringdepth; //how deep to allow rings as a win condition in a rollout

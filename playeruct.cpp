@@ -39,7 +39,7 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 			if(child->outcome < 0){
 				movelist.addtree(child->move, toplay);
 
-				if(!board.move(child->move, (player->minimax == 0), player->locality)){
+				if(!board.move(child->move, (player->minimax == 0), (player->locality || player->weightedrandom) )){
 					logerr("move failed: " + child->move.to_s() + "\n" + board.to_s(false));
 					assert(false && "move failed");
 				}
@@ -401,60 +401,40 @@ bool Player::PlayerUCT::test_bridge_probe(const Board & board, const Move & move
 //play a random game starting from a board state, and return the results of who won
 int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	int won;
-
 	int num = board.movesremain();
-	Move moves[num];
 
-	int i = 0;
-	for(Board::MoveIterator m = board.moveit(false, false); !m.done(); ++m)
-		moves[i++] = *m;
-
-	bool wrand = (player->weightedrandom && player->ravefactor > min_rave && player->root.children.num() > 1);
-
-	int order[num];
-	int * rmove = order;
+	int wrand = (player->weightedrandom);
+	const float wrandconst = 1.0f;
 
 	if(wrand){
-		wtree.resize(num);
+		wtree[0].resize(board.vecsize());
+		wtree[1].resize(board.vecsize());
 
-		Move * m = moves,
-		     * mend = moves + num;
-		Node * child = player->root.children.begin(),
-		     * childend = player->root.children.end();
-
-		while(m != mend && child != childend){
-			if(*m == child->move){
-				wtree.set_weight_fast(m - moves, max(0.1f, child->rave.avg() + (player->weightedknow * child->know / 100.f)));
-				m++;
-				child++;
-			}else if(*m > child->move){
-				child++;
-			}else{ //(m < child->move)
-				wtree.set_weight_fast(m - moves, 0.1f);
-				m++;
-			}
+		int set = 0;
+		for(Board::MoveIterator m = board.moveit(false, false); !m.done(); ++m){
+			int i = board.xy(*m);
+			moves[i] = *m;
+			wtree[0].set_weight_fast(i, wrandconst + board.local(*m, 1));
+			wtree[1].set_weight_fast(i, wrandconst + board.local(*m, 2));
+			set++;
 		}
 
-		while(m != mend){
-			wtree.set_weight_fast(m - moves, 0.1f);
-			m++;
-		}
-
-		wtree.rebuild_tree();
+		wtree[0].rebuild_tree();
+		wtree[1].rebuild_tree();
 	}else{
-		int i;
-		for(i = 0; i < num; i++)
-			order[i] = i;
+		int i = 0;
+		for(Board::MoveIterator m = board.moveit(false, false); !m.done(); ++m)
+			moves[i++] = *m;
 
 		i = num;
 		while(i > 1){
 			int j = rand32() % i--;
-			int tmp = order[j];
-			order[j] = order[i];
-			order[i] = tmp;
+			Move tmp = moves[j];
+			moves[j] = moves[i];
+			moves[i] = tmp;
 		}
 
-//		random_shuffle(order, order + num);
+//		random_shuffle(moves, moves + num);
 	}
 
 	int doinstwin = player->instwindepth;
@@ -480,28 +460,40 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 	int ringperm = player->ringperm;
 
+	Move * nextmove = moves;
+	Move forced = M_UNKNOWN;
 	while((won = board.won()) < 0){
-		//do a complex choice
-		PairMove pair = rollout_choose_move(board, move, doinstwin, checkrings);
-		move = pair.a;
+		int turn = board.toplay();
 
-		//or the simple random choice if complex found nothing
-		if(move == M_UNKNOWN){
-			do{
-				if(wrand){
-					int j = wtree.choose();
-					wtree.set_weight(j, 0);
-					move = moves[j];
-				}else{
-					move = moves[*rmove];
-					rmove++;
-				}
-			}while(!board.valid_move_fast(move));
+		if(forced == M_UNKNOWN){
+			//do a complex choice
+			PairMove pair = rollout_choose_move(board, move, doinstwin, checkrings);
+			move = pair.a;
+			forced = pair.b;
+
+			//or the simple random choice if complex found nothing
+			if(move == M_UNKNOWN){
+				do{
+					if(wrand){
+						int j = wtree[turn-1].choose();
+//						assert(j >= 0);
+						wtree[0].set_weight(j, 0);
+						wtree[1].set_weight(j, 0);
+						move = moves[j];
+					}else{
+						move = *nextmove;
+						nextmove++;
+					}
+				}while(!board.valid_move_fast(move));
+			}
+		}else{
+			move = forced;
+			forced = M_UNKNOWN;
 		}
 
-		movelist.addrollout(move, board.toplay());
+		movelist.addrollout(move, turn);
 
-		board.move(move, true, false, (checkrings ? minringsize : 0), ringperm);
+		board.move(move, true, (wrand == 2), (checkrings ? minringsize : 0), ringperm);
 		if(--ringcounter == 0){
 			minringsize++;
 			ringcounter = ringcounterfull;
@@ -509,15 +501,11 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 		depth++;
 		checkrings &= (depth < checkdepth);
 
-		if(board.won() < 0 && pair.b != M_UNKNOWN){ //should lead to a win
-			movelist.addrollout(move, board.toplay());
-			board.move(pair.b, true, false);
-			assert(board.won() >= 0);
-//			if(board.won() < 0){
-//				board.print();
-//				logerr("toplay " + to_str((int)board.toplay()) + ", moves: " + pair.a.to_s() + ", " + pair.b.to_s() + "\n");
-//			}
-			depth++;
+		if(wrand == 2){
+			//update neighbour weights
+			for(const MoveValid * i = board.nb_begin(move), *e = board.nb_endhood(i); i < e; i++)
+				if(i->onboard() && board.get(i->xy) == 0)
+					wtree[turn-1].set_weight(i->xy, wrandconst + board.local(i->xy, turn));
 		}
 	}
 

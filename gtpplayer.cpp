@@ -402,7 +402,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
 			"  -D --distance    Give a bonus to low minimum distance to win       [" + to_str(player.dists) + "]\n" +
 			"Rollout policy:\n" +
-			"  -h --weightrand  Weight the moves by the rave values at the root   [" + to_str(player.weightedrandom) + "]\n" +
+			"  -h --weightrand  Weight the moves locality                         [" + to_str(player.weightedrandom) + "]\n" +
 			"  -K --weightknow  Use knowledge in the weighted random values       [" + to_str(player.weightedknow) + "]\n" +
 			"  -C --checkrings  Check for rings only this often in rollouts       [" + to_str(player.checkrings) + "]\n" +
 			"  -R --ringdepth   Check for rings for this depth, < 0 for % moves   [" + to_str(player.checkringdepth) + "]\n" +
@@ -484,7 +484,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 		}else if((arg == "-D" || arg == "--distance") && i+1 < args.size()){
 			player.dists = from_str<int>(args[++i]);
 		}else if((arg == "-h" || arg == "--weightrand") && i+1 < args.size()){
-			player.weightedrandom = from_str<bool>(args[++i]);
+			player.weightedrandom = from_str<int>(args[++i]);
 		}else if((arg == "-K" || arg == "--weightknow") && i+1 < args.size()){
 			player.weightedknow = from_str<bool>(args[++i]);
 		}else if((arg == "-C" || arg == "--checkrings") && i+1 < args.size()){
