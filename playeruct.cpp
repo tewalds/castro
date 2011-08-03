@@ -414,8 +414,8 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 		for(Board::MoveIterator m = board.moveit(false, false); !m.done(); ++m){
 			int i = board.xy(*m);
 			moves[i] = *m;
-			wtree[0].set_weight_fast(i, wrandconst + board.local(*m, 1));
-			wtree[1].set_weight_fast(i, wrandconst + board.local(*m, 2));
+			wtree[0].set_weight_fast(i, wrandconst + board.local(i, 1));
+			wtree[1].set_weight_fast(i, wrandconst + board.local(i, 2));
 			set++;
 		}
 
@@ -447,14 +447,14 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	int  checkdepth = (int)player->checkringdepth;
 	//if it's negative, check for that fraction of the remaining moves
 	if(player->checkringdepth < 0)
-		checkdepth = ceil(board.movesremain() * player->checkringdepth * -1);
+		checkdepth = (int)ceil(num * player->checkringdepth * -1);
 
 	//only allow rings bigger than the minimum ring size, incrementing by the ringincr after each move
-	int minringsize = player->minringsize;
-	int ringcounterfull = player->ringincr;
+	int minringsize = (int)player->minringsize;
+	int ringcounterfull = (int)player->ringincr;
 	//if it's negative, scale by the fraction of remaining moves
 	if(player->ringincr < 0)
-		ringcounterfull = ceil(player->ringincr * board.movesremain() * -1);
+		ringcounterfull = (int)ceil(num * player->ringincr * -1);
 
 	int ringcounter = ringcounterfull;
 
