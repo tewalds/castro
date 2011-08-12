@@ -71,8 +71,8 @@ mutable uint8_t ringdepth; //when doing a ring search, what depth was this posit
 		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e, unsigned int l) :
 			piece(p), size(s), parent(a), corner(c), edge(e), perm(0), local(l), ringdepth(0) { }
 
-		int numcorners(){ return BitsSetTable64[corner]; }
-		int numedges()  { return BitsSetTable64[edge];   }
+		int numcorners() const { return BitsSetTable64[corner]; }
+		int numedges()   const { return BitsSetTable64[edge];   }
 	};
 
 	class MoveIterator { //only returns valid moves...
@@ -185,6 +185,12 @@ public:
 
 	int xyc(int x, int y)   const { return xy(  x + sizem1,   y + sizem1); }
 	int xyc(const Move & m) const { return xy(m.x + sizem1, m.y + sizem1); }
+
+	const Cell * cell(int i)          const { return & cells[i]; }
+	const Cell * cell(int x, int y)   const { return cell(xy(x,y)); }
+	const Cell * cell(const Move & m) const { return cell(xy(m)); }
+	const Cell * cell(const MoveValid & m) const { return cell(m.xy); }
+
 
 	//assumes valid x,y
 	int get(int i)          const { return cells[i].piece; }
@@ -681,6 +687,10 @@ public:
 		hash.update(9,  3*xyc(-y, -x) + turn);
 		hash.update(10, 3*xyc(-z, -y) + turn);
 		hash.update(11, 3*xyc( x, -z) + turn);
+	}
+
+	hash_t test_hash(const Move & pos) const {
+		return test_hash(pos, toplay());
 	}
 
 	hash_t test_hash(const Move & pos, int turn) const {
