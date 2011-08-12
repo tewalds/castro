@@ -556,10 +556,17 @@ PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev
 			return loss;
 	}
 
-	if(player->instantwin == 3 && --doinstwin >= 0){
+	if(player->instantwin >= 3 && --doinstwin >= 0){
 		Move start, cur, loss = M_UNKNOWN;
 		int dir = 5;
 		int turn = 3 - board.toplay();
+
+		if(player->instantwin == 4){ //must have an edge or corner connection, or it has nothing to offer a group towards a win, ignores rings
+			const Board::Cell * c = board.cell(prev);
+			if(c->numcorners() == 0 && c->numedges() == 0)
+				goto skipinstwin3;
+
+		}
 
 		//find the first empty cell
 		for(const MoveValid * i = board.nb_begin(prev), *e = board.nb_end(i); i < e; i++, dir++){
@@ -595,6 +602,7 @@ PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev
 		if(loss != M_UNKNOWN)
 			return loss;
 	}
+skipinstwin3:
 
 	//force a bridge reply
 	if(player->rolloutpattern){
