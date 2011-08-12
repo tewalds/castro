@@ -12,6 +12,9 @@ void SolverAB::solve(double time){
 	}
 	rootboard.setswap(false);
 
+	if(TT == NULL && maxnodes)
+		TT = new ABTTNode[maxnodes];
+
 	Timer timer(time, bind(&SolverAB::timedout, this));
 	Time start;
 
@@ -69,7 +72,10 @@ int SolverAB::negamax(const Board & board, const int depth, int alpha, int beta)
 	for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
 		nodes_seen++;
 
-		if(depth <= 2){
+		hash_t hash = board.test_hash(*move);
+		if(int ttval = tt_get(hash)){
+			value = ttval;
+		}else if(depth <= 2){
 			value = lookup[board.test_win(*move)+3];
 
 			if(board.test_win(*move, 3 - board.toplay()) > 0)
@@ -83,6 +89,7 @@ int SolverAB::negamax(const Board & board, const int depth, int alpha, int beta)
 			if(scout && value > alpha && value < beta && !first) // re-search
 				value = -negamax(next, depth - 1, -beta, -alpha);
 		}
+		tt_set(hash, value);
 
 		if(value > alpha)
 			alpha = value;
@@ -108,5 +115,23 @@ int SolverAB::negamax_outcome(const Board & board, const int depth){
 	else if(abval == 2)  return board.toplay(); //win
 	else if(abval == -2) return 3 - board.toplay(); //loss
 	else                 return 0; //draw
+}
+
+int SolverAB::tt_get(const Board & board){
+	return tt_get(board.gethash());
+}
+int SolverAB::tt_get(const hash_t & hash){
+	if(!TT) return 0;
+	ABTTNode * node = & TT[hash % maxnodes];
+	return (node->hash == hash ? node->value : 0);
+}
+void SolverAB::tt_set(const Board & board, int value){
+	tt_set(board.gethash(), value);
+}
+void SolverAB::tt_set(const hash_t & hash, int value){
+	if(!TT) return;
+	ABTTNode * node = & TT[hash % maxnodes];
+	node->hash = hash;
+	node->value = value;
 }
 

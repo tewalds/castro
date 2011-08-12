@@ -111,8 +111,11 @@ public:
 		newcallback("playgame",        bind(&HavannahGTP::gtp_playgame,      this, _1), "Play a list of moves");
 		newcallback("winner",          bind(&HavannahGTP::gtp_winner,        this, _1), "Check the winner of the game");
 		newcallback("havannah_winner", bind(&HavannahGTP::gtp_winner,        this, _1), "Alias for winner");
-		newcallback("solve_ab",        bind(&HavannahGTP::gtp_solve_ab,      this, _1), "Solve with negamax");
-		newcallback("solve_scout",     bind(&HavannahGTP::gtp_solve_scout,   this, _1), "Solve with negascout");
+
+		newcallback("ab_solve",        bind(&HavannahGTP::gtp_solve_ab,        this, _1),  "Solve with alpha-beta");
+		newcallback("ab_params",       bind(&HavannahGTP::gtp_solve_ab_params, this, _1),  "Set Parameters for alpha-beta");
+		newcallback("ab_stats",        bind(&HavannahGTP::gtp_solve_ab_stats,  this, _1),  "Output the stats for the alpha-beta solver");
+		newcallback("ab_clear",        bind(&HavannahGTP::gtp_solve_ab_clear,  this, _1),  "Stop the solver and release the memory");
 
 		newcallback("pns_solve",       bind(&HavannahGTP::gtp_solve_pns,        this, _1),  "Solve with proof number search and an explicit tree");
 		newcallback("pns_params",      bind(&HavannahGTP::gtp_solve_pns_params, this, _1),  "Set Parameters for PNS");
@@ -169,8 +172,11 @@ public:
 
 	string solve_str(int outcome) const;
 	string solve_str(const Solver & solve);
+
 	GTPResponse gtp_solve_ab(vecstr args);
-	GTPResponse gtp_solve_scout(vecstr args);
+	GTPResponse gtp_solve_ab_params(vecstr args);
+	GTPResponse gtp_solve_ab_stats(vecstr args);
+	GTPResponse gtp_solve_ab_clear(vecstr args);
 
 	GTPResponse gtp_solve_pns(vecstr args);
 	GTPResponse gtp_solve_pns_params(vecstr args);

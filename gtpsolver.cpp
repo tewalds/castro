@@ -22,41 +22,69 @@ string HavannahGTP::solve_str(const Solver & solve){
 	return ret;
 }
 
+
+
+
 GTPResponse HavannahGTP::gtp_solve_ab(vecstr args){
 	double time = 60;
-	int startdepth = 2;
 
 	if(args.size() >= 1)
 		time = from_str<double>(args[0]);
 
-	if(args.size() >= 2)
-		startdepth = from_str<int>(args[1]);
+	solverab.solve(time);
 
-	SolverAB solve(false);
-	solve.startdepth = startdepth;
-	solve.set_board(game.getboard());
-	solve.solve(time);
-
-	return GTPResponse(true, solve_str(solve));
+	return GTPResponse(true, solve_str(solverab));
 }
 
-GTPResponse HavannahGTP::gtp_solve_scout(vecstr args){
-	double time = 60;
-	int startdepth = 2;
+GTPResponse HavannahGTP::gtp_solve_ab_params(vecstr args){
+	if(args.size() == 0)
+		return GTPResponse(true, string("\n") +
+			"Update the alpha-beta solver settings, eg: ab_params -m 100 -s 1 -d 3\n"
+			"  -m --memory   Memory limit in Mb (0 to disable the TT)           [" + to_str(solverab.memlimit) + "]\n"
+			"  -s --scout    Whether to scout ahead for the true minimax value  [" + to_str(solverab.scout) + "]\n"
+			"  -d --depth    Starting depth                                     [" + to_str(solverab.startdepth) + "]\n"
+			);
 
-	if(args.size() >= 1)
-		time = from_str<double>(args[0]);
+	for(unsigned int i = 0; i < args.size(); i++) {
+		string arg = args[i];
 
-	if(args.size() >= 2)
-		startdepth = from_str<int>(args[1]);
+		if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
+			int mem = from_str<int>(args[++i]);
+			solverab.set_memlimit(mem);
+		}else if((arg == "-s" || arg == "--scout") && i+1 < args.size()){
+			solverab.scout = from_str<bool>(args[++i]);
+		}else if((arg == "-d" || arg == "--depth") && i+1 < args.size()){
+			solverab.startdepth = from_str<int>(args[++i]);
+		}else{
+			return GTPResponse(false, "Missing or unknown parameter");
+		}
+	}
 
-	SolverAB solve(true);
-	solve.startdepth = startdepth;
-	solve.set_board(game.getboard());
-	solve.solve(time);
-
-	return GTPResponse(true, solve_str(solve));
+	return true;
 }
+
+GTPResponse HavannahGTP::gtp_solve_ab_stats(vecstr args){
+	string s = "";
+
+	Board board = game.getboard();
+	for(unsigned int i = 0; i < args.size(); i++)
+		board.move(Move(args[i]));
+
+	int value;
+	for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
+		value = solverab.tt_get(board.test_hash(*move));
+
+		s += move->to_s() + "," + to_str(value) + "\n";
+	}
+	return GTPResponse(true, s);
+}
+
+GTPResponse HavannahGTP::gtp_solve_ab_clear(vecstr args){
+	solverab.clear_mem();
+	return true;
+}
+
+
 
 GTPResponse HavannahGTP::gtp_solve_pns(vecstr args){
 	double time = 60;
