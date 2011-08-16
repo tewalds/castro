@@ -44,17 +44,17 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 					assert(false && "move failed");
 				}
 
-				child->exp.addvloss(); //balanced out after rollouts
+//				child->exp.addvloss(); //balanced out after rollouts
 
 				walk_tree(board, child, depth+1);
-
-				child->exp.addv(movelist.getexp(toplay));
 
 				if(!do_backup(node, child, toplay) && //not solved
 					player->ravefactor > min_rave &&  //using rave
 					node->children.num() > 1 &&       //not a macro move
 					50*remain*(player->ravefactor + player->decrrave*remain) > node->exp.num()) //rave is still significant
 					update_rave(node, toplay);
+
+				child->exp.addv(movelist.getexp(toplay));
 
 				return;
 			}
@@ -94,7 +94,7 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 
 	treelen.add(depth);
 
-	movelist.subvlosses(1);
+//	movelist.subvlosses(1);
 
 	if(player->profile){
 		timestamps[3] = Time();
@@ -174,7 +174,7 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 		Node macro = *loss;
 		temp.dealloc(player->ctmem);
 		temp.alloc(1, player->ctmem);
-		macro.exp.addwins(player->visitexpand);
+//		macro.exp.addwins(player->visitexpand);
 		*(temp.begin()) = macro;
 	}else if(losses >= 2){ //proven loss, but at least try to block one of them
 		node->outcome = 3 - toplay;
@@ -253,7 +253,7 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 
 	uint8_t proofdepth = backup->proofdepth;
 	if(backup->outcome != toplay){
-		uint64_t sims = 0, bestsims = 0, outcome = 0, bestoutcome = 0;
+		int64_t sims = 0, bestsims = -1, outcome = 0, bestoutcome = 0;
 		backup = NULL;
 
 		Node * child = node->children.begin(),
@@ -308,6 +308,8 @@ bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
 	if(CAS(node->outcome, nodeoutcome, backup->outcome)){
 		node->bestmove = backup->move;
 		node->proofdepth = proofdepth;
+		if(player->minimax >= 3 && node->outcome == 3-toplay) //remove the experience of a loss from the ancestors
+			movelist.setproof(node->exp, toplay);
 	}else //if it was in a race, try again, might promote a partial solve to full solve
 		return do_backup(node, backup, toplay);
 

@@ -20,13 +20,16 @@
 class Player {
 public:
 	class ExpPair {
-		uword s, n;
-		ExpPair(uword S, uword N) : s(S), n(N) { }
+		iword s, n;
+		ExpPair(iword S, iword N) : s(S), n(N) { }
 	public:
 		ExpPair() : s(0), n(0) { }
 		float avg() const { return 0.5f*s/n; }
-		uword num() const { return n; }
-		uword sum() const { return s/2; }
+		iword num() const { return n; }
+		iword sum() const { return s/2; }
+
+		ExpPair invert() const { return ExpPair(n*2 - s, n); } //gives the values from the other players perspective
+		ExpPair negate() const { return ExpPair(-s, -n); }
 
 		void clear() { s = 0; n = 0; }
 
@@ -34,6 +37,7 @@ public:
 		void addvtie() { INCR(s); }
 		void addvwin() { PLUS(s, 2); }
 		void addv(const ExpPair & a){
+//			assert(s + a.s >= 0 && n + a.n >= 0);
 			if(a.s) PLUS(s, a.s);
 			if(a.n) PLUS(n, a.n);
 		}
@@ -44,6 +48,10 @@ public:
 		void add(const ExpPair & a){
 			s += a.s;
 			n += a.n;
+		}
+		void sub(const ExpPair & a){
+			s -= a.s;
+			n -= a.n;
 		}
 
 		void addwins(int num)  { n += num; s += 2*num; }
@@ -229,6 +237,10 @@ public:
 			exp[0].addlosses(-n);
 			exp[1].addlosses(-n);
 		}
+		void setproof(const ExpPair & proofexp, int toplay){
+			exp[toplay-1] = proofexp.negate();
+			exp[2-toplay] = proofexp.invert().negate();
+		}
 		const ExpPair & getrave(int player, const Move & move) const {
 			return rave[player-1][board->xy(move)];
 		}
@@ -341,7 +353,7 @@ public:
 	bool  keeptree;   //reuse the tree from the previous move
 	int   minimax;    //solve the minimax tree within the uct tree
 	bool  detectdraw; //look for draws early, slow
-	uint  visitexpand;//number of visits before expanding a node
+	int   visitexpand;//number of visits before expanding a node
 	bool  prunesymmetry; //prune symmetric children from the move list, useful for proving but likely not for playing
 //knowledge
 	int   localreply; //boost for a local reply, ie a move near the previous move
@@ -414,7 +426,7 @@ public:
 
 	Node * genmove(double time, int max_runs);
 	vector<Move> get_pv();
-	void garbage_collect(Board & board, Node * node, unsigned int limit); //destroys the board, so pass in a copy
+	void garbage_collect(Board & board, Node * node, int limit); //destroys the board, so pass in a copy
 
 protected:
 	Node * return_move(Node * node, int toplay) const;

@@ -415,7 +415,7 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 	return ret;
 }
 
-void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
+void Player::garbage_collect(Board & board, Node * node, int limit){
 	Node * child = node->children.begin(),
 		 * end = node->children.end();
 
