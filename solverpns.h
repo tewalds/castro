@@ -56,6 +56,17 @@ public:
 			return *this;
 		}
 
+		PNSNode & outcome(int outcome, int toplay, int assign, int value = 1){
+			if(assign && outcome == 0)
+				outcome = assign;
+
+			if(     outcome == -3)       { phi = value; delta = value; }
+			else if(outcome ==   toplay) { phi = LOSS;  delta = 0;     }
+			else if(outcome == 3-toplay) { phi = 0;     delta = LOSS; }
+			else /*(outcome == 0)*/      { phi = 0;     delta = DRAW; }
+			return *this;
+		}
+
 		bool terminal(){ return (phi == 0 || delta == 0); }
 
 		unsigned int size() const {
@@ -100,7 +111,7 @@ public:
 	LBDists dists;
 
 	SolverPNS() {
-		ab = 1;
+		ab = 2;
 		df = true;
 		epsilon = 0.25;
 		ties = 0;
@@ -157,7 +168,7 @@ public:
 			logerr(string("PNS Nodes before: ") + to_str(nodesbefore) + ", after: " + to_str(nodes) + ", saved " + to_str(100.0*nodes/nodesbefore, 1) + "% of the tree\n");
 
 		assert(nodes == root.size());
-		
+
 		if(nodes == 0)
 			clear_mem();
 	}

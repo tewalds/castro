@@ -33,6 +33,17 @@ public:
 			return *this;
 		}
 
+		PNSNode & outcome(int outcome, int toplay, int assign, int value = 1){
+			if(assign && outcome == 0)
+				outcome = assign;
+
+			if(     outcome == -3)       { phi = value; delta = value; }
+			else if(outcome ==   toplay) { phi = LOSS;  delta = 0;     }
+			else if(outcome == 3-toplay) { phi = 0;     delta = LOSS; }
+			else /*(outcome == 0)*/      { phi = 0;     delta = DRAW; }
+			return *this;
+		}
+
 		bool terminal(){ return (phi == 0 || delta == 0); }
 	};
 
@@ -48,7 +59,7 @@ public:
 
 
 	SolverPNSTT() {
-		ab = 1;
+		ab = 2;
 		df = true;
 		epsilon = 0.25;
 		ties = 0;

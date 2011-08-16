@@ -26,6 +26,42 @@ protected:
 	void timedout(){ timeout = true; }
 	Board rootboard;
 
+	static int solve1ply(const Board & board, int & nodes) {
+		int outcome = -3;
+		int turn = board.toplay();
+		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
+			++nodes;
+			int won = board.test_win(*move, turn);
+
+			if(won == turn)
+				return won;
+			if(won == 0)
+				outcome = 0;
+		}
+		return outcome;
+	}
+
+	static int solve2ply(const Board & board, int & nodes) {
+		int losses = 0;
+		int outcome = -3;
+		int turn = board.toplay(), opponent = 3 - turn;
+		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
+			++nodes;
+			int won = board.test_win(*move, turn);
+
+			if(won == turn)
+				return won;
+			if(won == 0)
+				outcome = 0;
+
+			if(board.test_win(*move, opponent) > 0)
+				losses++;
+		}
+		if(losses >= 2)
+			return opponent;
+		return outcome;
+	}
+
 };
 
 #endif

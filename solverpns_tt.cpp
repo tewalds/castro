@@ -1,6 +1,5 @@
 
 #include "solverpns_tt.h"
-#include "solverab.h"
 #include "time.h"
 #include "timer.h"
 #include "log.h"
@@ -237,20 +236,18 @@ SolverPNSTT::PNSNode * SolverPNSTT::tt(const Board & board){
 	PNSNode * node = TT + (hash % maxnodes);
 
 	if(node->hash != hash){
-		int abval, pd = 1; // alpha-beta value, phi & delta value
+		int outcome, pd;
 
 		if(ab){
-			SolverAB solveab(false);
-			abval = -solveab.negamax(board, ab, -2, 2);
-			pd = 1 + solveab.nodes_seen;
-			nodes_seen += solveab.nodes_seen;
+			pd = 0;
+			outcome = (ab == 1 ? solve1ply(board, pd) : solve2ply(board, pd));
+			nodes_seen += pd;
 		}else{
-			int won = board.won();
-			abval = (won > 0) + (won >= 0);
-			pd = 1; // phi & delta value
+			outcome = board.won();
+			pd = 1;
 		}
 
-		*node = PNSNode(hash).abval(abval, board.toplay(), ties, pd);
+		*node = PNSNode(hash).outcome(outcome, board.toplay(), ties, pd);
 		nodes_seen++;
 	}
 
@@ -261,25 +258,22 @@ SolverPNSTT::PNSNode * SolverPNSTT::tt(const Board & board, Move move){
 	hash_t hash = board.test_hash(move, board.toplay());
 
 	PNSNode * node = TT + (hash % maxnodes);
-	
+
 	if(node->hash != hash){
-		int abval, pd = 1; // alpha-beta value, phi & delta value
+		int outcome, pd;
 
 		if(ab){
 			Board next = board;
 			next.move(move);//, false, false);
-
-			SolverAB solveab(false);
-			abval = -solveab.negamax(next, ab, -2, 2);
-			pd = 1 + solveab.nodes_seen;
-			nodes_seen += solveab.nodes_seen;
+			pd = 0;
+			outcome = (ab == 1 ? solve1ply(next, pd) : solve2ply(next, pd));
+			nodes_seen += pd;
 		}else{
-			int won = board.test_win(move);
-			abval = (won > 0) + (won >= 0);
-			pd = 1; // phi & delta value
+			outcome = board.test_win(move);
+			pd = 1;
 		}
 
-		*node = PNSNode(hash).abval(abval, board.toplay(), ties, pd);
+		*node = PNSNode(hash).outcome(outcome, board.toplay(), ties, pd);
 		nodes_seen++;
 	}
 

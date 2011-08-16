@@ -1,6 +1,5 @@
 
 #include "solverpns2.h"
-#include "solverab.h"
 
 #include "time.h"
 #include "timer.h"
@@ -194,24 +193,24 @@ bool SolverPNS2::SolverThread::pns(const Board & board, PNSNode * node, int dept
 
 		int i = 0;
 		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
-			int abval, pd = 1; // alpha-beta value, phi & delta value
+			int outcome, pd; // alpha-beta value, phi & delta value
 
 			if(solver->ab){
 				Board next = board;
 				next.move(*move, false, false);
 
-				SolverAB solveab(false);
-				abval = -solveab.negamax(next, solver->ab, -2, 2);
-				PLUS(solver->nodes_seen, solveab.nodes_seen);
+				pd = 0;
+				outcome = (solver->ab == 1 ? solve1ply(next, pd) : solve2ply(next, pd));
+				PLUS(solver->nodes_seen, pd);
 			}else{
-				int won = board.test_win(*move);
-				abval = (won > 0) + (won >= 0);
+				outcome = board.test_win(*move);
+				pd = 1;
 			}
 
-			if(solver->lbdist && abval == 0)
+			if(solver->lbdist && outcome == -3)
 				pd = dists.get(*move);
 
-			temp[i] = PNSNode(*move).abval(abval, board.toplay(), solver->ties, pd);
+			temp[i] = PNSNode(*move).outcome(outcome, board.toplay(), solver->ties, pd);
 
 			i++;
 		}
@@ -225,7 +224,7 @@ bool SolverPNS2::SolverThread::pns(const Board & board, PNSNode * node, int dept
 
 		return true;
 	}
-	
+
 	bool mem;
 	do{
 		PNSNode * child = node->children.begin(),
@@ -255,7 +254,7 @@ bool SolverPNS2::SolverThread::pns(const Board & board, PNSNode * node, int dept
 
 		Board next = board;
 		next.move(child->move, false, false);
-		
+
 		child->ref();
 		uint64_t itersbefore = iters;
 		mem = pns(next, child, depth + 1, tpc, tdc);
@@ -320,3 +319,4 @@ void SolverPNS2::garbage_collect(PNSNode * node, unsigned int limit){
 		}
 	}
 }
+
