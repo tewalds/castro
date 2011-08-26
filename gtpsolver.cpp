@@ -40,7 +40,7 @@ GTPResponse HavannahGTP::gtp_solve_ab_params(vecstr args){
 	if(args.size() == 0)
 		return GTPResponse(true, string("\n") +
 			"Update the alpha-beta solver settings, eg: ab_params -m 100 -s 1 -d 3\n"
-			"  -m --memory   Memory limit in Mb (0 to disable the TT)           [" + to_str(solverab.memlimit) + "]\n"
+			"  -m --memory   Memory limit in Mb (0 to disable the TT)           [" + to_str(solverab.memlimit/(1024*1024)) + "]\n"
 			"  -s --scout    Whether to scout ahead for the true minimax value  [" + to_str(solverab.scout) + "]\n"
 			"  -d --depth    Starting depth                                     [" + to_str(solverab.startdepth) + "]\n"
 			);
@@ -117,7 +117,7 @@ GTPResponse HavannahGTP::gtp_solve_pns_params(vecstr args){
 		if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
 			uint64_t mem = from_str<uint64_t>(args[++i]);
 			if(mem < 1) return GTPResponse(false, "Memory can't be less than 1mb");
-			solverpns.set_memlimit(mem*(1024*1024));
+			solverpns.set_memlimit(mem*1024*1024);
 		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
 			solverpns.ties = from_str<int>(args[++i]);
 			solverpns.clear_mem();
@@ -205,7 +205,7 @@ GTPResponse HavannahGTP::gtp_solve_pns2_params(vecstr args){
 		}else if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
 			uint64_t mem = from_str<uint64_t>(args[++i]);
 			if(mem < 1) return GTPResponse(false, "Memory can't be less than 1mb");
-			solverpns2.set_memlimit(mem*(1024*1024));
+			solverpns2.set_memlimit(mem*1024*1024);
 		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
 			solverpns2.ties = from_str<int>(args[++i]);
 			solverpns2.clear_mem();
@@ -276,7 +276,7 @@ GTPResponse HavannahGTP::gtp_solve_pnstt_params(vecstr args){
 	if(args.size() == 0)
 		return GTPResponse(true, string("\n") +
 			"Update the pnstt solver settings, eg: pnstt_params -m 100 -s 0 -d 1 -e 0.25 -a 2 -l 0\n"
-			"  -m --memory   Memory limit in Mb                                       [" + to_str(solverpnstt.memlimit) + "]\n"
+			"  -m --memory   Memory limit in Mb                                       [" + to_str(solverpnstt.memlimit/(1024*1024)) + "]\n"
 			"  -s --ties     Which side to assign ties to, 0 = handle, 1 = p1, 2 = p2 [" + to_str(solverpnstt.ties) + "]\n"
 //			"  -t --threads  How many threads to run
 //			"  -o --ponder   Ponder in the background
@@ -293,7 +293,7 @@ GTPResponse HavannahGTP::gtp_solve_pnstt_params(vecstr args){
 		if((arg == "-m" || arg == "--memory") && i+1 < args.size()){
 			int mem = from_str<int>(args[++i]);
 			if(mem < 1) return GTPResponse(false, "Memory can't be less than 1mb");
-			solverpnstt.set_memlimit(mem);
+			solverpnstt.set_memlimit(mem*1024*1024);
 		}else if((arg == "-s" || arg == "--ties") && i+1 < args.size()){
 			solverpnstt.ties = from_str<int>(args[++i]);
 			solverpnstt.clear_mem();

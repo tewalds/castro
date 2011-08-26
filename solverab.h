@@ -24,7 +24,7 @@ public:
 		scout = Scout;
 		startdepth = 2;
 		TT = NULL;
-		set_memlimit(100);
+		set_memlimit(100*1024*1024);
 	}
 	~SolverAB() { }
 
@@ -38,7 +38,7 @@ public:
 	}
 	void set_memlimit(uint64_t lim){
 		memlimit = lim;
-		maxnodes = memlimit*1024*1024/sizeof(ABTTNode);
+		maxnodes = memlimit/sizeof(ABTTNode);
 		clear_mem();
 	}
 

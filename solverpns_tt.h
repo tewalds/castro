@@ -68,7 +68,7 @@ public:
 		TT = NULL;
 		reset();
 
-		set_memlimit(100);
+		set_memlimit(100*1024*1024);
 	}
 
 	~SolverPNSTT(){
@@ -102,7 +102,7 @@ public:
 	}
 	void set_memlimit(uint64_t lim){
 		memlimit = lim;
-		maxnodes = memlimit*1024*1024/sizeof(PNSNode);
+		maxnodes = memlimit/sizeof(PNSNode);
 		clear_mem();
 	}
 
