@@ -130,6 +130,7 @@ private:
 	char sizem1; //size - 1
 	char size_d; //diameter of the board = size*2-1
 
+	short num_cells;
 	short nummoves;
 	short unique_depth; //update and test rotations/symmetry with less than this many pieces on the board
 	char toPlay;
@@ -157,6 +158,7 @@ public:
 		wintype = 0;
 		allowswap = false;
 		neighbourlist = get_neighbour_list();
+		num_cells = vecsize() - size*sizem1;
 
 		cells.resize(vecsize());
 
@@ -174,10 +176,10 @@ public:
 	int get_size() const{ return size; }
 
 	int vecsize() const { return size_d*size_d; }
-	int numcells() const { return vecsize() - size*sizem1; }
+	int numcells() const { return num_cells; }
 
 	int num_moves() const { return nummoves; }
-	int movesremain() const { return (won() >= 0 ? 0 : numcells() - nummoves + canswap()); }
+	int movesremain() const { return (won() >= 0 ? 0 : num_cells - nummoves + canswap()); }
 
 	int xy(int x, int y)   const { return   y*size_d +   x; }
 	int xy(const Move & m) const { return m.y*size_d + m.x; }
@@ -766,7 +768,7 @@ public:
 			}else if(ringsize && alreadyjoined && g->size >= max(6, ringsize) && checkring_df(pos, turn, ringsize, permring)){
 				outcome = turn;
 				wintype = 3;
-			}else if(nummoves == numcells()){
+			}else if(nummoves == num_cells){
 				outcome = 0;
 			}
 		}
@@ -801,7 +803,7 @@ public:
 				return turn;
 		}
 
-		if(nummoves+1 == numcells())
+		if(nummoves+1 == num_cells)
 			return 0;
 
 		return -3;
