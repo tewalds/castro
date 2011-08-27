@@ -1,6 +1,5 @@
 
-#ifndef _SOLVERPNS_H_
-#define _SOLVERPNS_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -18,14 +17,15 @@ public:
 
 	struct PNSNode {
 		uint32_t phi, delta;
+		uint64_t work;
 		Move move;
 		CompactTree<PNSNode>::Children children;
 
 		PNSNode() { }
-		PNSNode(int x, int y,   int v = 1)     : phi(v), delta(v), move(Move(x,y)) { }
-		PNSNode(const Move & m, int v = 1)     : phi(v), delta(v), move(m)         { }
-		PNSNode(int x, int y,   int p, int d)  : phi(p), delta(d), move(Move(x,y)) { }
-		PNSNode(const Move & m, int p, int d)  : phi(p), delta(d), move(m)         { }
+		PNSNode(int x, int y,   int v = 1)     : phi(v), delta(v), work(0), move(Move(x,y)) { }
+		PNSNode(const Move & m, int v = 1)     : phi(v), delta(v), work(0), move(m)         { }
+		PNSNode(int x, int y,   int p, int d)  : phi(p), delta(d), work(0), move(Move(x,y)) { }
+		PNSNode(const Move & m, int p, int d)  : phi(p), delta(d), work(0), move(m)         { }
 
 		PNSNode(const PNSNode & n) { *this = n; }
 		PNSNode & operator = (const PNSNode & n){
@@ -35,6 +35,7 @@ public:
 
 				phi = n.phi;
 				delta = n.delta;
+				work = n.work;
 				move = n.move;
 				//don't copy the children
 			}
@@ -99,7 +100,10 @@ public:
 
 //memory management for PNS which uses a tree to store the nodes
 	uint64_t nodes, memlimit;
+	unsigned int gclimit;
 	CompactTree<PNSNode> ctmem;
+
+	uint64_t iters;
 
 	int   ab; // how deep of an alpha-beta search to run at each leaf node
 	bool  df; // go depth first?
@@ -116,6 +120,8 @@ public:
 		epsilon = 0.25;
 		ties = 0;
 		lbdist = false;
+		gclimit = 5;
+		iters = 0;
 
 		reset();
 
@@ -194,9 +200,7 @@ public:
 //update the phi and delta for the node
 	bool updatePDnum(PNSNode * node);
 
-//remove all the leaf nodes to free up some memory
-	bool garbage_collect(PNSNode * node);
+//remove all the nodes with little work to free up some memory
+	void garbage_collect(PNSNode * node);
 };
-
-#endif
 

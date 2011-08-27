@@ -17,7 +17,7 @@ void SolverPNS2::solve(double time){
 	Timer timer(time, bind(&SolverPNS2::timedout, this));
 	Time start;
 
-	logerr("max memory: " + to_str(memlimit/(1024*1024)) + " Mb\n");
+//	logerr("max memory: " + to_str(memlimit/(1024*1024)) + " Mb\n");
 
 	//wait for the timer to stop them
 	runbarrier.wait();
@@ -85,21 +85,22 @@ void SolverPNS2::SolverThread::run(){
 		case Thread_GC:         //one thread is running garbage collection, the rest are waiting
 		case Thread_GC_End:     //once done garbage collecting, go to wait_end instead of back to running
 			if(solver->gcbarrier.wait()){
-				Time starttime;
 				logerr("Starting solver GC with limit " + to_str(solver->gclimit) + " ... ");
-				Board copy = solver->rootboard;
-				solver->garbage_collect(& solver->root, solver->gclimit);
+
+				Time starttime;
+				solver->garbage_collect(& solver->root);
 
 				Time gctime;
 				solver->ctmem.compact(1.0, 0.75);
+
 				Time compacttime;
 				logerr(to_str(100.0*solver->ctmem.meminuse()/solver->memlimit, 1) + " % of tree remains - " +
 					to_str((gctime - starttime)*1000, 0)  + " msec gc, " + to_str((compacttime - gctime)*1000, 0) + " msec compact\n");
 
 				if(solver->ctmem.meminuse() >= solver->memlimit/2)
-					solver->gclimit = (int)(solver->gclimit*1.3);
+					solver->gclimit = (unsigned int)(solver->gclimit*1.3);
 				else if(solver->gclimit > 5)
-					solver->gclimit = (int)(solver->gclimit*0.9); //slowly decay to a minimum of 5
+					solver->gclimit = (unsigned int)(solver->gclimit*0.9); //slowly decay to a minimum of 5
 
 				CAS(solver->threadstate, Thread_GC,     Thread_Running);
 				CAS(solver->threadstate, Thread_GC_End, Thread_Wait_End);
@@ -187,13 +188,12 @@ bool SolverPNS2::SolverThread::pns(const Board & board, PNSNode * node, int dept
 		CompactTree<PNSNode>::Children temp;
 		temp.alloc(numnodes, solver->ctmem);
 
-
 		if(solver->lbdist)
 			dists.run(&board);
 
 		int i = 0;
 		for(Board::MoveIterator move = board.moveit(true); !move.done(); ++move){
-			int outcome, pd; // alpha-beta value, phi & delta value
+			int outcome, pd;
 
 			if(solver->ab){
 				Board next = board;
@@ -207,7 +207,7 @@ bool SolverPNS2::SolverThread::pns(const Board & board, PNSNode * node, int dept
 				pd = 1;
 			}
 
-			if(solver->lbdist && outcome == -3)
+			if(solver->lbdist && outcome < 0)
 				pd = dists.get(*move);
 
 			temp[i] = PNSNode(*move).outcome(outcome, board.toplay(), solver->ties, pd);
@@ -303,8 +303,8 @@ bool SolverPNS2::SolverThread::updatePDnum(PNSNode * node){
 	}
 }
 
-//removes the children of any node whos children are all unproven and have no children
-void SolverPNS2::garbage_collect(PNSNode * node, unsigned int limit){
+//removes the children of any node with less than limit work
+void SolverPNS2::garbage_collect(PNSNode * node){
 	PNSNode * child = node->children.begin();
 	PNSNode * end = node->children.end();
 
@@ -312,10 +312,10 @@ void SolverPNS2::garbage_collect(PNSNode * node, unsigned int limit){
 		if(child->terminal()){ //solved
 			//log heavy nodes?
 			PLUS(nodes, -child->dealloc(ctmem));
-		}else if(child->work < limit){ //low exp, ignore solvedness since it's trivial to re-solve
+		}else if(child->work < gclimit){ //low work, ignore solvedness since it's trivial to re-solve
 			PLUS(nodes, -child->dealloc(ctmem));
 		}else if(child->children.num() > 0){
-			garbage_collect(child, limit);
+			garbage_collect(child);
 		}
 	}
 }

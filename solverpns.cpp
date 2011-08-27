@@ -15,7 +15,7 @@ void SolverPNS::solve(double time){
 	Timer timer(time, bind(&SolverPNS::timedout, this));
 	Time start;
 
-	logerr("max nodes: " + to_str(memlimit/sizeof(PNSNode)) + ", max memory: " + to_str(memlimit/(1024*1024)) + " Mb\n");
+//	logerr("max nodes: " + to_str(memlimit/sizeof(PNSNode)) + ", max memory: " + to_str(memlimit/(1024*1024)) + " Mb\n");
 
 	run_pns();
 
@@ -49,21 +49,29 @@ void SolverPNS::solve(double time){
 void SolverPNS::run_pns(){
 	while(!timeout && root.phi != 0 && root.delta != 0){
 		if(!pns(rootboard, &root, 0, INF32/2, INF32/2)){
-			int64_t before = nodes;
-			garbage_collect(&root);
-			ctmem.compact();
+			logerr("Starting solver GC with limit " + to_str(gclimit) + " ... ");
 
-			logerr("Garbage collection cleaned up " + to_str(before - nodes) + " nodes, " +
-				to_str(ctmem.meminuse()/(1024*1024)) +  " of " + to_str(memlimit/(1024*1024)) + " Mb still in use\n");
+			Time starttime;
+			garbage_collect(& root);
 
-			if(ctmem.meminuse() > memlimit*0.99)
-				break;
+			Time gctime;
+			ctmem.compact(1.0, 0.75);
+
+			Time compacttime;
+			logerr(to_str(100.0*ctmem.meminuse()/memlimit, 1) + " % of tree remains - " +
+				to_str((gctime - starttime)*1000, 0)  + " msec gc, " + to_str((compacttime - gctime)*1000, 0) + " msec compact\n");
+
+			if(ctmem.meminuse() >= memlimit/2)
+				gclimit = (unsigned int)(gclimit*1.3);
+			else if(gclimit > 5)
+				gclimit = (unsigned int)(gclimit*0.9); //slowly decay to a minimum of 5
 		}
 	}
 }
 
 bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp, uint32_t td){
-	if(depth > maxdepth)
+	iters++;
+	if(maxdepth < depth)
 		maxdepth = depth;
 
 	if(node->children.empty()){
@@ -72,7 +80,6 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 
 		int numnodes = board.movesremain();
 		nodes += node->alloc(numnodes, ctmem);
-		nodes_seen += numnodes;
 
 		if(lbdist)
 			dists.run(&board);
@@ -101,6 +108,8 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 			i++;
 		}
 		node->children.shrink(i); //if symmetry, there may be extra moves to ignore
+
+		nodes_seen += i;
 
 		updatePDnum(node);
 
@@ -135,9 +144,12 @@ bool SolverPNS::pns(const Board & board, PNSNode * node, int depth, uint32_t tp,
 
 		Board next = board;
 		next.move(child->move, false, false);
-		mem = pns(next, child, depth + 1, tpc, tdc);
 
-		if(child->phi == 0 || child->delta == 0)
+		uint64_t itersbefore = iters;
+		mem = pns(next, child, depth + 1, tpc, tdc);
+		child->work += iters - itersbefore;
+
+		if(child->phi == 0 || child->delta == 0) //clear child's children
 			nodes -= child->dealloc(ctmem);
 
 		if(updatePDnum(node) && !df)
@@ -182,21 +194,20 @@ bool SolverPNS::updatePDnum(PNSNode * node){
 	}
 }
 
-//removes the children of any node whos children are all unproven and have no children
-bool SolverPNS::garbage_collect(PNSNode * node){
-	if(node->children.empty())
-		return (node->phi != 0 && node->delta != 0);
-
-	PNSNode * i = node->children.begin();
+//removes the children of any node with less than limit work
+void SolverPNS::garbage_collect(PNSNode * node){
+	PNSNode * child = node->children.begin();
 	PNSNode * end = node->children.end();
 
-	bool collect = true;
-	for( ; i != end; i++)
-		collect &= garbage_collect(i);
-
-	if(collect)
-		nodes -= node->dealloc(ctmem);
-
-	return false;
+	for( ; child != end; child++){
+		if(child->terminal()){ //solved
+			//log heavy nodes?
+			nodes -= child->dealloc(ctmem);
+		}else if(child->work < gclimit){ //low work, ignore solvedness since it's trivial to re-solve
+			nodes -= child->dealloc(ctmem);
+		}else if(child->children.num() > 0){
+			garbage_collect(child);
+		}
+	}
 }
 

@@ -1,6 +1,5 @@
 
-#ifndef _SOLVERPNS2_H_
-#define _SOLVERPNS2_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -71,7 +70,6 @@ public:
 			return *this;
 		}
 
-
 		bool terminal(){ return (phi == 0 || delta == 0); }
 
 		uint32_t refdelta() const {
@@ -137,7 +135,7 @@ public:
 
 //memory management for PNS which uses a tree to store the nodes
 	uint64_t nodes, memlimit;
-	int gclimit;
+	unsigned int gclimit;
 	CompactTree<PNSNode> ctmem;
 
 	enum ThreadState {
@@ -261,9 +259,7 @@ public:
 
 	void solve(double time);
 
-//remove all the leaf nodes to free up some memory
-	void garbage_collect(PNSNode * node, unsigned int limit);
+//remove all the nodes with little work to free up some memory
+	void garbage_collect(PNSNode * node);
 };
-
-#endif
 
