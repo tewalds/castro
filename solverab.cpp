@@ -129,7 +129,7 @@ void SolverAB::tt_set(const Board & board, int value){
 	tt_set(board.gethash(), value);
 }
 void SolverAB::tt_set(const hash_t & hash, int value){
-	if(!TT) return;
+	if(!TT || value == 0) return;
 	ABTTNode * node = & TT[hash % maxnodes];
 	node->hash = hash;
 	node->value = value;
