@@ -333,6 +333,18 @@ public:
 		printf("%s", to_s(color).c_str());
 	}
 
+	string boardstr() const {
+		string white, black;
+		for(int y = 0; y < size_d; y++){
+			for(int x = linestart(y); x < lineend(y); x++){
+				int p = get(x, y);
+				if(p == 1) white += Move(x, y).to_s();
+				if(p == 2) black += Move(x, y).to_s();
+			}
+		}
+		return white + ";" + black;
+	}
+
 	string won_str() const {
 		switch(outcome){
 			case -3: return "none";
