@@ -7,63 +7,74 @@
 #include "time.h"
 
 /* A simple alarm class that calls a callback at a certain time or after a timeout.
- * Alarm::set() returns a Alarm::Ctrl object, which automatically cancels the alarm
+ * Alarm() returns an Alarm object, which automatically cancels the alarm
  * when it goes out of scope, or can be cancelled directly
  *
- * Alarm::Ctrl timer(1.5, timeout_func);
+ * Alarm timer(1.5, timeout_func);
+ * or
+ * Alarm timer;
+ * timer(1.5, timeout_func);
+ *
  * timer.cancel();
  */
 
 class Alarm {
 public:
 	typedef std::tr1::function<void()> callback_t;
-	class Ctrl {
-		int id;
-		Ctrl(int i = -1) : id(i) { }
-	public:
-		Ctrl() : id(-1) { }
-//		Ctrl(Ctrl & other) { id = other.id; other.id = -1; }
-//		Ctrl & operator=(Ctrl & other){ if(this != &other){ cancel(); id = other.id; other.id = -1; } return *this; }
-//		Ctrl & move(Ctrl & other){ if(this != &other){ cancel(); id = other.id; other.id = -1; } return *this; }
 
-		Ctrl(Ctrl & o) { *this = o; }
-		Ctrl & operator = (Ctrl & o) {
-			cancel();
-			id = o.id;
-			o.id = -1;
-			return *this;
-		}
+	Alarm() : id(-1) { }
+	Alarm(double len, callback_t fn)   { (*this)(len, fn); }
+	Alarm(Time timeout, callback_t fn) { (*this)(timeout, fn); }
 
-		~Ctrl(){ cancel(); }
-		bool cancel();
-	};
+	//act as a move constructor, no copy constructor
+	Alarm(Alarm & o) { *this = o; }
+	Alarm & operator = (Alarm & o) {
+		cancel();
+		id = o.id;
+		o.id = -1;
+		return *this;
+	}
+
+	void operator()(double len, callback_t fn){ (*this)(Time() + len, fn); }
+	void operator()(Time timeout, callback_t fn){
+		cancel();
+		id = Handler::inst().add(timeout, fn);
+	}
+
+	~Alarm(){ cancel(); }
+	bool cancel(){
+		bool ret = Handler::inst().cancel(id);
+		id = -1;
+		return ret;
+	}
+
 
 private:
-	struct Entry {
-		int id;
-		callback_t fn;
-		Time timeout;
-		Entry(int i, callback_t f, Time t) : id(i), fn(f), timeout(t) { }
+	int id;
+
+	class Handler { //singleton class that handles the alarms
+		struct Entry {
+			int id;
+			callback_t fn;
+			Time timeout;
+			Entry(int i, callback_t f, Time t) : id(i), fn(f), timeout(t) { }
+		};
+
+		int nextid;
+		std::vector<Entry> alarms;
+
+		Handler();
+		Handler(Handler const& copy);            // Not Implemented
+		Handler& operator=(Handler const& copy); // Not Implemented
+
+	public:
+		static Handler & inst();
+
+		bool cancel(int id);
+		void reset();
+		int add(Time timeout, callback_t fn);
+
 	};
-
-	int nextid;
-	std::vector<Entry> alarms;
-
-	Alarm();
-	Alarm(Alarm const& copy);            // Not Implemented
-	Alarm& operator=(Alarm const& copy); // Not Implemented
-
-	static Alarm & inst();
-
-	bool cancel(int id);
-	void reset();
-	Ctrl add(Time timeout, callback_t fn);
-
 	friend void alarm_triggered(int);
-
-public:
-
-	static Ctrl set(double len, callback_t fn)   { return Alarm::inst().add(Time() + len, fn); }
-	static Ctrl set(Time timeout, callback_t fn) { return Alarm::inst().add(timeout, fn); }
 };
 

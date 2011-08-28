@@ -2,19 +2,19 @@
 #include "alarm.h"
 
 void alarm_triggered(int blah){
-	Alarm::inst().reset();
+	Alarm::Handler::inst().reset();
 }
 
-Alarm::Alarm() : nextid(0) {
+Alarm::Handler::Handler() : nextid(0) {
 	signal(SIGALRM, alarm_triggered);
 }
 
-Alarm & Alarm::inst() {
-	static Alarm instance;
+Alarm::Handler & Alarm::Handler::inst() {
+	static Handler instance;
 	return instance;
 }
 
-Alarm::Ctrl Alarm::add(Time timeout, callback_t fn){
+int Alarm::Handler::add(Time timeout, callback_t fn){
 	Entry entry(nextid, fn, timeout);
 	alarms.push_back(entry);
 
@@ -22,16 +22,10 @@ Alarm::Ctrl Alarm::add(Time timeout, callback_t fn){
 
 	reset();
 
-	return Ctrl(entry.id);
+	return entry.id;
 }
 
-bool Alarm::Ctrl::cancel(){
-	bool ret = Alarm::inst().cancel(id);
-	id = -1;
-	return ret;
-}
-
-bool Alarm::cancel(int id){
+bool Alarm::Handler::cancel(int id){
 	if(id < 0)
 		return false;
 	for(std::vector<Entry>::iterator a = alarms.begin(); a != alarms.end(); ++a){
@@ -43,7 +37,7 @@ bool Alarm::cancel(int id){
 	return false;
 }
 
-void Alarm::reset(){
+void Alarm::Handler::reset(){
 	Time now;
 
 	double next = 0;
