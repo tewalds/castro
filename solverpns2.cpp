@@ -2,7 +2,7 @@
 #include "solverpns2.h"
 
 #include "time.h"
-#include "timer.h"
+#include "alarm.h"
 #include "log.h"
 
 void SolverPNS2::solve(double time){
@@ -14,7 +14,7 @@ void SolverPNS2::solve(double time){
 	start_threads();
 
 	timeout = false;
-	Timer timer(time, bind(&SolverPNS2::timedout, this));
+	Alarm timer(time, std::tr1::bind(&SolverPNS2::timedout, this));
 	Time start;
 
 //	logerr("max memory: " + to_str(memlimit/(1024*1024)) + " Mb\n");

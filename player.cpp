@@ -5,7 +5,7 @@
 #include <string>
 #include "string.h"
 #include "solverab.h"
-#include "timer.h"
+#include "alarm.h"
 #include "time.h"
 
 void Player::PlayerThread::run(){
@@ -93,9 +93,9 @@ Player::Node * Player::genmove(double time, int max_runs){
 	//let them run!
 	start_threads();
 
-	Timer timer;
+	Alarm timer;
 	if(time > 0)
-		timer.set(time - (Time() - starttime), bind(&Player::timedout, this));
+		timer(time - (Time() - starttime), std::tr1::bind(&Player::timedout, this));
 
 	//wait for the timer to stop them
 	runbarrier.wait();

@@ -1,7 +1,7 @@
 
 #include "solverpns_tt.h"
 #include "time.h"
-#include "timer.h"
+#include "alarm.h"
 #include "log.h"
 
 void SolverPNSTT::solve(double time){
@@ -11,7 +11,7 @@ void SolverPNSTT::solve(double time){
 	}
 
 	timeout = false;
-	Timer timer(time, bind(&SolverPNSTT::timedout, this));
+	Alarm timer(time, std::tr1::bind(&SolverPNSTT::timedout, this));
 	Time start;
 
 //	logerr("max nodes: " + to_str(maxnodes) + ", max memory: " + to_str(memlimit) + " Mb\n");

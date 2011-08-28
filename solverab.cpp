@@ -1,7 +1,7 @@
 
 #include "solverab.h"
 #include "time.h"
-#include "timer.h"
+#include "alarm.h"
 #include "log.h"
 
 void SolverAB::solve(double time){
@@ -15,7 +15,7 @@ void SolverAB::solve(double time){
 	if(TT == NULL && maxnodes)
 		TT = new ABTTNode[maxnodes];
 
-	Timer timer(time, bind(&SolverAB::timedout, this));
+	Alarm timer(time, std::tr1::bind(&SolverAB::timedout, this));
 	Time start;
 
 	int turn = rootboard.toplay();
