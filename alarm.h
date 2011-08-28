@@ -1,29 +1,44 @@
 
-#ifndef _ALARM_H_
-#define _ALARM_H_
+#pragma once
 
 #include <tr1/functional>
-#include <unistd.h>
 #include <vector>
+#include <signal.h>
 #include "time.h"
 
-using namespace std;
-using namespace tr1;
-
-//used as Alarm->set(1.5, timeout_func);
+/* A simple alarm class that calls a callback at a certain time or after a timeout.
+ * Alarm::set() returns a Alarm::Ctrl object, which automatically cancels the alarm
+ * when it goes out of scope, or can be cancelled directly
+ *
+ * Alarm::Ctrl timer(1.5, timeout_func);
+ * timer.cancel();
+ */
 
 class Alarm {
 public:
+	typedef std::tr1::function<void()> callback_t;
 	class Ctrl {
 		int id;
+		Ctrl(int i = -1) : id(i) { }
 	public:
-		Ctrl(int i) : id(i) { }
-		~Ctrl(){ cancel(); }
-		void cancel(){ Alarm->cancel(id); }
-	};
-private:
-	typedef function<void()> callback_t;
+		Ctrl() : id(-1) { }
+//		Ctrl(Ctrl & other) { id = other.id; other.id = -1; }
+//		Ctrl & operator=(Ctrl & other){ if(this != &other){ cancel(); id = other.id; other.id = -1; } return *this; }
+//		Ctrl & move(Ctrl & other){ if(this != &other){ cancel(); id = other.id; other.id = -1; } return *this; }
 
+		Ctrl(Ctrl & o) { *this = o; }
+		Ctrl & operator = (Ctrl & o) {
+			cancel();
+			id = o.id;
+			o.id = -1;
+			return *this;
+		}
+
+		~Ctrl(){ cancel(); }
+		bool cancel();
+	};
+
+private:
 	struct Entry {
 		int id;
 		callback_t fn;
@@ -32,69 +47,23 @@ private:
 	};
 
 	int nextid;
-	vector<Entry> alarms;
-	static Alarm * alarm = NULL;
+	std::vector<Entry> alarms;
 
-	Alarm() : nextid(0) {
-		signal(SIGALRM, bind(&Alarm::reset, this));
-	}
+	Alarm();
+	Alarm(Alarm const& copy);            // Not Implemented
+	Alarm& operator=(Alarm const& copy); // Not Implemented
+
+	static Alarm & inst();
+
+	bool cancel(int id);
+	void reset();
+	Ctrl add(Time timeout, callback_t fn);
+
+	friend void alarm_triggered(int);
 
 public:
 
-	static Alarm * operator*(){
-		if(!alarm)
-			alarm = new Alarm;
-		return alarm;
-	}
-	
-	Ctrl set(double len, callback_t fn){
-		Entry entry(nextid++, fn, Time() + len);
-		alarms.push_back(entry);
-
-		reset();
-
-		return Ctrl(entry.id);
-	}
-
-	void cancel(int id){
-		for(int i = 0; i < alarms.size(); i++){
-			if(alarms[i].id == id){
-				alarms.erase(i);
-				return;
-			}
-		}
-	}
-
-	void reset(){
-		Time now();
-	
-		int i = 0;
-		while(i < alarms.size()){
-			if(alarms[i].timeout < now){
-				alarms[i].fn();
-				alarms.erase(i);
-			}else{
-				i++;
-			}
-		}
-
-		if(alarms.size() > 0){
-			int maxi = 0;
-			for(int i = 1; i < alarms.size(); i++)
-				if(alarms[i].timeout < alarms[maxi].timeout)
-					maxi = i;
-
-			double len = alarms[maxi].timeout - now;
-
-			struct itimerval timeout;
-			timeout.it_interval.tv_usec = 0;
-			timeout.it_interval.tv_sec = 0;
-			timeout.it_value.tv_usec = (len - (int)len)*1000000;
-			timeout.it_value.tv_sec = len;
-			setitimer(ITIMER_REAL, &timeout, NULL);
-		}
-	}
+	static Ctrl set(double len, callback_t fn)   { return Alarm::inst().add(Time() + len, fn); }
+	static Ctrl set(Time timeout, callback_t fn) { return Alarm::inst().add(timeout, fn); }
 };
-
-#endif
 
