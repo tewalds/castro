@@ -1,12 +1,13 @@
 
 #include "alarm.h"
 
-void alarm_triggered(int blah){
-	Alarm::Handler::inst().reset();
+void alarm_triggered(int signum){
+	Alarm::Handler::inst().reset(signum);
 }
 
 Alarm::Handler::Handler() : nextid(0) {
 	signal(SIGALRM, alarm_triggered);
+	signal(SIGUSR1, alarm_triggered);
 }
 
 Alarm::Handler & Alarm::Handler::inst() {
@@ -20,7 +21,7 @@ int Alarm::Handler::add(Time timeout, callback_t fn){
 
 	nextid = (nextid + 1) & 0x3FFFFFFF; //sets a limit of 2^30 alarms, but keeps them in the positive range
 
-	reset();
+	reset(SIGALRM);
 
 	return entry.id;
 }
@@ -28,28 +29,34 @@ int Alarm::Handler::add(Time timeout, callback_t fn){
 bool Alarm::Handler::cancel(int id){
 	if(id < 0)
 		return false;
-	for(std::vector<Entry>::iterator a = alarms.begin(); a != alarms.end(); ++a){
+	bool found = false;
+	for(std::vector<Entry>::iterator a = alarms.begin(); a != alarms.end(); ){
 		if(a->id == id){
-			alarms.erase(a);
-			return true;
+			a->called = true;
+			found = true;
 		}
+		if(a->called)
+			a = alarms.erase(a);
+		else
+			++a;
 	}
-	return false;
+	return found;
 }
 
-void Alarm::Handler::reset(){
+void Alarm::Handler::reset(int signum){
 	Time now;
 
 	double next = 0;
-	for(std::vector<Entry>::iterator a = alarms.begin(); a != alarms.end(); ){
+	for(std::vector<Entry>::iterator a = alarms.begin(); a != alarms.end(); ++a){
 		double cur = a->timeout - now;
-		if(cur <= 0){
-			a->fn();
-			a = alarms.erase(a);
+		if(cur <= 0 || signum == SIGUSR1){
+			if(!a->called){
+				a->fn();
+				a->called = true;
+			}
 		}else{
 			if(next == 0 || next > cur)
 				next = cur;
-			++a;
 		}
 	}
 

@@ -9,6 +9,7 @@
 /* A simple alarm class that calls a callback at a certain time or after a timeout.
  * Alarm() returns an Alarm object, which automatically cancels the alarm
  * when it goes out of scope, or can be cancelled directly
+ * Calls all callbacks if SIGUSR1 is received
  *
  * Alarm timer(1.5, timeout_func);
  * or
@@ -23,8 +24,8 @@ public:
 	typedef std::tr1::function<void()> callback_t;
 
 	Alarm() : id(-1) { }
-	Alarm(double len, callback_t fn)   { (*this)(len, fn); }
-	Alarm(Time timeout, callback_t fn) { (*this)(timeout, fn); }
+	Alarm(double len, callback_t fn)   : id(-1) { (*this)(len, fn); }
+	Alarm(Time timeout, callback_t fn) : id(-1) { (*this)(timeout, fn); }
 
 	//act as a move constructor, no copy constructor
 	Alarm(Alarm & o) { *this = o; }
@@ -55,9 +56,10 @@ private:
 	class Handler { //singleton class that handles the alarms
 		struct Entry {
 			int id;
+			bool called;
 			callback_t fn;
 			Time timeout;
-			Entry(int i, callback_t f, Time t) : id(i), fn(f), timeout(t) { }
+			Entry(int i, callback_t f, Time t) : id(i), called(false), fn(f), timeout(t) { }
 		};
 
 		int nextid;
@@ -71,7 +73,7 @@ private:
 		static Handler & inst();
 
 		bool cancel(int id);
-		void reset();
+		void reset(int signum);
 		int add(Time timeout, callback_t fn);
 
 	};
