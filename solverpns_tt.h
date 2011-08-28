@@ -82,6 +82,7 @@ public:
 		outcome = -3;
 		maxdepth = 0;
 		nodes_seen = 0;
+		time_used = 0;
 		bestmove = Move(M_UNKNOWN);
 
 		timeout = false;

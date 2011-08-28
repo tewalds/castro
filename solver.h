@@ -10,9 +10,10 @@ public:
 	int outcome; // 0 = tie, 1 = white, 2 = black, -1 = white or tie, -2 = black or tie, anything else unknown
 	int maxdepth;
 	uint64_t nodes_seen;
+	double time_used;
 	Move bestmove;
 
-	Solver() : outcome(-3), maxdepth(0), nodes_seen(0) { }
+	Solver() : outcome(-3), maxdepth(0), nodes_seen(0), time_used(0) { }
 	virtual ~Solver() { }
 
 	virtual void solve(double time) { }

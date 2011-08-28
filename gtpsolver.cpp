@@ -33,6 +33,8 @@ GTPResponse HavannahGTP::gtp_solve_ab(vecstr args){
 
 	solverab.solve(time);
 
+	logerr("Finished in " + to_str(solverab.time_used*1000, 0) + " msec\n");
+
 	return GTPResponse(true, solve_str(solverab));
 }
 
@@ -93,6 +95,8 @@ GTPResponse HavannahGTP::gtp_solve_pns(vecstr args){
 		time = from_str<double>(args[0]);
 
 	solverpns.solve(time);
+
+	logerr("Finished in " + to_str(solverpns.time_used*1000, 0) + " msec\n");
 
 	return GTPResponse(true, solve_str(solverpns));
 }
@@ -178,6 +182,8 @@ GTPResponse HavannahGTP::gtp_solve_pns2(vecstr args){
 		time = from_str<double>(args[0]);
 
 	solverpns2.solve(time);
+
+	logerr("Finished in " + to_str(solverpns2.time_used*1000, 0) + " msec\n");
 
 	return GTPResponse(true, solve_str(solverpns2));
 }
@@ -268,6 +274,8 @@ GTPResponse HavannahGTP::gtp_solve_pnstt(vecstr args){
 		time = from_str<double>(args[0]);
 
 	solverpnstt.solve(time);
+
+	logerr("Finished in " + to_str(solverpnstt.time_used*1000, 0) + " msec\n");
 
 	return GTPResponse(true, solve_str(solverpnstt));
 }

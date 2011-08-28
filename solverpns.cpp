@@ -43,7 +43,7 @@ void SolverPNS::solve(double time){
 		outcome = -3;
 	}
 
-	logerr("Finished in " + to_str((Time() - start)*1000, 0) + " msec\n");
+	time_used = Time() - start;
 }
 
 void SolverPNS::run_pns(){

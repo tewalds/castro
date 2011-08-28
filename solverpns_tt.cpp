@@ -14,7 +14,7 @@ void SolverPNSTT::solve(double time){
 	Timer timer(time, bind(&SolverPNSTT::timedout, this));
 	Time start;
 
-	logerr("max nodes: " + to_str(maxnodes) + ", max memory: " + to_str(memlimit) + " Mb\n");
+//	logerr("max nodes: " + to_str(maxnodes) + ", max memory: " + to_str(memlimit) + " Mb\n");
 
 	run_pns();
 
@@ -46,7 +46,7 @@ void SolverPNSTT::solve(double time){
 		outcome = -3;
 	}
 
-	logerr("Finished in " + to_str((Time() - start)*1000, 0) + " msec\n");
+	time_used = Time() - start;
 }
 
 void SolverPNSTT::run_pns(){
