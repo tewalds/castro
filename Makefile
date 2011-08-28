@@ -13,10 +13,10 @@ endif
 all: castro
 
 
-builddb: builddb.o string.o
+builddb: builddb.o string.o alarm.o
 	$(CXX) -o $@ $^ $(LOADLIBES) $(LDLIBS) -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc
 
-checkproof: checkproof.o string.o zobrist.o solverab.o solverpns.o
+checkproof: checkproof.o string.o zobrist.o solverab.o solverpns.o alarm.o
 	$(CXX) -o $@ $^ $(LOADLIBES) $(LDLIBS) -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc
 
 castro: $(OBJECTS)
