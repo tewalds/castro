@@ -88,7 +88,9 @@ public:
 		//set the other object to no longer own the thread
 		o.thread = pthread_t();
 		o.destruct = false;
-		func = nullfunc;
+		o.func = nullfunc;
+
+		return *this;
 	}
 
 	int operator()(function<void()> fn){
