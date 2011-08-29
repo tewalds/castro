@@ -83,14 +83,14 @@ int16_t recurse(const Board & board, const Move & prevmove, int mctsoutcome, int
 		if(verbose)
 			cerr << " -> MCTSRec not found, solved in " << timelimit << "\n";
 
-		cout << "\n" << string(depth, ' ') << "(;" << (board.toplay() == 2 ? "W" : "B") << "[" << prevmove.to_s() << "]";
-		cout << "C[" << solvedby << ": " << pns.outcome << ", nodes: " << nodes << ", time: " << to_str(time_used, 3) << "])";
+		cout << string(depth, ' ') << "(;" << (board.toplay() == 2 ? "W" : "B") << "[" << prevmove.to_s() << "]";
+		cout << "C[" << solvedby << ": " << pns.outcome << ", nodes: " << nodes << ", time: " << to_str(time_used, 3) << "])\n";
 		cout.flush();
 
 		return pns.outcome;
 	}
 
-	cout << "\n" << string(depth, ' ') << "(;" << (board.toplay() == 2 ? "W" : "B") << "[" << prevmove.to_s() << "]C[mcts: " << mcts.outcome << ", sims: " << mcts.work << "]";
+	cout << string(depth, ' ') << "(;" << (board.toplay() == 2 ? "W" : "B") << "[" << prevmove.to_s() << "]C[mcts: " << mcts.outcome << ", sims: " << mcts.work << "]\n";
 	cout.flush();
 
 	assert(pns.outcome <= -3);
@@ -168,13 +168,15 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	cout << "\n";
+
 	for(Board::MoveIterator move = rootboard.moveit(true); !move.done(); ++move){
 		Board next = rootboard;
 		next.move(*move);
 		recurse(next, *move, -5, 1, 1);
 	}
 
-	cout << ")";
+	cout << ")\n";
 
 	pnsdb.close();
 	mctsdb.close();
