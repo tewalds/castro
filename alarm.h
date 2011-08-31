@@ -7,6 +7,10 @@
 #include "time.h"
 
 /* A simple alarm class that calls a callback at a certain time or after a timeout.
+ * The callback is called in the interrupt context, so may be during a malloc call or similar,
+ * so doing anything fancy could lead to a deadlock. It is highly suggested that the callback
+ * do nothing more than change a state variable.
+ *
  * Alarm() returns an Alarm object, which automatically cancels the alarm
  * when it goes out of scope, or can be cancelled directly
  * Calls all callbacks if SIGUSR1 is received
