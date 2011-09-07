@@ -1,6 +1,7 @@
 
 #include "havannahgtp.h"
 
+#include <unistd.h>
 #include <string>
 using namespace std;
 
@@ -11,6 +12,8 @@ void die(int code, const string & str){
 
 int main(int argc, char **argv){
 	HavannahGTP gtp;
+
+	gtp.colorboard = isatty(fileno(stdout));
 
 	for(int i = 1; i < argc; i++) {
 		string arg = argv[i];
