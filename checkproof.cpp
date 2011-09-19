@@ -26,7 +26,7 @@ int16_t recurse(const Board & board, const Move & prevmove, int mctsoutcome, int
 	MCTSRec mcts(board.gethash());
 
 	if(verbose)
-		cerr << string(depth, ' ') << "recurse(" << board.boardstr() << ";" << mcts.key() << "," << prevmove.to_s() << "," << mctsoutcome << "," << depth << ")";
+		cerr << string(depth, ' ') << "recurse(" << board.boardstr() << ";" << mcts.key() << "," << prevmove.to_s() << "," << mctsoutcome << "," << depth << "," << timelimit << ")";
 
 	if(mctsdb.get(mcts)){
 		if(verbose)
@@ -42,6 +42,9 @@ int16_t recurse(const Board & board, const Move & prevmove, int mctsoutcome, int
 			if(verbose) cerr << "\n";
 			return -3;
 		}
+
+		if(!verbose && timelimit >= 1)
+			cerr << string(depth, ' ') << "recurse(" << board.boardstr() << ";" << mcts.key() << "," << prevmove.to_s() << "," << mctsoutcome << "," << depth << "," << timelimit << ")\n";
 
 		solverab.set_board(board);
 		solverab.solve(timelimit);
@@ -179,7 +182,7 @@ int main(int argc, char** argv) {
 
 	Move m(argv[argc-1]);
 	rootboard.move(m);
-	int ret = recurse(rootboard, m, -5, 1, 1);
+	int ret = recurse(rootboard, m, -5, 0, 1);
 	cerr << "root solved as " << ret << "\n";
 
 	cout << ")\n";
