@@ -178,6 +178,7 @@ int main(int argc, char** argv) {
 	cout.flush();
 
 	Move m(argv[argc-1]);
+	rootboard.move(m);
 	int ret = recurse(rootboard, m, -5, 1, 1);
 	cerr << "root solved as " << ret << "\n";
 
