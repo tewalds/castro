@@ -1,6 +1,4 @@
 
-//build with: g++ builddb.cpp -o builddb -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc string.o
-
 #include <string>
 #include <iostream>
 
@@ -46,45 +44,42 @@ int16_t recurse(const Board & board, const Move & prevmove, int mctsoutcome, int
 		}
 
 		solverab.set_board(board);
-		solverpns.set_board(board);
+		solverab.solve(timelimit);
 
-		string solvedby;
-		uint64_t nodes;
-		double time_used;
-		do {
-			solverab.solve(timelimit);
-
-			if(solverab.outcome >= 0){
-				pns.outcome = solverab.outcome;
-				nodes = solverab.nodes_seen;
-				time_used = solverab.time_used;
-				solvedby = "ab";
-				break;
-			}
-
+		if(solverab.outcome >= 0){
+			pns.bestmove = solverab.bestmove;
+			pns.outcome  = solverab.outcome;
+			pns.work     = solverab.nodes_seen;
+			pns.depth    = solverab.maxdepth;
+			pns.time     = solverab.time_used;
+			pns.solver   = "ab";
+		}else{
+			solverpns.set_board(board);
 			solverpns.solve(timelimit);
 
 			if(solverpns.outcome >= 0){
-				pns.outcome = solverpns.outcome;
-				nodes = solverpns.nodes_seen;
-				time_used = solverpns.time_used;
-				solvedby = "pns";
-				break;
+				pns.bestmove = solverpns.bestmove;
+				pns.outcome  = solverpns.outcome;
+				pns.work     = solverpns.nodes_seen;
+				pns.depth    = solverpns.maxdepth;
+				pns.time     = solverpns.time_used;
+				pns.solver   = "pns";
 			}
+		}
 
+		if(pns.outcome < 0){
 			if(verbose)
 				cerr << " -> MCTSRec not found, solve failed in " << timelimit << "\n";
 
 			return -4;
-		}while(0);
+		}
 
 		pnsdb.set(pns);
 
 		if(verbose)
-			cerr << " -> MCTSRec not found, solved in " << timelimit << "\n";
+			cerr << " -> MCTSRec not found, solved in " << pns.time << "\n";
 
-		cout << string(depth, ' ') << "(;" << (board.toplay() == 2 ? "W" : "B") << "[" << prevmove.to_s() << "]";
-		cout << "C[" << solvedby << ": " << pns.outcome << ", nodes: " << nodes << ", time: " << to_str(time_used, 3) << "])\n";
+		cout << string(depth, ' ') << "(;" << (board.toplay() == 2 ? "W" : "B") << "[" << prevmove.to_s() << "]" << pns.hgfcomment() << ")\n";
 		cout.flush();
 
 		return pns.outcome;
@@ -96,7 +91,7 @@ int16_t recurse(const Board & board, const Move & prevmove, int mctsoutcome, int
 	assert(pns.outcome <= -3);
 
 	double limit = 0.002;
-	for(int i = 0; i <= 5 && pns.outcome <= -3; ){
+	for(int i = 0; i <= 5 && pns.outcome <= 0; ){
 		int nextmcts = -5;
 		bool foundtimeout = false;
 		switch(i){
@@ -115,9 +110,11 @@ int16_t recurse(const Board & board, const Move & prevmove, int mctsoutcome, int
 			int16_t ret = recurse(next, *move, nextmcts, depth+1, limit);
 			if(ret == board.toplay()){
 				pns.outcome = ret;
+				pns.bestmove = *move;
 				break;
 			}else if(ret == 0){
 				pns.outcome = 0;
+				pns.bestmove = *move;
 			}else if(ret == -4){
 				foundtimeout = true;
 			} //unknown just falls through, and loss is implicit in pns.outcome initialization
@@ -130,24 +127,31 @@ int16_t recurse(const Board & board, const Move & prevmove, int mctsoutcome, int
 		}
 	}
 
-	cout << "\n" << string(depth, ' ') << ")";
+	cout << string(depth, ' ') << ")\n";
 	cout.flush();
+
+	pns.solver = "cp";
 
 	if(pns.outcome < 0) //no draws or wins, must be a loss
 		pns.outcome = 3 - board.toplay();
+
 	pnsdb.set(pns);
+
+	if(mcts.outcome >= 0 && pns.outcome != mcts.outcome)
+		cerr << "Mismatch! board: " << pns.key() << " mcts: " << mcts.outcome << ", pns: " << pns.outcome << "\n";
+
 	return pns.outcome;
 }
 
 int main(int argc, char** argv) {
-	if(argc < 3){
-		cout << "Usage: " << argv[0] << " <mctsdb> <pnsdb>\n";
+	if(argc < 4){
+		cout << "Usage: " << argv[0] << " <mctsdb> <pnsdb> [-v] [-d depth] [moves ...] move\n";
 		return 0;
 	}
 
 	// create the database object
-	mctsdb.open(argv[1]);
-	pnsdb.open(argv[2]);
+	mctsdb.open(argv[1], false);
+	pnsdb.open(argv[2], true);
 
 	solverab.set_memlimit(0);//10 << 20);
 	solverpns.set_memlimit(2000 << 20);
@@ -156,25 +160,26 @@ int main(int argc, char** argv) {
 
 	//setup the rootboard
 	Board rootboard(4);
-	for(int i = 3; i < argc; i++) {
+	for(int i = 3; i < argc-1; i++) {
 		string arg = argv[i];
 
 		if(arg == "-v"){
 			verbose = true;
+		}else if(arg == "-d"){
+			maxdepth = from_str<int>(argv[++i]);
 		}else{
 			Move m(arg);
-			cout << ";" << (rootboard.toplay() == 1 ? "W" : "B") << "[" << m.to_s() << "]";
+			cout << ";" << (rootboard.toplay() == 1 ? "W" : "B") << "[" << m.to_s() << "]\n";
 			rootboard.move(m);
 		}
 	}
 
 	cout << "\n";
+	cout.flush();
 
-	for(Board::MoveIterator move = rootboard.moveit(true); !move.done(); ++move){
-		Board next = rootboard;
-		next.move(*move);
-		recurse(next, *move, -5, 1, 1);
-	}
+	Move m(argv[argc-1]);
+	int ret = recurse(rootboard, m, -5, 1, 1);
+	cerr << "root solved as " << ret << "\n";
 
 	cout << ")\n";
 

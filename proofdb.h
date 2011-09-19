@@ -3,6 +3,7 @@
 
 #include <kcpolydb.h>
 #include "string.h"
+#include "move.h"
 
 struct MCTSRec {
 	uint64_t hash;
@@ -60,10 +61,14 @@ struct MCTSRec {
 
 struct PNSRec {
 	string   boardstr;
-	uint64_t work;
+	Move     bestmove;
 	int16_t  outcome;
+	int16_t  depth;
+	int64_t  work;
+	double   time;
+	string   solver;
 
-	PNSRec(string b = "") : boardstr(b), work(0), outcome(-4) { }
+	PNSRec(string b = "") : boardstr(b), bestmove(M_NONE), outcome(-4), depth(-1), work(-1), time(0) { }
 
 	PNSRec(const std::string & key, const std::string & val){
 		boardstr = key;
@@ -72,15 +77,22 @@ struct PNSRec {
 
 	void set_value(const std::string & val){
 		vecstr parts = explode(val, ",");
-		work         = from_str<uint64_t>(parts[0]);
+		bestmove     = Move(parts[0]);
 		outcome      = from_str<uint16_t>(parts[1]);
+		depth        = from_str<uint16_t>(parts[2]);
+		work         = from_str<uint64_t>(parts[3]);
+		time         = from_str<double>(parts[4]);
+		solver       = parts[5];
 	}
 
 	std::string key() const {
 		return boardstr;
 	}
 	std::string value() const {
-		return to_str(work) + "," + to_str(outcome);
+		return bestmove.to_s() + "," + to_str(outcome) + "," + to_str(depth) + "," + to_str(work) + "," + to_str(time) + "," + solver;
+	}
+	std::string hgfcomment() const {
+		return "C[" + solver + ": " + to_str(outcome) + ", move: " + bestmove.to_s() + ", nodes: " + to_str(work) + ", depth: " + to_str(depth) + ", time: " + to_str(time, 3) + "]";
 	}
 };
 
@@ -91,13 +103,13 @@ template<class ProofRec> class ProofDB {
 	kyotocabinet::TreeDB db;
 public:
 	ProofDB() { }
-	ProofDB(const std::string & name) { open(name); }
+	ProofDB(const std::string & name, bool writable = true) { open(name, writable); }
 
-	bool open(const std::string & name){
+	bool open(const std::string & name, bool writable = true){
 		db.tune_map(4LL << 30); //4gb
 		db.tune_page_cache(2LL << 30); //2gb
 //		db.tune_buckets(100LL * 1000*1000); //100 million buckets
-		return db.open(name, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
+		return db.open(name, (writable ? kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE : kyotocabinet::PolyDB::OREADER));
 	}
 	bool close()     { return db.close(); }
 	bool clear()     { return db.clear(); }

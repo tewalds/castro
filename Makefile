@@ -13,24 +13,30 @@ endif
 all: castro
 
 
-builddb: builddb.o string.o alarm.o
+builddb: builddb.o string.o
 	$(CXX) -o $@ $^ $(LOADLIBES) $(LDLIBS) -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc
 
 checkproof: checkproof.o string.o zobrist.o solverab.o solverpns.o alarm.o
 	$(CXX) -o $@ $^ $(LOADLIBES) $(LDLIBS) -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc
 
+genhgf: genhgf.o string.o zobrist.o
+	$(CXX) -o $@ $^ $(LOADLIBES) $(LDLIBS) -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc
+
+
 castro: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
 alarm.o: alarm.cpp alarm.h time.h
-builddb.o: builddb.cpp proofdb.h string.h
+builddb.o: builddb.cpp proofdb.h string.h move.h
 castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h move.h \
  zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
  player.h time.h depthstats.h mtrand.h weightedrandtree.h
-checkproof.o: checkproof.cpp proofdb.h string.h board.h move.h zobrist.h \
+checkproof.o: checkproof.cpp proofdb.h string.h move.h board.h zobrist.h \
  types.h hashset.h solverab.h solver.h solverpns.h compacttree.h thread.h \
  lbdist.h log.h
+genhgf.o: genhgf.cpp proofdb.h string.h move.h board.h zobrist.h types.h \
+ hashset.h
 gtpgeneral.o: gtpgeneral.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \

@@ -1,6 +1,4 @@
 
-//build with: g++ builddb.cpp -o builddb -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc string.o
-
 #include <string>
 #include <iostream>
 
