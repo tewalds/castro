@@ -91,6 +91,7 @@ public:
 		newcallback("showboard",       bind(&HavannahGTP::gtp_print,         this, _1), "Show the board");
 		newcallback("print",           bind(&HavannahGTP::gtp_print,         this, _1), "Alias for showboard");
 		newcallback("dists",           bind(&HavannahGTP::gtp_dists,         this, _1), "Similar to print, but shows minimum win distances");
+		newcallback("zobrist",         bind(&HavannahGTP::gtp_zobrist,       this, _1), "Output the zobrist hash for the current move");
 		newcallback("clear_board",     bind(&HavannahGTP::gtp_clearboard,    this, _1), "Clear the board, but keep the size");
 		newcallback("clear",           bind(&HavannahGTP::gtp_clearboard,    this, _1), "Alias for clear_board");
 		newcallback("boardsize",       bind(&HavannahGTP::gtp_boardsize,     this, _1), "Clear the board, set the board size");
@@ -135,6 +136,7 @@ public:
 
 	GTPResponse gtp_echo(vecstr args);
 	GTPResponse gtp_print(vecstr args);
+	GTPResponse gtp_zobrist(vecstr args);
 	string won_str(int outcome) const;
 	GTPResponse gtp_swap(vecstr args);
 	GTPResponse gtp_boardsize(vecstr args);

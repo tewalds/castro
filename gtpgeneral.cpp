@@ -299,3 +299,7 @@ GTPResponse HavannahGTP::gtp_dists(vecstr args){
 	return GTPResponse(true, s);
 }
 
+GTPResponse HavannahGTP::gtp_zobrist(vecstr args){
+	return GTPResponse(true, game.getboard().hashstr());
+}
+
