@@ -675,6 +675,18 @@ public:
 		return (nummoves > unique_depth ? hash.get(0) : hash.get());
 	}
 
+	string hashstr() const {
+		static const char hexlookup[] = "0123456789abcdef";
+		char buf[19] = "0x";
+		hash_t val = gethash();
+		for(int i = 15; i >= 0; i--){
+			buf[i+2] = hexlookup[val & 15];
+			val >>= 4;
+		}
+		buf[18] = '\0';
+		return (char *)buf;
+	}
+
 	void update_hash(const Move & pos, int turn){
 		if(nummoves > unique_depth){ //simple update, no rotations/symmetry
 			hash.update(0, 3*xy(pos) + turn);
