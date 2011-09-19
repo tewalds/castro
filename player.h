@@ -410,7 +410,7 @@ public:
 
 	bool setlogfile(string name);
 	void flushlog();
-	void logsolved(hash_t hash, const Node * node);
+	void logsolved(const Board & board, const Node * node);
 
 	Node * genmove(double time, int max_runs);
 	vector<Move> get_pv();

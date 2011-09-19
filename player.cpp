@@ -338,19 +338,8 @@ void Player::flushlog(){
 		fflush(solved_logfile);
 }
 
-void u64buf(char * buf, uint64_t val){
-	static const char hexlookup[] = "0123456789abcdef";
-	for(int i = 15; i >= 0; i--){
-		buf[i] = hexlookup[val & 15];
-		val >>= 4;
-	}
-	buf[16] = '\0';
-}
-
-void Player::logsolved(hash_t hash, const Node * node){
-	char hashbuf[17];
-	u64buf(hashbuf, hash);
-	string s = string("0x") + hashbuf + "," + to_str(node->exp.num()) + "," + to_str(node->outcome) + "\n";
+void Player::logsolved(const Board & board, const Node * node){
+	string s = board.hashstr() + "," + to_str(node->exp.num()) + "," + to_str(node->outcome) + "\n";
 	fprintf(solved_logfile, "%s", s.c_str());
 }
 
@@ -425,7 +414,7 @@ void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
 				board.set(child->move);
 				if(child->children.num() > 0)
 					garbage_collect(board, child, limit);
-				logsolved(board.gethash(), child);
+				logsolved(board, child);
 				board.unset(child->move);
 			}
 			nodes -= child->dealloc(ctmem);
