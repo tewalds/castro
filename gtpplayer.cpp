@@ -243,6 +243,25 @@ GTPResponse HavannahGTP::gtp_pv(vecstr args){
 	return GTPResponse(true, pvstr);
 }
 
+GTPResponse HavannahGTP::gtp_player_hgf(vecstr args){
+	if(args.size() == 0)
+		return GTPResponse(true, "player_hgf <filename> [sims limit]");
+
+	FILE * fd = fopen(args[0].c_str(), "w");
+
+	int limit = 10000;
+	if(args.size() > 1)
+		limit = from_str<int>(args[1]);
+
+	Board copy = player.rootboard;
+
+	player.gen_hgf(copy, & player.root, true, limit, 0, fd);
+
+	fclose(fd);
+
+	return true;
+}
+
 GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(player.rootboard.won() >= 0)
 		return GTPResponse(true, "resign");
@@ -394,6 +413,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -x --visitexpand Number of visits before expanding a node          [" + to_str(player.visitexpand) + "]\n" +
 			"  -P --symmetry    Prune symmetric moves, good for proof, not play   [" + to_str(player.prunesymmetry) + "]\n" +
 			"  -L --logproof    Log proven nodes hashes and outcomes to this file [" + player.solved_logname + "]\n" +
+			"     --gcsolved    Garbage collect solved nodes with fewer sims than [" + to_str(player.gcsolved) + "]\n" +
 			"Node initialization knowledge:\n" +
 			"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
 			"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
@@ -458,6 +478,8 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 		}else if((arg == "-L" || arg == "--logproof") && i+1 < args.size()){
 			if(player.setlogfile(args[++i]) == 0)
 				errs += "Can't set the log file\n";
+		}else if((               arg == "--gcsolved") && i+1 < args.size()){
+			player.gcsolved = from_str<uint>(args[++i]);
 		}else if((arg == "-r" || arg == "--userave") && i+1 < args.size()){
 			player.userave = from_str<float>(args[++i]);
 		}else if((arg == "-X" || arg == "--useexplore") && i+1 < args.size()){

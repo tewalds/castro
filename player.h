@@ -343,6 +343,7 @@ public:
 	bool  detectdraw; //look for draws early, slow
 	uint  visitexpand;//number of visits before expanding a node
 	bool  prunesymmetry; //prune symmetric children from the move list, useful for proving but likely not for playing
+	uint  gcsolved;   //garbage collect solved nodes or keep them in the tree, assuming they meet the required amount of work
 //knowledge
 	int   localreply; //boost for a local reply, ie a move near the previous move
 	int   locality;   //boost for playing near previous stones
@@ -415,6 +416,7 @@ public:
 	Node * genmove(double time, int max_runs);
 	vector<Move> get_pv();
 	void garbage_collect(Board & board, Node * node, unsigned int limit); //destroys the board, so pass in a copy
+	void gen_hgf(Board & board, Node * node, bool prooftree, unsigned int limit, unsigned int depth, FILE * fd);
 
 protected:
 	Node * return_move(Node * node, int toplay) const;

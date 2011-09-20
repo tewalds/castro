@@ -146,6 +146,7 @@ Player::Player() {
 	detectdraw  = false;
 	visitexpand = 1;
 	prunesymmetry = false;
+	gcsolved    = 1000000;
 
 	localreply  = 0;
 	locality    = 0;
@@ -408,8 +409,9 @@ void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
 	Node * child = node->children.begin(),
 		 * end = node->children.end();
 
+	int toplay = board.toplay();
 	for( ; child != end; child++){
-		if(child->outcome >= 0){ //solved
+		if(child->outcome >= 0 && (child->exp.num() < gcsolved || (toplay == node->outcome && child->outcome != node->outcome) )){ //solved and not part of the heavy proof tree
 			if(solved_logfile && child->exp.num() > 1000){ //log heavy solved nodes
 				board.set(child->move);
 				if(child->children.num() > 0)
@@ -426,5 +428,30 @@ void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
 			board.unset(child->move);
 		}
 	}
+}
+
+void Player::gen_hgf(Board & board, Node * node, bool prooftree, unsigned int limit, unsigned int depth, FILE * fd){
+	string s = string("\n") + string(depth, ' ') + "(;" + (board.toplay() == 1 ? "W" : "B") + "[" + node->move.to_s() + "]" +
+	       "C[mcts:" + to_str((int)(node->outcome)) + ",best:" + node->bestmove.to_s() + ",sims:" + to_str(node->exp.num()) + "]";
+	fprintf(fd, "%s", s.c_str());
+
+	Node * child = node->children.begin(),
+		 * end = node->children.end();
+
+	int toplay = board.toplay();
+
+	bool children = false;
+	for( ; child != end; child++){
+		if(child->exp.num() >= limit && (!prooftree || toplay != node->outcome || child->outcome == node->outcome) ){
+			board.set(child->move);
+			gen_hgf(board, child, prooftree, limit, depth+1, fd);
+			board.unset(child->move);
+			children = true;
+		}
+	}
+
+	if(children)
+		fprintf(fd, "\n%s", string(depth, ' ').c_str());
+	fprintf(fd, ")");
 }
 

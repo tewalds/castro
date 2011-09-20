@@ -104,6 +104,7 @@ public:
 		newcallback("move_stats",      bind(&HavannahGTP::gtp_move_stats,    this, _1), "Output the move stats for the player tree as it stands now");
 		newcallback("player_solve",    bind(&HavannahGTP::gtp_player_solve,  this, _1), "Run the player, but don't make the move, and give solve output");
 		newcallback("player_solved",   bind(&HavannahGTP::gtp_player_solved, this, _1), "Output whether the player solved the current node");
+		newcallback("player_hgf",      bind(&HavannahGTP::gtp_player_hgf,    this, _1), "Output an hgf of the current tree");
 		newcallback("pv",              bind(&HavannahGTP::gtp_pv,            this, _1), "Output the principle variation for the player tree as it stands now");
 		newcallback("time",            bind(&HavannahGTP::gtp_time,          this, _1), "Set the time limits and the algorithm for per game time");
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1), "Set the algorithm for the player, no args gives options");
@@ -171,6 +172,7 @@ public:
 	GTPResponse gtp_pv(vecstr args);
 	GTPResponse gtp_genmove(vecstr args);
 	GTPResponse gtp_player_params(vecstr args);
+	GTPResponse gtp_player_hgf(vecstr args);
 
 	string solve_str(int outcome) const;
 	string solve_str(const Solver & solve);
