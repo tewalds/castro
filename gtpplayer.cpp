@@ -255,7 +255,15 @@ GTPResponse HavannahGTP::gtp_player_hgf(vecstr args){
 
 	Board copy = player.rootboard;
 
-	player.gen_hgf(copy, & player.root, true, limit, 0, fd);
+	vector<Move> hist = game.get_hist();
+
+	fprintf(fd, "(;FF[4]SZ[4]\n");
+	for(unsigned int i = 0; i < hist.size()-1; i++)
+		fprintf(fd, ";%c[%s]", (i % 2 ? 'B' : 'W'), hist[i].to_s().c_str());
+
+	player.gen_hgf(copy, & player.root, limit, 0, fd);
+
+	fprintf(fd, ")\n");
 
 	fclose(fd);
 

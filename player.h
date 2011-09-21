@@ -411,12 +411,13 @@ public:
 
 	bool setlogfile(string name);
 	void flushlog();
-	void logsolved(const Board & board, const Node * node);
+	void logsolved(Board board, const Node * node, bool skiproot = false); //copies the board before passing to unsafe
+	void logsolved_unsafe(Board & board, const Node * node, bool skiproot); //modifies the board
 
 	Node * genmove(double time, int max_runs);
 	vector<Move> get_pv();
-	void garbage_collect(Board & board, Node * node, unsigned int limit); //destroys the board, so pass in a copy
-	void gen_hgf(Board & board, Node * node, bool prooftree, unsigned int limit, unsigned int depth, FILE * fd);
+	void garbage_collect(Board & board, Node * node); //destroys the board, so pass in a copy
+	void gen_hgf(Board & board, Node * node, unsigned int limit, unsigned int depth, FILE * fd);
 
 protected:
 	Node * return_move(Node * node, int toplay) const;

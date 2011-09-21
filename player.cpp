@@ -48,7 +48,7 @@ void Player::PlayerThread::run(){
 				logerr("Starting player GC with limit " + to_str(player->gclimit) + " ... ");
 				uint64_t nodesbefore = player->nodes;
 				Board copy = player->rootboard;
-				player->garbage_collect(copy, & player->root, player->gclimit);
+				player->garbage_collect(copy, & player->root);
 				player->flushlog();
 				Time gctime;
 				player->ctmem.compact(1.0, 0.75);
@@ -146,7 +146,7 @@ Player::Player() {
 	detectdraw  = false;
 	visitexpand = 1;
 	prunesymmetry = false;
-	gcsolved    = 1000000;
+	gcsolved    = 100000;
 
 	localreply  = 0;
 	locality    = 0;
@@ -177,9 +177,9 @@ Player::~Player(){
 	reset_threads(); //shut down the theads properly
 
 	if(solved_logfile){
-		Board copy = rootboard;
-		garbage_collect(copy, & root, 0);
+		logsolved(rootboard, & root);
 		fclose(solved_logfile);
+		solved_logfile = NULL;
 	}
 
 	root.dealloc(ctmem);
@@ -254,15 +254,12 @@ void Player::set_ponder(bool p){
 void Player::set_board(const Board & board){
 	stop_threads();
 
-	if(solved_logfile){
-		Board copy = rootboard;
-		garbage_collect(copy, & root, 0);
-	}
-
-	rootboard = board;
+	logsolved(rootboard, & root);
 	nodes -= root.dealloc(ctmem);
 	root = Node();
 	root.exp.addwins(visitexpand+1);
+
+	rootboard = board;
 
 	reset_threads(); //needed since the threads aren't started before a board it set
 
@@ -271,13 +268,6 @@ void Player::set_board(const Board & board){
 }
 void Player::move(const Move & m){
 	stop_threads();
-
-	if(solved_logfile){
-		Board copy = rootboard;
-		garbage_collect(copy, & root, 0);
-	}
-
-	rootboard.move(m, true, true);
 
 	uword nodesbefore = nodes;
 
@@ -292,6 +282,7 @@ void Player::move(const Move & m){
 			}
 		}
 
+		logsolved(rootboard, &root);
 		nodes -= root.dealloc(ctmem);
 		root = child;
 		root.swap_tree(child);
@@ -299,11 +290,14 @@ void Player::move(const Move & m){
 		if(nodesbefore > 0)
 			logerr("Nodes before: " + to_str(nodesbefore) + ", after: " + to_str(nodes) + ", saved " +  to_str(100.0*nodes/nodesbefore, 1) + "% of the tree\n");
 	}else{
+		logsolved(rootboard, &root);
 		nodes -= root.dealloc(ctmem);
 		root = Node();
 		root.move = m;
 	}
 	assert(nodes == root.size());
+
+	rootboard.move(m, true, true);
 
 	root.exp.addwins(visitexpand+1); //+1 to compensate for the virtual loss
 	if(rootboard.won() < 0)
@@ -339,9 +333,27 @@ void Player::flushlog(){
 		fflush(solved_logfile);
 }
 
-void Player::logsolved(const Board & board, const Node * node){
-	string s = board.hashstr() + "," + to_str(node->exp.num()) + "," + to_str(node->outcome) + "\n";
-	fprintf(solved_logfile, "%s", s.c_str());
+//logs all solved heavy nodes until this node. It is not limited to the proof tree
+void Player::logsolved(Board board, const Node * node, bool skiproot){
+	if(solved_logfile)
+		logsolved_unsafe(board, node, skiproot); //different in that it makes a copy of the board first
+}
+//destroys the board, so use a copy!
+void Player::logsolved_unsafe(Board & board, const Node * node, bool skiproot){
+	if(!skiproot && node->outcome >= 0){
+		string s = board.hashstr() + "," + to_str(node->exp.num()) + "," + to_str(node->outcome) + "\n";
+		fprintf(solved_logfile, "%s", s.c_str());
+	}
+
+	Node * child = node->children.begin(),
+		 * end = node->children.end();
+	for( ; child != end; child++){
+		if(child->exp.num() > 1000){
+			board.set(child->move);
+			logsolved_unsafe(board, child, false);
+			board.unset(child->move);
+		}
+	}
 }
 
 vector<Move> Player::get_pv(){
@@ -405,34 +417,34 @@ Player::Node * Player::return_move(Node * node, int toplay) const {
 	return ret;
 }
 
-void Player::garbage_collect(Board & board, Node * node, unsigned int limit){
+void Player::garbage_collect(Board & board, Node * node){
 	Node * child = node->children.begin(),
 		 * end = node->children.end();
 
 	int toplay = board.toplay();
 	for( ; child != end; child++){
-		if(child->outcome >= 0 && (child->exp.num() < gcsolved || (toplay == node->outcome && child->outcome != node->outcome) )){ //solved and not part of the heavy proof tree
-			if(solved_logfile && child->exp.num() > 1000){ //log heavy solved nodes
+		if(child->children.num() == 0)
+			continue;
+
+		if(	(node->outcome >= 0 && child->exp.num() > gcsolved && (node->outcome != toplay || child->outcome == toplay)) || //parent is solved, only keep the proof tree
+			(node->outcome <  0 && child->exp.num() > (child->outcome >= 0 ? gcsolved : gclimit)) ){ // only keep heavy nodes, with different cutoffs for solved and unsolved
+			board.set(child->move);
+			garbage_collect(board, child);
+			board.unset(child->move);
+		}else{
+			if(solved_logfile){
 				board.set(child->move);
-				if(child->children.num() > 0)
-					garbage_collect(board, child, limit);
-				logsolved(board, child);
+				logsolved_unsafe(board, child, true); //skip the root since it'll get logged when its parent is deallocated
 				board.unset(child->move);
 			}
 			nodes -= child->dealloc(ctmem);
-		}else if(child->exp.num() < limit){ //low exp, ignore solvedness since it's trivial to re-solve
-			nodes -= child->dealloc(ctmem);
-		}else if(child->children.num() > 0){
-			board.set(child->move);
-			garbage_collect(board, child, limit);
-			board.unset(child->move);
 		}
 	}
 }
 
-void Player::gen_hgf(Board & board, Node * node, bool prooftree, unsigned int limit, unsigned int depth, FILE * fd){
-	string s = string("\n") + string(depth, ' ') + "(;" + (board.toplay() == 1 ? "W" : "B") + "[" + node->move.to_s() + "]" +
-	       "C[mcts:" + to_str((int)(node->outcome)) + ",best:" + node->bestmove.to_s() + ",sims:" + to_str(node->exp.num()) + "]";
+void Player::gen_hgf(Board & board, Node * node, unsigned int limit, unsigned int depth, FILE * fd){
+	string s = string("\n") + string(depth, ' ') + "(;" + (board.toplay() == 2 ? "W" : "B") + "[" + node->move.to_s() + "]" +
+	       "C[mcts, sims:" + to_str(node->exp.num()) + ", avg:" + to_str(node->exp.avg(), 4) + ", outcome:" + to_str((int)(node->outcome)) + ", best:" + node->bestmove.to_s() + "]";
 	fprintf(fd, "%s", s.c_str());
 
 	Node * child = node->children.begin(),
@@ -442,9 +454,9 @@ void Player::gen_hgf(Board & board, Node * node, bool prooftree, unsigned int li
 
 	bool children = false;
 	for( ; child != end; child++){
-		if(child->exp.num() >= limit && (!prooftree || toplay != node->outcome || child->outcome == node->outcome) ){
+		if(child->exp.num() >= limit && (toplay != node->outcome || child->outcome == node->outcome) ){
 			board.set(child->move);
-			gen_hgf(board, child, prooftree, limit, depth+1, fd);
+			gen_hgf(board, child, limit, depth+1, fd);
 			board.unset(child->move);
 			children = true;
 		}
