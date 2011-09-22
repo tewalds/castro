@@ -78,6 +78,10 @@ public:
 		allow_swap = false;
 
 		player.set_board(game.getboard());
+		solverab.set_board(game.getboard());
+		solverpns.set_board(game.getboard());
+		solverpns2.set_board(game.getboard());
+		solverpnstt.set_board(game.getboard());
 
 		newcallback("name",            bind(&HavannahGTP::gtp_name,          this, _1), "Name of the program");
 		newcallback("version",         bind(&HavannahGTP::gtp_version,       this, _1), "Version of the program");
