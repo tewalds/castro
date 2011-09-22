@@ -17,15 +17,15 @@ int main(int argc, char **argv){
 
 	for(int i = 1; i < argc; i++) {
 		string arg = argv[i];
-		if(arg == "--help"){
+		if(arg == "-h" || arg == "--help"){
 			die(255, "Usage:\n"
-				"\t   --help     Show this help\n"
+				"\t-h --help     Show this help\n"
 				"\t-v --verbose  Give more output over gtp\n"
 				"\t-n --nocolor  Don't output the board in color\n"
 				"\t-c --cmd      Pass a gtp command from the command line\n"
 				"\t-f --file     Run this gtp file before reading from stdin\n"
 				"\t-l --logfile  Log the gtp commands in standard format to this file\n"
-				"\t-s --server   Run in server mode\n"
+//				"\t-s --server   Run in server mode\n"
 				);
 		}else if(arg == "-v" || arg == "--verbose"){
 			gtp.verbose = true;
@@ -50,10 +50,10 @@ int main(int argc, char **argv){
 			FILE * fd = fopen(ptr, "w");
 			if(!fd) die(255, string("Failed to open file: ") + ptr);
 			gtp.setlogfile(fd);
-		}else if(arg == "-s" || arg == "--server"){
-			gtp.setservermode(true);
+//		}else if(arg == "-s" || arg == "--server"){
+//			gtp.setservermode(true);
 		}else{
-			die(255, "Unknown argument: " + arg);
+			die(255, "Unknown argument: " + arg + ", try --help");
 		}
 	}
 
