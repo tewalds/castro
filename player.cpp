@@ -426,7 +426,7 @@ void Player::garbage_collect(Board & board, Node * node){
 		if(child->children.num() == 0)
 			continue;
 
-		if(	(node->outcome >= 0 && child->exp.num() > gcsolved && (node->outcome != toplay || child->outcome == toplay)) || //parent is solved, only keep the proof tree
+		if(	(node->outcome >= 0 && child->exp.num() > gcsolved && (node->outcome != toplay || child->outcome == toplay || child->outcome == 0)) || //parent is solved, only keep the proof tree, plus heavy draws
 			(node->outcome <  0 && child->exp.num() > (child->outcome >= 0 ? gcsolved : gclimit)) ){ // only keep heavy nodes, with different cutoffs for solved and unsolved
 			board.set(child->move);
 			garbage_collect(board, child);
