@@ -22,13 +22,6 @@ weighted random
 player_solved claims an empty board is a win by black, needs the backup to be rewritten, probably should copy Player::PlayerUCT::do_backup
 
 
-Set different cutoffs for ring checking to be less blind to rings
-- 0.4 for me, 0.5 for my opponent, etc
-
-Build a large persistent tree in some database
-- save and reload heavy Nodes between games
-- tokyo or kyoto cabinet? leveldb?
-
 compact tree memory manager
 - move old unused elements of the freelist to the front so they get used first? or is it better that they're at the back?
 - store a Chunk pointer in each data block, then traverse the freelist instead of the memory
@@ -40,8 +33,11 @@ compact tree memory manager
 Store nodes in a hash table instead of tree
 - how to garbage collect?
 - how to keep tree between moves?
+- use a persistent db instead?
 
-remove experience of proven losses from ancestors
+Build a large persistent tree in some database
+- save and reload heavy Nodes between games
+- tokyo or kyoto cabinet? leveldb?
 
 
 lambda DFPN http://www.aaai.org/Papers/IJCAI/2007/IJCAI07-387.pdf
