@@ -1,7 +1,7 @@
 
 
 #include "havannahgtp.h"
-
+#include "fileio.h"
 
 GTPResponse HavannahGTP::gtp_time(vecstr args){
 	if(args.size() == 0)
@@ -101,8 +101,8 @@ GTPResponse HavannahGTP::gtp_move_stats(vecstr args){
 			continue;
 
 		s += move_str(child->move, true);
-		s += "," + to_str((child->exp.num()  ? child->exp.avg() : 0.0), 2) + "," + to_str(child->exp.num());
-		s += "," + to_str((child->rave.num() ? child->rave.avg() : 0.0), 2) + "," + to_str(child->rave.num());
+		s += "," + to_str((child->exp.num()  ? child->exp.avg() : 0.0), 4) + "," + to_str(child->exp.num());
+		s += "," + to_str((child->rave.num() ? child->rave.avg() : 0.0), 4) + "," + to_str(child->rave.num());
 		s += "," + to_str(child->know);
 		if(child->outcome >= 0)
 			s += "," + won_str(child->outcome);
@@ -249,6 +249,9 @@ GTPResponse HavannahGTP::gtp_player_hgf(vecstr args){
 
 	FILE * fd = fopen(args[0].c_str(), "w");
 
+	if(!fd)
+		return GTPResponse(false, "Opening file " + args[0] + " for writing failed");
+
 	int limit = 10000;
 	if(args.size() > 1)
 		limit = from_str<int>(args[1]);
@@ -257,7 +260,7 @@ GTPResponse HavannahGTP::gtp_player_hgf(vecstr args){
 
 	vector<Move> hist = game.get_hist();
 
-	fprintf(fd, "(;FF[4]SZ[4]\n");
+	fprintf(fd, "(;FF[4]SZ[%i]\n", copy.get_size());
 	for(unsigned int i = 0; i < hist.size()-1; i++)
 		fprintf(fd, ";%c[%s]", (i % 2 ? 'B' : 'W'), hist[i].to_s().c_str());
 
@@ -269,6 +272,92 @@ GTPResponse HavannahGTP::gtp_player_hgf(vecstr args){
 
 	return true;
 }
+
+GTPResponse HavannahGTP::gtp_player_load_hgf(vecstr args){
+	if(args.size() == 0)
+		return GTPResponse(true, "player_load_hgf <filename>");
+
+	FILE * fd = fopen(args[0].c_str(), "r");
+
+	if(!fd)
+		return GTPResponse(false, "Opening file " + args[0] + " for reading failed");
+
+	vector<Move> hist = game.get_hist();
+
+	unsigned int size;
+	assert(fscanf(fd, "(;FF[4]SZ[%i]", & size) > 0);
+	if(size != game.getsize()){
+		if(hist.size() == 0){
+			game = HavannahGame(size);
+		}else{
+			fclose(fd);
+			return GTPResponse(false, "File has the wrong boardsize to match the existing game");
+		}
+	}
+
+	eat_whitespace(fd);
+
+	Board board(size);
+	Player::Node * node = & player.root;
+
+	char side, movestr[5];
+	while(fscanf(fd, ";%c[%5[^]]]", &side, movestr) > 0){
+		Move move(movestr);
+
+		if(board.num_moves() >= hist.size()){
+
+			if(node->children.empty()){
+				node->children.alloc(board.movesremain(), player.ctmem);
+
+				Player::Node * child = node->children.begin(),
+						     * end   = node->children.end();
+				Board::MoveIterator moveit = board.moveit(player.prunesymmetry);
+				int nummoves = 0;
+				for(; !moveit.done() && child != end; ++moveit, ++child){
+					*child = Player::Node(*moveit);
+//					add_knowledge(board, node, child);
+					nummoves++;
+				}
+
+				if(player.prunesymmetry)
+					node->children.shrink(nummoves); //shrink the node to ignore the extra moves
+				else //both end conditions should happen in parallel
+					assert(moveit.done() && child == end);
+
+				PLUS(player.nodes, node->children.num());
+			}
+
+
+			Player::Node * child = node->children.begin(),
+			             * end   = node->children.end();
+			for( ; child != end; ++child){
+				if(child->move == move){
+					node = child;
+					break;
+				}
+			}
+		}else if(hist[board.num_moves()] != move){
+			fclose(fd);
+			return GTPResponse(false, "The current game is deeper than this file");
+		}
+		board.move(move);
+
+		eat_whitespace(fd);
+	}
+
+	assert(fpeek(fd) == '(');
+
+	player.load_hgf(board, node, fd);
+
+	eat_whitespace(fd);
+
+	assert(fgetc(fd) == ')');
+
+	fclose(fd);
+
+	return true;
+}
+
 
 GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 	if(player.rootboard.won() >= 0)
@@ -372,12 +461,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 		extended += " " + to_str(player.nodes - nodesbefore);
 	}
 
-	game.move(best);
-	player.move(best);
-	solverab.move(best);
-	solverpns.move(best);
-	solverpns2.move(best);
-	solverpnstt.move(best);
+	move(best);
 
 	if(verbose >= 2)
 		stats += game.getboard().to_s(colorboard) + "\n";

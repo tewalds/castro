@@ -49,11 +49,7 @@ GTPResponse HavannahGTP::gtp_boardsize(vecstr args){
 		return GTPResponse(false, "Size " + to_str(size) + " is out of range.");
 
 	game = HavannahGame(size);
-	player.set_board(game.getboard());
-	solverab.set_board(game.getboard());
-	solverpns.set_board(game.getboard());
-	solverpns2.set_board(game.getboard());
-	solverpnstt.set_board(game.getboard());
+	set_board();
 
 	time_remain = time.game;
 
@@ -62,11 +58,7 @@ GTPResponse HavannahGTP::gtp_boardsize(vecstr args){
 
 GTPResponse HavannahGTP::gtp_clearboard(vecstr args){
 	game.clear();
-	player.set_board(game.getboard());
-	solverab.set_board(game.getboard());
-	solverpns.set_board(game.getboard());
-	solverpns2.set_board(game.getboard());
-	solverpnstt.set_board(game.getboard());
+	set_board();
 
 	time_remain = time.game;
 
@@ -83,11 +75,7 @@ GTPResponse HavannahGTP::gtp_undo(vecstr args){
 		game.undo();
 		log("undo");
 	}
-	player.set_board(game.getboard());
-	solverab.set_board(game.getboard());
-	solverpns.set_board(game.getboard());
-	solverpns2.set_board(game.getboard());
-	solverpnstt.set_board(game.getboard(), false);
+	set_board(false);
 	if(verbose >= 2)
 		logerr(game.getboard().to_s(colorboard) + "\n");
 	return GTPResponse(true);
@@ -130,22 +118,17 @@ GTPResponse HavannahGTP::play(const string & pos, int toplay){
 	if(game.getboard().won() >= 0)
 		return GTPResponse(false, "The game is already over.");
 
-	Move move = parse_move(pos);
+	Move m = parse_move(pos);
 
-	if(!game.valid(move))
+	if(!game.valid(m))
 		return GTPResponse(false, "Invalid move");
 
-	game.move(move);
-	player.move(move);
-	solverab.move(move);
-	solverpns.move(move);
-	solverpns2.move(move);
-	solverpnstt.move(move);
+	move(m);
 
-	log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(move, false));
+	log(string("play ") + (toplay == 1 ? 'w' : 'b') + ' ' + move_str(m, false));
 
 	if(verbose >= 2)
-		logerr("Placement: " + move_str(move) + ", outcome: " + game.getboard().won_str() + "\n" + game.getboard().to_s(colorboard));
+		logerr("Placement: " + move_str(m) + ", outcome: " + game.getboard().won_str() + "\n" + game.getboard().to_s(colorboard));
 
 	return GTPResponse(true);
 }

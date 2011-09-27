@@ -418,6 +418,7 @@ public:
 	vector<Move> get_pv();
 	void garbage_collect(Board & board, Node * node); //destroys the board, so pass in a copy
 	void gen_hgf(Board & board, Node * node, unsigned int limit, unsigned int depth, FILE * fd);
+	void load_hgf(Board & board, Node * node, FILE * fd);
 
 protected:
 	Node * return_move(Node * node, int toplay) const;

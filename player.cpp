@@ -7,6 +7,7 @@
 #include "solverab.h"
 #include "alarm.h"
 #include "time.h"
+#include "fileio.h"
 
 void Player::PlayerThread::run(){
 	while(true){
@@ -465,5 +466,90 @@ void Player::gen_hgf(Board & board, Node * node, unsigned int limit, unsigned in
 	if(children)
 		fprintf(fd, "\n%s", string(depth, ' ').c_str());
 	fprintf(fd, ")");
+}
+
+//reads the format from gen_hgf.
+void Player::load_hgf(Board & board, Node * node, FILE * fd){
+	char c, buf[101];
+
+	eat_whitespace(fd);
+
+	assert(fscanf(fd, "(;%c[%100[^]]]", &c, buf) > 0);
+	assert(board.toplay() == (c == 'W' ? 1 : 2));
+	node->move = Move(buf);
+
+	assert(fscanf(fd, "C[%100[^]]]", buf) > 0);
+
+	vecstr entry, parts = explode(string(buf), ", ");
+	assert(parts[0] == "mcts");
+
+	entry = explode(parts[1], ":");
+	assert(entry[0] == "sims");
+	double sims = from_str<double>(entry[1]);
+
+	entry = explode(parts[2], ":");
+	assert(entry[0] == "avg");
+	double avg = from_str<double>(entry[1]);
+
+	double wins = sims*avg;
+	node->exp.addwins(wins);
+	node->exp.addlosses(sims - wins);
+
+	entry = explode(parts[3], ":");
+	assert(entry[0] == "outcome");
+	node->outcome = from_str<int>(entry[1]);
+
+	entry = explode(parts[4], ":");
+	assert(entry[0] == "best");
+	node->bestmove = Move(entry[1]);
+
+
+	eat_whitespace(fd);
+
+	if(fpeek(fd) != ')'){
+		node->children.alloc(board.movesremain(), ctmem);
+
+		Node * child = node->children.begin(),
+			 * end   = node->children.end();
+		Board::MoveIterator moveit = board.moveit(prunesymmetry);
+		int nummoves = 0;
+		for(; !moveit.done() && child != end; ++moveit, ++child){
+			*child = Node(*moveit);
+//			add_knowledge(board, node, child);
+			nummoves++;
+		}
+
+		if(prunesymmetry)
+			node->children.shrink(nummoves); //shrink the node to ignore the extra moves
+		else //both end conditions should happen in parallel
+			assert(moveit.done() && child == end);
+
+
+
+		while(fpeek(fd) != ')'){
+			Node child;
+			Board copy = board;
+			copy.move(node->move);
+			load_hgf(copy, & child, fd);
+
+			for(Node * i = node->children.begin(); i != node->children.end(); i++){
+				if(i->move == child.move){
+					*i = child;          //copy the child experience to the tree
+					i->swap_tree(child); //move the child subtree to the tree
+					break;
+				}
+			}
+
+			assert(child.children.empty());
+
+			eat_whitespace(fd);
+		}
+
+		PLUS(nodes, node->children.num());
+	}
+
+	eat_char(fd, ')');
+
+	return;
 }
 
