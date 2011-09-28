@@ -417,8 +417,12 @@ public:
 	Node * genmove(double time, int max_runs);
 	vector<Move> get_pv();
 	void garbage_collect(Board & board, Node * node); //destroys the board, so pass in a copy
+
 	void gen_hgf(Board & board, Node * node, unsigned int limit, unsigned int depth, FILE * fd);
 	void load_hgf(Board board, Node * node, FILE * fd);
+
+	void create_children_simple(const Board & board, Node * node);
+	Node * find_child(Node * node, const Move & move);
 
 protected:
 	Node * return_move(Node * node, int toplay) const;

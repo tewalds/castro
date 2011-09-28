@@ -468,6 +468,37 @@ void Player::gen_hgf(Board & board, Node * node, unsigned int limit, unsigned in
 	fprintf(fd, ")");
 }
 
+void Player::create_children_simple(const Board & board, Node * node){
+	assert(node->children.empty());
+
+	node->children.alloc(board.movesremain(), ctmem);
+
+	Node * child = node->children.begin(),
+		 * end   = node->children.end();
+	Board::MoveIterator moveit = board.moveit(prunesymmetry);
+	int nummoves = 0;
+	for(; !moveit.done() && child != end; ++moveit, ++child){
+		*child = Node(*moveit);
+		nummoves++;
+	}
+
+	if(prunesymmetry)
+		node->children.shrink(nummoves); //shrink the node to ignore the extra moves
+	else //both end conditions should happen in parallel
+		assert(moveit.done() && child == end);
+
+	PLUS(nodes, node->children.num());
+}
+
+Player::Node * Player::find_child(Node * node, const Move & move){
+	for(Node * i = node->children.begin(); i != node->children.end(); i++)
+		if(i->move == move)
+			return i;
+
+	return NULL;
+}
+
+
 //reads the format from gen_hgf.
 void Player::load_hgf(Board board, Node * node, FILE * fd){
 	char c, buf[101];
@@ -509,43 +540,20 @@ void Player::load_hgf(Board board, Node * node, FILE * fd){
 	eat_whitespace(fd);
 
 	if(fpeek(fd) != ')'){
-		node->children.alloc(board.movesremain(), ctmem);
-
-		Node * child = node->children.begin(),
-			 * end   = node->children.end();
-		Board::MoveIterator moveit = board.moveit(prunesymmetry);
-		int nummoves = 0;
-		for(; !moveit.done() && child != end; ++moveit, ++child){
-			*child = Node(*moveit);
-//			add_knowledge(board, node, child);
-			nummoves++;
-		}
-
-		if(prunesymmetry)
-			node->children.shrink(nummoves); //shrink the node to ignore the extra moves
-		else //both end conditions should happen in parallel
-			assert(moveit.done() && child == end);
-
-
+		create_children_simple(board, node);
 
 		while(fpeek(fd) != ')'){
 			Node child;
 			load_hgf(board, & child, fd);
 
-			for(Node * i = node->children.begin(); i != node->children.end(); i++){
-				if(i->move == child.move){
-					*i = child;          //copy the child experience to the tree
-					i->swap_tree(child); //move the child subtree to the tree
-					break;
-				}
-			}
+			Node * i = find_child(node, child.move);
+			*i = child;          //copy the child experience to the tree
+			i->swap_tree(child); //move the child subtree to the tree
 
 			assert(child.children.empty());
 
 			eat_whitespace(fd);
 		}
-
-		PLUS(nodes, node->children.num());
 	}
 
 	eat_char(fd, ')');
