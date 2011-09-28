@@ -284,7 +284,7 @@ GTPResponse HavannahGTP::gtp_player_load_hgf(vecstr args){
 
 	vector<Move> hist = game.get_hist();
 
-	unsigned int size;
+	int size;
 	assert(fscanf(fd, "(;FF[4]SZ[%i]", & size) > 0);
 	if(size != game.getsize()){
 		if(hist.size() == 0){
@@ -304,7 +304,7 @@ GTPResponse HavannahGTP::gtp_player_load_hgf(vecstr args){
 	while(fscanf(fd, ";%c[%5[^]]]", &side, movestr) > 0){
 		Move move(movestr);
 
-		if(board.num_moves() >= hist.size()){
+		if(board.num_moves() >= (int)hist.size()){
 
 			if(node->children.empty()){
 				node->children.alloc(board.movesremain(), player.ctmem);
@@ -345,9 +345,45 @@ GTPResponse HavannahGTP::gtp_player_load_hgf(vecstr args){
 		eat_whitespace(fd);
 	}
 
-	assert(fpeek(fd) == '(');
 
-	player.load_hgf(board, node, fd);
+	if(fpeek(fd) != ')'){
+		node->children.alloc(board.movesremain(), player.ctmem);
+
+		Player::Node * child = node->children.begin(),
+			         * end   = node->children.end();
+		Board::MoveIterator moveit = board.moveit(player.prunesymmetry);
+		int nummoves = 0;
+		for(; !moveit.done() && child != end; ++moveit, ++child){
+			*child = Player::Node(*moveit);
+//			add_knowledge(board, node, child);
+			nummoves++;
+		}
+
+		if(player.prunesymmetry)
+			node->children.shrink(nummoves); //shrink the node to ignore the extra moves
+		else //both end conditions should happen in parallel
+			assert(moveit.done() && child == end);
+
+
+		while(fpeek(fd) != ')'){
+			Player::Node child;
+			player.load_hgf(board, & child, fd);
+
+			for(Player::Node * i = node->children.begin(); i != node->children.end(); i++){
+				if(i->move == child.move){
+					*i = child;          //copy the child experience to the tree
+					i->swap_tree(child); //move the child subtree to the tree
+					break;
+				}
+			}
+
+			assert(child.children.empty());
+
+			eat_whitespace(fd);
+		}
+
+		PLUS(player.nodes, node->children.num());
+	}
 
 	eat_whitespace(fd);
 

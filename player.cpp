@@ -469,14 +469,16 @@ void Player::gen_hgf(Board & board, Node * node, unsigned int limit, unsigned in
 }
 
 //reads the format from gen_hgf.
-void Player::load_hgf(Board & board, Node * node, FILE * fd){
+void Player::load_hgf(Board board, Node * node, FILE * fd){
 	char c, buf[101];
 
 	eat_whitespace(fd);
 
 	assert(fscanf(fd, "(;%c[%100[^]]]", &c, buf) > 0);
+
 	assert(board.toplay() == (c == 'W' ? 1 : 2));
 	node->move = Move(buf);
+	board.move(node->move);
 
 	assert(fscanf(fd, "C[%100[^]]]", buf) > 0);
 
@@ -492,8 +494,8 @@ void Player::load_hgf(Board & board, Node * node, FILE * fd){
 	double avg = from_str<double>(entry[1]);
 
 	double wins = sims*avg;
-	node->exp.addwins(wins);
-	node->exp.addlosses(sims - wins);
+	node->exp.addwins((uword)wins);
+	node->exp.addlosses((uword)(sims - wins));
 
 	entry = explode(parts[3], ":");
 	assert(entry[0] == "outcome");
@@ -528,9 +530,7 @@ void Player::load_hgf(Board & board, Node * node, FILE * fd){
 
 		while(fpeek(fd) != ')'){
 			Node child;
-			Board copy = board;
-			copy.move(node->move);
-			load_hgf(copy, & child, fd);
+			load_hgf(board, & child, fd);
 
 			for(Node * i = node->children.begin(); i != node->children.end(); i++){
 				if(i->move == child.move){
