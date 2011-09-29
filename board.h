@@ -742,6 +742,47 @@ public:
 		return m;
 	}
 
+	unsigned int pattern(const Move & pos){ return pattern(xy(pos)); }
+	unsigned int pattern(int posxy){
+		unsigned int p = 0;
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
+			p <<= 2;
+			if(i->onboard())
+				p |= cells[i->xy].piece;
+			else
+				p |= 3;
+		}
+		return p;
+	}
+
+	unsigned int pattern_rotate(unsigned int p){
+		return (((p & 3) << 10) | (p >> 2));
+	}
+	unsigned int pattern_mirror(unsigned int p){
+		//012345 -> 054321, mirrors along the 0,3 axis to move fewer bits
+		return (p & ((3 << 10) | (3 << 4))) | ((p & (3 << 8)) >> 8) | ((p & (3 << 6)) >> 4) | ((p & (3 << 2)) << 4) | ((p & (3 << 0)) << 8);
+	}
+
+	unsigned int sympattern(const Move & pos){ return sympattern(xy(pos)); }
+	unsigned int sympattern(int posxy){
+		unsigned int p = pattern(posxy);
+
+		unsigned int m = p;                 //012345
+		m = min(m, (p = pattern_rotate(p)));//501234
+		m = min(m, (p = pattern_rotate(p)));//450123
+		m = min(m, (p = pattern_rotate(p)));//345012
+		m = min(m, (p = pattern_rotate(p)));//234501
+		m = min(m, (p = pattern_rotate(p)));//123450
+		m = min(m, (p = pattern_mirror(pattern_rotate(p))));//012345 -> 054321
+		m = min(m, (p = pattern_rotate(p)));//105432
+		m = min(m, (p = pattern_rotate(p)));//210543
+		m = min(m, (p = pattern_rotate(p)));//321054
+		m = min(m, (p = pattern_rotate(p)));//432105
+		m = min(m, (p = pattern_rotate(p)));//543210
+
+		return m;
+	}
+
 	bool move(const Move & pos, bool checkwin = true, bool locality = false, int ringsize = 6, int permring = 0){
 		assert(outcome < 0);
 

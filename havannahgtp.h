@@ -109,6 +109,7 @@ public:
 		newcallback("pv",              bind(&HavannahGTP::gtp_pv,            this, _1), "Output the principle variation for the player tree as it stands now");
 		newcallback("time",            bind(&HavannahGTP::gtp_time,          this, _1), "Set the time limits and the algorithm for per game time");
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1), "Set the algorithm for the player, no args gives options");
+		newcallback("patterns",        bind(&HavannahGTP::gtp_patterns,      this, _1), "List all legal moves plus their local pattern");
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,     this, _1), "List all legal moves");
 		newcallback("history",         bind(&HavannahGTP::gtp_history,       this, _1), "List of played moves");
 		newcallback("playgame",        bind(&HavannahGTP::gtp_playgame,      this, _1), "Play a list of moves");
@@ -166,6 +167,7 @@ public:
 	string move_str(Move m, int hguic = -1);
 	GTPResponse gtp_all_legal(vecstr args);
 	GTPResponse gtp_history(vecstr args);
+	GTPResponse gtp_patterns(vecstr args);
 	GTPResponse play(const string & pos, int toplay);
 	GTPResponse gtp_playgame(vecstr args);
 	GTPResponse gtp_play(vecstr args);

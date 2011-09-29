@@ -96,6 +96,14 @@ string HavannahGTP::move_str(Move m, int hguic){
 	return m.to_s(!hguic * game.getsize());
 }
 
+GTPResponse HavannahGTP::gtp_patterns(vecstr args){
+	string ret;
+	Board board = game.getboard();
+	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move)
+		ret += move->to_s() + " " + to_str(board.sympattern(*move)) + "\n";
+	return GTPResponse(true, ret);
+}
+
 GTPResponse HavannahGTP::gtp_all_legal(vecstr args){
 	string ret;
 	for(Board::MoveIterator move = game.getboard().moveit(); !move.done(); ++move)
