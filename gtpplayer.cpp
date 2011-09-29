@@ -261,7 +261,7 @@ GTPResponse HavannahGTP::gtp_player_hgf(vecstr args){
 	vector<Move> hist = game.get_hist();
 
 	fprintf(fd, "(;FF[4]SZ[%i]\n", copy.get_size());
-	for(unsigned int i = 0; i < hist.size()-1; i++)
+	for(unsigned int i = 0; i+1 < hist.size(); i++)
 		fprintf(fd, ";%c[%s]", (i % 2 ? 'B' : 'W'), hist[i].to_s().c_str());
 
 	player.gen_hgf(copy, & player.root, limit, 0, fd);
