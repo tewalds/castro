@@ -518,15 +518,15 @@ void Player::load_hgf(Board board, Node * node, FILE * fd){
 
 	entry = explode(parts[1], ":");
 	assert(entry[0] == "sims");
-	double sims = from_str<double>(entry[1]);
+	uword sims = from_str<uword>(entry[1]);
 
 	entry = explode(parts[2], ":");
 	assert(entry[0] == "avg");
 	double avg = from_str<double>(entry[1]);
 
-	double wins = sims*avg;
-	node->exp.addwins((uword)wins);
-	node->exp.addlosses((uword)(sims - wins));
+	uword wins = sims*avg;
+	node->exp.addwins(wins);
+	node->exp.addlosses(sims - wins);
 
 	entry = explode(parts[3], ":");
 	assert(entry[0] == "outcome");

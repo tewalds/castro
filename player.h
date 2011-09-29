@@ -46,8 +46,8 @@ public:
 			n += a.n;
 		}
 
-		void addwins(int num)  { n += num; s += 2*num; }
-		void addlosses(int num){ n += num; }
+		void addwins(uword num)  { n += num; s += 2*num; }
+		void addlosses(uword num){ n += num; }
 		ExpPair & operator+=(const ExpPair & a){
 			s += a.s;
 			n += a.n;
@@ -56,7 +56,7 @@ public:
 		ExpPair operator + (const ExpPair & a){
 			return ExpPair(s + a.s, n + a.n);
 		}
-		ExpPair & operator*=(int m){
+		ExpPair & operator*=(uword m){
 			s *= m;
 			n *= m;
 			return *this;
