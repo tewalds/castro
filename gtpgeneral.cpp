@@ -97,12 +97,16 @@ string HavannahGTP::move_str(Move m, int hguic){
 }
 
 GTPResponse HavannahGTP::gtp_patterns(vecstr args){
+	bool symmetric = true;
+	bool invert = true;
 	string ret;
 	Board board = game.getboard();
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 		ret += move->to_s() + " ";
-		unsigned int p = board.sympattern(*move);
-		if(board.toplay() == 2)
+		unsigned int p = board.pattern(*move);
+		if(symmetric)
+			p = board.pattern_symmetry(p);
+		if(invert && board.toplay() == 2)
 			p = board.pattern_invert(p);
 		ret += to_str(p);
 		ret += "\n";
