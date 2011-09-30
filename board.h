@@ -742,8 +742,11 @@ public:
 		return m;
 	}
 
-	unsigned int pattern(const Move & pos){ return pattern(xy(pos)); }
-	unsigned int pattern(int posxy){
+	unsigned int sympattern(const Move & pos) const { return sympattern(xy(pos)); }
+	unsigned int sympattern(int posxy)        const { return pattern_symmetry(pattern(posxy)); }
+
+	unsigned int pattern(const Move & pos) const { return pattern(xy(pos)); }
+	unsigned int pattern(int posxy)        const {
 		unsigned int p = 0;
 		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 			p <<= 2;
@@ -755,18 +758,17 @@ public:
 		return p;
 	}
 
-	unsigned int pattern_rotate(unsigned int p){
+	static unsigned int pattern_invert(unsigned int p){ //switch players
+		return ((p & 0xAAA) >> 1) | ((p & 0x555) << 1);
+	}
+	static unsigned int pattern_rotate(unsigned int p){
 		return (((p & 3) << 10) | (p >> 2));
 	}
-	unsigned int pattern_mirror(unsigned int p){
+	static unsigned int pattern_mirror(unsigned int p){
 		//012345 -> 054321, mirrors along the 0,3 axis to move fewer bits
 		return (p & ((3 << 10) | (3 << 4))) | ((p & (3 << 8)) >> 8) | ((p & (3 << 6)) >> 4) | ((p & (3 << 2)) << 4) | ((p & (3 << 0)) << 8);
 	}
-
-	unsigned int sympattern(const Move & pos){ return sympattern(xy(pos)); }
-	unsigned int sympattern(int posxy){
-		unsigned int p = pattern(posxy);
-
+	static unsigned int pattern_symmetry(unsigned int p){ //takes a pattern and returns the representative version
 		unsigned int m = p;                 //012345
 		m = min(m, (p = pattern_rotate(p)));//501234
 		m = min(m, (p = pattern_rotate(p)));//450123
@@ -779,7 +781,6 @@ public:
 		m = min(m, (p = pattern_rotate(p)));//321054
 		m = min(m, (p = pattern_rotate(p)));//432105
 		m = min(m, (p = pattern_rotate(p)));//543210
-
 		return m;
 	}
 

@@ -2,6 +2,9 @@
 
 #include "havannahgtp.h"
 #include "fileio.h"
+#include <fstream>
+
+using namespace std;
 
 GTPResponse HavannahGTP::gtp_time(vecstr args){
 	if(args.size() == 0)
@@ -502,8 +505,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
 			"  -D --distance    Give a bonus to low minimum distance to win       [" + to_str(player.dists) + "]\n" +
 			"Rollout policy:\n" +
-			"  -h --weightrand  Weight the moves locality                         [" + to_str(player.weightedrandom) + "]\n" +
-			"  -K --weightknow  Use knowledge in the weighted random values       [" + to_str(player.weightedknow) + "]\n" +
+			"  -h --weightrand  Weight the moves according to computed gammas     [" + to_str(player.weightedrandom) + "]\n" +
 			"  -C --checkrings  Check for rings only this often in rollouts       [" + to_str(player.checkrings) + "]\n" +
 			"  -R --ringdepth   Check for rings for this depth, < 0 for % moves   [" + to_str(player.checkringdepth) + "]\n" +
 			"  -Z --ringsize    Starting minimum ring size in rollouts            [" + to_str(player.minringsize) + "]\n" +
@@ -586,9 +588,7 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 		}else if((arg == "-D" || arg == "--distance") && i+1 < args.size()){
 			player.dists = from_str<int>(args[++i]);
 		}else if((arg == "-h" || arg == "--weightrand") && i+1 < args.size()){
-			player.weightedrandom = from_str<int>(args[++i]);
-		}else if((arg == "-K" || arg == "--weightknow") && i+1 < args.size()){
-			player.weightedknow = from_str<bool>(args[++i]);
+			player.weightedrandom = from_str<bool>(args[++i]);
 		}else if((arg == "-C" || arg == "--checkrings") && i+1 < args.size()){
 			player.checkrings = from_str<float>(args[++i]);
 		}else if((arg == "-R" || arg == "--ringdepth") && i+1 < args.size()){
@@ -612,5 +612,32 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 		}
 	}
 	return GTPResponse(true, errs);
+}
+
+GTPResponse HavannahGTP::gtp_player_gammas(vecstr args){
+	if(args.size() == 0)
+		return GTPResponse(true, "Must pass the filename of a set of gammas");
+
+	ifstream ifs(args[0].c_str());
+
+	if(!ifs.good())
+		return GTPResponse(false, "Failed to open file for reading");
+
+	Board board = game.getboard();
+
+	for(int i = 0; i < 4096; i++){
+		int a;
+		float f;
+		ifs >> a >> f;
+
+		int s = board.pattern_symmetry(i);
+		if(s == i)
+			player.gammas[i] = f;
+		else
+			player.gammas[i] = player.gammas[s];
+	}
+
+	ifs.close();
+	return GTPResponse(true);
 }
 

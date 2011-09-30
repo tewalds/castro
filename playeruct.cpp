@@ -404,7 +404,6 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	int num = board.movesremain();
 
 	int wrand = (player->weightedrandom);
-	const float wrandconst = 1.0f;
 
 	if(wrand){
 		wtree[0].resize(board.vecsize());
@@ -414,8 +413,9 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 		for(Board::MoveIterator m = board.moveit(false, false); !m.done(); ++m){
 			int i = board.xy(*m);
 			moves[i] = *m;
-			wtree[0].set_weight_fast(i, wrandconst + board.local(i, 1));
-			wtree[1].set_weight_fast(i, wrandconst + board.local(i, 2));
+			unsigned int p = board.pattern(i);
+			wtree[0].set_weight_fast(i, player->gammas[p]);
+			wtree[1].set_weight_fast(i, player->gammas[board.pattern_invert(p)]);
 			set++;
 		}
 
@@ -503,9 +503,13 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 		if(wrand == 2){
 			//update neighbour weights
-			for(const MoveValid * i = board.nb_begin(move), *e = board.nb_endhood(i); i < e; i++)
-				if(i->onboard() && board.get(i->xy) == 0)
-					wtree[turn-1].set_weight(i->xy, wrandconst + board.local(i->xy, turn));
+			for(const MoveValid * i = board.nb_begin(move), *e = board.nb_end(i); i < e; i++){
+				if(i->onboard() && board.get(i->xy) == 0){
+					unsigned int p = board.pattern(i->xy);
+					wtree[0].set_weight_fast(i->xy, player->gammas[p]);
+					wtree[1].set_weight_fast(i->xy, player->gammas[board.pattern_invert(p)]);
+				}
+			}
 		}
 	}
 

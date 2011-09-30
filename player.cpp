@@ -156,8 +156,7 @@ Player::Player() {
 	bridge      = 25;
 	dists       = 0;
 
-	weightedrandom = 0;
-	weightedknow   = false;
+	weightedrandom = false;
 	checkrings     = 1.0;
 	checkringdepth = 1000;
 	minringsize    = 6;
@@ -167,6 +166,9 @@ Player::Player() {
 	lastgoodreply  = false;
 	instantwin     = 0;
 	instwindepth   = 1000;
+
+	for(int i = 0; i < 4096; i++)
+		gammas[i] = 1;
 
 	//no threads started until a board is set
 	threadstate = Thread_Wait_Start;

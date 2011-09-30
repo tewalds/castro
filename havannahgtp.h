@@ -109,6 +109,7 @@ public:
 		newcallback("pv",              bind(&HavannahGTP::gtp_pv,            this, _1), "Output the principle variation for the player tree as it stands now");
 		newcallback("time",            bind(&HavannahGTP::gtp_time,          this, _1), "Set the time limits and the algorithm for per game time");
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1), "Set the algorithm for the player, no args gives options");
+		newcallback("player_gammas",   bind(&HavannahGTP::gtp_player_gammas, this, _1), "Load the gammas for weighted random from a file");
 		newcallback("patterns",        bind(&HavannahGTP::gtp_patterns,      this, _1), "List all legal moves plus their local pattern");
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,     this, _1), "List all legal moves");
 		newcallback("history",         bind(&HavannahGTP::gtp_history,       this, _1), "List of played moves");
@@ -192,6 +193,7 @@ public:
 	GTPResponse gtp_pv(vecstr args);
 	GTPResponse gtp_genmove(vecstr args);
 	GTPResponse gtp_player_params(vecstr args);
+	GTPResponse gtp_player_gammas(vecstr args);
 	GTPResponse gtp_player_hgf(vecstr args);
 	GTPResponse gtp_player_load_hgf(vecstr args);
 

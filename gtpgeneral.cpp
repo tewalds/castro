@@ -99,8 +99,14 @@ string HavannahGTP::move_str(Move m, int hguic){
 GTPResponse HavannahGTP::gtp_patterns(vecstr args){
 	string ret;
 	Board board = game.getboard();
-	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move)
-		ret += move->to_s() + " " + to_str(board.sympattern(*move)) + "\n";
+	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+		ret += move->to_s() + " ";
+		unsigned int p = board.sympattern(*move);
+		if(board.toplay() == 2)
+			p = board.pattern_invert(p);
+		ret += to_str(p);
+		ret += "\n";
+	}
 	return GTPResponse(true, ret);
 }
 
