@@ -22,6 +22,8 @@ checkproof: checkproof.o string.o zobrist.o solverab.o solverpns.o alarm.o
 genhgf: genhgf.o string.o zobrist.o
 	$(CXX) -o $@ $^ $(LOADLIBES) $(LDLIBS) -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc
 
+mm: mm.cpp
+	g++ -O3 -Wall -o mm mm.cpp
 
 castro: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
@@ -75,7 +77,7 @@ gendeps:
 	ls *.cpp -1 | xargs -L 1 cpp -M -MM
 
 clean:
-	rm -f castro *.o
+	rm -f *.o castro builddb checkproof genhgf mm mm-with-freq.dat
 
 fresh: clean all
 
