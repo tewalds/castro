@@ -403,7 +403,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	int won;
 	int num = board.movesremain();
 
-	int wrand = (player->weightedrandom);
+	bool wrand = (player->weightedrandom);
 
 	if(wrand){
 		wtree[0].resize(board.vecsize());
