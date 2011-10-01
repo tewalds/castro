@@ -493,7 +493,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 		movelist.addrollout(move, turn);
 
-		board.move(move, true, (wrand == 2), (checkrings ? minringsize : 0), ringperm);
+		board.move(move, true, false, (checkrings ? minringsize : 0), ringperm);
 		if(--ringcounter == 0){
 			minringsize++;
 			ringcounter = ringcounterfull;
@@ -501,7 +501,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 		depth++;
 		checkrings &= (depth < checkdepth);
 
-		if(wrand == 2){
+		if(wrand){
 			//update neighbour weights
 			for(const MoveValid * i = board.nb_begin(move), *e = board.nb_end(i); i < e; i++){
 				if(i->onboard() && board.get(i->xy) == 0){
