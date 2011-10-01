@@ -630,6 +630,11 @@ GTPResponse HavannahGTP::gtp_player_gammas(vecstr args){
 		float f;
 		ifs >> a >> f;
 
+		if(i != a){
+			ifs.close();
+			return GTPResponse(false, "Line " + to_str(i) + " doesn't match the expected value");
+		}
+
 		int s = board.pattern_symmetry(i);
 		if(s == i)
 			player.gammas[i] = f;
