@@ -506,8 +506,8 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 			for(const MoveValid * i = board.nb_begin(move), *e = board.nb_end(i); i < e; i++){
 				if(i->onboard() && board.get(i->xy) == 0){
 					unsigned int p = board.pattern(i->xy);
-					wtree[0].set_weight_fast(i->xy, player->gammas[p]);
-					wtree[1].set_weight_fast(i->xy, player->gammas[board.pattern_invert(p)]);
+					wtree[0].set_weight(i->xy, player->gammas[p]);
+					wtree[1].set_weight(i->xy, player->gammas[board.pattern_invert(p)]);
 				}
 			}
 		}
