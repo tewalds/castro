@@ -2,3 +2,8 @@
 castro
 castro-*
 callgrind.out.*
+checkproof
+genhgf
+builddb
+mm
+
