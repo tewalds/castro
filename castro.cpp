@@ -1,5 +1,6 @@
 
 #include "havannahgtp.h"
+#include "time.h"
 
 #include <unistd.h>
 #include <string>
@@ -11,6 +12,7 @@ void die(int code, const string & str){
 }
 
 int main(int argc, char **argv){
+	srand((unsigned int)(Time().to_f()*1000));
 	HavannahGTP gtp;
 
 	gtp.colorboard = isatty(fileno(stdout));
