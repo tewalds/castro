@@ -50,7 +50,7 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 
 				child->exp.addv(movelist.getexp(toplay));
 
-				if(!do_backup(node, child, toplay) && //not solved
+				if(!player->do_backup(node, child, toplay) && //not solved
 					player->ravefactor > min_rave &&  //using rave
 					node->children.num() > 1 &&       //not a macro move
 					50*remain*(player->ravefactor + player->decrrave*remain) > node->exp.num()) //rave is still significant
@@ -58,7 +58,7 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 
 				return;
 			}
-		}while(!do_backup(node, child, toplay));
+		}while(!player->do_backup(node, child, toplay));
 
 		return;
 	}
@@ -242,7 +242,7 @@ backup in this order:
 0 lose
 return true if fully solved, false if it's unknown or partially unknown
 */
-bool Player::PlayerUCT::do_backup(Node * node, Node * backup, int toplay){
+bool Player::do_backup(Node * node, Node * backup, int toplay){
 	int nodeoutcome = node->outcome;
 	if(nodeoutcome >= 0) //already proven, probably by a different thread
 		return true;

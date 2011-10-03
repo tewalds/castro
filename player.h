@@ -61,6 +61,9 @@ public:
 			n *= m;
 			return *this;
 		}
+		ExpPair invert(){
+			return ExpPair(n*2 - s, n);
+		}
 	};
 
 	struct Node {
@@ -303,7 +306,6 @@ public:
 		bool create_children(Board & board, Node * node, int toplay);
 		void add_knowledge(Board & board, Node * node, Node * child);
 		Node * choose_move(const Node * node, int toplay, int remain) const;
-		bool do_backup(Node * node, Node * backup, int toplay);
 		void update_rave(const Node * node, int toplay);
 		bool test_bridge_probe(const Board & board, const Move & move, const Move & test) const;
 
@@ -418,6 +420,8 @@ public:
 	Node * genmove(double time, int max_runs);
 	vector<Move> get_pv();
 	void garbage_collect(Board & board, Node * node); //destroys the board, so pass in a copy
+
+	bool do_backup(Node * node, Node * backup, int toplay);
 
 	void gen_hgf(Board & board, Node * node, unsigned int limit, unsigned int depth, FILE * fd);
 	void load_hgf(Board board, Node * node, FILE * fd);
