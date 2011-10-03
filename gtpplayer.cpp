@@ -250,24 +250,41 @@ GTPResponse HavannahGTP::gtp_player_hgf(vecstr args){
 	if(args.size() == 0)
 		return GTPResponse(true, "player_hgf <filename> [sims limit]");
 
-	FILE * fd = fopen(args[0].c_str(), "w");
+	FILE * fd = fopen(args[0].c_str(), "r");
+
+	if(fd){
+		fclose(fd);
+		return GTPResponse(false, "File " + args[0] + " already exists");
+	}
+
+	fd = fopen(args[0].c_str(), "w");
 
 	if(!fd)
 		return GTPResponse(false, "Opening file " + args[0] + " for writing failed");
 
-	int limit = 10000;
+	unsigned int limit = 10000;
 	if(args.size() > 1)
-		limit = from_str<int>(args[1]);
+		limit = from_str<unsigned int>(args[1]);
 
-	Board copy = player.rootboard;
+	Board board = game.getboard();
 
 	vector<Move> hist = game.get_hist();
 
-	fprintf(fd, "(;FF[4]SZ[%i]\n", copy.get_size());
-	for(unsigned int i = 0; i+1 < hist.size(); i++)
+	fprintf(fd, "(;FF[4]SZ[%i]\n", board.get_size());
+	for(unsigned int i = 0; i < hist.size(); i++)
 		fprintf(fd, ";%c[%s]", (i % 2 ? 'B' : 'W'), hist[i].to_s().c_str());
 
-	player.gen_hgf(copy, & player.root, limit, 0, fd);
+
+	Player::Node * child = player.root.children.begin(),
+	             * end = player.root.children.end();
+
+	for( ; child != end; child++){
+		if(child->exp.num() >= limit){
+			board.set(child->move);
+			player.gen_hgf(board, child, limit, 1, fd);
+			board.unset(child->move);
+		}
+	}
 
 	fprintf(fd, ")\n");
 
@@ -292,6 +309,7 @@ GTPResponse HavannahGTP::gtp_player_load_hgf(vecstr args){
 	if(size != game.getsize()){
 		if(hist.size() == 0){
 			game = HavannahGame(size);
+			set_board();
 		}else{
 			fclose(fd);
 			return GTPResponse(false, "File has the wrong boardsize to match the existing game");
