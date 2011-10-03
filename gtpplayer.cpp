@@ -320,6 +320,7 @@ GTPResponse HavannahGTP::gtp_player_load_hgf(vecstr args){
 
 	Board board(size);
 	Player::Node * node = & player.root;
+	vector<Player::Node *> prefix;
 
 	char side, movestr[5];
 	while(fscanf(fd, ";%c[%5[^]]]", &side, movestr) > 0){
@@ -329,6 +330,7 @@ GTPResponse HavannahGTP::gtp_player_load_hgf(vecstr args){
 			if(node->children.empty())
 				player.create_children_simple(board, node);
 
+			prefix.push_back(node);
 			node = player.find_child(node, move);
 		}else if(hist[board.num_moves()] != move){
 			fclose(fd);
@@ -338,6 +340,7 @@ GTPResponse HavannahGTP::gtp_player_load_hgf(vecstr args){
 
 		eat_whitespace(fd);
 	}
+	prefix.push_back(node);
 
 
 	if(fpeek(fd) != ')'){
@@ -359,10 +362,30 @@ GTPResponse HavannahGTP::gtp_player_load_hgf(vecstr args){
 	}
 
 	eat_whitespace(fd);
-
 	assert(fgetc(fd) == ')');
-
 	fclose(fd);
+
+	while(!prefix.empty()){
+		Player::Node * node = prefix.back();
+		prefix.pop_back();
+
+		Player::Node * child = node->children.begin(),
+			         * end = node->children.end();
+
+		int toplay = game.getboard().toplay();
+		if(prefix.size() % 2 == 1)
+			toplay = 3 - toplay;
+
+		Player::Node * backup = child;
+
+		node->exp.clear();
+		for( ; child != end; child++){
+			node->exp += child->exp.invert();
+			if(child->outcome == toplay || child->exp.num() > backup->exp.num())
+				backup = child;
+		}
+		player.do_backup(node, backup, toplay);
+	}
 
 	return true;
 }
