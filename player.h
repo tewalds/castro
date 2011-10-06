@@ -16,6 +16,8 @@
 #include "lbdist.h"
 #include "compacttree.h"
 #include "log.h"
+#include "solverab.h"
+#include "solverpns.h"
 
 class Player {
 public:
@@ -428,6 +430,8 @@ public:
 
 	void create_children_simple(const Board & board, Node * node);
 	Node * find_child(Node * node, const Move & move);
+
+	int confirm_proof(const Board & board, Node * node, SolverAB & ab, SolverPNS & pns);
 
 protected:
 	Node * return_move(Node * node, int toplay) const;

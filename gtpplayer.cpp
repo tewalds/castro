@@ -687,3 +687,17 @@ GTPResponse HavannahGTP::gtp_player_gammas(vecstr args){
 	return GTPResponse(true);
 }
 
+GTPResponse HavannahGTP::gtp_confirm_proof(vecstr args){
+	Time start;
+
+	SolverAB ab(false);
+	ab.set_memlimit(0);
+
+	SolverPNS pns;
+
+	int outcome = player.confirm_proof(player.rootboard, &player.root, ab, pns);
+	Time end;
+
+	return GTPResponse(true, to_str(outcome) + " " + to_str(end - start));
+}
+

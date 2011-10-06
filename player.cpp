@@ -4,7 +4,6 @@
 #include <cmath>
 #include <string>
 #include "string.h"
-#include "solverab.h"
 #include "alarm.h"
 #include "time.h"
 #include "fileio.h"
@@ -561,5 +560,54 @@ void Player::load_hgf(Board board, Node * node, FILE * fd){
 	eat_char(fd, ')');
 
 	return;
+}
+
+//does not handle draws...
+int Player::confirm_proof(const Board & board, Node * node, SolverAB & ab, SolverPNS & pns){
+	int toplay = board.toplay();
+
+	if(node->children.empty()){
+		Board copy = board;
+
+		if(node->outcome == toplay)
+			copy.move(node->bestmove);
+
+		double timelimit = 0.005;
+
+		ab.set_board(copy);
+		pns.set_board(copy);
+
+		while(1){
+			ab.solve(timelimit);
+
+			if(ab.outcome >= 0){
+				assert(node->outcome < 0 || ab.outcome == node->outcome);
+				return ab.outcome;
+			}
+
+			pns.solve(timelimit);
+
+			if(pns.outcome >= 0){
+				assert(node->outcome < 0 || pns.outcome == node->outcome);
+				return pns.outcome;
+			}
+
+			timelimit *= 3;
+		}
+	}
+
+	for(Node * i = node->children.begin(); i != node->children.end(); i++){
+		if(node->outcome == toplay && node->bestmove != i->move) //only look at the best move for a win
+			continue;
+
+		Board copy = board;
+		copy.move(i->move);
+		int outcome = confirm_proof(copy, i, ab, pns);
+		if(outcome != node->outcome){
+			logerr(board.to_s(true) + "\n" + i->move.to_s() + " " + to_str(toplay) + " " + to_str((int)node->outcome) + " " + to_str(outcome) + "\n");
+			assert(false);
+		}
+	}
+	return node->outcome;
 }
 
