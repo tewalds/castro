@@ -280,8 +280,7 @@ public:
 
 					for(int i = 0; i < 18; i++){
 						Move loc = pos + neighbours[i];
-						if(onboard(loc))
-							*a = MoveValid(loc, xy(loc));
+						*a = MoveValid(loc, (onboard(loc) ? xy(loc) : -1) );
 						++a;
 					}
 				}
