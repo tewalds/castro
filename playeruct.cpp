@@ -562,7 +562,6 @@ PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev
 
 	if(player->instantwin >= 3 && --doinstwin >= 0){
 		Move start, cur, loss = M_UNKNOWN;
-		int dir = 5;
 		int turn = 3 - board.toplay();
 
 		if(player->instantwin == 4){ //must have an edge or corner connection, or it has nothing to offer a group towards a win, ignores rings
@@ -572,25 +571,39 @@ PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev
 
 		}
 
+//		logerr(board.to_s(true));
+
 		//find the first empty cell
-		for(const MoveValid * i = board.nb_begin(prev), *e = board.nb_end(i); i < e; i++, dir++){
-			if(i->onboard() && turn != board.get(i->xy)){
-				start = *i;
+		int dir = -1;
+		for(int i = 0; i <= 5; i++){
+			start = prev + neighbours[i];
+
+			if(!board.onboard(start) || board.get(start) != turn){
+				dir = (i + 5) % 6;
 				break;
 			}
 		}
-		dir = dir % 6;
+
+		if(dir == -1) //possible if it's in the middle of a ring, which is possible if rings are being ignored
+			goto skipinstwin3;
+
 		cur = start;
+
+//		logerr(prev.to_s() + ":");
 
 		//follow contour of the current group looking for wins
 		do{
+//			logerr(" " + to_str((int)cur.y) + "," + to_str((int)cur.x));
+			//check the current cell
 			if(board.onboard(cur) && board.get(cur) == 0 && board.test_win(cur, turn, checkrings) > 0){
+//				logerr(" loss");
 				if(loss == M_UNKNOWN)
 					loss = cur;
 				else if(loss != cur)
-					return PairMove(loss, cur); //game over, two wins found
+					return PairMove(loss, cur); //game over, two wins found for opponent
 			}
 
+			//advance to the next cell
 			for(int i = 5; i <= 9; i++){
 				int nd = (dir + i) % 6;
 				Move next = cur + neighbours[nd];
@@ -601,7 +614,9 @@ PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev
 					break;
 				}
 			}
-		}while(cur != start);
+		}while(cur != start); //potentially skips part of it when the start is in a pocket, rare bug
+
+//		logerr("\n");
 
 		if(loss != M_UNKNOWN)
 			return loss;
