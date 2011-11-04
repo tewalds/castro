@@ -198,7 +198,7 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int remain) const {
 	float val, maxval = -1000000000;
 	float logvisits = log(node->exp.num());
-	int dynwidenlim = (player->dynwiden > 0 ? (int)(logvisits/player->logdynwiden) : 361);
+	unsigned int dynwidenlim = (player->dynwiden > 0 ? (unsigned int)(logvisits/player->logdynwiden) : 361);
 
 	float raveval = use_rave * (player->ravefactor + player->decrrave*remain);
 	float explore = use_explore * player->explore;
@@ -207,9 +207,9 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int
 
 	Node * ret = NULL,
 		 * child = node->children.begin(),
-		 * end = min(node->children.end(), child + dynwidenlim);
+		 * end   = node->children.end();
 
-	for(; child != end; child++){
+	for(; child != end && dynwidenlim >= 0; child++, dynwidenlim--){
 		if(child->outcome >= 0){
 			if(child->outcome == toplay) //return a win immediately
 				return child;
