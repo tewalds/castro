@@ -147,18 +147,19 @@ public:
 		float value(float ravefactor, bool knowledge, float fpurgency){
 			float val = fpurgency;
 			float expnum = exp.num();
+			float ravenum = rave.num();
 
 			if(ravefactor <= min_rave){
 				if(expnum > 0)
 					val = exp.avg();
-			}else if(rave.num() || expnum > 0){
+			}else if(ravenum > 0 || expnum > 0){
 				float alpha = ravefactor/(ravefactor + expnum);
-//				float alpha = sqrt(ravefactor/(ravefactor + 3*exp.num()));
-//				float alpha = (float)rave.num()/((float)exp.num() + (float)rave.num() + 4.0*exp.num()*rave.num()*ravefactor);
+//				float alpha = sqrt(ravefactor/(ravefactor + 3.0f*expnum));
+//				float alpha = ravenum/(expnum + ravenum + expnum*ravenum*ravefactor);
 
 				val = 0;
-				if(rave.num()) val += alpha*rave.avg();
-				if(expnum > 0) val += (1-alpha)*exp.avg();
+				if(ravenum > 0) val += alpha*rave.avg();
+				if(expnum  > 0) val += (1.0f-alpha)*exp.avg();
 			}
 
 			if(knowledge && know > 0){
