@@ -1,7 +1,7 @@
 .PHONY: clean fresh run gendeps
 
 LDFLAGS   += -lpthread
-OBJECTS		= castro.o fileio.o gtpgeneral.o gtpplayer.o gtpsolver.o mtrand.o string.o \
+OBJECTS		= castro.o fileio.o gtpgeneral.o gtpplayer.o gtpsolver.o string.o \
 				solverab.o solverpns.o solverpns2.o solverpns_tt.o player.o playeruct.o zobrist.o alarm.o
 
 ifdef DEBUG
@@ -28,13 +28,12 @@ mm: mm.cpp
 castro: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
-
 alarm.o: alarm.cpp alarm.h time.h
 builddb.o: builddb.cpp proofdb.h string.h move.h
 castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h move.h \
  zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
- player.h time.h depthstats.h mtrand.h weightedrandtree.h
+ player.h time.h depthstats.h xorshift.h weightedrandtree.h
 checkproof.o: checkproof.cpp proofdb.h string.h move.h board.h zobrist.h \
  types.h hashset.h solverab.h solver.h solverpns.h compacttree.h thread.h \
  lbdist.h log.h
@@ -44,23 +43,22 @@ genhgf.o: genhgf.cpp proofdb.h string.h move.h board.h zobrist.h types.h \
 gtpgeneral.o: gtpgeneral.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
- player.h time.h depthstats.h mtrand.h weightedrandtree.h
+ player.h time.h depthstats.h xorshift.h weightedrandtree.h
 gtpplayer.o: gtpplayer.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
- player.h time.h depthstats.h mtrand.h weightedrandtree.h fileio.h
+ player.h time.h depthstats.h xorshift.h weightedrandtree.h fileio.h
 gtpsolver.o: gtpsolver.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
- player.h time.h depthstats.h mtrand.h weightedrandtree.h
+ player.h time.h depthstats.h xorshift.h weightedrandtree.h
 mm.o: mm.cpp
-mtrand.o: mtrand.cpp mtrand.h
 player.o: player.cpp player.h time.h types.h move.h string.h board.h \
- zobrist.h hashset.h depthstats.h thread.h mtrand.h weightedrandtree.h \
+ zobrist.h hashset.h depthstats.h thread.h xorshift.h weightedrandtree.h \
  lbdist.h compacttree.h log.h solverab.h solver.h solverpns.h alarm.h \
  fileio.h
 playeruct.o: playeruct.cpp player.h time.h types.h move.h string.h \
- board.h zobrist.h hashset.h depthstats.h thread.h mtrand.h \
+ board.h zobrist.h hashset.h depthstats.h thread.h xorshift.h \
  weightedrandtree.h lbdist.h compacttree.h log.h solverab.h solver.h \
  solverpns.h
 solverab.o: solverab.cpp solverab.h solver.h board.h move.h string.h \

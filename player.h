@@ -11,7 +11,7 @@
 #include "board.h"
 #include "depthstats.h"
 #include "thread.h"
-#include "mtrand.h"
+#include "xorshift.h"
 #include "weightedrandtree.h"
 #include "lbdist.h"
 #include "compacttree.h"
@@ -246,8 +246,8 @@ public:
 	class PlayerThread {
 	protected:
 	public:
-		mutable MTRand_int32 rand32;
-		mutable MTRand unitrand;
+		mutable XORShift_uint32 rand32;
+		mutable XORShift_float unitrand;
 		Thread thread;
 		Player * player;
 	public:
