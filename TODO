@@ -6,6 +6,15 @@ worker stuff
 
 fix crash after last move, seems to be related to pondering
 
+Features for weighted random rollouts:
+- pattern - empty, white, black, offboard - 4^6 = 4096, minus symmetry = ~300
+- distance to last move
+- distance to second last move
+- how many edges - 0,1,2
+- how many corners - 0,1
+- group size
+- forms vc
+
 
 Test
 - dynamic widening
@@ -34,6 +43,7 @@ Store nodes in a hash table instead of tree
 - how to garbage collect?
 - how to keep tree between moves?
 - use a persistent db instead?
+- use an array of hash tables, resizing one at a time so little extra memory is needed
 
 Build a large persistent tree in some database
 - save and reload heavy Nodes between games
@@ -52,7 +62,8 @@ Count nodes expanded per move
 tree checkpointing to deal with a crash?
 
 detect ties
-- if not using lbdists, use 1 flood fill instead of 24
+- if not using lbdists, use few flood fill instead of 24
+  - if edges/corners can reach each other, no need to run extra flood fills
 - keep bits for corners and edges for each colour
 - if crossing empty or your own, propagate connections, otherwise don't
 - how to go backwards?
