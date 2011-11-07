@@ -1,0 +1,171 @@
+a2 a1
+a2 a3
+a2 a4
+a2 b1
+a2 b2
+a2 b3
+a2 b4
+a2 b5
+a2 c1
+a2 c2
+a2 c3
+a2 c4
+a2 c5
+a2 c6
+a2 d1
+a2 d2
+a2 d3
+a2 d4
+a2 d5
+a2 d6
+a2 d7
+a2 e2
+a2 e3
+a2 e4
+a2 e5
+a2 e6
+a2 e7
+a2 f3
+a2 f4
+a2 f5
+a2 f6
+a2 f7
+a2 g4
+a2 g5
+a2 g6
+a2 g7
+b2
+b3
+
+c3 a1 g7 a2
+c3 a1 g7 a3
+c3 a1 g7 a4
+c3 a1 g7 b2
+c3 a1 g7 b3
+c3 a1 g7 b4
+c3 a1 g7 b5
+c3 a1 g7 c4
+c3 a1 g7 c5
+c3 a1 g7 c6
+c3 a1 g7 d4
+c3 a1 g7 d5
+c3 a1 g7 d6
+c3 a1 g7 d7
+c3 a1 g7 e5
+c3 a1 g7 e6
+c3 a1 g7 e7
+c3 a1 g7 f6
+c3 a1 g7 f7
+
+c3 a2
+c3 a3
+c3 a4
+c3 b2
+c3 b3
+c3 b4
+c3 b5
+c3 c4
+c3 c5
+c3 c6
+c3 d4
+c3 d5
+c3 d6
+c3 d7
+c3 e5
+c3 e6
+c3 e7
+c3 f6
+c3 f7
+c3 g7
+
+d4 a1 g7 a2
+d4 a1 g7 a3
+d4 a1 g7 a4
+d4 a1 g7 b2
+d4 a1 g7 b3
+
+d4 a1 g7 b4 d6 a2
+d4 a1 g7 b4 d6 a3
+d4 a1 g7 b4 d6 a4
+d4 a1 g7 b4 d6 b1
+d4 a1 g7 b4 d6 b2
+d4 a1 g7 b4 d6 b3
+d4 a1 g7 b4 d6 b5
+d4 a1 g7 b4 d6 c1
+d4 a1 g7 b4 d6 c2
+d4 a1 g7 b4 d6 c3
+d4 a1 g7 b4 d6 c4
+d4 a1 g7 b4 d6 c5
+d4 a1 g7 b4 d6 c6
+d4 a1 g7 b4 d6 d1
+d4 a1 g7 b4 d6 d2
+d4 a1 g7 b4 d6 d3
+d4 a1 g7 b4 d6 d5
+d4 a1 g7 b4 d6 d7
+d4 a1 g7 b4 d6 e2
+d4 a1 g7 b4 d6 e3
+d4 a1 g7 b4 d6 e4
+d4 a1 g7 b4 d6 e5
+d4 a1 g7 b4 d6 e6
+d4 a1 g7 b4 d6 e7
+d4 a1 g7 b4 d6 f3
+d4 a1 g7 b4 d6 f4
+d4 a1 g7 b4 d6 f5
+d4 a1 g7 b4 d6 f6
+d4 a1 g7 b4 d6 f7
+d4 a1 g7 b4 d6 g4
+d4 a1 g7 b4 d6 g5
+d4 a1 g7 b4 d6 g6
+
+d4 a1 g7 b5
+d4 a1 g7 c3
+d4 a1 g7 c4
+d4 a1 g7 c5
+d4 a1 g7 c6
+d4 a1 g7 d5
+d4 a1 g7 d6
+d4 a1 g7 d7
+d4 a1 g7 e5
+d4 a1 g7 e6
+d4 a1 g7 e7
+d4 a1 g7 f6
+d4 a1 g7 f7
+
+d4 a2 d1 a1
+d4 a2 d1 a3
+d4 a2 d1 a4
+d4 a2 d1 b1
+d4 a2 d1 b2
+d4 a2 d1 b3
+d4 a2 d1 b4
+d4 a2 d1 b5
+d4 a2 d1 c1
+d4 a2 d1 c2
+d4 a2 d1 c3
+d4 a2 d1 c4
+d4 a2 d1 c5
+d4 a2 d1 c6
+d4 a2 d1 d2
+d4 a2 d1 d3
+d4 a2 d1 d5
+d4 a2 d1 d6
+d4 a2 d1 d7
+d4 a2 d1 e2
+d4 a2 d1 e3
+d4 a2 d1 e4
+d4 a2 d1 e5
+d4 a2 d1 e6
+d4 a2 d1 e7
+d4 a2 d1 f3
+d4 a2 d1 f4
+d4 a2 d1 f5
+d4 a2 d1 f6
+d4 a2 d1 f7
+d4 a2 d1 g4
+d4 a2 d1 g5
+d4 a2 d1 g6
+d4 a2 d1 g7
+
+d4 b2
+d4 b3
+d4 c3
