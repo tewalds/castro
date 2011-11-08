@@ -37,7 +37,7 @@ static const int BitsSetTable64[] = {
  *   16   4   3  14
  *     10  15   9
  */
-const MoveScore neighbours[18] = {
+const MoveScore neighbours[18] = { //the order of the 3 sets is important for calculating symmetry in the patterns
 	MoveScore(-1,-1, 3), MoveScore(0,-1, 3), MoveScore(1, 0, 3), MoveScore(1, 1, 3), MoveScore( 0, 1, 3), MoveScore(-1, 0, 3), //direct neighbours, clockwise
 	MoveScore(-2,-2, 1), MoveScore(0,-2, 1), MoveScore(2, 0, 1), MoveScore(2, 2, 1), MoveScore( 0, 2, 1), MoveScore(-2, 0, 1), //corners of ring 2, easy to block
 	MoveScore(-1,-2, 2), MoveScore(1,-1, 2), MoveScore(2, 1, 2), MoveScore(1, 2, 2), MoveScore(-1, 1, 2), MoveScore(-2,-1, 2), //sides of ring 2, virtual connections
@@ -55,21 +55,26 @@ public:
 		unsigned size   : 7; //size of this group of cells
 		unsigned corner : 6; //which corners are this group connected to
 		unsigned edge   : 6; //which edges are this group connected to
-		unsigned local  : 2; //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
+		mutable unsigned ringdepth : 6; //when doing a ring search, what depth was this position found
+		unsigned perm   : 1; //is this a permanent piece or a randomly placed piece?
+		unsigned local  : 4; //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
+		unsigned pattern : 36;
+
 /*/
 		uint8_t piece;  //who controls this cell, 0 for none, 1,2 for players
 		uint8_t size;   //size of this group of cells
 mutable uint16_t parent; //parent for this group of cells
 		uint8_t corner; //which corners are this group connected to
 		uint8_t edge;   //which edges are this group connected to
+mutable uint8_t ringdepth; //when doing a ring search, what depth was this position found
 		unsigned perm : 4;   //is this a permanent piece or a randomly placed piece?
 		unsigned local: 4;  //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
-mutable uint8_t ringdepth; //when doing a ring search, what depth was this position found
+		uint64_t pattern;
 //*/
 
-		Cell() : piece(0), size(0), parent(0), corner(0), edge(0), perm(0), local(0), ringdepth(0) { }
+		Cell() : piece(0), size(0), parent(0), corner(0), edge(0), ringdepth(0), perm(0), local(0), pattern(0) { }
 		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e, unsigned int l) :
-			piece(p), size(s), parent(a), corner(c), edge(e), perm(0), local(l), ringdepth(0) { }
+			piece(p), size(s), parent(a), corner(c), edge(e), ringdepth(0), perm(0), local(l), pattern(0) { }
 
 		int numcorners() const { return BitsSetTable64[corner]; }
 		int numedges()   const { return BitsSetTable64[edge];   }
@@ -163,9 +168,19 @@ public:
 		cells.resize(vecsize());
 
 		for(int y = 0; y < size_d; y++){
-			for(int x = 0; x < size_d; x++){
-				int i = xy(x, y);
+			for(int x = linestart(y); x < lineend(y); x++){
+				Move pos(x, y);
+				int i = xy(pos);
+
+				uint64_t p = 0;
+				for(int j = 0; j < 18; j++){
+					Move loc = neighbours[j] + pos;
+					if(!onboard(loc))
+						p |= (0x40001ull << j);
+				}
+
 				cells[i] = Cell(0, i, 1, (1 << iscorner(x, y)), (1 << isedge(x, y)), 0);
+				cells[i].pattern = p;
 			}
 		}
 	}
@@ -741,46 +756,65 @@ public:
 		return m;
 	}
 
-	unsigned int sympattern(const Move & pos) const { return sympattern(xy(pos)); }
-	unsigned int sympattern(int posxy)        const { return pattern_symmetry(pattern(posxy)); }
+	uint64_t sympattern(const Move & pos) const { return sympattern(xy(pos)); }
+	uint64_t sympattern(int posxy)        const { return pattern_symmetry(pattern(posxy)); }
 
-	unsigned int pattern(const Move & pos) const { return pattern(xy(pos)); }
-	unsigned int pattern(int posxy)        const {
-		unsigned int p = 0;
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
-			p <<= 2;
-			if(i->onboard())
-				p |= cells[i->xy].piece;
-			else
-				p |= 3;
-		}
+	uint64_t pattern(const Move & pos) const { return pattern(xy(pos)); }
+	uint64_t pattern(int posxy)        const { return cells[posxy].pattern; }
+
+	//working in octal here, because it's groups of 6 bits
+	static uint64_t pattern_invert(uint64_t p){ //switch players
+		return ((p & 0777777000000ull) >> 18) | ((p & 0000000777777ull) << 18);
+	}
+	static uint64_t pattern_rotate(uint64_t p){
+		p = ((p & 0767676767676ull) >>  1) | ((p & 0010101010101ull) <<  5); //012345 -> 501234
 		return p;
 	}
+	static uint64_t pattern_mirror(uint64_t p){
+		//this is a real pain, because some, but not all fall on the axis of symmetry.
 
-	static unsigned int pattern_invert(unsigned int p){ //switch players
-		return ((p & 0xAAA) >> 1) | ((p & 0x555) << 1);
+		uint64_t a = p, //neighbours and dist 2, do 012345 -> 543210
+		         b = p; //dist 2 vcs, do            012345 -> 432105
+		a = ((a & 0007070007070ull) >>  3) | ((a & 0000707000707ull) <<  3); // 012345 -> 345012
+		a = ((a & 0004444004444ull) >>  2) | ((a & 0001111001111ull) <<  2) | (a & 0002222002222ull); // 345012 -> 543210
+		b = ((b & 0300000300000ull) >>  3) | ((b & 0030000030000ull) <<  3); // 012345 -> 342015
+		b = ((b & 0220000220000ull) >>  1) | ((b & 0110000110000ull) <<  1); // 342015 -> 432105
+		p = a | b | (p & 0440000440000ull);
+
+//		I'm not sure why this version doesn't work. It reflects everything, but then has to rotate the one set back as a correction
+//		p = ((p & 0707070707070ull) >>  3) | ((p & 0070707070707ull) <<  3); // 012345 -> 345012
+//		p = ((p & 0444444444444ull) >>  2) | ((p & 0111111111111ull) <<  2) | (p & 0222222222222ull); // 345012 -> 543210
+//		p = ((p & 0400000400000ull) >>  5) | ((p & 0370000370000ull) <<  1) | (p & 0007777007777ull); // 543210 -> 432105
+
+		return p;
 	}
-	static unsigned int pattern_rotate(unsigned int p){
-		return (((p & 3) << 10) | (p >> 2));
-	}
-	static unsigned int pattern_mirror(unsigned int p){
-		//012345 -> 054321, mirrors along the 0,3 axis to move fewer bits
-		return (p & ((3 << 10) | (3 << 4))) | ((p & (3 << 8)) >> 8) | ((p & (3 << 6)) >> 4) | ((p & (3 << 2)) << 4) | ((p & (3 << 0)) << 8);
-	}
-	static unsigned int pattern_symmetry(unsigned int p){ //takes a pattern and returns the representative version
-		unsigned int m = p;                 //012345
-		m = min(m, (p = pattern_rotate(p)));//501234
-		m = min(m, (p = pattern_rotate(p)));//450123
-		m = min(m, (p = pattern_rotate(p)));//345012
-		m = min(m, (p = pattern_rotate(p)));//234501
-		m = min(m, (p = pattern_rotate(p)));//123450
-		m = min(m, (p = pattern_mirror(pattern_rotate(p))));//012345 -> 054321
-		m = min(m, (p = pattern_rotate(p)));//105432
-		m = min(m, (p = pattern_rotate(p)));//210543
-		m = min(m, (p = pattern_rotate(p)));//321054
-		m = min(m, (p = pattern_rotate(p)));//432105
-		m = min(m, (p = pattern_rotate(p)));//543210
+	static uint64_t pattern_symmetry(uint64_t p){ //takes a pattern and returns the representative version
+		uint64_t m = p, t = p;              //012345
+		m = min(m, (t = pattern_rotate(t)));//501234
+		m = min(m, (t = pattern_rotate(t)));//450123
+		m = min(m, (t = pattern_rotate(t)));//345012
+		m = min(m, (t = pattern_rotate(t)));//234501
+		m = min(m, (t = pattern_rotate(t)));//123450
+		m = min(m, (t = pattern_mirror(p)));//543210
+		m = min(m, (t = pattern_rotate(t)));//054321
+		m = min(m, (t = pattern_rotate(t)));//105432
+		m = min(m, (t = pattern_rotate(t)));//210543
+		m = min(m, (t = pattern_rotate(t)));//321054
+		m = min(m, (t = pattern_rotate(t)));//432105
+
 		return m;
+	}
+	static string pattern_str(uint64_t p){
+		char buf[42];
+		char * s = buf + 41;
+		*s-- = '\0';
+		for(int i = 0; i < 36; i++){
+			*s-- = ((p & 1) ? '1' : '0');
+			p >>= 1;
+			if(i % 6 == 5)
+				*s-- = ' ';
+		}
+		return buf;
 	}
 
 	bool move(const Move & pos, bool checkwin = true, bool locality = false, int ringsize = 6, int permring = 0){
@@ -794,27 +828,29 @@ public:
 			return true;
 		}
 
+		int posxy = xy(pos);
 		char turn = toplay();
 		char localshift = (turn & 2); //0 for p1, 2 for p2
+		char patternshift = (localshift ? 18 : 0); //0 for p1, 18 for p2
 
 		set(pos, !permring);
 
-		if(locality){
-			for(int i = 6; i < 18; i++){
-				MoveScore loc = neighbours[i] + pos;
+		//locality
+		for(int i = 0; i < 18; i++){
+			MoveScore loc = neighbours[i] + pos;
 
-				if(onboard(loc))
-					cells[xy(loc)].local |= (loc.score << localshift);
+			if(onboard(loc)){
+				Cell * c = & cells[xy(loc)];
+				c->local |= (loc.score << localshift);
+				c->pattern |= (1 << (i + patternshift));
 			}
 		}
 
-		int posxy = xy(pos);
-		bool islocal = (local(pos, turn) == 3);
 		bool alreadyjoined = false; //useful for finding rings
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
-			if(i->onboard()){
-				cells[i->xy].local |= (3 << localshift);
-				if(islocal && turn == get(i->xy)){
+
+		if(local(posxy, turn) == 3){
+			for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
+				if(i->onboard() && turn == get(i->xy)){
 					alreadyjoined |= join_groups(posxy, i->xy);
 					i++; //skip the next one. If it is the same group,
 						 //it is already connected and forms a corner, which we can ignore

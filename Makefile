@@ -33,7 +33,7 @@ builddb.o: builddb.cpp proofdb.h string.h move.h
 castro.o: castro.cpp havannahgtp.h gtp.h string.h game.h board.h move.h \
  zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
- player.h time.h depthstats.h xorshift.h weightedrandtree.h
+ player.h time.h depthstats.h xorshift.h weightedrandtree.h patterndb.h
 checkproof.o: checkproof.cpp proofdb.h string.h move.h board.h zobrist.h \
  types.h hashset.h solverab.h solver.h solverpns.h compacttree.h thread.h \
  lbdist.h log.h
@@ -43,24 +43,25 @@ genhgf.o: genhgf.cpp proofdb.h string.h move.h board.h zobrist.h types.h \
 gtpgeneral.o: gtpgeneral.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
- player.h time.h depthstats.h xorshift.h weightedrandtree.h
+ player.h time.h depthstats.h xorshift.h weightedrandtree.h patterndb.h
 gtpplayer.o: gtpplayer.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
- player.h time.h depthstats.h xorshift.h weightedrandtree.h fileio.h
+ player.h time.h depthstats.h xorshift.h weightedrandtree.h patterndb.h \
+ fileio.h
 gtpsolver.o: gtpsolver.cpp havannahgtp.h gtp.h string.h game.h board.h \
  move.h zobrist.h types.h hashset.h solver.h solverab.h solverpns.h \
  compacttree.h thread.h lbdist.h log.h solverpns2.h solverpns_tt.h \
- player.h time.h depthstats.h xorshift.h weightedrandtree.h
+ player.h time.h depthstats.h xorshift.h weightedrandtree.h patterndb.h
 mm.o: mm.cpp
 player.o: player.cpp player.h time.h types.h move.h string.h board.h \
  zobrist.h hashset.h depthstats.h thread.h xorshift.h weightedrandtree.h \
- lbdist.h compacttree.h log.h solverab.h solver.h solverpns.h alarm.h \
- fileio.h
+ lbdist.h compacttree.h log.h solverab.h solver.h solverpns.h patterndb.h \
+ alarm.h fileio.h
 playeruct.o: playeruct.cpp player.h time.h types.h move.h string.h \
  board.h zobrist.h hashset.h depthstats.h thread.h xorshift.h \
  weightedrandtree.h lbdist.h compacttree.h log.h solverab.h solver.h \
- solverpns.h
+ solverpns.h patterndb.h
 solverab.o: solverab.cpp solverab.h solver.h board.h move.h string.h \
  zobrist.h types.h hashset.h time.h alarm.h log.h
 solverpns2.o: solverpns2.cpp solverpns2.h solver.h board.h move.h \

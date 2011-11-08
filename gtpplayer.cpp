@@ -666,21 +666,31 @@ GTPResponse HavannahGTP::gtp_player_gammas(vecstr args){
 
 	Board board = game.getboard();
 
-	for(int i = 0; i < 4096; i++){
-		int a;
-		float f;
-		ifs >> a >> f;
+	unsigned int num;
+	uint64_t p;
+	float f;
 
-		if(i != a){
-			ifs.close();
-			return GTPResponse(false, "Line " + to_str(i) + " doesn't match the expected value");
-		}
+	ifs >> num >> f;
 
-		int s = board.pattern_symmetry(i);
-		if(s == i)
-			player.gammas[i] = f;
-		else
-			player.gammas[i] = player.gammas[s];
+	player.gammas.init(num*12);
+	player.gammas.set_default(f);
+
+	for(unsigned int i = 0; i < num; i++){
+		ifs >> p >> f;
+
+		uint64_t t = p;
+		player.gammas.set(p, f);//012345
+		player.gammas.set((t = board.pattern_rotate(t)), f);//501234
+		player.gammas.set((t = board.pattern_rotate(t)), f);//450123
+		player.gammas.set((t = board.pattern_rotate(t)), f);//345012
+		player.gammas.set((t = board.pattern_rotate(t)), f);//234501
+		player.gammas.set((t = board.pattern_rotate(t)), f);//123450
+		player.gammas.set((t = board.pattern_mirror(p)), f);//543210
+		player.gammas.set((t = board.pattern_rotate(t)), f);//054321
+		player.gammas.set((t = board.pattern_rotate(t)), f);//105432
+		player.gammas.set((t = board.pattern_rotate(t)), f);//210543
+		player.gammas.set((t = board.pattern_rotate(t)), f);//321054
+		player.gammas.set((t = board.pattern_rotate(t)), f);//432105
 	}
 
 	ifs.close();

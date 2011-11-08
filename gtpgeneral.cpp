@@ -103,7 +103,7 @@ GTPResponse HavannahGTP::gtp_patterns(vecstr args){
 	Board board = game.getboard();
 	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
 		ret += move->to_s() + " ";
-		unsigned int p = board.pattern(*move);
+		uint64_t p = board.pattern(*move);
 		if(symmetric)
 			p = board.pattern_symmetry(p);
 		if(invert && board.toplay() == 2)

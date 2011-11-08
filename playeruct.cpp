@@ -503,7 +503,7 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 		if(wrand){
 			//update neighbour weights
-			for(const MoveValid * i = board.nb_begin(move), *e = board.nb_end(i); i < e; i++){
+			for(const MoveValid * i = board.nb_begin(move), *e = board.nb_endhood(i); i < e; i++){
 				if(i->onboard() && board.get(i->xy) == 0){
 					unsigned int p = board.pattern(i->xy);
 					wtree[0].set_weight(i->xy, player->gammas[p]);

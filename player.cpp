@@ -166,8 +166,6 @@ Player::Player() {
 	instantwin     = 0;
 	instwindepth   = 1000;
 
-	for(int i = 0; i < 4096; i++)
-		gammas[i] = 1;
 
 	//no threads started until a board is set
 	threadstate = Thread_Wait_Start;
