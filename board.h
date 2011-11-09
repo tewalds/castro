@@ -61,23 +61,44 @@ public:
 		unsigned pattern : 36;
 
 /*/
-		uint8_t piece;  //who controls this cell, 0 for none, 1,2 for players
-		uint8_t size;   //size of this group of cells
-mutable uint16_t parent; //parent for this group of cells
-		uint8_t corner; //which corners are this group connected to
-		uint8_t edge;   //which edges are this group connected to
-mutable uint8_t ringdepth; //when doing a ring search, what depth was this position found
-		unsigned perm : 4;   //is this a permanent piece or a randomly placed piece?
-		unsigned local: 4;  //0 for far, 1 for distance 2, 2 for virtual connection, 3 for neighbour
-		uint64_t pattern;
+		uint8_t  piece;     //who controls this cell, 0 for none, 1,2 for players
+		uint8_t  size;      //size of this group of cells
+mutable uint16_t parent;    //parent for this group of cells
+		uint8_t  corner;    //which corners are this group connected to
+		uint8_t  edge;      //which edges are this group connected to
+mutable uint8_t  ringdepth; //when doing a ring search, what depth was this position found
+		uint8_t  perm;      //is this a permanent piece or a randomly placed piece?
+		uint64_t pattern;   //two 18bit patterns for the neighbours of this cell
 //*/
 
-		Cell() : piece(0), size(0), parent(0), corner(0), edge(0), ringdepth(0), perm(0), local(0), pattern(0) { }
-		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e, unsigned int l) :
-			piece(p), size(s), parent(a), corner(c), edge(e), ringdepth(0), perm(0), local(l), pattern(0) { }
+		Cell() : piece(0), size(0), parent(0), corner(0), edge(0), ringdepth(0), perm(0), pattern(0) { }
+		Cell(unsigned int p, unsigned int a, unsigned int s, unsigned int c, unsigned int e, unsigned int pa) :
+			piece(p), size(s), parent(a), corner(c), edge(e), ringdepth(0), perm(0), pattern(pa) { }
 
 		int numcorners() const { return BitsSetTable64[corner]; }
 		int numedges()   const { return BitsSetTable64[edge];   }
+
+		uint64_t pattern_side(int turn) const {
+			if(turn == 1)
+				return pattern & ~(pattern >> 18);
+			else
+				return (pattern >> 18) & ~pattern;
+		}
+		bool test_local(int turn) const {
+			uint64_t p = pattern_side(turn);
+			return (p & 077);
+		}
+		int local(int turn) const {
+			uint64_t p = pattern_side(turn);
+			if(p & 077)
+				return 3;
+			int l = 0;
+			if(p & 0770000)
+				l += 2;
+			if(p & 07700)
+				l += 1;
+			return l;
+		}
 	};
 
 	class MoveIterator { //only returns valid moves...
@@ -218,10 +239,7 @@ public:
 	int geton(const MoveValid & m) const { return (m.onboard() ? get(m.xy) : 0); }
 
 	int local(const Move & m, char turn) const { return local(xy(m), turn); }
-	int local(int i,          char turn) const {
-		char localshift = (turn & 2); //0 for p1, 2 for p2
-		return ((cells[i].local >> localshift) & 3);
-	}
+	int local(int i,          char turn) const { return cells[i].local(turn); }
 
 
 	//assumes x, y are in array bounds
@@ -462,13 +480,15 @@ public:
 		int posxy = xy(pos);
 
 		Cell testcell = cells[find_group(pos)];
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
-			if(i->onboard() && turn == get(i->xy)){
-				const Cell * g = & cells[find_group(i->xy)];
-				testcell.corner |= g->corner;
-				testcell.edge   |= g->edge;
-				testcell.size   += g->size; //not quite accurate if it's joining the same group twice
-				i++; //skip the next one
+		if(testcell.test_local(turn)){
+			for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
+				if(i->onboard() && turn == get(i->xy)){
+					const Cell * g = & cells[find_group(i->xy)];
+					testcell.corner |= g->corner;
+					testcell.edge   |= g->edge;
+					testcell.size   += g->size; //not quite accurate if it's joining the same group twice
+					i++; //skip the next one
+				}
 			}
 		}
 		return testcell;
@@ -836,19 +856,14 @@ public:
 		set(pos, !permring);
 
 		//locality
-		for(int i = 0; i < 18; i++){
-			MoveScore loc = neighbours[i] + pos;
-
-			if(onboard(loc)){
-				Cell * c = & cells[xy(loc)];
-				c->local |= (loc.score << localshift);
-				c->pattern |= (1 << (i + patternshift));
-			}
-		}
+		int j = 0;
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_endhood(i); i < e; i++, j++)
+			if(i->onboard())
+				cells[i->xy].pattern |= (1 << (j + patternshift));
 
 		bool alreadyjoined = false; //useful for finding rings
 
-		if(local(posxy, turn) == 3){
+		if(test_local(posxy, turn)){
 			for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 				if(i->onboard() && turn == get(i->xy)){
 					alreadyjoined |= join_groups(posxy, i->xy);
@@ -876,9 +891,8 @@ public:
 		return true;
 	}
 
-	bool test_local(const Move & pos, char turn) const {
-		return (local(pos, turn) == 3);
-	}
+	bool test_local(const Move & pos, char turn) const { return test_local(xy(pos), turn); }
+	bool test_local(int i,            char turn) const { return cells[i].test_local(turn); }
 
 	//test if making this move would win, but don't actually make the move
 	int test_win(const Move & pos, char turn = 0, bool checkrings = true) const {
