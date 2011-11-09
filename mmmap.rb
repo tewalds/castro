@@ -21,7 +21,7 @@ while(ARGV.length > 0)
 	when "-m", "--mapfile"  then $mapfile       = ARGV.shift
 	when "-h", "--help"     then
 		puts "Map an mm input file to and have a smaller set of patterns."
-		puts "Usage: #{$0} [-k] [-n num] [-e exp] -i infile -o outfile -m mapfile"
+		puts "Usage: #{$0} [-k] [-n num] [-f freq] -i infile -o outfile -m mapfile"
 		puts "  -k --keep     Replace the low frequency patterns with a generic pattern"
 		puts "  -n --num      Limit the number of patterns to this many"
 		puts "  -f --freq     Only keep patterns with this frequency or greater [#{$freqlimit}]"
