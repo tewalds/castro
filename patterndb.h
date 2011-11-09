@@ -16,7 +16,7 @@ class PatternDB {
 	Entry * table;
 
 public:
-	PatternDB() : default_val(1), size(0), mask(0), table(NULL) { }
+	PatternDB() : default_val(1), size(0), num(0), mask(0), table(NULL) { }
 	PatternDB(unsigned int s){ init(s); }
 	~PatternDB(){
 		clear();
@@ -25,6 +25,7 @@ public:
 	void init(unsigned int s){
 		clear();
 		size = roundup(s)*4;
+		num = 0;
 		mask = size-1;
 		table = new Entry[size];
 	}
@@ -38,6 +39,7 @@ public:
 	void clean(){
 		for(uintptr_t i = 0; i < size; i++)
 			table[i] = Entry();
+		num = 0;
 	}
 
 	void set_default(float gamma){
@@ -52,20 +54,21 @@ public:
 		num++;
 	}
 
-	const float & operator[](uint64_t pattern) const { return get(pattern); }
-	const float & get(uint64_t pattern) const {
+	const float & operator[](uint64_t pattern) const {
 		for(uint64_t i = mix_bits(pattern) & mask; table[i].pattern != empty; i = (i+1) & mask)
 			if(table[i].pattern == pattern)
 				return table[i].gamma;
 		return default_val;
 	}
 
-	//use the xorshift mixer
-	static uint64_t mix_bits(uint64_t p){
-		p ^= (p << 13);
-		p ^= (p >>  7);
-		p ^= (p << 17);
-		return p;
+	//from murmurhash
+	static uint64_t mix_bits(uint64_t h){
+		h ^= h >> 33;
+		h *= 0xff51afd7ed558ccd;
+		h ^= h >> 33;
+		h *= 0xc4ceb9fe1a85ec53;
+		h ^= h >> 33;
+		return h;
 	}
 
 	//round a number up to the nearest power of 2
