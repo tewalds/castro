@@ -302,6 +302,10 @@ public:
 
 			for(int a = 0; a < 4; a++)
 				times[a] = 0;
+
+			wtree[0].resize(player->rootboard.vecsize());
+			wtree[1].resize(player->rootboard.vecsize());
+
 		}
 
 	private:

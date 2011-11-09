@@ -850,16 +850,15 @@ public:
 
 		int posxy = xy(pos);
 		char turn = toplay();
-		char localshift = (turn & 2); //0 for p1, 2 for p2
-		char patternshift = (localshift ? 18 : 0); //0 for p1, 18 for p2
 
 		set(pos, !permring);
 
-		//locality
-		int j = 0;
-		for(const MoveValid * i = nb_begin(posxy), *e = nb_endhood(i); i < e; i++, j++)
+		//update the patterns
+		char patternshift = (turn == 1 ? 0 : 18);
+		uint64_t bit = (1 << patternshift);
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_endhood(i); i < e; i++, bit <<= 1)
 			if(i->onboard())
-				cells[i->xy].pattern |= (1 << (j + patternshift));
+				cells[i->xy].pattern |= bit;
 
 		bool alreadyjoined = false; //useful for finding rings
 

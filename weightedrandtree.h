@@ -55,6 +55,12 @@ public:
 			weights[i] = 0;
 	}
 
+	//reset only the weights to 0, O(s), must be followed by rebuild_tree
+	void clear_weights(){
+		for(unsigned int i = size; i < size*2; i++)
+			weights[i] = 0;
+	}
+
 	//get an individual weight, O(1)
 	float get_weight(unsigned int i) const {
 		return weights[i + size];
@@ -83,10 +89,12 @@ public:
 		if(weights[i] == w)
 			return;
 
+		float diff = w - weights[i];
+
 		weights[i] = w;
 
-		while(i /= 2)
-			weights[i] = weights[i*2] + weights[i*2 + 1];
+		while(i >>= 1)
+			weights[i] += diff;
 	}
 
 	//return a weighted random index, O(log s), infinite loop if sum = 0

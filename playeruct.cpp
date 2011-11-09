@@ -406,8 +406,8 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 	bool wrand = (player->weightedrandom);
 
 	if(wrand){
-		wtree[0].resize(board.vecsize());
-		wtree[1].resize(board.vecsize());
+		wtree[0].clear_weights();
+		wtree[1].clear_weights();
 
 		int set = 0;
 		for(Board::MoveIterator m = board.moveit(false, false); !m.done(); ++m){
