@@ -414,8 +414,9 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 			int i = board.xy(*m);
 			moves[i] = *m;
 			unsigned int p = board.pattern(i);
-			wtree[0].set_weight_fast(i, player->gammas[p]);
-			wtree[1].set_weight_fast(i, player->gammas[board.pattern_invert(p)]);
+			const float * gamma = player->gammas.get(p);
+			wtree[0].set_weight_fast(i, gamma[0]);
+			wtree[1].set_weight_fast(i, gamma[1]);
 			set++;
 		}
 
@@ -506,8 +507,9 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 			for(const MoveValid * i = board.nb_begin(move), *e = board.nb_endhood(i); i < e; i++){
 				if(i->onboard() && board.get(i->xy) == 0){
 					unsigned int p = board.pattern(i->xy);
-					wtree[0].set_weight(i->xy, player->gammas[p]);
-					wtree[1].set_weight(i->xy, player->gammas[board.pattern_invert(p)]);
+					const float * gamma = player->gammas.get(p);
+					wtree[0].set_weight(i->xy, gamma[0]);
+					wtree[1].set_weight(i->xy, gamma[1]);
 				}
 			}
 		}
