@@ -187,6 +187,7 @@ bool SolverPNS2::SolverThread::pns(const Board & board, PNSNode * node, int dept
 		int numnodes = board.movesremain();
 		CompactTree<PNSNode>::Children temp;
 		temp.alloc(numnodes, solver->ctmem);
+		PLUS(solver->nodes, numnodes);
 
 		if(solver->lbdist)
 			dists.run(&board);
