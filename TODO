@@ -16,6 +16,12 @@ Features for weighted random rollouts:
 - forms vc
 
 
+Fix test_local
+- possibly move from 36bit patterns to 54bit patterns, moving offboard into its own 18bit set
+- test with a larger training set or smaller patterns. It seems that many important patterns are smaller than the 18 neighbours,
+  and enumerating the ways the 18 neighbours are set isn't possible, so many important patterns are missed
+
+
 Test
 - dynamic widening
 - combinations of knowledge?
