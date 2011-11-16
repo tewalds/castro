@@ -254,7 +254,7 @@ GTPResponse HavannahGTP::gtp_solve_pns2_stats(vecstr args){
 		if(child->move == M_NONE)
 			continue;
 
-		s += child->move.to_s() + "," + to_str(child->phi) + "," + to_str(child->delta) + "\n";
+		s += child->move.to_s() + "," + to_str(child->phi) + "," + to_str(child->delta) + "," + to_str(child->work) + "\n";
 	}
 	return GTPResponse(true, s);
 }
