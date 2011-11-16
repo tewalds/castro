@@ -13,6 +13,7 @@ using namespace std;
 #include "string.h"
 #include "zobrist.h"
 #include "hashset.h"
+#include "weightedrandtree.h"
 
 static const int BitsSetTable64[] = {
 	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
@@ -351,6 +352,57 @@ public:
 				s += ' ';
 				int p = get(x, y);
 				if(p == 0) s += '.';
+				if(p == 1) s += white;
+				if(p == 2) s += black;
+			}
+			if(y < size-1)
+				s += " " + to_str(1 + size + y);
+			s += '\n';
+		}
+		return s;
+	}
+
+	string to_s(const WeightedRandTree & weights) const {
+		string s;
+		s += string(size + 3, ' ');
+		for(int i = 0; i < size; i++)
+			s += " " + to_str(i+1);
+		s += "\n";
+
+		string white = "O", black = "@";
+		string esc = "\033", reset = esc + "[0m";
+		white = esc + "[1;33m" + "@" + reset; //yellow
+		black = esc + "[1;34m" + "@" + reset; //blue
+
+		static const string colors[] = {
+			"[0;31m",
+			"[0;32m",
+			"[0;33m",
+			"[0;34m",
+			"[0;35m",
+			"[0;36m",
+			"[0;37m",
+		};
+
+		for(int y = 0; y < size_d; y++){
+			s += string(abs(sizem1 - y) + 2, ' ');
+			s += char('A' + y);
+			for(int x = linestart(y); x < lineend(y); x++){
+				s += ' ';
+				int p = get(x, y);
+				if(p == 0){
+					int c = 0;
+					float g = weights.get_weight(xy(x,y));
+					if(     g < 0.001){ c = 0; g = 0; }
+					else if(g < 0.01) { c = 1; g = (int)(g*1000); }
+					else if(g < 0.1)  { c = 2; g = (int)(g*100); }
+					else if(g < 1)    { c = 3; g = (int)(g*10); }
+					else if(g < 10)   { c = 4; g = (int)(g); }
+					else if(g < 100)  { c = 5; g = (int)(g/10); }
+					else              { c = 6; g = (int)(g/100); }
+
+					s += esc + colors[c] + to_str((int)g) + reset;
+				}
 				if(p == 1) s += white;
 				if(p == 2) s += black;
 			}
@@ -862,7 +914,7 @@ public:
 
 		bool alreadyjoined = false; //useful for finding rings
 
-		if(test_local(posxy, turn)){
+//		if(test_local(posxy, turn)){
 			for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 				if(i->onboard() && turn == get(i->xy)){
 					alreadyjoined |= join_groups(posxy, i->xy);
@@ -870,7 +922,7 @@ public:
 						 //it is already connected and forms a corner, which we can ignore
 				}
 			}
-		}
+//		}
 
 		if(checkwin){
 			Cell * g = & cells[find_group(posxy)];

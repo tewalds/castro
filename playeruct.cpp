@@ -494,6 +494,8 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 
 		movelist.addrollout(move, turn);
 
+		printf("%s\n", board.to_s(wtree[(int)board.toplay()-1]).c_str());
+
 		board.move(move, true, false, (checkrings ? minringsize : 0), ringperm);
 		if(--ringcounter == 0){
 			minringsize++;
@@ -514,6 +516,8 @@ int Player::PlayerUCT::rollout(Board & board, Move move, int depth){
 			}
 		}
 	}
+
+	printf("%s\n", board.to_s(true).c_str());
 
 	gamelen.add(depth);
 
