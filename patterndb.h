@@ -47,7 +47,7 @@ public:
 	}
 
 	void set(uint64_t pattern, float gamma){
-		for(int side = 0; size < 2; side++){
+		for(int side = 0; side < 2; side++){
 			for(int mirror = 0; mirror < 2; mirror++){
 				for(int rotation = 0; rotation < 6; rotation++){
 					set_entry(pattern, gamma, side);
