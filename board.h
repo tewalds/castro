@@ -47,15 +47,15 @@ const MoveScore neighbours[18] = {
 static MoveValid * staticneighbourlist[11] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL}; //one per boardsize
 
 struct BoardFeatures {
-	int distlast[2];      //distance to last move,  p1,p2
-	int neighbours[3][4]; //neighbours - dist 1, dist 2, vc - empty, p1, p2, edge
+	int distlast[2];      //distance to last move,  own,op
+	int neighbours[3][4]; //neighbours - dist 1, dist 2, vc - empty, own,op, edge
 	int distwin[2];       //distance to win, p1,p2
-	int connect[2];       // how many edges/corners - 0,1c,1e,1e1c,2e,2e1c - p1,p2
-	int groupsize[2];     //group size - p1,p2
-	int groups[2];        //how many neighbouring groups - p1,p2
-	int pattern;          //the local 6-pattern - 12bits
-	int form1b[2];        //forms a 1-bridge
-	int form2b[2];        //forms a 2-bridge (ie VC)
+	int connect[2];       // how many edges/corners - 0,1c,1e,1e1c,2e,2e1c - own,op
+	int groupsize[2];     //group size - own,op
+	int groups[2];        //how many neighbouring groups - own,op
+	int pattern;          //the local 6-pattern - 12bits - p1 perspective
+	int form1b[2];        //forms a 1-bridge - own,op
+	int form2b[2];        //forms a 2-bridge (ie VC) - own,op
 //	int join1b[2];        //joins a 1-bridge
 //	int join2b[2];        //joins a 2-bridge
 //	int break1b[2];       //breaks a 1-bridge
@@ -532,7 +532,7 @@ public:
 					const Cell * g = & cells[group];
 					testcell[side].corner |= g->corner;
 					testcell[side].edge   |= g->edge;
-					testcell[side].size   += g->size; //not quite accurate if it's joining the same group twice
+					testcell[side].size   += g->size;
 				}
 			}
 		}
@@ -585,6 +585,20 @@ public:
 				if( (!onboard(d) || get(d) == side) && get(n) == 0)
 					f.form1b[side-1]++;
 			}
+		}
+
+		//above are calculated as p1, p2 instead of own, op
+		if(turn == 2){
+			swap(f.distlast[0], f.distlast[1]);
+			swap(f.neighbours[0][1], f.neighbours[0][2]);
+			swap(f.neighbours[1][1], f.neighbours[1][2]);
+			swap(f.neighbours[2][1], f.neighbours[2][2]);
+			swap(f.distwin[0], f.distwin[1]);
+			swap(f.connect[0], f.connect[1]);
+			swap(f.groupsize[0], f.groupsize[1]);
+			swap(f.groups[0], f.groups[1]);
+			swap(f.form1b[0], f.form1b[1]);
+			swap(f.form2b[0], f.form2b[1]);
 		}
 
 		int p = pattern(pos);
