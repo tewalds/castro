@@ -555,9 +555,11 @@ public:
 
 			f.neighbours[set][p]++;
 
-			if(++j == 6){
+			if(j == 5){
 				j = 0;
 				set++;
+			}else{
+				j++;
 			}
 		}
 
@@ -565,24 +567,35 @@ public:
 		for(int side = 1; side <= 2; side++){
 			for(int i = 0; i < 6; i++){
 				Move n = pos + neighbours[i];
-				Move m = pos + neighbours[(i+1)%6];
-				Move v = pos + neighbours[i+12];
-				Move d = pos + neighbours[i+6];
 
 				if(!onboard(n))
 					continue;
 
+				Move m = pos + neighbours[(i+1)%6];
+				Move v = pos + neighbours[i+12];
+
+				int gn = get(n);
+
+				if( (!onboard(v) || get(v) == side) && onboard(m)){
+					int gm = get(m);
+
 				//forms a VC with your own piece or the edge. Both parts of the VC are empty
-				if( (!onboard(v) || get(v) == side) && onboard(m) && get(n) == 0 && get(m) == 0)
-					f.form2b[side-1]++;
+					if(gn == 0 && gm == 0){
+						f.form2b[side-1]++;
+						continue;
 
 				//would be a vc, but only 1 side is empty
-				if( (!onboard(v) || get(v) == side) && onboard(m) && ((get(n) == 0) ^ (get(m) == 0)) )
-					f.form1b[side-1]++;
+					}else if(gn == 0 || gm == 0){
+						f.form1b[side-1]++;
+						continue;
+					}
+				}
+
+				Move d = pos + neighbours[i+6];
 
 				//forms a 1b to the corner
 				//how to avoid setting this if it's already covered by a 2b?
-				if( (!onboard(d) || get(d) == side) && get(n) == 0)
+				if( (!onboard(d) || get(d) == side) && gn == 0)
 					f.form1b[side-1]++;
 			}
 		}
