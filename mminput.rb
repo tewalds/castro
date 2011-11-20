@@ -75,6 +75,12 @@ $stdin.each_line {|line|
 
 		gtp.cmd("playgame #{move}")
 	}
+
+	if(linenum % 100 == 0)
+		gtp.cmd("quit")
+		gtp.close
+		gtp = GTPClient.new("./castro")
+	end
 }
 
 gtp.cmd("quit")
