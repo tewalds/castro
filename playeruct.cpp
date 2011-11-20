@@ -324,30 +324,48 @@ void Player::PlayerUCT::update_rave(const Node * node, int toplay){
 }
 
 void Player::PlayerUCT::add_knowledge(Board & board, Node * node, Node * child){
-	if(player->localreply){ //boost for moves near the previous move
-		int dist = node->move.dist(child->move);
-		if(dist < 4)
-			child->know += player->localreply * (4 - dist);
-	}
 
-	if(player->locality) //boost for moves near previous stones
-		child->know += player->locality * board.local(child->move, board.toplay());
+	int dist1 = 0, dist2 = 0;
 
-	Board::Cell cell;
-	if(player->connect || player->size)
-		cell = board.test_cell(child->move);
+//	if(player->dists){
+//		dist1 = dists.get(child->move, 1);
+//		dist2 = dists.get(child->move, 2);
+//	}
 
-	if(player->connect) //boost for moves that connect to edges/corners
-		child->know += player->connect * (cell.numcorners() + cell.numedges());
+	BoardFeatures f = board.features(child->move, dist1, dist2);
 
-	if(player->size) //boost for size of the group
-		child->know += player->size * cell.size;
+	double know = 1;
 
-	if(player->bridge && test_bridge_probe(board, node->move, child->move)) //boost for maintaining a virtual connection
-		child->know += player->bridge;
+	know *= player->gammas[f.distlast[0]];
+	know *= player->gammas[f.distlast[1] + 19];
+	know *= player->gammas[f.neighbours[0][0] + 38];
+	know *= player->gammas[f.neighbours[0][1] + 44];
+	know *= player->gammas[f.neighbours[0][2] + 50];
+	know *= player->gammas[f.neighbours[0][3] + 56];
+	know *= player->gammas[f.neighbours[1][0] + 62];
+	know *= player->gammas[f.neighbours[1][1] + 68];
+	know *= player->gammas[f.neighbours[1][2] + 74];
+	know *= player->gammas[f.neighbours[1][3] + 80];
+	know *= player->gammas[f.neighbours[2][0] + 86];
+	know *= player->gammas[f.neighbours[2][1] + 92];
+	know *= player->gammas[f.neighbours[2][2] + 98];
+	know *= player->gammas[f.neighbours[2][3] + 104];
+	know *= player->gammas[f.distwin[0] + 110];
+	know *= player->gammas[f.distwin[1] + 129];
+	know *= player->gammas[f.connect[0] + 148];
+	know *= player->gammas[f.connect[1] + 154];
+	know *= player->gammas[f.groupsize[0] + 160];
+	know *= player->gammas[f.groupsize[1] + 180];
+	know *= player->gammas[f.groups[0] + 200];
+	know *= player->gammas[f.groups[1] + 204];
+	know *= player->gammas[f.form1b[0] + 208];
+	know *= player->gammas[f.form1b[1] + 214];
+	know *= player->gammas[f.form2b[0] + 220];
+	know *= player->gammas[f.form2b[1] + 226];
+	know *= player->gammas[f.pattern + 232];
 
-	if(player->dists)
-		child->know += player->dists * max(0, board.get_size_d() - dists.get(child->move, board.toplay()));
+	child->know = know*100;
+
 }
 
 //test whether this move is a forced reply to the opponent probing your virtual connections

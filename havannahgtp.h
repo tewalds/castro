@@ -112,6 +112,7 @@ public:
 		newcallback("player_params",   bind(&HavannahGTP::gtp_player_params, this, _1), "Set the algorithm for the player, no args gives options");
 		newcallback("player_gammas",   bind(&HavannahGTP::gtp_player_gammas, this, _1), "Load the gammas for weighted random from a file");
 		newcallback("patterns",        bind(&HavannahGTP::gtp_patterns,      this, _1), "List all legal moves plus their local pattern");
+		newcallback("features",        bind(&HavannahGTP::gtp_features,      this, _1), "List all legal moves plus their features");
 		newcallback("all_legal",       bind(&HavannahGTP::gtp_all_legal,     this, _1), "List all legal moves");
 		newcallback("history",         bind(&HavannahGTP::gtp_history,       this, _1), "List of played moves");
 		newcallback("playgame",        bind(&HavannahGTP::gtp_playgame,      this, _1), "Play a list of moves");
@@ -170,6 +171,7 @@ public:
 	GTPResponse gtp_all_legal(vecstr args);
 	GTPResponse gtp_history(vecstr args);
 	GTPResponse gtp_patterns(vecstr args);
+	GTPResponse gtp_features(vecstr args);
 	GTPResponse play(const string & pos, int toplay);
 	GTPResponse gtp_playgame(vecstr args);
 	GTPResponse gtp_play(vecstr args);

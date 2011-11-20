@@ -4,15 +4,21 @@ worker stuff
 - cd /tmp; wget -N --no-check-certificate https://dropbox.ewalds.ca/worker.sh; screen -d -m sh worker.sh; logout
 
 
-Features for weighted random rollouts:
-- pattern - empty, white, black, offboard - 4^6 = 4096, minus symmetry = ~300
-- distance to last move
-- distance to second last move
-- how many edges - 0,1,2
-- how many corners - 0,1
+Heuristic features:
+- distance to own last move
+- distance to opponent's last move
+- how many edges/corners - 0,1c,1e,e2,2e1c
+- own neighbours - dist 1, vc, dist 2
+- op neighbours - dist 1, vc, dist 2
 - group size
 - distance to win
+- maintain VC
+- joins groups
 - forms vc
+- pattern - empty, white, black, offboard
+  - neighbours = 4^6 = 4096, minus symmetry = ~300
+  - neighbours+vc = 4^6*2^6 = 262144
+  - dist 2 = 4^18 = > 4B
 
 
 Move iterator already computes xy(move), so might as well save it, and return a MoveValid instead

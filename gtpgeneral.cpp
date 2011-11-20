@@ -114,6 +114,46 @@ GTPResponse HavannahGTP::gtp_patterns(vecstr args){
 	return GTPResponse(true, ret);
 }
 
+GTPResponse HavannahGTP::gtp_features(vecstr args){
+	string ret;
+	Board board = game.getboard();
+	for(Board::MoveIterator move = board.moveit(); !move.done(); ++move){
+		ret += move->to_s();
+
+		BoardFeatures f = board.features(*move);
+
+		ret += " " + to_str(f.distlast[0]);
+		ret += " " + to_str(f.distlast[1] + 19);
+		ret += " " + to_str(f.neighbours[0][0] + 38);
+		ret += " " + to_str(f.neighbours[0][1] + 44);
+		ret += " " + to_str(f.neighbours[0][2] + 50);
+		ret += " " + to_str(f.neighbours[0][3] + 56);
+		ret += " " + to_str(f.neighbours[1][0] + 62);
+		ret += " " + to_str(f.neighbours[1][1] + 68);
+		ret += " " + to_str(f.neighbours[1][2] + 74);
+		ret += " " + to_str(f.neighbours[1][3] + 80);
+		ret += " " + to_str(f.neighbours[2][0] + 86);
+		ret += " " + to_str(f.neighbours[2][1] + 92);
+		ret += " " + to_str(f.neighbours[2][2] + 98);
+		ret += " " + to_str(f.neighbours[2][3] + 104);
+		ret += " " + to_str(f.distwin[0] + 110);
+		ret += " " + to_str(f.distwin[1] + 129);
+		ret += " " + to_str(f.connect[0] + 148);
+		ret += " " + to_str(f.connect[1] + 154);
+		ret += " " + to_str(f.groupsize[0] + 160);
+		ret += " " + to_str(f.groupsize[1] + 180);
+		ret += " " + to_str(f.groups[0] + 200);
+		ret += " " + to_str(f.groups[1] + 204);
+		ret += " " + to_str(f.form1b[0] + 208);
+		ret += " " + to_str(f.form1b[1] + 214);
+		ret += " " + to_str(f.form2b[0] + 220);
+		ret += " " + to_str(f.form2b[1] + 226);
+		ret += " " + to_str(f.pattern + 232);
+		ret += "\n";
+	}
+	return GTPResponse(true, ret);
+}
+
 GTPResponse HavannahGTP::gtp_all_legal(vecstr args){
 	string ret;
 	for(Board::MoveIterator move = game.getboard().moveit(); !move.done(); ++move)

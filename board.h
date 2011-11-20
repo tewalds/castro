@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <string.h>
 #include <cassert>
 using namespace std;
 
@@ -45,6 +46,25 @@ const MoveScore neighbours[18] = {
 
 static MoveValid * staticneighbourlist[11] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL}; //one per boardsize
 
+struct BoardFeatures {
+	int distlast[2];      //distance to last move,  p1,p2
+	int neighbours[3][4]; //neighbours - dist 1, dist 2, vc - empty, p1, p2, edge
+	int distwin[2];       //distance to win, p1,p2
+	int connect[2];       // how many edges/corners - 0,1c,1e,1e1c,2e,2e1c - p1,p2
+	int groupsize[2];     //group size - p1,p2
+	int groups[2];        //how many neighbouring groups - p1,p2
+	int pattern;          //the local 6-pattern - 12bits
+	int form1b[2];        //forms a 1-bridge
+	int form2b[2];        //forms a 2-bridge (ie VC)
+//	int join1b[2];        //joins a 1-bridge
+//	int join2b[2];        //joins a 2-bridge
+//	int break1b[2];       //breaks a 1-bridge
+//	int probe2b[2];       //probe a 2-bridge, turns it into a 1-bridge
+
+	BoardFeatures() {
+		memset(this, 0, sizeof(*this));
+	}
+};
 
 class Board{
 public:
@@ -138,6 +158,8 @@ private:
 	char wintype; //0 no win, 1 = edge, 2 = corner, 3 = ring
 	bool allowswap;
 
+	Move lastmove[2];
+
 	vector<Cell> cells;
 	Zobrist hash;
 	const MoveValid * neighbourlist;
@@ -168,6 +190,8 @@ public:
 				cells[i] = Cell(0, i, 1, (1 << iscorner(x, y)), (1 << isedge(x, y)), 0);
 			}
 		}
+
+		lastmove[0] = lastmove[1] = M_NONE;
 	}
 
 	int memsize() const { return sizeof(Board) + sizeof(Cell)*vecsize(); }
@@ -446,7 +470,7 @@ public:
 		char turn = toplay();
 		int posxy = xy(pos);
 
-		Cell testcell = cells[find_group(pos)];
+		Cell testcell = cells[find_group(posxy)];
 		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
 			if(i->onboard() && turn == get(i->xy)){
 				const Cell * g = & cells[find_group(i->xy)];
@@ -467,6 +491,110 @@ public:
 	int test_size(const Move & pos) const {
 		Cell testcell = test_cell(pos);
 		return testcell.size;
+	}
+
+	BoardFeatures features(const Move & pos, int dw1 = 0, int dw2 = 0) const {
+		BoardFeatures f;
+
+		int turn = toplay();
+
+		f.distwin[0] = dw1;
+		f.distwin[1] = dw2;
+
+		f.distlast[turn-1] = (lastmove[1] == M_NONE ? 0 : pos.dist(lastmove[1]) );
+		f.distlast[2-turn] = (lastmove[0] == M_NONE ? 0 : pos.dist(lastmove[0]) );
+
+
+		int posxy = xy(pos);
+
+		int groups[3][2] = {{-1, -1}, {-1, -1}, {-1, -1}};
+		int numgroups[2] = {0, 0};
+
+		Cell testcell[2];
+		testcell[0] = testcell[1] = cells[find_group(posxy)];
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_end(i); i < e; i++){
+			if(i->onboard()){
+				int side = get(i->xy);
+				if(side == 0)
+					continue;
+
+				side--;
+
+				int group = find_group(i->xy);
+
+				bool found = false;
+				for(int j = 0; j < numgroups[side]; j++)
+					if(groups[j][side] == group)
+						found = true;
+
+				if(!found){
+					groups[numgroups[side]++][side] = group;
+					const Cell * g = & cells[group];
+					testcell[side].corner |= g->corner;
+					testcell[side].edge   |= g->edge;
+					testcell[side].size   += g->size; //not quite accurate if it's joining the same group twice
+				}
+			}
+		}
+
+
+		f.groups[0] = numgroups[0];
+		f.groups[1] = numgroups[1];
+
+		f.connect[0] = 2*testcell[0].numedges() + testcell[0].numcorners();
+		f.connect[1] = 2*testcell[1].numedges() + testcell[1].numcorners();
+
+		f.groupsize[0] = testcell[0].size;
+		f.groupsize[1] = testcell[1].size;
+
+
+		//set neighbours
+		int set = 0, j = 0;
+		for(const MoveValid * i = nb_begin(posxy), *e = nb_endhood(i); i < e; i++){
+			int p = (i->onboard() ? get(i->xy) : 3);
+
+			f.neighbours[set][p]++;
+
+			if(++j == 6){
+				j = 0;
+				set++;
+			}
+		}
+
+		//forms a 1b or 2b
+		for(int side = 1; side <= 2; side++){
+			for(int i = 0; i < 6; i++){
+				Move n = pos + neighbours[i];
+				Move m = pos + neighbours[(i+1)%6];
+				Move v = pos + neighbours[i+12];
+				Move d = pos + neighbours[i+6];
+
+				if(!onboard(n))
+					continue;
+
+				//forms a VC with your own piece or the edge. Both parts of the VC are empty
+				if( (!onboard(v) || get(v) == side) && onboard(m) && get(n) == 0 && get(m) == 0)
+					f.form2b[side-1]++;
+
+				//would be a vc, but only 1 side is empty
+				if( (!onboard(v) || get(v) == side) && onboard(m) && ((get(n) == 0) ^ (get(m) == 0)) )
+					f.form1b[side-1]++;
+
+				//forms a 1b to the corner
+				//how to avoid setting this if it's already covered by a 2b?
+				if( (!onboard(d) || get(d) == side) && get(n) == 0)
+					f.form1b[side-1]++;
+			}
+		}
+
+		int p = pattern(pos);
+		if(turn == 2)
+			p = pattern_invert(p);
+		p = pattern_symmetry(p);
+
+		f.pattern = p;
+
+		return f;
 	}
 
 	//check if a position is encirclable by a given player
@@ -793,6 +921,9 @@ public:
 			doswap();
 			return true;
 		}
+
+		lastmove[1] = lastmove[0];
+		lastmove[0] = pos;
 
 		char turn = toplay();
 		char localshift = (turn & 2); //0 for p1, 2 for p2

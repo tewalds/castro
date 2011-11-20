@@ -22,8 +22,35 @@ size = (ARGV[0] || 5).to_i
 
 gtp = GTPClient.new("./castro")
 
-puts "! 4096"
-puts "1"
+puts "! 4328"
+puts "27"
+
+puts "19 dist-p1"
+puts "19 dist-p2"
+puts "6 neighbours-dist-1-empty"
+puts "6 neighbours-dist-1-p1"
+puts "6 neighbours-dist-1-p2"
+puts "6 neighbours-dist-1-edge"
+puts "6 neighbours-dist-2-empty"
+puts "6 neighbours-dist-2-p1"
+puts "6 neighbours-dist-2-p2"
+puts "6 neighbours-dist-2-edge"
+puts "6 neighbours-vc-empty"
+puts "6 neighbours-vc-p1"
+puts "6 neighbours-vc-p2"
+puts "6 neighbours-vc-edge"
+puts "19 distwin-p1"
+puts "19 distwin-p2"
+puts "6 connect-p1"
+puts "6 connect-p2"
+puts "20 groupsize-p1"
+puts "20 groupsize-p2"
+puts "4 groups-p1"
+puts "4 groups-p2"
+puts "6 form1b-p1"
+puts "6 form1b-p2"
+puts "6 form2b-p1"
+puts "6 form2b-p2"
 puts "4096 6-pattern"
 puts "!"
 
@@ -39,8 +66,8 @@ $stdin.each_line {|line|
 	gtp.cmd("boardsize #{size}")
 
 	moves.each{|move|
-		patterns = gtp.cmd("patterns")[1]
-		patterns = Hash[patterns.strip.split("\n").map{|l| l.strip.split }]
+		patterns = gtp.cmd("features")[1]
+		patterns = Hash[patterns.strip.split("\n").map{|l| l.strip.split(" ", 2) }]
 
 		puts "#"
 		puts patterns[move]

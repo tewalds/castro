@@ -666,7 +666,7 @@ GTPResponse HavannahGTP::gtp_player_gammas(vecstr args){
 
 	Board board = game.getboard();
 
-	for(int i = 0; i < 4096; i++){
+	for(int i = 0; i < 4328; i++){
 		int a;
 		float f;
 		ifs >> a >> f;
@@ -676,11 +676,7 @@ GTPResponse HavannahGTP::gtp_player_gammas(vecstr args){
 			return GTPResponse(false, "Line " + to_str(i) + " doesn't match the expected value");
 		}
 
-		int s = board.pattern_symmetry(i);
-		if(s == i)
-			player.gammas[i] = f;
-		else
-			player.gammas[i] = player.gammas[s];
+		player.gammas[i] = f;
 	}
 
 	ifs.close();

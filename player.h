@@ -368,7 +368,7 @@ public:
 	int   instantwin;     //look for instant wins in rollouts
 	int   instwindepth;   //how deep to look for instant wins
 
-	float gammas[4096]; //pattern weights for weighted random
+	float gammas[4328]; //pattern weights for weighted random
 
 	Board rootboard;
 	Node  root;
