@@ -176,7 +176,7 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 
 			PairMove m = Solver::solvebylast(next, cmove, true);
 
-			//ignore one threat for now
+			//no single threats, they're all caught by the opponent and made into macro moves
 
 			//forms two threats, winning position
 			if(m.b != M_UNKNOWN){

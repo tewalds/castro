@@ -117,7 +117,9 @@ public:
 
 		//follow contour of the current group looking for wins
 		do{
-//			logerr(to_str((int)cur.y) + "," + to_str((int)cur.x) + " ");
+//			if(board.onboard(cur)) logerr(cur.to_s() + " ");
+//			else                   logerr(to_str((int)cur.y) + "," + to_str((int)cur.x) + " ");
+
 			//check the current cell
 			if(board.onboard(cur) && board.get(cur) == 0 && board.test_win(cur, turn, checkrings) > 0){
 //				logerr(cur.to_s() + " loss ");
