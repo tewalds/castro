@@ -30,9 +30,9 @@ public:
 protected:
 	static const uint64_t def_seed = 88172645463325252ULL;
 	uint64_t rand(){
-		r ^= (r << 13);
-		r ^= (r >>  7);
-		r ^= (r << 17);
+		r ^= (r >> 17);
+		r ^= (r << 31);
+		r ^= (r >>  8);
 		return r;
 	}
 };
