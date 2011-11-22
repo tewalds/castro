@@ -112,7 +112,7 @@ int SolverAB::negamax(const Board & board, const int depth, int alpha, int beta)
 
 int SolverAB::negamax_outcome(const Board & board, const int depth){
 	int abval = negamax(board, depth, -2, 2);
-	if(     abval == 0)  return -1; //unknown
+	if(     abval == 0)  return -3; //unknown
 	else if(abval == 2)  return board.toplay(); //win
 	else if(abval == -2) return 3 - board.toplay(); //loss
 	else                 return 0; //draw
