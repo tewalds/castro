@@ -512,7 +512,7 @@ public:
 				continue;
 
 			g->ringdepth = 2;
-			success = followring(loc, i, turn, 3, ringsize, (permsneeded - g->perm));
+			success = followring(loc, i, turn, 3, ringsize, (permsneeded + (g->perm ? -1 : 1)));
 			g->ringdepth = 0;
 
 			if(success)
@@ -540,7 +540,7 @@ public:
 				continue;
 
 			g->ringdepth = depth;
-			bool success = followring(next, nd, turn, depth+1, ringsize, (permsneeded - g->perm));
+			bool success = followring(next, nd, turn, depth+1, ringsize, (permsneeded + (g->perm ? -1 : 1)) );
 			g->ringdepth = 0;
 
 			if(success)
