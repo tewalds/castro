@@ -4,6 +4,10 @@ worker stuff
 - cd /tmp; wget -N --no-check-certificate https://dropbox.ewalds.ca/worker.sh; screen -d -m sh worker.sh; logout
 
 
+garbage collection on pns
+- if you remove a whole bunch of nodes, a backup will remove its values, changing the shape of the tree...
+
+
 Features for weighted random rollouts:
 - pattern - empty, white, black, offboard - 4^6 = 4096, minus symmetry = ~300
 - distance to last move
