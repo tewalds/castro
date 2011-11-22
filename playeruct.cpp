@@ -39,7 +39,7 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 			if(child->outcome < 0){
 				movelist.addtree(child->move, toplay);
 
-				if(!board.move(child->move, (player->minimax == 0), (player->locality || player->weightedrandom) )){
+				if(!board.move(child->move, true, (player->locality || player->weightedrandom) )){
 					logerr("move failed: " + child->move.to_s() + "\n" + board.to_s(false));
 					assert(false && "move failed");
 				}
@@ -68,7 +68,7 @@ void Player::PlayerUCT::walk_tree(Board & board, Node * node, int depth){
 		timestamps[1] = Time();
 	}
 
-	int won = (player->minimax ? node->outcome : board.won());
+	int won = node->outcome;
 
 	//if it's not already decided
 	if(won < 0){
@@ -130,30 +130,59 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	}
 
 	CompactTree<Node>::Children temp;
+
+	PairMove m = Solver::solvebylast(board, node->move, true);
+
+	if(m.a != M_UNKNOWN){
+		//Make a macro move, add experience to the move so the current simulation continues past this move
+		if(m.b == M_UNKNOWN){
+			Node macro = m.a;
+			temp.alloc(1, player->ctmem);
+			macro.exp.addwins(player->visitexpand);
+			*(temp.begin()) = macro;
+			PLUS(player->nodes, temp.num());
+			node->children.swap(temp);
+			assert(temp.unlock());
+		}else{ //proven loss, but at least try to block one of them
+			node->outcome = 3 - toplay;
+			node->proofdepth = 2;
+			node->bestmove = m.a;
+			node->children.unlock();
+		}
+		return true;
+	}else if(board.movesremain() <= 2){
+		node->outcome = 0;
+		if(board.movesremain() >= 10)
+			node->bestmove = *(board.moveit());
+		node->proofdepth = board.movesremain();
+		node->children.unlock();
+		return true;
+	}
+
 	temp.alloc(board.movesremain(), player->ctmem);
 
-	int losses = 0;
-
 	Node * child = temp.begin(),
-	     * end   = temp.end(),
-	     * loss  = NULL;
+	     * end   = temp.end();
 	Board::MoveIterator move = board.moveit(player->prunesymmetry);
 	int nummoves = 0;
 	for(; !move.done() && child != end; ++move, ++child){
 		*child = Node(*move);
 
 		if(player->minimax){
-			child->outcome = board.test_win(*move);
+			Board next = board;
 
-			if(player->minimax >= 2 && board.test_win(*move, 3 - board.toplay()) > 0){
-				losses++;
-				loss = child;
-			}
+			Move cmove = *move;
+			next.move(cmove);
 
-			if(child->outcome == toplay){ //proven win from here, don't need children
-				node->outcome = child->outcome;
+			PairMove m = Solver::solvebylast(next, cmove, true);
+
+			//ignore one threat for now
+
+			//forms two threats, winning position
+			if(m.b != M_UNKNOWN){
+				node->outcome = toplay;
 				node->proofdepth = 1;
-				node->bestmove = *move;
+				node->bestmove = cmove;
 				node->children.unlock();
 				temp.dealloc(player->ctmem);
 				return true;
@@ -169,21 +198,6 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 	else //both end conditions should happen in parallel
 		assert(move.done() && child == end);
 
-	//Make a macro move, add experience to the move so the current simulation continues past this move
-	if(losses == 1){
-		Node macro = *loss;
-		temp.dealloc(player->ctmem);
-		temp.alloc(1, player->ctmem);
-		macro.exp.addwins(player->visitexpand);
-		*(temp.begin()) = macro;
-	}else if(losses >= 2){ //proven loss, but at least try to block one of them
-		node->outcome = 3 - toplay;
-		node->proofdepth = 2;
-		node->bestmove = loss->move;
-		node->children.unlock();
-		temp.dealloc(player->ctmem);
-		return true;
-	}
 
 	if(player->dynwiden > 0) //sort in decreasing order by knowledge
 		sort(temp.begin(), temp.end(), sort_node_know);
@@ -561,67 +575,11 @@ PairMove Player::PlayerUCT::rollout_choose_move(Board & board, const Move & prev
 	}
 
 	if(player->instantwin >= 3 && --doinstwin >= 0){
-		Move start, cur, loss = M_UNKNOWN;
-		int turn = 3 - board.toplay();
+		PairMove m = Solver::solvebylast(board, prev, (player->instantwin != 4));
 
-		if(player->instantwin == 4){ //must have an edge or corner connection, or it has nothing to offer a group towards a win, ignores rings
-			const Board::Cell * c = board.cell(prev);
-			if(c->numcorners() == 0 && c->numedges() == 0)
-				goto skipinstwin3;
-
-		}
-
-//		logerr(board.to_s(true));
-
-		//find the first empty cell
-		int dir = -1;
-		for(int i = 0; i <= 5; i++){
-			start = prev + neighbours[i];
-
-			if(!board.onboard(start) || board.get(start) != turn){
-				dir = (i + 5) % 6;
-				break;
-			}
-		}
-
-		if(dir == -1) //possible if it's in the middle of a ring, which is possible if rings are being ignored
-			goto skipinstwin3;
-
-		cur = start;
-
-//		logerr(prev.to_s() + ":");
-
-		//follow contour of the current group looking for wins
-		do{
-//			logerr(" " + to_str((int)cur.y) + "," + to_str((int)cur.x));
-			//check the current cell
-			if(board.onboard(cur) && board.get(cur) == 0 && board.test_win(cur, turn, checkrings) > 0){
-//				logerr(" loss");
-				if(loss == M_UNKNOWN)
-					loss = cur;
-				else if(loss != cur)
-					return PairMove(loss, cur); //game over, two wins found for opponent
-			}
-
-			//advance to the next cell
-			for(int i = 5; i <= 9; i++){
-				int nd = (dir + i) % 6;
-				Move next = cur + neighbours[nd];
-
-				if(!board.onboard(next) || board.get(next) != turn){
-					cur = next;
-					dir = nd;
-					break;
-				}
-			}
-		}while(cur != start); //potentially skips part of it when the start is in a pocket, rare bug
-
-//		logerr("\n");
-
-		if(loss != M_UNKNOWN)
-			return loss;
+		if(m.a != M_UNKNOWN)
+			return m;
 	}
-skipinstwin3:
 
 	//force a bridge reply
 	if(player->rolloutpattern){

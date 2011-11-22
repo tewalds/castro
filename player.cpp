@@ -142,7 +142,7 @@ Player::Player() {
 
 	shortrave   = false;
 	keeptree    = true;
-	minimax     = 2;
+	minimax     = 0;
 	detectdraw  = false;
 	visitexpand = 1;
 	prunesymmetry = false;
