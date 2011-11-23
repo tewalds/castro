@@ -1,6 +1,5 @@
 
-#ifndef _HASHSET_H_
-#define _HASHSET_H_
+#pragma once
 
 #include "zobrist.h"
 
@@ -32,7 +31,7 @@ public:
 			i = (i+1) & mask;
 		table[i] = h;
 	}
-	
+
 	bool exists(hash_t h){
 		for(unsigned int i = h & mask; table[i]; i = (i+1) & mask)
 			if(table[i] == h)
@@ -52,6 +51,4 @@ public:
 		return v;
 	}
 };
-
-#endif
 

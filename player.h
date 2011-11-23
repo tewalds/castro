@@ -1,6 +1,5 @@
 
-#ifndef __PLAYER_H_
-#define __PLAYER_H_
+#pragma once
 
 #include <cmath>
 #include <cassert>
@@ -437,6 +436,4 @@ public:
 protected:
 	Node * return_move(Node * node, int toplay) const;
 };
-
-#endif
 

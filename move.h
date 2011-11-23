@@ -1,6 +1,5 @@
 
-#ifndef _MOVE_H_
-#define _MOVE_H_
+#pragma once
 
 #include <stdint.h>
 #include <cstdlib>
@@ -88,6 +87,4 @@ struct PairMove {
 	PairMove(Move A = M_UNKNOWN, Move B = M_UNKNOWN) : a(A), b(B) { }
 	PairMove(MoveSpecial A) : a(Move(A)), b(M_UNKNOWN) { }
 };
-
-#endif
 

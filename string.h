@@ -1,6 +1,5 @@
 
-#ifndef _STRING_H_
-#define _STRING_H_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -30,6 +29,4 @@ void rtrim(std::string & str);
 
 vecstr explode(const std::string & str, const std::string & sep);
 std::string implode(const vecstr & vec, const std::string & sep);
-
-#endif
 

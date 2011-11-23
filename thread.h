@@ -1,8 +1,5 @@
 
-
-
-#ifndef _MY_THREAD_H_
-#define _MY_THREAD_H_
+#pragma once
 
 #include <tr1/functional>
 #include <pthread.h>
@@ -118,8 +115,13 @@ class SpinLock {
 public:
 	SpinLock() : taken(0) { }
 	void lock()   { while(!trylock()) ; }
+#ifdef SINGLE_THREAD
+	bool trylock(){ return true; }
+	void unlock() { };
+#else
 	bool trylock(){ return !__sync_lock_test_and_set(&taken, 1); }
 	void unlock() { __sync_lock_release(&taken); }
+#endif
 };
 
 //object wrapper around pthread rwlock
@@ -230,7 +232,4 @@ public:
 		return flip;
 	}
 };
-
-
-#endif
 

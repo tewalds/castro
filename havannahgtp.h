@@ -1,6 +1,5 @@
 
-#ifndef _HAVANNAHGTP_H_
-#define _HAVANNAHGTP_H_
+#pragma once
 
 #include "gtp.h"
 #include "game.h"
@@ -222,6 +221,4 @@ public:
 	GTPResponse gtp_solve_pnstt_stats(vecstr args);
 	GTPResponse gtp_solve_pnstt_clear(vecstr args);
 };
-
-#endif
 

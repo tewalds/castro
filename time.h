@@ -1,15 +1,8 @@
 
-#ifndef _TIME_H_
-#define _TIME_H_
+#pragma once
 
 #include <time.h>
 #include <sys/time.h>
-
-inline int time_msec(){
-	struct timeval time;
-	gettimeofday(&time, NULL);
-	return (time.tv_sec*1000 + time.tv_usec/1000);
-}
 
 class Time {
 	double t;
@@ -42,6 +35,4 @@ public:
 	bool operator == (const Time & a) const { return t == a.t; }
 	bool operator != (const Time & a) const { return t != a.t; }
 };
-
-#endif
 

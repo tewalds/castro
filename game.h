@@ -1,6 +1,5 @@
 
-#ifndef _GAME_H_
-#define _GAME_H_
+#pragma once
 
 #include "board.h"
 #include "move.h"
@@ -76,6 +75,4 @@ public:
 		return false;
 	}
 };
-
-#endif
 

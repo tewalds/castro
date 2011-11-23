@@ -1,6 +1,5 @@
 
-#ifndef _BOARD_H_
-#define _BOARD_H_
+#pragma once
 
 #include <cstdio>
 #include <algorithm>
@@ -874,6 +873,4 @@ public:
 		return -3;
 	}
 };
-
-#endif
 

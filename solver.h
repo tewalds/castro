@@ -1,6 +1,5 @@
 
-#ifndef _SOLVER_H_
-#define _SOLVER_H_
+#pragma once
 
 #include <stdint.h>
 #include "board.h"
@@ -64,6 +63,4 @@ protected:
 	}
 
 };
-
-#endif
 

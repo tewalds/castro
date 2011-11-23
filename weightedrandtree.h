@@ -1,6 +1,5 @@
 
-#ifndef _WEIGHTED_RAND_TREE_H_
-#define _WEIGHTED_RAND_TREE_H_
+#pragma once
 
 #include <cstdlib>
 #include "xorshift.h"
@@ -114,6 +113,4 @@ public:
 		return i - size;
 	}
 };
-
-#endif
 

@@ -1,6 +1,5 @@
 
-#ifndef _SOLVERPNS_TT_H_
-#define _SOLVERPNS_TT_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -129,6 +128,4 @@ public:
 	PNSNode * tt(const Board & board);
 	PNSNode * tt(const Board & board, Move move);
 };
-
-#endif
 

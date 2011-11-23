@@ -1,8 +1,5 @@
 
-
-
-#ifndef _COMPACTTREE_H_
-#define _COMPACTTREE_H_
+#pragma once
 
 #include <new>
 #include <cstring> //for memmove
@@ -498,6 +495,4 @@ public:
 		last = dchunk;
 	}
 };
-
-#endif
 

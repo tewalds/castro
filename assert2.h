@@ -1,6 +1,5 @@
 
-#ifndef _ASSERT2_H_
-#define _ASSERT2_H_
+#pragma once
 
 #include <cassert>
 #include "string.h"
@@ -9,6 +8,4 @@
   ((expr)								\
    ? __ASSERT_VOID_CAST (0)						\
    : __assert_fail ((string(__STRING(expr)) + "; " + (str)).c_str(), __FILE__, __LINE__, __ASSERT_FUNCTION))
-
-#endif
 

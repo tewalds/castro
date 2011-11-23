@@ -1,6 +1,5 @@
 
-#ifndef _GTP_H_
-#define _GTP_H_
+#pragma once
 
 #include "string.h"
 
@@ -26,7 +25,7 @@ struct GTPResponse {
 		response = r;
 		rtrim(response);
 	}
-	
+
 	GTPResponse(string r){
 		GTPResponse(true, r);
 	}
@@ -102,11 +101,11 @@ public:
 		if(longest_cmd < name.length())
 			longest_cmd = name.length();
 	}
-	
+
 	void newcallback(const GTPCallback & a){
 		callbacks.push_back(a);
 	}
-	
+
 	int find_callback(const string & name){
 		for(unsigned int i = 0; i < callbacks.size(); i++)
 			if(callbacks[i].name == name)
@@ -155,7 +154,7 @@ public:
 			string line(buf);
 
 			trim(line);
-			
+
 			if(line.length() == 0 || line[0] == '#')
 				continue;
 
@@ -211,7 +210,7 @@ public:
 		running = false;
 		return true;
 	}
-	
+
 	GTPResponse gtp_list_commands(vecstr args, bool showdesc){
 		string ret = "\n";
 		for(unsigned int i = 0; i < callbacks.size(); i++){
@@ -225,6 +224,4 @@ public:
 		return GTPResponse(true, ret);
 	}
 };
-
-#endif
 

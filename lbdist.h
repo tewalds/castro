@@ -1,4 +1,5 @@
 
+#pragma once
 
 /*
 Compute a rough lower bound on the number of additional moves needed to win given this position
@@ -9,8 +10,6 @@ Increase distance when crossing an opponent virtual connection?
 Decrease distance when crossing your own virtual connection?
 */
 
-#ifndef _LBDIST_H_
-#define _LBDIST_H_
 
 #include "board.h"
 #include "move.h"
@@ -200,6 +199,4 @@ public:
 		}
 	}
 };
-
-#endif
 

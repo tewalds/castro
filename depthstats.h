@@ -1,6 +1,5 @@
 
-#ifndef _DEPTHSTATS_H_
-#define _DEPTHSTATS_H_
+#pragma once
 
 #include <stdint.h>
 #include <cmath>
@@ -58,6 +57,4 @@ struct DepthStats {
 		return to_str(avg(), 4) +", dev=" + to_str(std_dev(), 4) + ", min=" + to_str(mindepth) + ", max=" + to_str(maxdepth) + ", num=" + to_str(num);
 	}
 };
-
-#endif
 

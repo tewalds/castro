@@ -1,6 +1,5 @@
 
-#ifndef _ZOBRIST_H_
-#define _ZOBRIST_H_
+#pragma once
 
 #include "types.h"
 
@@ -40,6 +39,4 @@ public:
 		return m;
 	}
 };
-
-#endif
 

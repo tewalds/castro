@@ -1,6 +1,5 @@
 
-#ifndef _TIMER_H_
-#define _TIMER_H_
+#pragma once
 
 #include <tr1/functional>
 #include <unistd.h>
@@ -63,6 +62,4 @@ public:
 		cancel();
 	}
 };
-
-#endif
 

@@ -1,7 +1,5 @@
 
-
-#ifndef _TYPES_H_
-#define _TYPES_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -30,7 +28,5 @@ typedef uint64_t u64;
 	typedef uint64_t uword;
 #else
 #error Unknown word size
-#endif
-
 #endif
 

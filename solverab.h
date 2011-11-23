@@ -1,6 +1,5 @@
 
-#ifndef _SOLVERAB_H_
-#define _SOLVERAB_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -70,6 +69,4 @@ public:
 	void tt_set(const hash_t & hash, int val);
 	void tt_set(const Board & board, int val);
 };
-
-#endif
 
