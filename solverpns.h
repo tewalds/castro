@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <stdint.h>
+//A single-threaded, tree based, proof number search solver.
 
 #include "solver.h"
 #include "compacttree.h"

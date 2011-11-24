@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <stdint.h>
+//An Alpha-beta solver, single threaded with an optional transposition table.
 
 #include "solver.h"
 

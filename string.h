@@ -1,6 +1,8 @@
 
 #pragma once
 
+//A few basic string operation helpers
+
 #include <vector>
 #include <string>
 #include <sstream>

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <stdint.h>
+//A single-threaded, transposition table based, proof number search solver.
 
 #include "solver.h"
 #include "zobrist.h"

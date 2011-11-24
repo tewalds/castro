@@ -1,6 +1,8 @@
 
 #pragma once
 
+//Generates random numbers using the XORShift algorithm.
+
 #include <stdint.h>
 
 //generates 32 bit values, has a 32bit period

@@ -1,6 +1,8 @@
 
 #pragma once
 
+//A Monte-Carlo Tree Search based player
+
 #include <cmath>
 #include <cassert>
 

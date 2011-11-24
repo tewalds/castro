@@ -1,7 +1,13 @@
 
 #pragma once
 
-#include <cstdlib>
+/*
+Given weights for indexes, returns a random index according to the weights.
+This is useful for softmax and similar, used in the rollout policy.
+
+Most operations are O(log n).
+*/
+
 #include "xorshift.h"
 
 //rounds to power of 2 sizes, completely arbitrary weights

@@ -1,7 +1,9 @@
 
 #pragma once
 
-#include "types.h"
+//Maintains 12 zobrist hashes, one for each permutation
+
+#include <stdint.h>
 
 typedef uint64_t hash_t;
 

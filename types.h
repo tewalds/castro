@@ -1,6 +1,8 @@
 
 #pragma once
 
+//A few fixed width or architecture specific types
+
 #include <stdint.h>
 
 typedef unsigned char  uchar;

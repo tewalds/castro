@@ -1,7 +1,9 @@
 
 #pragma once
 
-#include <stdint.h>
+//Interface for the various solvers
+
+#include "types.h"
 #include "board.h"
 
 class Solver {
