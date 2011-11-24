@@ -15,15 +15,14 @@ enum MoveSpecial {
 struct Move {
 	int8_t y, x;
 
-	Move() : y(M_UNKNOWN), x(110) { }
-	Move(MoveSpecial a) : y(a), x(120) { } //big x so it will always wrap to y=0 with swap
+	Move(MoveSpecial a = M_UNKNOWN) : y(a), x(120) { } //big x so it will always wrap to y=0 with swap
 	Move(int X, int Y) : y(Y), x(X) { }
 
 	Move(const std::string & str, int size = 0){
-		if(     str == "swap"   ){ y = M_SWAP;    x = 121; }
-		else if(str == "resign" ){ y = M_RESIGN;  x = 122; }
-		else if(str == "none"   ){ y = M_NONE;    x = 123; }
-		else if(str == "unknown"){ y = M_UNKNOWN; x = 124; }
+		if(     str == "swap"   ){ y = M_SWAP;    x = 120; }
+		else if(str == "resign" ){ y = M_RESIGN;  x = 120; }
+		else if(str == "none"   ){ y = M_NONE;    x = 120; }
+		else if(str == "unknown"){ y = M_UNKNOWN; x = 120; }
 		else{
 			y = tolower(str[0]) - 'a';
 			x = atoi(str.c_str() + 1) - 1;
