@@ -162,7 +162,7 @@ Player::Player() {
 	checkringdepth = 1000;
 	minringsize    = 6;
 	ringincr       = 0;
-	ringperm       = 2;
+	ringperm       = 0;
 	rolloutpattern = false;
 	lastgoodreply  = false;
 	instantwin     = 0;
