@@ -319,7 +319,7 @@ public:
 
 public:
 
-	static const float min_rave = 0.1;
+	static const float min_rave;
 
 	bool  ponder;     //think during opponents time?
 	int   numthreads; //number of player threads to run

@@ -8,6 +8,8 @@
 #include "time.h"
 #include "fileio.h"
 
+const float Player::min_rave = 0.1;
+
 void Player::PlayerThread::run(){
 	while(true){
 		switch(player->threadstate){
