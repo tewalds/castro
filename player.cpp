@@ -31,7 +31,7 @@ void Player::PlayerThread::run(){
 		case Thread_Running:    //threads are running
 			if(player->rootboard.won() >= 0 || player->root.outcome >= 0 || (player->maxruns > 0 && player->runs >= player->maxruns)){ //solved or finished runs
 				if(CAS(player->threadstate, Thread_Running, Thread_Wait_End) && player->root.outcome >= 0)
-					logerr("Solved as " + to_str(player->root.outcome >= 0) + "\n");
+					logerr("Solved as " + to_str(player->root.outcome) + "\n");
 				break;
 			}
 			if(player->ctmem.memalloced() >= player->maxmem){ //out of memory, start garbage collection
