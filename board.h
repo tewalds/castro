@@ -296,39 +296,56 @@ public:
 	int lineend(int y)   const { return (y < size ? size + y : size_d); }
 	int linelen(int y)   const { return size_d - abs(sizem1 - y); }
 
-	string to_s(bool color) const {
+	string to_s(bool color, bool hguicoords = false) const {
+		string white = "O",
+		       black = "@",
+		       empty = ".",
+		       coord = "",
+		       reset = "";
+		if(color){
+			string esc = "\033";
+			reset = esc + "[0m";
+			coord = esc + "[1;37m";
+			empty = reset + ".";
+			white = esc + "[1;33m" + "@"; //yellow
+			black = esc + "[1;34m" + "@"; //blue
+		}
+
 		string s;
 		s += string(size + 3, ' ');
 		for(int i = 0; i < size; i++)
-			s += " " + to_str(i+1);
+			s += " " + coord + to_str(i+1);
 		s += "\n";
-
-		string white = "O", black = "@";
-		if(color){
-			string esc = "\033", reset = esc + "[0m";
-			white = esc + "[1;33m" + "@" + reset; //yellow
-			black = esc + "[1;34m" + "@" + reset; //blue
-		}
 
 		for(int y = 0; y < size_d; y++){
 			s += string(abs(sizem1 - y) + 2, ' ');
-			s += char('A' + y);
+			s += coord + char('A' + y);
 			for(int x = linestart(y); x < lineend(y); x++){
 				s += ' ';
 				int p = get(x, y);
-				if(p == 0) s += '.';
+				if(p == 0) s += empty;
 				if(p == 1) s += white;
 				if(p == 2) s += black;
 			}
-			if(y < size-1)
-				s += " " + to_str(1 + size + y);
+			if(y < sizem1)
+				s += " " + coord + to_str(size + y + 1);
+			else if(!hguicoords && y > sizem1)
+				s += " " + coord + to_str(3*size - y - 1);
 			s += '\n';
 		}
+		if(!hguicoords){
+			s += string(size + 3, ' ');
+			for(int i = 0; i < size; i++)
+				s += " " + coord + to_str(i+1);
+			s += "\n";
+		}
+
+		s += reset;
 		return s;
 	}
 
-	void print(bool color = true) const {
-		printf("%s", to_s(color).c_str());
+	void print(bool color = true, bool hguicoords = true) const {
+		printf("%s", to_s(color, hguicoords).c_str());
 	}
 
 	string boardstr() const {
