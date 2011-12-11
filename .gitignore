@@ -7,3 +7,17 @@ genhgf
 builddb
 mm
 
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.properties.xml
+*.make
+*.d
+*.fls
+
