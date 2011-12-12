@@ -7,7 +7,10 @@ GTPResponse HavannahGTP::gtp_echo(vecstr args){
 }
 
 GTPResponse HavannahGTP::gtp_print(vecstr args){
-	return GTPResponse(true, "\n" + game.getboard().to_s(colorboard, hguicoords));
+	Board board = game.getboard();
+	for(unsigned int i = 0; i < args.size() && board.move(args[i]); i++)
+		;
+	return GTPResponse(true, "\n" + board.to_s(colorboard, hguicoords));
 }
 
 string HavannahGTP::won_str(int outcome) const {
