@@ -18,9 +18,21 @@ Features for weighted random rollouts:
 - distance to win
 - forms vc
 
+Board printing
+- mark the last move (bold colour?)
+- move to board.cpp ?
+- make a generalized version for outputing values for empty cells
+
+Add a small amount of random knowledge, or shuffle children order to avoid bias towards early moves
 
 Move iterator already computes xy(move), so might as well save it, and return a MoveValid instead
 
+Continue playing past the end of a rollout until the losing player makes a winning formation. Use this as an estimate of the winning advantage
+
+Test correlation between each cell to statistically determine virtual connections and important areas
+
+Test local replies in rollouts based on patterns
+- if an important pattern is found local to the last move, make it, otherwise play globally.
 
 Test
 - dynamic widening
