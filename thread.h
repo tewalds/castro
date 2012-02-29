@@ -184,6 +184,7 @@ public:
 	}
 };
 
+//*
 class Barrier {
 	static const uint32_t waitexit = (1<<30);
 	CondVar cond;
@@ -200,6 +201,16 @@ public:
 		cond.lock();
 		assert(counter == 0);
 		numthreads = n;
+		cond.unlock();
+	}
+
+	~Barrier(){
+		cond.lock();
+
+		//wait for threads to exit
+		while(counter > waitexit)
+			cond.wait();
+
 		cond.unlock();
 	}
 
@@ -232,4 +243,28 @@ public:
 		return flip;
 	}
 };
+/*/
+//use the pthread Barrier implementation
+//the destructor below seems to have a deadlock that I can't explain but that doesn't affect the custom version above
+class Barrier {
+	pthread_barrier_t barrier;
+
+//not copyable
+	Barrier(const Barrier & b) { }
+	Barrier operator=(const Barrier & b);
+
+public:
+	Barrier(int n = 1) { pthread_barrier_init(&barrier, NULL, n); }
+	~Barrier()         { pthread_barrier_destroy(&barrier); }
+
+	void reset(int n){
+		pthread_barrier_destroy(&barrier);
+		pthread_barrier_init(&barrier, NULL, n);
+	}
+
+	bool wait(){
+		return !(pthread_barrier_wait(&barrier) == 0);
+	}
+};
+//*/
 
