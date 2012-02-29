@@ -538,13 +538,13 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			"  -P --symmetry    Prune symmetric moves, good for proof, not play   [" + to_str(player.prunesymmetry) + "]\n" +
 			"  -L --logproof    Log proven nodes hashes and outcomes to this file [" + player.solved_logname + "]\n" +
 			"     --gcsolved    Garbage collect solved nodes with fewer sims than [" + to_str(player.gcsolved) + "]\n" +
-			"Node initialization knowledge:\n" +
-			"  -l --localreply  Give a bonus based on how close a reply is        [" + to_str(player.localreply) + "]\n" +
-			"  -y --locality    Give a bonus to stones near other stones          [" + to_str(player.locality) + "]\n" +
-			"  -c --connect     Give a bonus to stones connected to edges/corners [" + to_str(player.connect) + "]\n" +
-			"  -S --size        Give a bonus based on the size of the group       [" + to_str(player.size) + "]\n" +
-			"  -b --bridge      Give a bonus to replying to a bridge probe        [" + to_str(player.bridge) + "]\n" +
-			"  -D --distance    Give a bonus to low minimum distance to win       [" + to_str(player.dists) + "]\n" +
+			"Node initialization knowledge, Give a bonus:\n" +
+			"  -l --localreply     based on the distance to the previous move     [" + to_str(player.localreply) + "]\n" +
+			"  -y --locality       to stones near other stones of the same color  [" + to_str(player.locality) + "]\n" +
+			"  -c --connect        to stones connected to edges/corners           [" + to_str(player.connect) + "]\n" +
+			"  -S --size           based on the size of the group                 [" + to_str(player.size) + "]\n" +
+			"  -b --bridge         to maintaining a 2-bridge after the op probes  [" + to_str(player.bridge) + "]\n" +
+			"  -D --distance       to low minimum distance to win (<0 avoid VCs)  [" + to_str(player.dists) + "]\n" +
 			"Rollout policy:\n" +
 			"  -h --weightrand  Weight the moves according to computed gammas     [" + to_str(player.weightedrandom) + "]\n" +
 			"  -C --checkrings  Check for rings only this often in rollouts       [" + to_str(player.checkrings) + "]\n" +
