@@ -2,6 +2,28 @@
 
 \documentclass[12pt]{article}          % LaTeX 2e
 
+\usepackage{listings}
+
+\lstset{ %
+%language=C++,                % choose the language of the code
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+%numbers=left,                   % where to put the line-numbers
+%numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+%stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+%numbersep=5pt,                  % how far the line-numbers are from the code
+%backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+%showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,   		% adds a frame around the code
+tabsize=3,  		% sets default tabsize to 2 spaces
+%captionpos=b,   		% sets the caption-position to bottom
+breaklines=true,    	% sets automatic line breaking
+breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+%escapeinside={\%}{)}          % if you want to add a comment within your code
+}
+
+
 \begin{document}
 
 \title{Castro Documentation}
@@ -65,9 +87,46 @@ Since moves can't be undone, the outcome of a move can be asked for without modi
 
 \section{Compacting tree}
 
+The CompactTree class (compacttree.h) is a tree data structure that is thread safe and that manages its own memory. It gives hard upper bounds on the allocated memory and avoids fragmentation. \texttt{CompactTree} is the overarching memory pool, though you can allocate several independent ones if needed. Castro currently allocates three of them: one for the player, one for SolverPNS and one for SolverPNS2. Being a tree data structure, it is templated on a Node class that must have an element of type \texttt{CompactTree<Node>::Children} named \texttt{children}, where \texttt{Node} is your specific type of Node. The root of the tree is defined as just a simple Node element.
+
+Nodes must have an element of type \texttt{CompactTree<Node>::Children}, which let you know how many children it has, allocate/deallocate the children, and index into them as an array or using an iterator. To allocate or deallocate children of a node, you must pass in a reference to your \texttt{CompactTree} object so it knows where to allocate the memory. In a single threaded environment you can simply allocate the children and fill them in. In a multi-threaded environment you can lock a node. If it fails, some other thread is creating those children, so you should fall back and do something else. If it succeeds, then create a temporary node, allocate the children there, fill them in, and then swap the children into the tree. This avoids the wasted time and memory and potential memory leaks from having multiple threads create the same children.
+
+The CompactTree gives you a way to ask for the memory usage, then a way to compact it. It is your responsibility to deallocate nodes that are no longer needed. The compact function is single threaded, so make sure to stop all the threads before calling it.
+
+
 \section{MCTS}
 
-Thread state diagram
+The MCTS player is defined in the \texttt{Player} class in player.h. Several classes are defined under Player.
+
+\texttt{Player::ExpPair} holds a wins/sims or num/sum pair. The ratio between the two is a winning rate. It allows atomic increments and computes the ratio each time.
+
+\texttt{Player::Node} holds a node in the MCTS tree. It stores the real and rave experience (both instances of ExpPair), along with a knowledge value, the proven outcome, the move made from the parent's position, and the best move to make from this position, and of course the children (an instance of CompactTree<Node>::Children). Player::Node::value() returns the MCTS value of the node, so it calculates the experience+rave+knowledge value that MCTS maximizes over.
+
+\texttt{Player::MoveList} holds the moves made during an iteration of MCTS, including all the different rollout paths. It is used to decide how much experience and rave experience to give to each node in the back-propagation phase.
+
+\texttt{Player::PlayerThread} and its descendant \text{Player::PlayerUCT} include the actual MCTS algorithm. PlayerThread is intended to be the thread pool, with the MCTS/UCT specific bits being in PlayerUCT. If other algorithms would use the same Tree/Node structure, they'd inherit from PlayerThread, but this hasn't been done yet. The actually code for this bit is implemented in playeruct.cpp.
+
+The Player object itself mainly keeps the player config variables, stores the tree root, manages the thread pool, and does the high level functions like making a move and generating a move. These bits are implemented in player.cpp.
+
+The thread pool is a state machine whose states are defined in Player::ThreadState:
+\begin{lstlisting}
+enum ThreadState {
+	Thread_Cancelled,  //threads should exit
+	Thread_Wait_Start, //threads are waiting to start
+	Thread_Wait_Start_Cancelled, //once done waiting, cancel
+	Thread_Running,    //threads are running
+	Thread_GC,         //one thread is gc, the rest wait to run
+	Thread_GC_End,     //once done gc, go to wait_end
+	Thread_Wait_End,   //threads are waiting to end
+};
+\end{lstlisting}
+
+The progress of the states is governed by the state transitions and a couple thread barriers. The actual state machine is mainly in player.cpp in void Player::PlayerThread::run().
+
+.............. thread state diagram .............., description
+
+
+Garbage collection just walks the tree and removes any node with less experience than some threshold, and any solved nodes with a higher fixed threshold. The lower threshold is raised and lowered to try to garbage collect about half of the tree each iteration.
 
 
 
