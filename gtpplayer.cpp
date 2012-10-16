@@ -486,7 +486,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 		if(ret) extended += " " + to_str(ret->exp.avg());
 		else    extended += " 0";
 		//outcome
-		extended += " " + to_str(player.root.outcome);
+		extended += " " + won_str(player.root.outcome);
 		//work
 		extended += " " + to_str(runs);
 		//nodes
@@ -495,8 +495,14 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 
 	move(best);
 
-	if(verbose >= 2)
-		stats += game.getboard().to_s(colorboard) + "\n";
+	if(verbose >= 2){
+		stats += "history: ";
+		vector<Move> hist = game.get_hist();
+		for(unsigned int i = 0; i < hist.size(); i++)
+			stats += move_str(hist[i]) + " ";
+		stats += "\n";
+		stats += game.getboard().to_s(colorboard, hguicoords) + "\n";
+	}
 
 	if(verbose)
 		logerr(stats);
