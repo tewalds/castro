@@ -1,6 +1,6 @@
 .PHONY: clean fresh run gendeps
 
-LDFLAGS   += -lpthread
+LDFLAGS   += -pthread
 OBJECTS		= castro.o fileio.o gtpgeneral.o gtpplayer.o gtpsolver.o string.o \
 				solverab.o solverpns.o solverpns2.o solverpns_tt.o player.o playeruct.o zobrist.o alarm.o
 
