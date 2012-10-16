@@ -617,6 +617,8 @@ GTPResponse HavannahGTP::gtp_player_params(vecstr args){
 			player.fpurgency = from_str<float>(args[++i]);
 		}else if((arg == "-O" || arg == "--rollouts") && i+1 < args.size()){
 			player.rollouts = from_str<int>(args[++i]);
+			if(player.gclimit < player.rollouts*5)
+				player.gclimit = player.rollouts*5;
 		}else if((arg == "-I" || arg == "--dynwiden") && i+1 < args.size()){
 			player.dynwiden = from_str<float>(args[++i]);
 			player.logdynwiden = std::log(player.dynwiden);

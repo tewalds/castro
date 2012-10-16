@@ -60,7 +60,7 @@ void Player::PlayerThread::run(){
 
 				if(player->ctmem.meminuse() >= player->maxmem/2)
 					player->gclimit = (int)(player->gclimit*1.3);
-				else if(player->gclimit > 5)
+				else if(player->gclimit > player->rollouts*5)
 					player->gclimit = (int)(player->gclimit*0.9); //slowly decay to a minimum of 5
 
 				CAS(player->threadstate, Thread_GC,     Thread_Running);
