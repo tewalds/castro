@@ -132,6 +132,7 @@ private:
 	short num_cells;
 	short nummoves;
 	short unique_depth; //update and test rotations/symmetry with less than this many pieces on the board
+	Move last;
 	char toPlay;
 	char outcome; //-3 = unknown, 0 = tie, 1,2 = player win
 	char wintype; //0 no win, 1 = edge, 2 = corner, 3 = ring
@@ -150,6 +151,7 @@ public:
 		size = s;
 		sizem1 = s - 1;
 		size_d = s*2-1;
+		last = M_NONE;
 		nummoves = 0;
 		unique_depth = 5;
 		toPlay = 1;
@@ -320,17 +322,20 @@ public:
 		for(int y = 0; y < size_d; y++){
 			s += string(abs(sizem1 - y) + 2, ' ');
 			s += coord + char('A' + y);
-			for(int x = linestart(y); x < lineend(y); x++){
-				s += ' ';
+			int end = lineend(y);
+			for(int x = linestart(y); x < end; x++){
+				s += (last == Move(x, y)   ? coord + "[" :
+				      last == Move(x-1, y) ? coord + "]" : " ");
 				int p = get(x, y);
 				if(p == 0) s += empty;
 				if(p == 1) s += white;
 				if(p == 2) s += black;
 			}
+			s += (last == Move(end-1, y) ? reset + "]" : " ");
 			if(y < sizem1)
-				s += " " + coord + to_str(size + y + 1);
+				s += coord + to_str(size + y + 1);
 			else if(!hguicoords && y > sizem1)
-				s += " " + coord + to_str(3*size - y - 1);
+				s += coord + to_str(3*size - y - 1);
 			s += '\n';
 		}
 		if(!hguicoords){
@@ -393,6 +398,7 @@ public:
 	}
 
 	void set(const Move & m, bool perm = true){
+		last = m;
 		Cell * cell = & cells[xy(m)];
 		cell->piece = toPlay;
 		cell->perm = perm;
