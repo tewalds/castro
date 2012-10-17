@@ -453,16 +453,16 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 		if(player.profile)
 			stats += "Times:       " + to_str(times[0], 3) + ", " + to_str(times[1], 3) + ", " + to_str(times[2], 3) + ", " + to_str(times[3], 3) + "\n";
 		stats += "Win Types:   ";
-		stats += "P1: f " + to_str(wintypes[0][1].num*100.0/games,0) + "%, b " + to_str(wintypes[0][2].num*100.0/games,0) + "%, r " + to_str(wintypes[0][3].num*100.0/games,0) + "%; ";
-		stats += "P2: f " + to_str(wintypes[1][1].num*100.0/games,0) + "%, b " + to_str(wintypes[1][2].num*100.0/games,0) + "%, r " + to_str(wintypes[1][3].num*100.0/games,0) + "%\n";
+		stats += "W: f " + to_str(wintypes[0][1].num*100.0/games,0) + "%, b " + to_str(wintypes[0][2].num*100.0/games,0) + "%, r " + to_str(wintypes[0][3].num*100.0/games,0) + "%; ";
+		stats += "B: f " + to_str(wintypes[1][1].num*100.0/games,0) + "%, b " + to_str(wintypes[1][2].num*100.0/games,0) + "%, r " + to_str(wintypes[1][3].num*100.0/games,0) + "%\n";
 
 		if(verbose >= 2){
-			stats += "P1 fork:     " + wintypes[0][1].to_s() + "\n";
-			stats += "P1 bridge:   " + wintypes[0][2].to_s() + "\n";
-			stats += "P1 ring:     " + wintypes[0][3].to_s() + "\n";
-			stats += "P2 fork:     " + wintypes[1][1].to_s() + "\n";
-			stats += "P2 bridge:   " + wintypes[1][2].to_s() + "\n";
-			stats += "P2 ring:     " + wintypes[1][3].to_s() + "\n";
+			stats += "W fork:     " + wintypes[0][1].to_s() + "\n";
+			stats += "W bridge:   " + wintypes[0][2].to_s() + "\n";
+			stats += "W ring:     " + wintypes[0][3].to_s() + "\n";
+			stats += "B fork:     " + wintypes[1][1].to_s() + "\n";
+			stats += "B bridge:   " + wintypes[1][2].to_s() + "\n";
+			stats += "B ring:     " + wintypes[1][3].to_s() + "\n";
 		}
 	}
 
