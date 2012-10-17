@@ -425,15 +425,19 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 
 	DepthStats gamelen, treelen;
 	uint64_t runs = player.runs;
+	uint64_t games = 0;
 	DepthStats wintypes[2][4];
 	double times[4] = {0,0,0,0};
 	for(unsigned int i = 0; i < player.threads.size(); i++){
 		gamelen += player.threads[i]->gamelen;
 		treelen += player.threads[i]->treelen;
 
-		for(int a = 0; a < 2; a++)
-			for(int b = 0; b < 4; b++)
+		for(int a = 0; a < 2; a++){
+			for(int b = 0; b < 4; b++){
 				wintypes[a][b] += player.threads[i]->wintypes[a][b];
+				games += player.threads[i]->wintypes[a][b].num;
+			}
+		}
 
 		for(int a = 0; a < 4; a++)
 			times[a] += player.threads[i]->times[a];
@@ -449,8 +453,8 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 		if(player.profile)
 			stats += "Times:       " + to_str(times[0], 3) + ", " + to_str(times[1], 3) + ", " + to_str(times[2], 3) + ", " + to_str(times[3], 3) + "\n";
 		stats += "Win Types:   ";
-		stats += "P1: f " + to_str(wintypes[0][1].num) + ", b " + to_str(wintypes[0][2].num) + ", r " + to_str(wintypes[0][3].num) + "; ";
-		stats += "P2: f " + to_str(wintypes[1][1].num) + ", b " + to_str(wintypes[1][2].num) + ", r " + to_str(wintypes[1][3].num) + "\n";
+		stats += "P1: f " + to_str(wintypes[0][1].num*100.0/games,0) + "%, b " + to_str(wintypes[0][2].num*100.0/games,0) + "%, r " + to_str(wintypes[0][3].num*100.0/games,0) + "%; ";
+		stats += "P2: f " + to_str(wintypes[1][1].num*100.0/games,0) + "%, b " + to_str(wintypes[1][2].num*100.0/games,0) + "%, r " + to_str(wintypes[1][3].num*100.0/games,0) + "%\n";
 
 		if(verbose >= 2){
 			stats += "P1 fork:     " + wintypes[0][1].to_s() + "\n";
