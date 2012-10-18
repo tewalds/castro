@@ -331,7 +331,7 @@ public:
 				if(p == 1) s += white;
 				if(p == 2) s += black;
 			}
-			s += (last == Move(end-1, y) ? reset + "]" : " ");
+			s += (last == Move(end-1, y) ? coord + "]" : " ");
 			if(y < sizem1)
 				s += coord + to_str(size + y + 1);
 			else if(!hguicoords && y > sizem1)
