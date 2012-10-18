@@ -125,7 +125,7 @@ GTPResponse HavannahGTP::gtp_player_solve(vecstr args){
 
 	player.rootboard.setswap(allow_swap);
 
-	Player::Node * ret = player.genmove(use_time, time.max_sims);
+	Player::Node * ret = player.genmove(use_time, time.max_sims, time.flexible);
 	Move best = M_RESIGN;
 	if(ret)
 		best = ret->move;
@@ -407,7 +407,7 @@ GTPResponse HavannahGTP::gtp_genmove(vecstr args){
 
 	player.rootboard.setswap(allow_swap);
 
-	Player::Node * ret = player.genmove(use_time, time.max_sims);
+	Player::Node * ret = player.genmove(use_time, time.max_sims, time.flexible);
 	Move best = player.root.bestmove;
 
 	if(time.flexible)

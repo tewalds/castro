@@ -72,7 +72,7 @@ void Player::PlayerThread::run(){
 	}
 }
 
-Player::Node * Player::genmove(double time, int max_runs){
+Player::Node * Player::genmove(double time, int max_runs, bool flexible){
 	time_used = 0;
 	int toplay = rootboard.toplay();
 
@@ -91,18 +91,20 @@ Player::Node * Player::genmove(double time, int max_runs){
 	for(unsigned int i = 0; i < threads.size(); i++)
 		threads[i]->reset();
 
+	// if the move is forced and the time can be added to the clock, don't bother running at all
+	if(!flexible || root.children.num() > 1){
+		//let them run!
+		start_threads();
 
-	//let them run!
-	start_threads();
+		Alarm timer;
+		if(time > 0)
+			timer(time - (Time() - starttime), std::tr1::bind(&Player::timedout, this));
 
-	Alarm timer;
-	if(time > 0)
-		timer(time - (Time() - starttime), std::tr1::bind(&Player::timedout, this));
-
-	//wait for the timer to stop them
-	runbarrier.wait();
-	CAS(threadstate, Thread_Wait_End, Thread_Wait_Start);
-	assert(threadstate == Thread_Wait_Start);
+		//wait for the timer to stop them
+		runbarrier.wait();
+		CAS(threadstate, Thread_Wait_End, Thread_Wait_Start);
+		assert(threadstate == Thread_Wait_Start);
+	}
 
 	if(ponder && root.outcome < 0)
 		start_threads();

@@ -421,7 +421,7 @@ public:
 	void logsolved(Board board, const Node * node, bool skiproot = false); //copies the board before passing to unsafe
 	void logsolved_unsafe(Board & board, const Node * node, bool skiproot); //modifies the board
 
-	Node * genmove(double time, int max_runs);
+	Node * genmove(double time, int max_runs, bool flexible);
 	vector<Move> get_pv();
 	void garbage_collect(Board & board, Node * node); //destroys the board, so pass in a copy
 
