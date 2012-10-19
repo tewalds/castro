@@ -92,7 +92,7 @@ Player::Node * Player::genmove(double time, int max_runs, bool flexible){
 		threads[i]->reset();
 
 	// if the move is forced and the time can be added to the clock, don't bother running at all
-	if(!flexible || root.children.num() > 1){
+	if(!flexible || root.children.num() != 1){
 		//let them run!
 		start_threads();
 
