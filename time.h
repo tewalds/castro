@@ -17,10 +17,10 @@ public:
 		t = time.tv_sec + (double)time.tv_usec/1000000;
 	}
 
-	int to_i()    const { return (int)t; }
-	int in_msec() const { return (int)(t*1000); }
-	int in_usec() const { return (int)(t*1000000); }
-	double to_f() const { return t; }
+	double    to_f()    const { return t; }
+	long long to_i()    const { return (long long)t; }
+	long long in_msec() const { return (long long)(t*1000); }
+	long long in_usec() const { return (long long)(t*1000000); }
 
 	Time   operator +  (double a)       const { return Time(t+a); }
 	Time & operator += (double a)             { t += a; return *this; }
