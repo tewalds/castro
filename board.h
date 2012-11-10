@@ -99,21 +99,29 @@ mutable uint8_t ringdepth; //when doing a ring search, what depth was this posit
 		bool operator == (const Board::MoveIterator & rhs) const { return (move == rhs.move); }
 		bool operator != (const Board::MoveIterator & rhs) const { return (move != rhs.move); }
 		MoveIterator & operator ++ (){ //prefix form
-			do{
-				move.x++;
+			while(true){
+				do{
+					move.x++;
 
-				if(move.x >= lineend){
-					move.y++;
-					if(move.y >= board.get_size_d()) //done
-						return *this;
+					if(move.x >= lineend){
+						move.y++;
+						if(move.y >= board.get_size_d()) //done
+							return *this;
 
-					move.x = board.linestart(move.y);
-					lineend = board.lineend(move.y);
+						move.x = board.linestart(move.y);
+						lineend = board.lineend(move.y);
+					}
+				}while(!board.valid_move_fast(move));
+
+				if(unique){
+					uint64_t h = board.test_hash(move, board.toplay());
+					if(hashes.exists(h))
+						continue;
+					else
+						hashes.add(board.test_hash(move, board.toplay()));
 				}
-			}while(!board.valid_move_fast(move) || (unique && hashes.exists(board.test_hash(move, board.toplay()))));
-
-			if(unique)
-				hashes.add(board.test_hash(move, board.toplay()));
+				break;
+			}
 
 			return *this;
 		}
