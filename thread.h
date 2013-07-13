@@ -133,7 +133,7 @@ public:
 		pthread_rwlockattr_t attr;
 		pthread_rwlockattr_init(&attr);
 
-#ifndef __APPLE__
+#ifdef PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP
 		if(preferwriter)
 			pthread_rwlockattr_setkind_np(&attr, PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP);
 #endif
