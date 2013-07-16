@@ -160,7 +160,8 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 			}
 		}
 
-		add_knowledge(board, node, child);
+		if(player->knowledge)
+			add_knowledge(board, node, child);
 		nummoves++;
 	}
 
