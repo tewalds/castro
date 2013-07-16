@@ -111,9 +111,13 @@ public:
 			printf("%s\n", to_s().c_str());
 		}
 		string to_s() const {
-			return "Node: exp " + to_str(exp.avg(), 2) + "/" + to_str(exp.num()) +
+			return "Node: move " + move.to_s() +
+					", exp " + to_str(exp.avg(), 2) + "/" + to_str(exp.num()) +
 					", rave " + to_str(rave.avg(), 2) + "/" + to_str(rave.num()) +
-					", move " + to_str(move.x) + "," + to_str(move.y) + ", " + to_str(children.num());
+					", know " + to_str(know) +
+					", outcome " + to_str(outcome) + "/" + to_str(proofdepth) +
+					", best " + bestmove.to_s() +
+					", children " + to_str(children.num());
 		}
 
 		unsigned int size() const {
