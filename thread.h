@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <cassert>
 #include <time.h>
+#include "types.h"
 
 using namespace std;
 using namespace tr1;
@@ -269,4 +270,3 @@ public:
 	}
 };
 //*/
-
