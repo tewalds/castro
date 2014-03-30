@@ -2,7 +2,16 @@
 
 LDFLAGS   += -pthread
 OBJECTS		= castro.o fileio.o gtpgeneral.o gtpplayer.o gtpsolver.o string.o \
-				solverab.o solverpns.o solverpns2.o solverpns_tt.o player.o playeruct.o zobrist.o alarm-timer.o
+				solverab.o solverpns.o solverpns2.o solverpns_tt.o player.o playeruct.o zobrist.o
+
+SYS := $(shell gcc -dumpmachine)
+ifneq (, $(findstring linux, $(SYS)))
+	OBJECTS += alarm.o
+else
+#else ifneq(, $(findstring mingw, $(SYS)))
+#else ifneq(, $(findstring cygwin, $(SYS)))
+	OBJECTS += alarm-timer.o
+endif
 
 ifdef DEBUG
 	CPPFLAGS	+= -g3 -Wall
