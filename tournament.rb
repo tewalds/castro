@@ -122,7 +122,7 @@ def play_game(n, p1, p2)
 		}
 		}
 
-		ret = gtp[1].cmd("havannah_winner")[2..-3];
+		ret = gtp[1].cmd("winner")[2..-3];
 		turn = turnstrings.index(ret);
 
 		log.write("# Winner: #{ret}, #{$players[turn]}\n") if log
