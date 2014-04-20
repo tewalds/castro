@@ -41,6 +41,8 @@ GTPResponse HavannahGTP::gtp_time(vecstr args){
 			time.move = from_str<double>(args[++i]);
 		}else if((arg == "-g" || arg == "--game") && i+1 < args.size()){
 			time.game = from_str<float>(args[++i]);
+			if(game.len() == 0)
+				time_remain = time.game;
 		}else if((arg == "-f" || arg == "--flexible") && i+1 < args.size()){
 			time.flexible = from_str<bool>(args[++i]);
 		}else if((arg == "-i" || arg == "--maxsims") && i+1 < args.size()){
@@ -690,7 +692,7 @@ GTPResponse HavannahGTP::gtp_player_gammas(vecstr args){
 
 		int s = board.pattern_symmetry(i);
 		if(s == i)
-			player.gammas[i] = f;
+			player.gammas[i] = exp(f);
 		else
 			player.gammas[i] = player.gammas[s];
 	}
@@ -712,4 +714,3 @@ GTPResponse HavannahGTP::gtp_confirm_proof(vecstr args){
 
 	return GTPResponse(true, to_str(outcome) + " " + to_str(end - start));
 }
-

@@ -8,6 +8,7 @@
 	$time_per_move = 0;
 	$max_runs = 0;
 	$boardsize = 4;
+	$first = nil;
 	$players = [];
 	$cmds = [];
 	$msg = nil;
@@ -23,6 +24,7 @@
 		when "-t", "--timemove" then $time_per_move = ARGV.shift.to_f;
 		when "-m", "--maxruns"  then $max_runs      = ARGV.shift.to_i;
 		when "-s", "--size"     then $boardsize     = ARGV.shift.to_i;
+		when "-f", "--first"    then $first         = ARGV.shift
 		when "-c", "--cmd"      then $cmds << ARGV.shift;
 		when "-z", "--msg"      then $msg = ARGV.shift;
 		when "-l", "--log"      then $log = ARGV.shift;
@@ -36,6 +38,7 @@
 			puts "  -t --timemove Time given per move [#{$time_per_move}]"
 			puts "  -m --maxruns  Simulations per move [#{$max_runs}]"
 			puts "  -s --size     Board size [#{$boardsize}]"
+			puts "  -f --first    First move"
 			puts "  -c --cmd      Send an arbitrary GTP command at the beginning of the game"
 			puts "  -z --msg      Output a message of what this is testing with the results"
 			puts "  -l --log      Log the games to this directory, disabled by default"
@@ -86,6 +89,15 @@ def play_game(n, p1, p2)
 		turn = 1;
 		i = 1;
 		ret = nil;
+
+		if $first
+			gtp[1].cmd("play #{turnstrings[turn]} #{$first}");
+			gtp[2].cmd("play #{turnstrings[turn]} #{$first}");
+			log.write("play #{turnstrings[turn]} #{$first}\n") if log
+			i += 1;
+			turn = 3-turn;
+		end
+
 		totaltime = timer {
 		loop{
 			$0 = "Game #{n}/#{$num_games} move #{i}: #{$players[p1]} vs #{$players[p2]}"
@@ -110,7 +122,7 @@ def play_game(n, p1, p2)
 		}
 		}
 
-		ret = gtp[1].cmd("havannah_winner")[2..-3];
+		ret = gtp[1].cmd("winner")[2..-3];
 		turn = turnstrings.index(ret);
 
 		log.write("# Winner: #{ret}, #{$players[turn]}\n") if log
@@ -181,7 +193,7 @@ end
 			$results[j][i] += 1;
 		end
 	}
-	
+
 #start output
 	out = "\n\n";
 	out << "#{$msg}\n" if $msg;
@@ -209,8 +221,11 @@ end
 				losses += $results[j][i];
 			end
 		}
-		ties = ($against && i > 0 ? 1 : $num-1)*2*$rounds - wins - losses;
-		out << " : #{wins} wins, #{losses} losses, #{ties} ties\n";
+		total = ($against && i > 0 ? 1 : $num-1)*2*$rounds
+		ties = total - wins - losses;
+		rate = 1.0*(wins + ties/2.0)/total
+		conf = 2.0*Math.sqrt(rate*(1-rate)/total)
+		out << " : #{wins} wins, #{losses} losses, #{ties} ties: #{(100*rate).round(1)}±#{(100*conf).round(1)}%\n";
 	}
 
 	out << "Played #{$num_games} games, Total Time: #{time.to_i} s\n";
@@ -232,4 +247,3 @@ end
 			fp.write(out);
 		}
 	end
-

@@ -143,6 +143,7 @@ Player::Player() {
 	fpurgency   = 1;
 	rollouts    = 1;
 	dynwiden    = 0;
+	logdynwiden = (dynwiden ? std::log(dynwiden) : 0);
 
 	shortrave   = false;
 	keeptree    = true;
@@ -614,4 +615,3 @@ int Player::confirm_proof(const Board & board, Node * node, SolverAB & ab, Solve
 	}
 	return node->outcome;
 }
-

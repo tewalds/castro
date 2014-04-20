@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <cassert>
 #include <time.h>
+#include "types.h"
 
 using namespace std;
 using namespace tr1;
@@ -133,7 +134,7 @@ public:
 		pthread_rwlockattr_t attr;
 		pthread_rwlockattr_init(&attr);
 
-#ifndef __APPLE__
+#ifdef PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP
 		if(preferwriter)
 			pthread_rwlockattr_setkind_np(&attr, PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP);
 #endif
@@ -269,4 +270,3 @@ public:
 	}
 };
 //*/
-
