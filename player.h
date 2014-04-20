@@ -199,7 +199,7 @@ public:
 			moves[tree++] = RaveMove(move, player);
 		}
 		void addrollout(const Move & move, char player){
-			moves[rollout++] = RaveMove(move, player);
+			moves[tree + rollout++] = RaveMove(move, player);
 		}
 		void reset(Board * b){
 			tree = 0;
@@ -442,4 +442,3 @@ public:
 protected:
 	Node * return_move(Node * node, int toplay) const;
 };
-
