@@ -221,8 +221,11 @@ end
 				losses += $results[j][i];
 			end
 		}
-		ties = ($against && i > 0 ? 1 : $num-1)*2*$rounds - wins - losses;
-		out << " : #{wins} wins, #{losses} losses, #{ties} ties\n";
+		total = ($against && i > 0 ? 1 : $num-1)*2*$rounds
+		ties = total - wins - losses;
+		rate = 1.0*(wins + ties/2.0)/total
+		conf = 2.0*Math.sqrt(rate*(1-rate)/total)
+		out << " : #{wins} wins, #{losses} losses, #{ties} ties: #{(100*rate).round(1)}±#{(100*conf).round(1)}%\n";
 	}
 
 	out << "Played #{$num_games} games, Total Time: #{time.to_i} s\n";
