@@ -199,7 +199,7 @@ bool Player::PlayerUCT::create_children(Board & board, Node * node, int toplay){
 Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int remain) const {
 	float val, maxval = -1000000000;
 	float logvisits = log(node->exp.num());
-	unsigned int dynwidenlim = (player->dynwiden > 0 ? (unsigned int)(logvisits/player->logdynwiden) : 361);
+	int dynwidenlim = (player->dynwiden > 1.0 ? (int)(logvisits/player->logdynwiden)+2 : 361);
 
 	float raveval = use_rave * (player->ravefactor + player->decrrave*remain);
 	float explore = use_explore * player->explore;
@@ -210,7 +210,7 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int
 		 * child = node->children.begin(),
 		 * end   = node->children.end();
 
-	for(; child != end && dynwidenlim >= 0; child++, dynwidenlim--){
+	for(; child != end && dynwidenlim >= 0; child++){
 		if(child->outcome >= 0){
 			if(child->outcome == toplay) //return a win immediately
 				return child;
@@ -220,6 +220,7 @@ Player::Node * Player::PlayerUCT::choose_move(const Node * node, int toplay, int
 			val = child->value(raveval, player->knowledge, player->fpurgency);
 			if(explore > 0)
 				val += explore*sqrt(logvisits/(child->exp.num() + 1));
+			dynwidenlim--;
 		}
 
 		if(maxval < val){
@@ -684,4 +685,3 @@ Move Player::PlayerUCT::rollout_pattern(const Board & board, const Move & move){
 	}
 	return M_UNKNOWN;
 }
-
