@@ -692,7 +692,7 @@ GTPResponse HavannahGTP::gtp_player_gammas(vecstr args){
 
 		int s = board.pattern_symmetry(i);
 		if(s == i)
-			player.gammas[i] = f;
+			player.gammas[i] = exp(f);
 		else
 			player.gammas[i] = player.gammas[s];
 	}
