@@ -98,11 +98,16 @@ class LittleGolemInterface
 		resp = @http.get(path, @headers)
 		return (resp.code == '200' ? resp.body : nil)
 	end
+	def get_my_games
+		path="/get_xml.jsp"
+		resp = @http.post(path, "login=#{@login}&password=#{@psw}")
+		return (resp.code == '200' ? resp.body : nil)
+	end
 	def get_my_turn_games
 		if self.login 
 			if (gamesheet = get_gamesheet)
-				if !(gamesheet =~  /Games where it is your turn \[0\]/)
-					return gamesheet.slice(/your turn.*your opponent/m).scan(/gid=(\d+)?/).flatten
+				if !(gamesheet =~  /On Move/)
+					return gamesheet.slice(/On Move.*Opponent's Move/m).scan(/gid=(\d+)?/).flatten
 				end  
 			end 
 		else
@@ -138,8 +143,8 @@ class LittleGolemInterface
 			end
 
 			#play a move
-			if !(gamesheet =~  /Games where it is your turn \[0\]/)
-				gameids=gamesheet.slice(/your turn.*your opponent/m).scan(/gid=(\d+)?/).flatten
+			if (gamesheet =~  /On Move/)
+				gameids=gamesheet.slice(/On Move.*Opponent's Move/m).scan(/gid=(\d+)?/).flatten
 				parse_make_moves(gameids)
 				return true;
 			else
