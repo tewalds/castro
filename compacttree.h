@@ -31,7 +31,10 @@ template <class Node> class CompactTree {
 			Data ** parent;  //pointer to the Data* in the parent Node that references this Data instance
 			Data *  nextfree; //next free Data block of this size when in the free list
 		};
-		Node        children[0]; //array of Nodes, runs past the end of the data block
+		// array of Nodes, runs past the end of the data block. Should be size [0] or even []
+		// but C++ doesn't actually support flexible array members, so waste the space of
+		// 1 member, allocate enough for the full capacity, and run off the end of the array.
+		Node        children[1];
 
 		Data(unsigned int n, Data ** p) : capacity(n), used(n), parent(p) {
 			header = (((unsigned long)this >> 2) & 0xFFFF) | (0xBEEF << 16);
@@ -443,7 +446,7 @@ public:
 					//move!
 					s->capacity = s->used;
 					if(s != d){
-						memmove(d, s, dsize);
+						memmove(reinterpret_cast<void*>(d), reinterpret_cast<void*>(s), dsize);
 						d->move(s);
 					}
 					memused += dsize;
